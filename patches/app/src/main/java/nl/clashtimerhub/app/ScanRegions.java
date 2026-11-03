@@ -10,7 +10,7 @@ import android.graphics.Rect;
 public final class ScanRegions {
     private ScanRegions() {}
     private static final String PREFS = "scan_regions";
-    private static final float[] DEFAULT = { .58f, 0f, 1f, .58f };
+    private static final float[] DEFAULT = { .58f, 0f, 1f, .45f };
 
     public static Rect get(Context context, int category, int width, int height) {
         float[] values = new float[4];
