@@ -120,6 +120,17 @@ public final class MainActivity extends Activity {
   EditText lead=new EditText(this);lead.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);lead.setSingleLine(true);
   lead.setText(String.valueOf(prefs.getInt("notifyLeadMinutes",15)));lead.setSelectAllOnFocus(true);panel.addView(lead);
   panel.addView(label("Bijvoorbeeld 5, 10, 30, 45 of 120 minuten. Maximaal 10080 (7 dagen).",12));
+  if(android.os.Build.VERSION.SDK_INT>=31){
+   android.app.AlarmManager alarm=(android.app.AlarmManager)getSystemService(ALARM_SERVICE);
+   if(alarm!=null&&!alarm.canScheduleExactAlarms()){
+    Button precise=new Button(this);precise.setText("Sta exacte alarmen toe");
+    precise.setOnClickListener(v->{
+     try{startActivity(new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,android.net.Uri.parse("package:"+getPackageName())));}
+     catch(Exception e){toast("Open de alarmtoestemming via Android-instellingen");}
+    });
+    panel.addView(precise);
+   }
+  }
   new android.app.AlertDialog.Builder(this).setTitle("Meldingen instellen").setView(panel)
    .setPositiveButton("Opslaan",(d,w)->{
     int minutes=15;
