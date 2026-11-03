@@ -133,10 +133,12 @@ service = replace_once(service,
     '''if(result.hit!=null){
                             org.json.JSONArray active=new org.json.JSONArray();
                             long capturedAt=System.currentTimeMillis();
-                            for(TimerParser.Hit timer:result.hits){
+                            for(int timerIndex=0;timerIndex<result.hits.size();timerIndex++){
+                                TimerParser.Hit timer=result.hits.get(timerIndex);
                                 org.json.JSONObject item=new org.json.JSONObject();
                                 try{
-                                    item.put("label",timer.text);
+                                    String building=timerIndex<result.names.size()?result.names.get(timerIndex):"";
+                                    item.put("label",building.isEmpty()?timer.text:building);
                                     item.put("finish",capturedAt+timer.seconds*1000L);
                                     active.put(item);
                                 }catch(org.json.JSONException ignored){}
