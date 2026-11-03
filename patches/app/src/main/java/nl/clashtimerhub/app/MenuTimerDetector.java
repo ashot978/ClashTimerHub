@@ -34,9 +34,14 @@ public final class MenuTimerDetector {
     public static final class Result {
         public final boolean menuOpen;
         public final TimerParser.Hit hit;
+        public final int freeBuilders;
         Result(boolean menuOpen, TimerParser.Hit hit) {
+            this(menuOpen, hit, -1);
+        }
+        Result(boolean menuOpen, TimerParser.Hit hit, int freeBuilders) {
             this.menuOpen = menuOpen;
             this.hit = hit;
+            this.freeBuilders = freeBuilders;
         }
     }
 
@@ -63,6 +68,20 @@ public final class MenuTimerDetector {
             return new Result(false, null);
         }
         if (!found) return new Result(false, null);
+        int freeBuilders = -1;
+        if (category == 0) {
+            for (Token t : tokens) {
+                if (t.centerY() > height * .35f) continue;
+                int count = BuilderAvailability.parse(t.text);
+                if (count >= 0) {
+                    if (freeBuilders >= 0 && freeBuilders != count) {
+                        freeBuilders = -1;
+                        break;
+                    }
+                    freeBuilders = count;
+                }
+            }
+        }
 
         // Recommendations have their own durations and MUST NOT be counted.
         int endOfActiveList = height;
@@ -140,7 +159,7 @@ public final class MenuTimerDetector {
                 shortest = mostComplete;
             }
         }
-        return new Result(true, shortest);
+        return new Result(true, shortest, freeBuilders);
     }
 
     private static int unitCount(String text) {
