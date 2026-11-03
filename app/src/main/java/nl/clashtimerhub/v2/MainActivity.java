@@ -25,7 +25,7 @@ public final class MainActivity extends Activity {
  private final ArrayList<String> accounts=new ArrayList<>();
  private final ArrayList<JSONObject> upgrades=new ArrayList<>();
  private final ArrayList<JSONObject> pending=new ArrayList<>();
- private static final int PICK=12;
+ private static final int PICK=12,IMPORT=13;
  private Bitmap lastScanBitmap;
  private final android.os.Handler ticker=new android.os.Handler(android.os.Looper.getMainLooper());
  private final Runnable tick=new Runnable(){public void run(){if(items!=null)showTimers();ticker.postDelayed(this,1000);}};
@@ -68,6 +68,7 @@ public final class MainActivity extends Activity {
   category.setBackground(shape(0xff262941,14));root.addView(category,new LinearLayout.LayoutParams(-1,dp(52)));
   android.widget.AdapterView.OnItemSelectedListener refresh=new android.widget.AdapterView.OnItemSelectedListener(){public void onNothingSelected(android.widget.AdapterView<?> p){}public void onItemSelected(android.widget.AdapterView<?> p,View v,int pos,long id){showTimers();}};
   account.setOnItemSelectedListener(refresh);category.setOnItemSelectedListener(refresh);
+  button("Importeer Clash-data (JSON)",()->{Intent i=new Intent(Intent.ACTION_GET_CONTENT);i.setType("*/*");i.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(i,IMPORT);});
   button("Scan screenshot",()->{Intent i=new Intent(Intent.ACTION_GET_CONTENT);i.setType("image/*");startActivityForResult(i,PICK);});
   LinearLayout actions=new LinearLayout(this);actions.setOrientation(LinearLayout.HORIZONTAL);root.addView(actions);
   Button manual=new Button(this);manual.setText("＋ Timer");manual.setAllCaps(false);manual.setOnClickListener(v->manual());
@@ -79,6 +80,7 @@ public final class MainActivity extends Activity {
   button("Deel timer-overzicht",()->shareTimers());
   button("Scanner kalibreren",()->calibrate());
   button("Alle accounts · Overzicht",()->overview());
+  button("Alle accounts · Eerstvolgende builder",()->showAllNextBuilders());
   TextView section=label("EERSTVOLGENDE UPGRADE  •  LIVE",18);section.setTypeface(null,android.graphics.Typeface.BOLD);root.addView(section);
   items=new LinearLayout(this);items.setOrientation(1);root.addView(items);showTimers();
  }
@@ -121,6 +123,81 @@ public final class MainActivity extends Activity {
     getPreferences(0).edit().putInt("timerStart",vals[0]).putInt("timerEnd",vals[1]).apply();
     toast("Scannerkalibratie opgeslagen");
    }).setNegativeButton("Annuleren",null).show();
+ }
+ private void showAllNextBuilders(){
+  LinearLayout list=new LinearLayout(this);list.setOrientation(1);list.setPadding(dp(12),dp(8),dp(12),dp(8));
+  long now=System.currentTimeMillis();
+  for(String ac:accounts){
+   JSONObject earliest=null;long soonest=Long.MAX_VALUE;
+   for(JSONObject o:upgrades){
+    if(!ac.equals(o.optString("account"))||!"Bouwers".equals(o.optString("category")))continue;
+    long finish=o.optLong("finish");if(finish<soonest){soonest=finish;earliest=o;}
+   }
+   TextView line=label(ac+"  ·  "+(earliest==null?"Geen builder bekend":cleanName(earliest.optString("name"))+"  ·  "+(soonest<=now?"Gereed":format((soonest-now+999)/1000))),16);
+   line.setBackground(shape(0xff30243e,12));list.addView(line);
+  }
+  ScrollView scroll=new ScrollView(this);scroll.addView(list);
+  new android.app.AlertDialog.Builder(this).setTitle("Alle accounts · Eerstvolgende builder")
+   .setView(scroll).setPositiveButton("Sluiten",null).show();
+ }
+ private void importClashData(String input){
+  try{
+   int start=input.indexOf('{'),end=input.lastIndexOf('}');
+   if(start<0||end<=start)throw new JSONException("Geen JSON gevonden");
+   JSONObject json=new JSONObject(input.substring(start,end+1));
+   if(!json.has("buildings")&&!json.has("heroes")&&!json.has("units"))throw new JSONException("Geen Clash-export");
+   String ac=accounts.get(account.getSelectedItemPosition());
+   long now=System.currentTimeMillis();
+   long timestamp=json.optLong("timestamp",now/1000)*1000L;
+   // Timestamp is the moment at which the exported remaining seconds were measured.
+   if(timestamp>now+3600000||timestamp<now-30L*86400000L)timestamp=now;
+   ArrayList<JSONObject> parsed=new ArrayList<>();
+   String[] sections={"buildings","heroes","units","spells","pets","traps"};
+   for(String section:sections){
+    JSONArray arr=json.optJSONArray(section);if(arr==null)continue;
+    for(int i=0;i<arr.length();i++){
+     JSONObject entry=arr.optJSONObject(i);if(entry==null)continue;
+     long id=entry.optLong("data",-1);if(id<0)continue;
+     String cat=(id>=73000000&&id<74000000)?"Pets":((id>=4000000&&id<5000000)||(id>=26000000&&id<27000000))?"Laboratorium":"Bouwers";
+     JSONArray timers=entry.optJSONArray("timers");
+     if(timers!=null){
+      for(int j=0;j<timers.length();j++){
+       Object obj=timers.opt(j);long sec=obj instanceof JSONObject?((JSONObject)obj).optLong("timer"):timers.optLong(j);
+       addExportTimer(parsed,ac,cat,id,sec,timestamp,j);
+      }
+     }else addExportTimer(parsed,ac,cat,id,entry.optLong("timer"),timestamp,0);
+    }
+   }
+   if(parsed.isEmpty()){toast("Export bevat geen actieve timers");return;}
+   // Preserve manual timers and other accounts. Only replace earlier imports.
+   for(int i=upgrades.size()-1;i>=0;i--){
+    JSONObject old=upgrades.get(i);
+    if(ac.equals(old.optString("account"))&&old.optBoolean("exported",false))upgrades.remove(i);
+   }
+   upgrades.addAll(parsed);persist();showTimers();toast(parsed.size()+" upgrades geïmporteerd voor "+ac);
+  }catch(Exception e){toast("Ongeldige Clash-export: "+e.getMessage());}
+ }
+ private void addExportTimer(ArrayList<JSONObject> out,String ac,String cat,long id,long sec,long ts,int index)throws JSONException{
+  if(sec<=0)return;
+  long finish=ts+sec*1000L;
+  if(finish<=System.currentTimeMillis())return;
+  JSONObject o=new JSONObject();
+  o.put("id",UUID.randomUUID().toString());o.put("account",ac);o.put("category",cat);
+  o.put("name",exportName(id));o.put("finish",finish);o.put("exported",true);o.put("sourceId",id);
+  out.add(o);
+ }
+ private String exportName(long id){
+  if(id==1000089)return "Crafting Station";
+  if(id==1000002)return "Elixir Collector";
+  if(id==1000015)return "Builder's Hut";
+  if(id==1000019)return "Hidden Tesla";
+  if(id==1000001)return "Town Hall";
+  if(id==1000007)return "Laboratory";
+  if(id==28000000)return "Barbarian King";
+  if(id==28000001)return "Archer Queen";
+  if(id==28000002)return "Grand Warden";
+  if(id==28000004)return "Royal Champion";
+  return "Upgrade #"+id;
  }
  private void overview(){
   long now=System.currentTimeMillis();StringBuilder result=new StringBuilder();
@@ -204,7 +281,13 @@ public final class MainActivity extends Activity {
   if(count>0){TextView hint=label("Tik op een timer om deze te bewerken · Houd ingedrukt om te verwijderen",12);hint.setTextColor(0xffa5a9c0);items.addView(hint);}
   if(count==0){TextView empty=label("Nog geen actieve upgrades. Scan een screenshot om te beginnen.",15);empty.setTextColor(0xffa5a9c0);items.addView(empty);}
  }
- @Override protected void onActivityResult(int req,int result,Intent data){super.onActivityResult(req,result,data);if(req!=PICK||result!=RESULT_OK||data==null)return;try(InputStream stream=getContentResolver().openInputStream(data.getData())){Bitmap bmp=BitmapFactory.decodeStream(stream);if(bmp!=null)scan(bmp);}catch(Exception e){toast("Foto kon niet worden geopend");}}
+ @Override protected void onActivityResult(int req,int result,Intent data){super.onActivityResult(req,result,data);if(result!=RESULT_OK||data==null)return;
+  if(req==IMPORT){try(InputStream stream=getContentResolver().openInputStream(data.getData())){
+   java.io.ByteArrayOutputStream buffer=new java.io.ByteArrayOutputStream();byte[] bytes=new byte[8192];int n;
+   while((n=stream.read(bytes))!=-1){buffer.write(bytes,0,n);if(buffer.size()>10_000_000)throw new java.io.IOException("Export te groot");}
+   importClashData(buffer.toString("UTF-8"));
+  }catch(Exception e){toast("Import mislukt: "+e.getMessage());}return;}
+  if(req!=PICK)return;try(InputStream stream=getContentResolver().openInputStream(data.getData())){Bitmap bmp=BitmapFactory.decodeStream(stream);if(bmp!=null)scan(bmp);}catch(Exception e){toast("Foto kon niet worden geopend");}}
  private void scan(Bitmap bmp){
   // Only the FIRST active upgrade and the builder availability counter matter.
   // The bottom-right builder badge (0/7 in the supplied screenshot) is below the list.
