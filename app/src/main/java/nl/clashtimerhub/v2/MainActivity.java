@@ -74,6 +74,7 @@ public final class MainActivity extends Activity {
   TextView section=label("GESELECTEERD ACCOUNT  ·  LIVE",18);section.setTypeface(null,android.graphics.Typeface.BOLD);root.addView(section);
   items=new LinearLayout(this);items.setOrientation(1);root.addView(items);showTimers();
   root.addView(label("BEHEER EN SYNCHRONISATIE",15));
+  button("🔔 Meldingen instellen",()->notificationSettings());
   button("📋 Synchroniseer vanaf klembord",()->importClipboard());
   button("Back-up kopiëren",()->copyBackup());
   button("Back-up delen",()->backup());
@@ -90,6 +91,18 @@ public final class MainActivity extends Activity {
   button("Details per account",()->overview());
 
 
+ }
+ private void notificationSettings(){
+  boolean enabled=getPreferences(0).getBoolean("notifyEnabled",true);
+  LinearLayout panel=new LinearLayout(this);panel.setOrientation(LinearLayout.VERTICAL);panel.setPadding(dp(16),dp(8),dp(16),dp(8));
+  CheckBox toggle=new CheckBox(this);toggle.setText("Meldingen bij voltooide upgrades");toggle.setChecked(enabled);panel.addView(toggle);
+  TextView hint=label("Android moet meldingen toestaan. Meldingen zijn lokaal en gebruiken de laatst geïmporteerde timers.",13);panel.addView(hint);
+  new android.app.AlertDialog.Builder(this).setTitle("Meldingen").setView(panel)
+   .setPositiveButton("Opslaan",(d,w)->{getPreferences(0).edit().putBoolean("notifyEnabled",toggle.isChecked()).apply();TimerWidget.schedule(this);})
+   .setNeutralButton("Android-instellingen",(d,w)->{
+    Intent i=new Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+    i.putExtra(android.provider.Settings.EXTRA_APP_PACKAGE,getPackageName());startActivity(i);
+   }).setNegativeButton("Annuleren",null).show();
  }
  private void copyBackup(){
   try{
