@@ -100,7 +100,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           if [ -f /tmp/clash-gradle.log ]; then
-            tail -c 12000 /tmp/clash-gradle.log > /tmp/clash-error.txt
+            { grep -n -E 'error:|FAILURE:|What went wrong|cannot find symbol|symbol:|location:|Compilation failed' /tmp/clash-gradle.log | head -n 65 || true; echo '--- log excerpt ---'; head -n 110 /tmp/clash-gradle.log; } > /tmp/clash-error.txt
             gh issue create --title "Android CI failure: compile #${{ github.run_number }}" --body-file /tmp/clash-error.txt || true
           fi
       - name: Report successful APK build
