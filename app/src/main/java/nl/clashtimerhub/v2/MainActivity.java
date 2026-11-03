@@ -265,10 +265,15 @@ public final class MainActivity extends Activity {
   if(items==null)return;items.removeAllViews();long now=System.currentTimeMillis();
   String chosenAccount=account!=null&&account.getSelectedItem()!=null?account.getSelectedItem().toString():"";
   String chosenCategory=category!=null&&category.getSelectedItem()!=null?category.getSelectedItem().toString():"";
-  int count=0;
+  int count=0;long nextFinish=Long.MAX_VALUE;
+  if("Bouwers".equals(chosenCategory))for(JSONObject candidate:upgrades){
+   if(chosenAccount.equals(candidate.optString("account"))&&"Bouwers".equals(candidate.optString("category")))
+    nextFinish=Math.min(nextFinish,candidate.optLong("finish"));
+  }
   for(JSONObject o:upgrades){
    String name=cleanName(o.optString("name")),ac=o.optString("account"),cat=o.optString("category");
    if(!ac.equals(chosenAccount)||!cat.equals(chosenCategory))continue;
+   if("Bouwers".equals(chosenCategory)&&o.optLong("finish")!=nextFinish)continue;
    count++;long remain=Math.max(0,(o.optLong("finish")-now+999)/1000);
    LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
    card.setPadding(dp(16),dp(10),dp(16),dp(12));card.setBackground(shape(0xff30243e,16));
