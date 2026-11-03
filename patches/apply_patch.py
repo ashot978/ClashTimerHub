@@ -40,12 +40,15 @@ service = replace_once(service,
                     if(!closed && result.menuOpen){
                         menuWasOpened=true;
                         consecutiveMenuFrames++;
+                        if(consecutiveMenuFrames==1)
+                            store.setScanMessage("Upgrademenu herkend. Timers worden gecontroleerd...");
                         // Two consecutive recognitions avoid accidental OCR artifacts.
                         if(consecutiveMenuFrames>=2 && result.hit!=null){
                             long estimate=System.currentTimeMillis()+result.hit.seconds*1000L;
                             if(bestFinish==0||estimate<bestFinish){
                                 bestFinish=estimate;
                                 bestText=result.hit.text;
+                                store.setScanMessage("Timer herkend: "+result.hit.text+". Scan wordt afgerond.");
                             }
                         }
                     } else {
@@ -78,6 +81,7 @@ service = replace_once(service,
                 consecutiveMenuFrames=0;
                 bestFinish=0;
                 bestText="";
+                store.setScanMessage("Scanknop ingedrukt. OCR leest nu het geopende menu; wacht circa 15 seconden.");
                 floatingScanButton.hide();
             });
             floatingScanButton.show();
