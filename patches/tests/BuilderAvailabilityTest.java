@@ -14,6 +14,8 @@ public class BuilderAvailabilityTest {
         expect("2 / 7",2);
         expect("8/7",-1);
         expect("not recognized",-1);
+        expect("1/6 2/6",-1);
+        expect("2/6 2/6",2);
         System.out.println("Builder availability tests passed");
     }
 }
