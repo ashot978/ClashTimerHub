@@ -89,6 +89,34 @@ public final class MainActivity extends Activity {
   TextView section=label("EERSTVOLGENDE UPGRADE  •  LIVE",18);section.setTypeface(null,android.graphics.Typeface.BOLD);root.addView(section);
   items=new LinearLayout(this);items.setOrientation(1);root.addView(items);showTimers();
  }
+ private void backup(){
+  try{
+   JSONObject data=new JSONObject();data.put("format","clash-timer-hub-backup-v1");
+   data.put("accounts",new JSONArray(accounts));data.put("upgrades",new JSONArray(upgrades));
+   data.put("playerTags",new JSONObject(getPreferences(0).getString("playerTags","{}")));
+   Intent send=new Intent(Intent.ACTION_SEND);send.setType("application/json");
+   send.putExtra(Intent.EXTRA_TEXT,data.toString(2));
+   startActivity(Intent.createChooser(send,"Deel Clash Timer Hub back-up"));
+  }catch(Exception e){toast("Back-up maken mislukt");}
+ }
+ private void restoreBackup(String input){
+  try{
+   JSONObject data=new JSONObject(input.trim());
+   if(!"clash-timer-hub-backup-v1".equals(data.optString("format")))throw new JSONException("Onbekend back-upformaat");
+   JSONArray a=data.getJSONArray("accounts"),u=data.getJSONArray("upgrades");
+   if(a.length()>100||u.length()>10000)throw new JSONException("Back-up is te groot");
+   ArrayList<String> names=new ArrayList<>();ArrayList<JSONObject> timers=new ArrayList<>();
+   for(int i=0;i<a.length();i++){String n=a.getString(i).trim();if(n.isEmpty()||names.contains(n))throw new JSONException("Ongeldig account");names.add(n);}
+   for(int i=0;i<u.length();i++){JSONObject o=u.getJSONObject(i);if(!names.contains(o.optString("account"))||o.optLong("finish")<=0)throw new JSONException("Ongeldige timer");timers.add(o);}
+   new android.app.AlertDialog.Builder(this).setTitle("Back-up herstellen?")
+    .setMessage("Dit vervangt alle bestaande accounts en timers door "+names.size()+" accounts en "+timers.size()+" timers.")
+    .setPositiveButton("Herstellen",(d,w)->{
+     accounts.clear();accounts.addAll(names);upgrades.clear();upgrades.addAll(timers);
+     getPreferences(0).edit().putString("playerTags",data.optJSONObject("playerTags")==null?"{}":data.optJSONObject("playerTags").toString()).apply();
+     persist();draw();toast("Back-up hersteld");
+    }).setNegativeButton("Annuleren",null).show();
+  }catch(Exception e){toast("Ongeldige back-up: "+e.getMessage());}
+ }
  private void shareTimers(){
   StringBuilder out=new StringBuilder("Clash Timer Hub · Upgrade overzicht\n");
   long now=System.currentTimeMillis();int count=0;
