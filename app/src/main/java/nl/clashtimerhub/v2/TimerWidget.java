@@ -79,13 +79,30 @@ public final class TimerWidget extends AppWidgetProvider {
        alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,trigger,pi);
       }else if(Build.VERSION.SDK_INT>=23&&Build.VERSION.SDK_INT<31){
        alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,trigger,pi);
+      }else if(Build.VERSION.SDK_INT>=31){
+       // Exact-alarm permission denied: alarm-clock scheduling remains exact and user-visible.
+       PendingIntent show=PendingIntent.getActivity(context,0,new Intent(context,MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+       alarms.setAlarmClock(new AlarmManager.AlarmClockInfo(trigger,show),pi);
       }else{
-       alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,trigger,pi);
+       alarms.set(AlarmManager.RTC_WAKEUP,trigger,pi);
       }
      }
     }
    }
-  }catch(Exception ignored){}
+  }catch(Exception e){android.util.Log.e("ClashTimerHub","Scheduling builder alarms failed",e);}
   update(context);
  }
+ static void scheduleDiagnostic(Context context){
+  AlarmManager alarms=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+  if(alarms==null)return;
+  Intent intent=new Intent(context,BuilderAlarm.class).setAction("nl.clashtimerhub.v2.TEST_SCHEDULED_ALARM");
+  PendingIntent pi=PendingIntent.getBroadcast(context,90117,intent,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+  long when=System.currentTimeMillis()+60000L;
+  if(Build.VERSION.SDK_INT>=31&&!alarms.canScheduleExactAlarms()){
+   PendingIntent show=PendingIntent.getActivity(context,0,new Intent(context,MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+   alarms.setAlarmClock(new AlarmManager.AlarmClockInfo(when,show),pi);
+  }else if(Build.VERSION.SDK_INT>=23)alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,when,pi);
+  else alarms.setExact(AlarmManager.RTC_WAKEUP,when,pi);
+ }
+}
 }
