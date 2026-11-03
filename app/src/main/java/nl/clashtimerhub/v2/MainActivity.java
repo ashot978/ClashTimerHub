@@ -441,7 +441,7 @@ public final class MainActivity extends Activity {
   for(JSONObject o:upgrades){
    String name=cleanName(o.optString("name")),ac=o.optString("account"),cat=o.optString("category");
    if(!ac.equals(chosenAccount)||!cat.equals(chosenCategory))continue;
-   if("Bouwers".equals(chosenCategory)&&o.optLong("finish")!=nextFinish)continue;
+   if(o.optLong("finish")<=now)continue;
    count++;long remain=Math.max(0,(o.optLong("finish")-now+999)/1000);
    LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
    card.setPadding(dp(16),dp(10),dp(16),dp(12));card.setBackground(shape(0xff30243e,16));
