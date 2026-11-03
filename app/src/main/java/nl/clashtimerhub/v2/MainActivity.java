@@ -244,7 +244,7 @@ public final class MainActivity extends Activity {
      String raw=line.getText().trim();
      if(raw.isEmpty())continue;
      if(raw.toLowerCase(java.util.Locale.ROOT).contains("upgrade"))continue;
-     if(parse(raw)>0||raw.matches("(?i).*\\\\d+\\\\s*[dhms].*"))time.append(raw).append(" ");
+     if(parse(raw)>0||raw.matches("(?i).*\\d+\\s*[dhms].*"))time.append(raw).append(" ");
      else name.append(raw).append(" ");
     }
     String title=cleanName(name.toString());
