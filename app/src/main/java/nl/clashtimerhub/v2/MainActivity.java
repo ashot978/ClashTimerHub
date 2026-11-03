@@ -87,7 +87,7 @@ public final class MainActivity extends Activity {
   LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(0,dp(52),1);ap.setMargins(dp(8),0,0,0);actions.addView(add,ap);
   button("Deel timer-overzicht",()->shareTimers());
   button("Scanner kalibreren",()->calibrate());
-  button("Alle accounts · Overzicht",()->overview());
+  button("Details per account",()->overview());
 
 
  }
@@ -303,20 +303,25 @@ public final class MainActivity extends Activity {
   return ClashNames.name(id);
  }
  private void overview(){
-  long now=System.currentTimeMillis();StringBuilder result=new StringBuilder();
-  int active=0,done=0;
+  long now=System.currentTimeMillis();
+  LinearLayout list=new LinearLayout(this);list.setOrientation(1);list.setPadding(dp(12),dp(8),dp(12),dp(8));
   for(String ac:accounts){
-   int a=0,d=0;long next=Long.MAX_VALUE;
-   for(JSONObject o:upgrades)if(ac.equals(o.optString("account"))){
-    long finish=o.optLong("finish");if(finish<=now)d++;else{a++;next=Math.min(next,finish);}
+   int builders=0,lab=0,pets=0;long soonest=Long.MAX_VALUE;String name="";
+   for(JSONObject o:upgrades){
+    if(!ac.equals(o.optString("account"))||o.optLong("finish")<=now)continue;
+    String type=o.optString("category");
+    if("Bouwers".equals(type)){builders++;if(o.optLong("finish")<soonest){soonest=o.optLong("finish");name=o.optString("name");}}
+    else if("Laboratorium".equals(type))lab++;
+    else if("Pets".equals(type))pets++;
    }
-   active+=a;done+=d;
-   result.append(ac).append(": ").append(a).append(" bezig · ").append(d).append(" gereed");
-   if(next!=Long.MAX_VALUE)result.append(" · volgende over ").append(format((next-now+999)/1000));
-   result.append("\n");
+   String next=soonest==Long.MAX_VALUE?"Geen actieve builder":cleanName(name)+" · "+format((soonest-now+999)/1000);
+   TextView line=label(ac+"\n"+next+"\n"+builders+" bouwers bezig · "+lab+" lab · "+pets+" pets",15);
+   line.setBackground(shape(0xff30243e,12));
+   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(0,dp(4),0,dp(4));list.addView(line,lp);
   }
-  new android.app.AlertDialog.Builder(this).setTitle("Command Center · "+active+" bezig / "+done+" gereed")
-   .setMessage(result.toString()).setPositiveButton("Sluiten",null).show();
+  ScrollView scroll=new ScrollView(this);scroll.addView(list);
+  new android.app.AlertDialog.Builder(this).setTitle("Alle accounts · Details")
+   .setView(scroll).setPositiveButton("Sluiten",null).show();
  }
  private void editTimer(JSONObject o){
   LinearLayout form=new LinearLayout(this);form.setOrientation(1);form.setPadding(dp(16),dp(8),dp(16),0);
