@@ -75,15 +75,32 @@ public final class MainActivity extends Activity {
   Button add=new Button(this);add.setText("＋ Account");add.setAllCaps(false);add.setOnClickListener(v->editAccount());
   add.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xff353853));
   LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(0,dp(52),1);ap.setMargins(dp(8),0,0,0);actions.addView(add,ap);
+  button("Deel timer-overzicht",()->shareTimers());
   TextView section=label("ACTIVE UPGRADES  •  LIVE",18);section.setTypeface(null,android.graphics.Typeface.BOLD);root.addView(section);
   items=new LinearLayout(this);items.setOrientation(1);root.addView(items);showTimers();
+ }
+ private void shareTimers(){
+  StringBuilder out=new StringBuilder("Clash Timer Hub · Upgrade overzicht\\n");
+  long now=System.currentTimeMillis();int count=0;
+  for(String ac:accounts){
+   StringBuilder section=new StringBuilder();
+   for(JSONObject o:upgrades){
+    if(!ac.equals(o.optString("account")))continue;
+    long remain=Math.max(0,(o.optLong("finish")-now+999)/1000);
+    section.append("• ").append(o.optString("name")).append(" [").append(o.optString("category")).append("] — ").append(remain==0?"Gereed":format(remain)).append("\\n");
+    count++;
+   }
+   if(section.length()>0)out.append("\\n").append(ac).append("\\n").append(section);
+  }
+  if(count==0){toast("Er zijn nog geen timers om te delen");return;}
+  Intent send=new Intent(Intent.ACTION_SEND);send.setType("text/plain");send.putExtra(Intent.EXTRA_TEXT,out.toString());
+  startActivity(Intent.createChooser(send,"Deel je timers"));
  }
  private void editAccount(){EditText e=new EditText(this);e.setSingleLine(true);new android.app.AlertDialog.Builder(this).setTitle("Nieuw account").setView(e).setPositiveButton("Toevoegen",(d,w)->{String s=e.getText().toString().trim();if(!s.isEmpty()){accounts.add(s);persist();draw();}}).setNegativeButton("Annuleren",null).show();}
  private void manual(){LinearLayout form=new LinearLayout(this);form.setOrientation(1);EditText n=new EditText(this),t=new EditText(this);n.setHint("Gebouwnaam");t.setHint("Tijd, bijvoorbeeld 3h 15m");form.addView(n);form.addView(t);new android.app.AlertDialog.Builder(this).setTitle("Timer toevoegen").setView(form).setPositiveButton("Opslaan",(d,w)->{long seconds=parse(t.getText().toString());if(seconds>0){try{JSONObject o=new JSONObject();o.put("id",UUID.randomUUID().toString());o.put("account",accounts.get(account.getSelectedItemPosition()));o.put("category",categories[category.getSelectedItemPosition()]);o.put("name",n.getText().toString());o.put("finish",System.currentTimeMillis()+seconds*1000);upgrades.add(o);persist();showTimers();}catch(Exception ignored){}}}).setNegativeButton("Annuleren",null).show();}
  private static long parse(String raw){
   String s=raw.trim().toLowerCase(java.util.Locale.ROOT).replace('ı','1');
   s=s.replaceAll("(?i)(?<![a-z0-9])[il](?=\\s*[dhms])","1");\n  s=s.replaceAll("(?i)(?<![a-z0-9])s(?=\\s*h)","5");
-  s=s.replaceAll("(?i)(?<![a-z0-9])s(?=\\s*h)","5");
   s=s.replaceAll("(?i)(?<=\\d)o(?=\\s*[dhms])","0");
   java.util.regex.Matcher m=java.util.regex.Pattern.compile("(\\d+)\\s*([dhms])").matcher(s);
   long total=0;int consumed=0;boolean found=false;java.util.HashSet<String> seen=new java.util.HashSet<>();
