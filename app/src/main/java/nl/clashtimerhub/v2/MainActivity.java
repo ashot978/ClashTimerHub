@@ -137,12 +137,17 @@ public final class MainActivity extends Activity {
  private void editAccount(){EditText e=new EditText(this);e.setSingleLine(true);new android.app.AlertDialog.Builder(this).setTitle("Nieuw account").setView(e).setPositiveButton("Toevoegen",(d,w)->{String s=e.getText().toString().trim();if(!s.isEmpty()){accounts.add(s);persist();draw();}}).setNegativeButton("Annuleren",null).show();}
  private void manual(){LinearLayout form=new LinearLayout(this);form.setOrientation(1);EditText n=new EditText(this),t=new EditText(this);n.setHint("Gebouwnaam");t.setHint("Tijd, bijvoorbeeld 3h 15m");form.addView(n);form.addView(t);new android.app.AlertDialog.Builder(this).setTitle("Timer toevoegen").setView(form).setPositiveButton("Opslaan",(d,w)->{long seconds=parse(t.getText().toString());if(seconds>0){try{JSONObject o=new JSONObject();o.put("id",UUID.randomUUID().toString());o.put("account",accounts.get(account.getSelectedItemPosition()));o.put("category",categories[category.getSelectedItemPosition()]);o.put("name",n.getText().toString());o.put("finish",System.currentTimeMillis()+seconds*1000);upgrades.add(o);persist();showTimers();}catch(Exception ignored){}}}).setNegativeButton("Annuleren",null).show();}
  private static long parse(String raw){
-  String s=raw.trim().toLowerCase(java.util.Locale.ROOT).replace('ı','1');
-  s=s.replaceAll("(?i)(?<![a-z0-9])[il](?=\\s*[dhms])","1");
-  s=s.replaceAll("(?i)(?<![a-z0-9])s(?=\\s*h)","5");
-  s=s.replaceAll("(?i)(?<=\\d)o(?=\\s*[dhms])","0");
+  if(raw==null)return 0;
+  String s=raw.toLowerCase(java.util.Locale.ROOT).replace('ı','1');
+  s=s.replaceAll("(?<![a-z0-9])[il](?=\\s*[dhms])","1");
+  s=s.replaceAll("(?<![a-z0-9])s(?=\\s*h)","5");
+  s=s.replaceAll("(?<=\\d)o(?=\\s*[dhms])","0");
+  // OCR frequently appends E/6 after the final minute or hour unit.
+  s=s.replaceAll("(?<=[dhms])\\s*[e€]+\\s*$","");
+  s=s.replaceAll("(?<=m)6\\s*$","");
   java.util.regex.Matcher m=java.util.regex.Pattern.compile("(\\d+)\\s*([dhms])").matcher(s);
-  long total=0;int consumed=0;boolean found=false;java.util.HashSet<String> seen=new java.util.HashSet<>();
+  long total=0;int consumed=0;boolean found=false;
+  java.util.HashSet<String> seen=new java.util.HashSet<>();
   while(m.find()){
    if(!s.substring(consumed,m.start()).trim().isEmpty())return 0;
    String unit=m.group(2);if(!seen.add(unit))return 0;
@@ -234,7 +239,7 @@ public final class MainActivity extends Activity {
   }).addOnFailureListener(e->{n2.recycle();t2.recycle();scanRow(bmp,rows,index+1);});
  }
  private void review(){if(pending.isEmpty()){toast("Geen OCR-resultaten");return;}LinearLayout form=new LinearLayout(this);form.setOrientation(1);ScrollView scroll=new ScrollView(this);scroll.addView(form);ArrayList<EditText> names=new ArrayList<>(),times=new ArrayList<>();
-  for(JSONObject o:pending){form.addView(label("Rij "+(o.optInt("row")+1),16));EditText n=new EditText(this),t=new EditText(this);n.setSingleLine(true);t.setSingleLine(true);n.setText(o.optString("name"));t.setText(o.optString("raw"));n.setHint("Naam");t.setHint("Bijv. 3h 15m");form.addView(n);form.addView(t);names.add(n);times.add(t);}
+  for(JSONObject o:pending){form.addView(label("Rij "+(o.optInt("row")+1),16));EditText n=new EditText(this),t=new EditText(this);n.setSingleLine(true);t.setSingleLine(true);n.setText(o.optString("name"));String recognized=o.optString("raw");t.setText(recognized);if(parse(recognized)>0)t.setCompoundDrawablesWithIntrinsicBounds(0,0,android.R.drawable.checkbox_on_background,0);else t.setError("Controleer deze tijd");n.setHint("Naam");t.setHint("Bijv. 3h 15m");form.addView(n);form.addView(t);names.add(n);times.add(t);}
   android.app.AlertDialog dialog=new android.app.AlertDialog.Builder(this).setTitle("Controleer "+pending.size()+" rijen").setView(scroll).setPositiveButton("Opslaan",null).setNegativeButton("Annuleren",null).create();
   dialog.setOnShowListener(showEvent->dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
    String ac=accounts.get(account.getSelectedItemPosition()),cat=categories[category.getSelectedItemPosition()];long now=System.currentTimeMillis();
