@@ -229,6 +229,11 @@ public final class MainActivity extends Activity {
    JSONObject json=new JSONObject(input.substring(start,end+1));
    if(!json.has("buildings")&&!json.has("heroes")&&!json.has("units"))throw new JSONException("Geen Clash-export");
    String ac=accounts.get(account.getSelectedItemPosition());
+   JSONObject player=json.optJSONObject("player");
+   String tag=json.optString("tag",json.optString("playerTag",player==null?"":player.optString("tag",""))).trim().toUpperCase(java.util.Locale.ROOT);
+   JSONObject tags=new JSONObject(getPreferences(0).getString("playerTags","{}"));
+   String linked=tags.optString(ac,"");
+   if(!tag.isEmpty()&&!linked.isEmpty()&&!linked.equals(tag)){toast("Verkeerd account: verwacht "+linked+" maar export bevat "+tag);return;}
    long now=System.currentTimeMillis();
    long timestamp=json.optLong("timestamp",now/1000)*1000L;
    // Timestamp is the moment at which the exported remaining seconds were measured.
@@ -256,7 +261,7 @@ public final class MainActivity extends Activity {
     JSONObject old=upgrades.get(i);
     if(ac.equals(old.optString("account"))&&old.optBoolean("exported",false))upgrades.remove(i);
    }
-   upgrades.addAll(parsed);persist();showTimers();renderDashboard();toast(parsed.size()+" upgrades geïmporteerd voor "+ac);
+   upgrades.addAll(parsed);if(!tag.isEmpty()){tags.put(ac,tag);getPreferences(0).edit().putString("playerTags",tags.toString()).apply();}persist();showTimers();renderDashboard();toast(parsed.size()+" upgrades geïmporteerd voor "+ac);
   }catch(Exception e){toast("Ongeldige Clash-export: "+e.getMessage());}
  }
  private void addExportTimer(ArrayList<JSONObject> out,String ac,String cat,long id,long sec,long ts,int index)throws JSONException{
