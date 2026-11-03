@@ -32,7 +32,7 @@ public final class OcrScanner {
             return;
         }
         try {
-            RECOGNIZER.process(InputImage.fromBitmap(bitmap, 0))
+            RECOGNIZER.process(InputImage.fromBitmap(cropUpgradePanel(bitmap), 0))
                 .addOnSuccessListener(text -> {
                     List<MenuTimerDetector.Token> tokens = new ArrayList<>();
                     for (Text.TextBlock block : text.getTextBlocks()) {
@@ -40,7 +40,7 @@ public final class OcrScanner {
                             Rect rect = line.getBoundingBox();
                             if (rect != null) {
                                 tokens.add(new MenuTimerDetector.Token(
-                                    line.getText(), rect.left, rect.top, rect.right, rect.bottom));
+                                    line.getText(), rect.left + Math.round(bitmap.getWidth() * 0.58f), rect.top, rect.right + Math.round(bitmap.getWidth() * 0.58f), rect.bottom));
                             }
                         }
                     }
@@ -53,6 +53,16 @@ public final class OcrScanner {
         } catch (RuntimeException error) {
             callback.onError(error);
         }
+    }
+
+    /**
+     * Crop the right-side upgrade panel before OCR. Village timers are never
+     * submitted to text recognition, even if the menu is visible.
+     */
+    private static Bitmap cropUpgradePanel(Bitmap bitmap) {
+        int left = Math.round(bitmap.getWidth() * 0.58f);
+        int cropWidth = bitmap.getWidth() - left;
+        return Bitmap.createBitmap(bitmap, left, 0, cropWidth, bitmap.getHeight());
     }
 
     /** Visual confirmation of the green progress bar in a running builder row. */
