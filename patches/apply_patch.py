@@ -124,8 +124,8 @@ service = replace_once(service,
     '        if(floatingScanButton!=null){floatingScanButton.hide();floatingScanButton=null;}\n        store.setScanning(false);',
     "cleanup floating scan control")
 service = replace_once(service,
-    '            store.setPending(slot,category,bestFinish,bestText);',
-    '            store.setTimerAt(this,slot,category,bestFinish,bestText);\n            store.clearPending(slot,category);',
+    'if(bestFinish>0){store.setPending(slot,category,bestFinish,bestText);',
+    'if(bestFinish>0){store.setTimerAt(this,slot,category,bestFinish,bestText);store.clearPending(slot,category);',
     "save recognized timer immediately")
 service_file.write_text(service, encoding="utf-8")
 
