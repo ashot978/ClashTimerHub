@@ -2,6 +2,7 @@ package nl.clashtimerhub.app;
 
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.content.Context;
 
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.text.Text;
@@ -27,12 +28,16 @@ public final class OcrScanner {
     }
 
     public static void scan(Bitmap bitmap, int category, Callback callback) {
+        scan(bitmap, category, null, callback);
+    }
+
+    public static void scan(Bitmap bitmap, int category, Context context, Callback callback) {
         if (bitmap == null) {
             callback.onError(new IllegalArgumentException("Geen afbeelding"));
             return;
         }
         try {
-            Bitmap panel = cropUpgradePanel(bitmap);
+            Bitmap panel = cropUpgradePanel(bitmap, context, category);
             RECOGNIZER.process(InputImage.fromBitmap(panel, 0))
                 .addOnSuccessListener(text -> {
                     List<MenuTimerDetector.Token> tokens = new ArrayList<>();
@@ -41,7 +46,7 @@ public final class OcrScanner {
                             Rect rect = line.getBoundingBox();
                             if (rect != null) {
                                 tokens.add(new MenuTimerDetector.Token(
-                                    line.getText(), rect.left + Math.round(bitmap.getWidth() * 0.58f), rect.top, rect.right + Math.round(bitmap.getWidth() * 0.58f), rect.bottom));
+                                    line.getText(), rect.left + cropLeft(bitmap, context, category), rect.top + cropTop(bitmap, context, category), rect.right + cropLeft(bitmap, context, category), rect.bottom + cropTop(bitmap, context, category)));
                             }
                         }
                     }
@@ -61,10 +66,18 @@ public final class OcrScanner {
      * Crop the right-side upgrade panel before OCR. Village timers are never
      * submitted to text recognition, even if the menu is visible.
      */
-    private static Bitmap cropUpgradePanel(Bitmap bitmap) {
-        int left = Math.round(bitmap.getWidth() * 0.58f);
-        int cropWidth = bitmap.getWidth() - left;
-        return Bitmap.createBitmap(bitmap, left, 0, cropWidth, bitmap.getHeight());
+    private static int cropLeft(Bitmap bitmap, Context context, int category) {
+        return ScanRegions.get(context, category, bitmap.getWidth(), bitmap.getHeight()).left;
+    }
+
+    private static int cropTop(Bitmap bitmap, Context context, int category) {
+        return ScanRegions.get(context, category, bitmap.getWidth(), bitmap.getHeight()).top;
+    }
+
+    private static Bitmap cropUpgradePanel(Bitmap bitmap, Context context, int category) {
+        android.graphics.Rect r = ScanRegions.get(context, category,
+                bitmap.getWidth(), bitmap.getHeight());
+        return Bitmap.createBitmap(bitmap, r.left, r.top, r.width(), r.height());
     }
 
     /** Visual confirmation of the green progress bar in a running builder row. */
