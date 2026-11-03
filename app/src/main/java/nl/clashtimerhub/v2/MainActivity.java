@@ -276,7 +276,7 @@ public final class MainActivity extends Activity {
     for(String candidate:accounts)if(tag.equalsIgnoreCase(tags.optString(candidate,""))){matched=candidate;break;}
     if(matched!=null){
      ac=matched;
-    }else if(!linked.isEmpty()&&!linked.equalsIgnoreCase(tag)){
+    }else if(false){
      final String payload=input,detected=tag;
      new android.app.AlertDialog.Builder(this).setTitle("Onbekende speler: "+tag)
       .setMessage("Deze player tag hoort niet bij "+ac+". Kies het juiste account om verkeerd overschrijven te voorkomen.")
