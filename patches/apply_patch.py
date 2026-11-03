@@ -123,6 +123,10 @@ service = replace_once(service,
     '        store.setScanning(false);',
     '        if(floatingScanButton!=null){floatingScanButton.hide();floatingScanButton=null;}\n        store.setScanning(false);',
     "cleanup floating scan control")
+service = replace_once(service,
+    '            store.setPending(slot,category,bestFinish,bestText);',
+    '            store.setTimerAt(this,slot,category,bestFinish,bestText);\n            store.clearPending(slot,category);',
+    "save recognized timer immediately")
 service_file.write_text(service, encoding="utf-8")
 
 # Request overlay permission when opening the app; permission is granted by
@@ -293,6 +297,25 @@ activity=replace_once(activity,
     '        content.addView(text("Alle 7 accounts",18,Color.WHITE,true));',
     '        content.addView(text("Accounts (maximaal 7)",18,Color.WHITE,true));',
     "account overview title")
+# Require overlay permission before starting screen capture; otherwise the
+# scan is silently unarmed and no floating button ever appears.
+activity=replace_once(activity,
+    '        selectedCategory=category;\\n        MediaProjectionManager mgr=',
+    '''        selectedCategory=category;
+        if(!ScanOverlay.allowed(this)){
+            new AlertDialog.Builder(this)
+                .setTitle("Zwevende scanknop inschakelen")
+                .setMessage("Geef Clash Timer Hub toestemming voor Weergeven over andere apps. Ga daarna terug en tik opnieuw op Scan spel. Zonder deze toestemming kan de scan niet starten.")
+                .setNegativeButton("Annuleren",null)
+                .setPositiveButton("Instellingen",(d,w)->{
+                    Intent permission=new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:"+getPackageName()));
+                    startActivity(permission);
+                }).show();
+            return;
+        }
+        MediaProjectionManager mgr=''',
+    "require floating button permission before capture")
 activity_file.write_text(activity,encoding="utf-8")
 
 gradle_file=Path("app/build.gradle")
