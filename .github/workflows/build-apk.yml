@@ -30,9 +30,11 @@ jobs:
             app/src/main/java/nl/clashtimerhub/app/MenuTimerDetector.java \
             app/src/main/java/nl/clashtimerhub/app/BuilderAvailability.java \
             tests/TimerParserTest.java \
-            patches/tests/MenuTimerDetectorTest.java
+            patches/tests/MenuTimerDetectorTest.java \
+            patches/tests/BuilderAvailabilityTest.java
           java -cp /tmp/clash-tests TimerParserTest
           java -cp /tmp/clash-tests MenuTimerDetectorTest
+          java -cp /tmp/clash-tests BuilderAvailabilityTest
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
