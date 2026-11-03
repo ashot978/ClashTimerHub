@@ -84,6 +84,7 @@ public final class MainActivity extends Activity {
   TextView section=label("GESELECTEERD ACCOUNT  ·  LIVE",18);section.setTypeface(null,android.graphics.Typeface.BOLD);root.addView(section);
   items=new LinearLayout(this);items.setOrientation(1);root.addView(items);showTimers();
   root.addView(label("BEHEER EN SYNCHRONISATIE",15));
+  button("⚔ Zwevende plakknop aan/uit",()->toggleFloatingSync());
   button("🔔 Meldingen instellen",()->notificationSettings());
   button("🔔 Testmelding versturen",()->sendTestNotification());
   button("📋 Synchroniseer vanaf klembord",()->importClipboard());
@@ -102,6 +103,33 @@ public final class MainActivity extends Activity {
   button("Details per account",()->overview());
 
 
+ }
+ private void toggleFloatingSync(){
+  android.content.SharedPreferences prefs=getPreferences(0);
+  boolean active=prefs.getBoolean("floatingEnabled",false);
+  Intent service=new Intent(this,FloatingSyncService.class);
+  if(active){
+   stopService(service);
+   prefs.edit().putBoolean("floatingEnabled",false).apply();
+   toast("Zwevende plakknop uitgeschakeld");
+   return;
+  }
+  if(!android.provider.Settings.canDrawOverlays(this)){
+   new android.app.AlertDialog.Builder(this)
+    .setTitle("Zwevende plakknop")
+    .setMessage("Geef Clash Timer Hub toestemming om over andere apps te worden weergegeven. Kom daarna terug en tik nogmaals op de knop.")
+    .setPositiveButton("Toestemming geven",(d,w)->{
+     Intent i=new Intent(android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,android.net.Uri.parse("package:"+getPackageName()));
+     startActivity(i);
+    }).setNegativeButton("Annuleren",null).show();
+   return;
+  }
+  try{
+   if(android.os.Build.VERSION.SDK_INT>=26)startForegroundService(service);
+   else startService(service);
+   prefs.edit().putBoolean("floatingEnabled",true).apply();
+   toast("Zwevende plakknop ingeschakeld");
+  }catch(Exception e){toast("Kan zwevende knop niet starten: "+e.getMessage());}
  }
  private void sendTestNotification(){
   if(android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED){
