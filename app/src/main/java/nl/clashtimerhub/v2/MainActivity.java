@@ -448,7 +448,7 @@ public final class MainActivity extends Activity {
   if(!payload.contains("\"buildings\"")&&!payload.contains("\"heroes\"")&&!payload.contains("\"units\"")){
    toast("Dit lijkt geen Clash of Clans-spelerdata. Kopieer eerst Copy Player Data.");return;
   }
-  String selected=account.getSelectedItem()==null?"nieuw account":account.getSelectedItem().toString();
+  String selected=selectedAccount.isEmpty()?"automatisch herkend account":selectedAccount;
   new android.app.AlertDialog.Builder(this).setTitle("Synchroniseren met "+selected+"?")
    .setMessage("De actieve upgrades uit de gekopieerde Clash-data worden aan dit account gekoppeld. Handmatige timers blijven behouden.")
    .setPositiveButton("Synchroniseren",(d,w)->importClashData(payload))
@@ -600,8 +600,8 @@ public final class MainActivity extends Activity {
    .setMessage(o.optString("name")).setPositiveButton("Verwijderen",(d,w)->{upgrades.remove(o);persist();showTimers();})
    .setNegativeButton("Annuleren",null).show();
  }
- private void editAccount(){EditText e=new EditText(this);e.setSingleLine(true);new android.app.AlertDialog.Builder(this).setTitle("Nieuw account").setView(e).setPositiveButton("Toevoegen",(d,w)->{String s=e.getText().toString().trim();if(!s.isEmpty()){accounts.add(s);persist();draw();}}).setNegativeButton("Annuleren",null).show();}
- private void manual(){LinearLayout form=new LinearLayout(this);form.setOrientation(1);EditText n=new EditText(this),t=new EditText(this);n.setHint("Gebouwnaam");t.setHint("Tijd, bijvoorbeeld 3h 15m");form.addView(n);form.addView(t);new android.app.AlertDialog.Builder(this).setTitle("Timer toevoegen").setView(form).setPositiveButton("Opslaan",(d,w)->{long seconds=parse(t.getText().toString());if(seconds>0){try{JSONObject o=new JSONObject();o.put("id",UUID.randomUUID().toString());o.put("account",accounts.get(account.getSelectedItemPosition()));o.put("category",categories[category.getSelectedItemPosition()]);o.put("name",n.getText().toString());o.put("finish",System.currentTimeMillis()+seconds*1000);upgrades.add(o);persist();showTimers();}catch(Exception ignored){}}}).setNegativeButton("Annuleren",null).show();}
+ private void editAccount(){EditText e=new EditText(this);e.setSingleLine(true);new android.app.AlertDialog.Builder(this).setTitle("Nieuw account").setView(e).setPositiveButton("Toevoegen",(d,w)->{String s=e.getText().toString().trim();if(!s.isEmpty()&&!accounts.contains(s)){accounts.add(s);selectedAccount=s;persist();draw();}}).setNegativeButton("Annuleren",null).show();}
+ private void manual(){LinearLayout form=new LinearLayout(this);form.setOrientation(1);EditText n=new EditText(this),t=new EditText(this);n.setHint("Gebouwnaam");t.setHint("Tijd, bijvoorbeeld 3h 15m");form.addView(n);form.addView(t);new android.app.AlertDialog.Builder(this).setTitle("Timer toevoegen").setView(form).setPositiveButton("Opslaan",(d,w)->{long seconds=parse(t.getText().toString());if(seconds>0&&!accounts.isEmpty()){try{JSONObject o=new JSONObject();o.put("id",UUID.randomUUID().toString());o.put("account",selectedAccount.isEmpty()?accounts.get(0):selectedAccount);o.put("category","Bouwers");o.put("name",n.getText().toString());o.put("finish",System.currentTimeMillis()+seconds*1000);upgrades.add(o);persist();draw();}catch(Exception ignored){}}}).setNegativeButton("Annuleren",null).show();}
  private static long parse(String raw){
   if(raw==null)return 0;
   String s=raw.toLowerCase(java.util.Locale.ROOT).replace('ı','1');
