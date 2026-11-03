@@ -127,6 +127,23 @@ service = replace_once(service,
     'if(bestFinish>0){store.setPending(slot,category,bestFinish,bestText);',
     'if(bestFinish>0){store.setTimerAt(this,slot,category,bestFinish,bestText);store.clearPending(slot,category);',
     "save recognized timer immediately")
+# Persist all detected active upgrade durations for the selected account.
+service = replace_once(service,
+    'if(result.hit!=null){',
+    '''if(result.hit!=null){
+                            org.json.JSONArray active=new org.json.JSONArray();
+                            long capturedAt=System.currentTimeMillis();
+                            for(TimerParser.Hit timer:result.hits){
+                                org.json.JSONObject item=new org.json.JSONObject();
+                                try{
+                                    item.put("label",timer.text);
+                                    item.put("finish",capturedAt+timer.seconds*1000L);
+                                    active.put(item);
+                                }catch(org.json.JSONException ignored){}
+                            }
+                            getSharedPreferences("active_upgrades",MODE_PRIVATE).edit()
+                                .putString("slot_"+slot+"_category_"+category,active.toString()).apply();''',
+    "save all active upgrade rows")
 service_file.write_text(service, encoding="utf-8")
 
 # Request overlay permission when opening the app; permission is granted by
@@ -316,6 +333,28 @@ activity=replace_once(activity,
         }
         MediaProjectionManager mgr=''',
     "require floating button permission before capture")
+# Display each stored active upgrade independently instead of just one timer.
+activity=replace_once(activity,
+    '        overview.removeAllViews();',
+    '''        overview.removeAllViews();
+        try{
+            String raw=getSharedPreferences("active_upgrades",MODE_PRIVATE)
+                .getString("slot_"+selectedSlot+"_category_0","[]");
+            org.json.JSONArray upgrades=new org.json.JSONArray(raw);
+            if(upgrades.length()>0){
+                overview.addView(text("Actieve upgrades voor "+store.name(selectedSlot),
+                    17,GREEN,true));
+                long now=System.currentTimeMillis();
+                for(int n=0;n<upgrades.length();n++){
+                    org.json.JSONObject item=upgrades.getJSONObject(n);
+                    long remaining=Math.max(0,(item.optLong("finish")-now)/1000L);
+                    if(remaining>0)
+                        overview.addView(text("• "+item.optString("label")+" — "+
+                            TimerParser.pretty(remaining),14,Color.WHITE,false));
+                }
+            }
+        }catch(org.json.JSONException ignored){}''',
+    "render individual active upgrade timers")
 activity_file.write_text(activity,encoding="utf-8")
 
 gradle_file=Path("app/build.gradle")
