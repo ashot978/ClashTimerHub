@@ -75,7 +75,13 @@ public final class TimerWidget extends AppWidgetProvider {
      long trigger=kind==1?finish-lead*60000L:finish;
      boolean active=enabled&&(kind==0?onFinish:lead>0);
      if(active&&trigger>now&&finish>now){
-      alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,trigger,pi);
+      if(Build.VERSION.SDK_INT>=31&&alarms.canScheduleExactAlarms()){
+       alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,trigger,pi);
+      }else if(Build.VERSION.SDK_INT>=23&&Build.VERSION.SDK_INT<31){
+       alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,trigger,pi);
+      }else{
+       alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,trigger,pi);
+      }
      }
     }
    }
