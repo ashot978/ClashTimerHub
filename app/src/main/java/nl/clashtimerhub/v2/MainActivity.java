@@ -177,7 +177,7 @@ public final class MainActivity extends Activity {
     JSONObject old=upgrades.get(i);
     if(ac.equals(old.optString("account"))&&old.optBoolean("exported",false))upgrades.remove(i);
    }
-   upgrades.addAll(parsed);persist();showTimers();toast(parsed.size()+" upgrades geïmporteerd voor "+ac);
+   upgrades.addAll(parsed);persist();showTimers();renderDashboard();toast(parsed.size()+" upgrades geïmporteerd voor "+ac);
   }catch(Exception e){toast("Ongeldige Clash-export: "+e.getMessage());}
  }
  private void addExportTimer(ArrayList<JSONObject> out,String ac,String cat,long id,long sec,long ts,int index)throws JSONException{
