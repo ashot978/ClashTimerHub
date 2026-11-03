@@ -216,7 +216,10 @@ public final class MainActivity extends Activity {
    countdown.setTypeface(null,android.graphics.Typeface.BOLD);countdown.setTextColor(first==null?0xff82e8a7:0xffffd88a);top.addView(countdown);
    String tag=tags.optString(ac,"");
    String name=first==null?"Geen actieve buildertimer":cleanName(first.optString("name"));
-   TextView detail=label(name+"  ·  "+active+" bezig · vrij: onbekend",12);
+   int completed=completedCount(ac,now);
+   long oldest=oldestCompleted(ac,now);
+   String waiting=completed==0?"":(" · "+completed+" klaar · oudste "+format((now-oldest)/1000)+" geleden");
+   TextView detail=label(name+"  ·  "+active+" bezig · vrij: onbekend"+waiting,12);
    detail.setTextColor(0xffc5b7d6);card.addView(detail);
    card.setOnClickListener(v->{int i=accounts.indexOf(ac);if(i>=0)account.setSelection(i);});
   }
