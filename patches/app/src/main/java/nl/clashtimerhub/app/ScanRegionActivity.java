@@ -37,7 +37,9 @@ public final class ScanRegionActivity extends Activity {
         layout.setPadding(16,16,16,16);
         scroll.addView(layout);
         TextView help = new TextView(this);
-        help.setText("Kies een Clash-screenshot met het upgrademenu open. Sleep daarna een kader rond de builderstand en de bovenste actieve timer. Tik Opslaan.");
+        help.setText("Kies een Clash-screenshot met het upgrademenu open. Selecteer het hele rechterpaneel met de titel en alle actieve groene upgradebalken. Laat voorgestelde upgrades buiten het kader. Scroll omlaag voor Opslaan.");
+        help.setTextColor(Color.WHITE);
+        help.setTextSize(16);
         layout.addView(help);
         Button pick = new Button(this);
         pick.setText("Kies screenshot");
