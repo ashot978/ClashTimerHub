@@ -163,8 +163,8 @@ public final class MainActivity extends Activity {
   ArrayList<String> ordered=new ArrayList<>(accounts);
   java.util.Collections.sort(ordered,(a,b)->{
    long x=nextBuilder(a,now),y=nextBuilder(b,now);
-   if(x==Long.MAX_VALUE&&y!=Long.MAX_VALUE)return -1;
-   if(y==Long.MAX_VALUE&&x!=Long.MAX_VALUE)return 1;
+   if(x==Long.MAX_VALUE&&y!=Long.MAX_VALUE)return 1;
+   if(y==Long.MAX_VALUE&&x!=Long.MAX_VALUE)return -1;
    return Long.compare(x,y);
   });
   JSONObject tags;
@@ -297,7 +297,7 @@ public final class MainActivity extends Activity {
    active+=a;done+=d;
    result.append(ac).append(": ").append(a).append(" bezig · ").append(d).append(" gereed");
    if(next!=Long.MAX_VALUE)result.append(" · volgende over ").append(format((next-now+999)/1000));
-   result.append("\\n");
+   result.append("\n");
   }
   new android.app.AlertDialog.Builder(this).setTitle("Command Center · "+active+" bezig / "+done+" gereed")
    .setMessage(result.toString()).setPositiveButton("Sluiten",null).show();
