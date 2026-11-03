@@ -98,10 +98,9 @@ manifest_file=Path("app/src/main/AndroidManifest.xml")
 manifest=manifest_file.read_text(encoding="utf-8")
 if 'android.permission.SYSTEM_ALERT_WINDOW' not in manifest:
     manifest=manifest.replace('<manifest ', '<manifest ', 1)
-    manifest=manifest.replace('<application', '<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />\\n    <application', 1)
-manifest=manifest.replace('<application', '<activity android:name=".ScanRegionActivity" android:exported="false" />\\n    <application', 1) if False else manifest
+    manifest=manifest.replace('<application', '<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />\n    <application', 1)
 # Activity must be nested inside application, insert before </application>
-manifest=manifest.replace('</application>', '<activity android:name=".ScanRegionActivity" android:exported="false" />\\n    </application>', 1)
+manifest=manifest.replace('</application>', '<activity android:name=".ScanRegionActivity" android:exported="false" />\n    </application>', 1)
 manifest_file.write_text(manifest,encoding="utf-8")
 
 activity_file=ROOT / "MainActivity.java"
