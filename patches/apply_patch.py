@@ -105,23 +105,6 @@ manifest_file.write_text(manifest,encoding="utf-8")
 
 activity_file=ROOT / "MainActivity.java"
 activity=activity_file.read_text(encoding="utf-8")
-import re
-activity, overlay_matches = re.subn(
-    r'super\.onCreate\(\s*([A-Za-z_][A-Za-z_0-9]*)\s*\);',
-    lambda m: m.group(0) + '''
-        if(!ScanOverlay.allowed(this)){
-            android.content.Intent overlayPermission=new android.content.Intent(
-                android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                android.net.Uri.parse("package:"+getPackageName()));
-            startActivity(overlayPermission);
-            android.widget.Toast.makeText(this,
-                "Sta Weergeven over andere apps toe voor Scan nu",
-                android.widget.Toast.LENGTH_LONG).show();
-        }''',
-    activity, count=1)
-if overlay_matches != 1:
-    raise RuntimeError("MainActivity onCreate invocation not found")
-
 activity=replace_once(activity,
     'Open na de schermtoestemming zelf het juiste upgradescherm. Laat het circa 20 seconden in beeld en keer terug naar de app.',
     'Open na de toestemming Buildings & Heroes (voor bouwers). De scanner wacht op de menukop en negeert voorgestelde upgrades. Laat het menu 15-20 seconden open.',
