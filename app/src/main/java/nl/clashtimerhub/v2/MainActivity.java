@@ -48,7 +48,20 @@ public final class MainActivity extends Activity {
  }
  private void editAccount(){EditText e=new EditText(this);e.setSingleLine(true);new android.app.AlertDialog.Builder(this).setTitle("Nieuw account").setView(e).setPositiveButton("Toevoegen",(d,w)->{String s=e.getText().toString().trim();if(!s.isEmpty()){accounts.add(s);persist();draw();}}).setNegativeButton("Annuleren",null).show();}
  private void manual(){LinearLayout form=new LinearLayout(this);form.setOrientation(1);EditText n=new EditText(this),t=new EditText(this);n.setHint("Gebouwnaam");t.setHint("Tijd, bijvoorbeeld 3h 15m");form.addView(n);form.addView(t);new android.app.AlertDialog.Builder(this).setTitle("Timer toevoegen").setView(form).setPositiveButton("Opslaan",(d,w)->{long seconds=parse(t.getText().toString());if(seconds>0){try{JSONObject o=new JSONObject();o.put("id",UUID.randomUUID().toString());o.put("account",accounts.get(account.getSelectedItemPosition()));o.put("category",categories[category.getSelectedItemPosition()]);o.put("name",n.getText().toString());o.put("finish",System.currentTimeMillis()+seconds*1000);upgrades.add(o);persist();showTimers();}catch(Exception ignored){}}}).setNegativeButton("Annuleren",null).show();}
- private static long parse(String s){Matcher m=TIME.matcher(s.replace('O','0'));long best=0;while(m.find()){if(m.group().trim().isEmpty())continue;long v=0;for(int i=1;i<=4;i++)if(m.group(i)!=null){try{v+=Long.parseLong(m.group(i))*(i==1?86400:i==2?3600:i==3?60:1);}catch(Exception ignored){}}best=Math.max(best,v);}return best;}
+ private static long parse(String raw){
+  String s=raw.trim().toLowerCase(java.util.Locale.ROOT).replace('o','0');
+  java.util.regex.Matcher m=java.util.regex.Pattern.compile("(\\\\d+)\\\\s*([dhms])").matcher(s);
+  long total=0;int consumed=0;boolean found=false;java.util.HashSet<String> seen=new java.util.HashSet<>();
+  while(m.find()){
+   if(!s.substring(consumed,m.start()).trim().isEmpty())return 0;
+   String unit=m.group(2);if(!seen.add(unit))return 0;
+   long value;try{value=Long.parseLong(m.group(1));}catch(Exception e){return 0;}
+   if(value<0||value>9999)return 0;
+   total+=value*(unit.equals("d")?86400L:unit.equals("h")?3600L:unit.equals("m")?60L:1L);
+   consumed=m.end();found=true;
+  }
+  return found&&s.substring(consumed).trim().isEmpty()?total:0;
+ }
  private static String format(long seconds){long d=seconds/86400,h=seconds%86400/3600,m=seconds%3600/60;return(d>0?d+"d ":"")+(h>0?h+"h ":"")+(m>0?m+"m ":"")+(seconds<3600?seconds%60+"s":"");}
  private void showTimers(){if(items==null)return;items.removeAllViews();long now=System.currentTimeMillis();for(JSONObject o:upgrades){String name=o.optString("name"),ac=o.optString("account"),cat=o.optString("category");long remain=Math.max(0,(o.optLong("finish")-now)/1000);TextView v=label(ac+" · "+cat+" · "+name+" — "+format(remain),16);items.addView(v);v.setOnLongClickListener(x->{new android.app.AlertDialog.Builder(this).setMessage("Timer verwijderen?").setPositiveButton("Verwijderen",(d,w)->{upgrades.remove(o);persist();showTimers();}).setNegativeButton("Annuleren",null).show();return true;});}}
  @Override protected void onActivityResult(int req,int result,Intent data){super.onActivityResult(req,result,data);if(req!=PICK||result!=RESULT_OK||data==null)return;try(InputStream stream=getContentResolver().openInputStream(data.getData())){Bitmap bmp=BitmapFactory.decodeStream(stream);if(bmp!=null)scan(bmp);}catch(Exception e){toast("Foto kon niet worden geopend");}}
@@ -75,10 +88,17 @@ public final class MainActivity extends Activity {
  }
  private void review(){if(pending.isEmpty()){toast("Geen OCR-resultaten");return;}LinearLayout form=new LinearLayout(this);form.setOrientation(1);ScrollView scroll=new ScrollView(this);scroll.addView(form);ArrayList<EditText> names=new ArrayList<>(),times=new ArrayList<>();
   for(JSONObject o:pending){form.addView(label("Rij "+(o.optInt("row")+1),16));EditText n=new EditText(this),t=new EditText(this);n.setSingleLine(true);t.setSingleLine(true);n.setText(o.optString("name"));t.setText(o.optString("raw"));n.setHint("Naam");t.setHint("Bijv. 3h 15m");form.addView(n);form.addView(t);names.add(n);times.add(t);}
-  new android.app.AlertDialog.Builder(this).setTitle("Controleer alle "+pending.size()+" rijen").setView(scroll).setPositiveButton("Gecorrigeerde timers opslaan",(d,w)->{
+  new android.app.AlertDialog.Builder(this).setTitle("Controleer "+pending.size()+" gedetecteerde rijen (oude scan wordt vervangen)").setView(scroll).setPositiveButton("Gecorrigeerde timers opslaan",(d,w)->{
    String ac=accounts.get(account.getSelectedItemPosition()),cat=categories[category.getSelectedItemPosition()];long now=System.currentTimeMillis();int count=0;
-   for(int i=0;i<names.size();i++){long sec=parse(times.get(i).getText().toString());String name=names.get(i).getText().toString().trim();if(sec<=0||name.isEmpty())continue;try{JSONObject o=new JSONObject();o.put("id",UUID.randomUUID().toString());o.put("account",ac);o.put("category",cat);o.put("name",name);o.put("finish",now+sec*1000);upgrades.add(o);count++;}catch(Exception ignored){}}
-   persist();showTimers();toast(count+" timers opgeslagen");
+   ArrayList<JSONObject> replacement=new ArrayList<>();
+   for(int i=0;i<names.size();i++){long sec=parse(times.get(i).getText().toString());String name=names.get(i).getText().toString().trim();if(sec<=0||name.isEmpty())continue;try{JSONObject o=new JSONObject();o.put("id",UUID.randomUUID().toString());o.put("account",ac);o.put("category",cat);o.put("name",name);o.put("finish",now+sec*1000);replacement.add(o);count++;}catch(Exception ignored){}}
+   if(count==0){toast("Geen geldige timers. Niets gewijzigd.");return;}
+   for(int i=upgrades.size()-1;i>=0;i--){
+    JSONObject old=upgrades.get(i);
+    if(ac.equals(old.optString("account"))&&cat.equals(old.optString("category")))upgrades.remove(i);
+   }
+   upgrades.addAll(replacement);
+   persist();showTimers();toast(count+" timers opgeslagen; vorige scan vervangen");
   }).setNegativeButton("Annuleren",null).show();
  }
  private void toast(String s){Toast.makeText(this,s,Toast.LENGTH_LONG).show();}
