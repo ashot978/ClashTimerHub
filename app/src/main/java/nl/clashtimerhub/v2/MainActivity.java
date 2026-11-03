@@ -107,6 +107,7 @@ public final class MainActivity extends Activity {
   button("⚔ Zwevende plakknop aan/uit",()->toggleFloatingSync());
   button("🔔 Meldingen instellen",()->notificationSettings());
   button("🔔 Testmelding versturen",()->sendTestNotification());
+  button("⏰ Alarmtest over 1 minuut",()->{TimerWidget.scheduleDiagnostic(this);toast("Alarm ingepland voor over 1 minuut. Verlaat de app om te testen.");});
   button("📋 Synchroniseer vanaf klembord",()->importClipboard());
   button("Back-up kopiëren",()->copyBackup());
   button("Back-up delen",()->backup());
