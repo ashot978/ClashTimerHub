@@ -48,6 +48,8 @@ jobs:
           sed -i -E "s/versionCode [0-9]+/versionCode ${{ github.run_number }}/" app/build.gradle
           sed -i -E "s/versionName '[^']+'/versionName '0.3.${{ github.run_number }}'/" app/build.gradle
           grep -E 'versionCode|versionName' app/build.gradle
+      - name: Inspect scanner service
+        run: sed -n '1,260p' app/src/main/java/nl/clashtimerhub/app/ProjectionScanService.java
       - name: Run pure Java regression tests
         run: |
           mkdir -p /tmp/clash-tests
