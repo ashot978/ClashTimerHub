@@ -292,6 +292,14 @@ public final class MainActivity extends Activity {
      return;
     }
    }
+   if(tag.isEmpty()&&ac.isEmpty()){toast("Export bevat geen player tag. Voeg eerst een account toe.");return;}
+   if(!tag.isEmpty()&&!tags.optString(ac,"").equalsIgnoreCase(tag)){
+    String base=playerName.isEmpty()?tag:playerName;
+    String candidate=base;int suffix=2;
+    while(accounts.contains(candidate)){candidate=base+" ("+suffix+")";suffix++;}
+    ac=candidate;
+   }
+   if(!accounts.contains(ac))accounts.add(ac);
    long now=System.currentTimeMillis();
    long timestamp=json.optLong("timestamp",now/1000)*1000L;
    // Timestamp is the moment at which the exported remaining seconds were measured.
