@@ -58,7 +58,6 @@ public final class TimerWidget extends AppWidgetProvider {
    if(alarms==null)return;
    for(int i=0;i<upgrades.length();i++){
     JSONObject o=upgrades.getJSONObject(i);
-    if(!"Bouwers".equals(o.optString("category")))continue;
     long finish=o.optLong("finish");
     if(finish<=now)continue;
     String key=o.optString("id",o.optString("account")+i);
