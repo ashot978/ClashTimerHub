@@ -6,11 +6,17 @@ import android.os.Build;
 public final class BuilderAlarm extends android.content.BroadcastReceiver {
  @Override public void onReceive(Context context,Intent intent){
   long finish=intent.getLongExtra("finish",0);
-  if(finish>System.currentTimeMillis()+60000)return;
+  boolean early=intent.getBooleanExtra("early",false);
+  if(!early&&finish>System.currentTimeMillis()+60000)return;
   String ac=intent.getStringExtra("account"),name=intent.getStringExtra("name");
   if(ac==null||name==null)return;
   android.content.SharedPreferences prefs=context.getSharedPreferences("MainActivity",Context.MODE_PRIVATE);
   if(!prefs.getBoolean("notifyEnabled",true))return;
+  if(!early&&!prefs.getBoolean("notifyOnFinish",true))return;
+  if(early){
+   int lead=prefs.getInt("notifyLeadMinutes",15);
+   if(lead<=0||finish<=System.currentTimeMillis()||finish-System.currentTimeMillis()>lead*60000L+60000L)return;
+  }
   if(finish<=prefs.getLong("ack_"+ac,0L))return;
   boolean stillTracked=false;
   try{
@@ -28,9 +34,9 @@ public final class BuilderAlarm extends android.content.BroadcastReceiver {
   Intent open=new Intent(context,MainActivity.class);
   PendingIntent pi=PendingIntent.getActivity(context,0,open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
   Notification.Builder builder=Build.VERSION.SDK_INT>=26?new Notification.Builder(context,TimerWidget.CHANNEL):new Notification.Builder(context);
-  builder.setSmallIcon(android.R.drawable.ic_dialog_info).setContentTitle(ac+" · Upgrade voltooid")
-   .setContentText(name+" is klaar").setAutoCancel(true).setContentIntent(pi);
-  manager.notify((ac+"-"+name+"-"+finish).hashCode(),builder.build());
+  builder.setSmallIcon(android.R.drawable.ic_dialog_info).setContentTitle(ac+(early?" · Upgrade bijna klaar":" · Upgrade voltooid"))
+   .setContentText(early?name+" · nog "+Math.max(1,(finish-System.currentTimeMillis()+59999)/60000)+" minuten":name+" is klaar").setAutoCancel(true).setContentIntent(pi);
+  manager.notify((ac+"-"+name+"-"+finish+"-"+early).hashCode(),builder.build());
   TimerWidget.update(context);
  }
 }
