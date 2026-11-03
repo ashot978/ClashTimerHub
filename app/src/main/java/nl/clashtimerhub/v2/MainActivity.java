@@ -292,7 +292,7 @@ public final class MainActivity extends Activity {
      return;
     }
    }
-   if(tag.isEmpty()&&ac.isEmpty()){toast("Export bevat geen player tag. Voeg eerst een account toe.");return;}
+   if(tag.isEmpty()&&ac.isEmpty()){if(playerName.isEmpty()){toast("Export bevat geen spelernaam of player tag. Voeg eerst een account toe.");return;}ac=playerName;}
    if(!tag.isEmpty()&&!tags.optString(ac,"").equalsIgnoreCase(tag)){
     String base=playerName.isEmpty()?tag:playerName;
     String candidate=base;int suffix=2;
