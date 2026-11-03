@@ -374,7 +374,7 @@ public final class MainActivity extends Activity {
   if(count==0){TextView empty=label("Nog geen actieve upgrades. Scan een screenshot om te beginnen.",15);empty.setTextColor(0xffa5a9c0);items.addView(empty);}
  }
  @Override protected void onActivityResult(int req,int result,Intent data){super.onActivityResult(req,result,data);if(result!=RESULT_OK||data==null)return;
-  if(req==RESTORE){try(InputStream stream=getContentResolver().openInputStream(data.getData())){byte[] bytes=new byte[2000000];int n=stream.read(bytes);if(n>0)restoreBackup(new String(bytes,0,n,java.nio.charset.StandardCharsets.UTF_8));}catch(Exception e){toast("Herstellen mislukt: "+e.getMessage());}return;}
+  if(req==RESTORE){try(InputStream stream=getContentResolver().openInputStream(data.getData())){java.io.ByteArrayOutputStream buffer=new java.io.ByteArrayOutputStream();byte[] bytes=new byte[8192];int n;while((n=stream.read(bytes))!=-1){buffer.write(bytes,0,n);if(buffer.size()>2000000)throw new java.io.IOException("Back-up te groot");}restoreBackup(buffer.toString("UTF-8"));}catch(Exception e){toast("Herstellen mislukt: "+e.getMessage());}return;}
   if(req==IMPORT){try(InputStream stream=getContentResolver().openInputStream(data.getData())){
    java.io.ByteArrayOutputStream buffer=new java.io.ByteArrayOutputStream();byte[] bytes=new byte[8192];int n;
    while((n=stream.read(bytes))!=-1){buffer.write(bytes,0,n);if(buffer.size()>10_000_000)throw new java.io.IOException("Export te groot");}
