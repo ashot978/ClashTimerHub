@@ -221,6 +221,10 @@ public final class MainActivity extends Activity {
    String waiting=completed==0?"":(" · "+completed+" klaar · oudste "+format((now-oldest)/1000)+" geleden");
    TextView detail=label(name+"  ·  "+active+" bezig · vrij: onbekend"+waiting,12);
    detail.setTextColor(0xffc5b7d6);card.addView(detail);
+   if(completed>0){
+    Button checked=new Button(this);checked.setText("Gecontroleerd");checked.setAllCaps(false);
+    checked.setOnClickListener(v->acknowledgeAccount(ac));card.addView(checked);
+   }
    card.setOnClickListener(v->{int i=accounts.indexOf(ac);if(i>=0)account.setSelection(i);});
   }
  }
