@@ -206,60 +206,44 @@ public final class MainActivity extends Activity {
  }
  @Override protected void onActivityResult(int req,int result,Intent data){super.onActivityResult(req,result,data);if(req!=PICK||result!=RESULT_OK||data==null)return;try(InputStream stream=getContentResolver().openInputStream(data.getData())){Bitmap bmp=BitmapFactory.decodeStream(stream);if(bmp!=null)scan(bmp);}catch(Exception e){toast("Foto kon niet worden geopend");}}
  private void scan(Bitmap bmp){
-  // One OCR pass on the full active-upgrade panel. Text coordinates are used to
-  // group name and timer by their actual screen position, rather than fixed rows.
+  // The Buildings & Heroes menu has seven fixed upgrade slots on this layout.
+  // Read each slot independently: whole-panel line grouping dropped the first
+  // and seventh rows when OCR split name and duration into different baselines.
   int w=bmp.getWidth(),h=bmp.getHeight();
   int left=(int)(w*.587),right=Math.min(w,(int)(w*.998));
-  int top=(int)(h*.071),bottom=Math.min(h,(int)(h*.44));
-  if(right<=left||bottom<=top){toast("Ongeldig screenshotformaat");return;}
-  Bitmap panel=Bitmap.createBitmap(bmp,left,top,right-left,bottom-top);
+  int first=(int)(h*.072),stride=(int)(h*.053),height=(int)(h*.046);
+  if(right<=left||first<0||first+6*stride+height>h){toast("Screenshotformaat niet ondersteund");return;}
+  ArrayList<Rect> rows=new ArrayList<>();
+  for(int i=0;i<7;i++){
+   int y=first+i*stride;rows.add(new Rect(left,y,right,y+height));
+  }
+  pending.clear();scanRow(bmp,rows,0);
+ }
+ private void scanRow(Bitmap bmp,ArrayList<Rect> rows,int index){
+  if(index>=rows.size()){review();return;}
+  Rect r=rows.get(index);
+  int startPct=getPreferences(0).getInt("timerStart",70),endPct=getPreferences(0).getInt("timerEnd",94);
+  if(endPct<=startPct+3){startPct=70;endPct=94;}
+  int split=r.left+(int)(r.width()*startPct/100.0);
+  int timerRight=r.left+(int)(r.width()*endPct/100.0);
+  Bitmap name=Bitmap.createBitmap(bmp,r.left,r.top,split-r.left,r.height());
+  Bitmap timer=Bitmap.createBitmap(bmp,split,r.top,timerRight-split,r.height());
+  Bitmap n2=Bitmap.createScaledBitmap(name,name.getWidth()*3,name.getHeight()*3,true);
+  Bitmap t2=Bitmap.createScaledBitmap(timer,timer.getWidth()*3,timer.getHeight()*3,true);
+  name.recycle();timer.recycle();
   com.google.mlkit.vision.text.TextRecognizer recognizer=TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
-  recognizer.process(InputImage.fromBitmap(panel,0)).addOnSuccessListener(result->{
-   ArrayList<Text.Line> lines=new ArrayList<>();
-   int cutoff=panel.getHeight();
-   for(Text.TextBlock block:result.getTextBlocks())for(Text.Line line:block.getLines()){
-    Rect rect=line.getBoundingBox();if(rect==null)continue;
-    String t=line.getText().toLowerCase(java.util.Locale.ROOT);
-    if(t.contains("suggested")||t.contains("other upgrades"))cutoff=Math.min(cutoff,rect.top);
-    else lines.add(line);
-   }
-   java.util.Collections.sort(lines,(x,y)->Integer.compare(x.getBoundingBox().centerY(),y.getBoundingBox().centerY()));
-   // Group text into rows by actual Y coordinates, preserving the visual order.
-   ArrayList<ArrayList<Text.Line>> groups=new ArrayList<>();
-   int tolerance=Math.max(8,(int)(h*.014));
-   for(Text.Line line:lines){
-    Rect rect=line.getBoundingBox();
-    if(rect.centerY()>=cutoff)continue;
-    ArrayList<Text.Line> group=null;
-    for(ArrayList<Text.Line> existing:groups){
-     if(Math.abs(existing.get(0).getBoundingBox().centerY()-rect.centerY())<=tolerance){group=existing;break;}
-    }
-    if(group==null){group=new ArrayList<>();groups.add(group);}
-    group.add(line);
-   }
-   pending.clear();
-   for(ArrayList<Text.Line> group:groups){
-    StringBuilder name=new StringBuilder(),time=new StringBuilder();
-    for(Text.Line line:group){
-     String raw=line.getText().trim();
-     if(raw.isEmpty())continue;
-     if(raw.toLowerCase(java.util.Locale.ROOT).contains("upgrade"))continue;
-     if(parse(raw)>0||raw.matches("(?i).*\\d+\\s*[dhms].*"))time.append(raw).append(" ");
-     else name.append(raw).append(" ");
-    }
-    String title=cleanName(name.toString());
-    String duration=time.toString().trim();
-    if(title.isEmpty()||duration.isEmpty())continue;
+  recognizer.process(InputImage.fromBitmap(n2,0)).addOnSuccessListener(n->{
+   recognizer.process(InputImage.fromBitmap(t2,0)).addOnSuccessListener(t->{
+    String raw=t.getText().replace("\\n"," ").trim();
     try{
-     JSONObject o=new JSONObject();o.put("name",title);o.put("raw",duration);
-     o.put("seconds",parse(duration));o.put("row",pending.size());pending.add(o);
+     JSONObject o=new JSONObject();
+     o.put("name",cleanName(n.getText().replace("\\n"," ")));
+     o.put("raw",raw);o.put("seconds",parse(raw));o.put("row",index);
+     pending.add(o);
     }catch(Exception ignored){}
-    if(pending.size()==7)break;
-   }
-   panel.recycle();recognizer.close();
-   if(pending.isEmpty())toast("Geen timers gevonden. Probeer Scanner kalibreren of een nieuwe screenshot.");
-   else review();
-  }).addOnFailureListener(e->{panel.recycle();recognizer.close();toast("Scan mislukt: "+e.getMessage());});
+    n2.recycle();t2.recycle();recognizer.close();scanRow(bmp,rows,index+1);
+   }).addOnFailureListener(e->{n2.recycle();t2.recycle();recognizer.close();scanRow(bmp,rows,index+1);});
+  }).addOnFailureListener(e->{n2.recycle();t2.recycle();recognizer.close();scanRow(bmp,rows,index+1);});
  }
  private static String cleanName(String raw){
   String s=raw.toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z ]"," ").replaceAll("\\s+"," ").trim();
