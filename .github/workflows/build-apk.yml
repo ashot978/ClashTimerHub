@@ -18,6 +18,20 @@ jobs:
           cat source/chunk*.b64 | base64 --decode > /tmp/clashtimerhub-sources.tar.xz
           echo "0264159ac49365a072922cf1b78babe7ea67f736d378aba703ead2384238a430  /tmp/clashtimerhub-sources.tar.xz" | sha256sum --check
           tar -xJf /tmp/clashtimerhub-sources.tar.xz -C .
+      - name: Apply OCR menu safety patch
+        run: |
+          cp -r patches/app/src/main/java/nl/clashtimerhub/app/*.java app/src/main/java/nl/clashtimerhub/app/
+          python3 patches/apply_patch.py
+      - name: Run pure Java regression tests
+        run: |
+          mkdir -p /tmp/clash-tests
+          javac -d /tmp/clash-tests \
+            app/src/main/java/nl/clashtimerhub/app/TimerParser.java \
+            app/src/main/java/nl/clashtimerhub/app/MenuTimerDetector.java \
+            tests/TimerParserTest.java \
+            patches/tests/MenuTimerDetectorTest.java
+          java -cp /tmp/clash-tests TimerParserTest
+          java -cp /tmp/clash-tests MenuTimerDetectorTest
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
