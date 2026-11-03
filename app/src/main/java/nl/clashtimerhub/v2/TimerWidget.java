@@ -105,4 +105,3 @@ public final class TimerWidget extends AppWidgetProvider {
   else alarms.setExact(AlarmManager.RTC_WAKEUP,when,pi);
  }
 }
-}
