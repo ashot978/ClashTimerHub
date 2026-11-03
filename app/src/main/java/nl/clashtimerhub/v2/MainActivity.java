@@ -70,6 +70,9 @@ public final class MainActivity extends Activity {
   category.setBackground(shape(0xff262941,14));root.addView(category,new LinearLayout.LayoutParams(-1,dp(52)));
   android.widget.AdapterView.OnItemSelectedListener refresh=new android.widget.AdapterView.OnItemSelectedListener(){public void onNothingSelected(android.widget.AdapterView<?> p){}public void onItemSelected(android.widget.AdapterView<?> p,View v,int pos,long id){showTimers();}};
   account.setOnItemSelectedListener(refresh);category.setOnItemSelectedListener(refresh);
+  TextView section=label("GESELECTEERD ACCOUNT  ·  LIVE",18);section.setTypeface(null,android.graphics.Typeface.BOLD);root.addView(section);
+  items=new LinearLayout(this);items.setOrientation(1);root.addView(items);showTimers();
+  root.addView(label("BEHEER EN SYNCHRONISATIE",15));
   button("📋 Synchroniseer vanaf klembord",()->importClipboard());
   button("Back-up delen",()->backup());
   button("Back-up herstellen",()->{Intent i=new Intent(Intent.ACTION_GET_CONTENT);i.setType("*/*");i.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(i,RESTORE);});
@@ -86,8 +89,7 @@ public final class MainActivity extends Activity {
   button("Scanner kalibreren",()->calibrate());
   button("Alle accounts · Overzicht",()->overview());
 
-  TextView section=label("EERSTVOLGENDE UPGRADE  •  LIVE",18);section.setTypeface(null,android.graphics.Typeface.BOLD);root.addView(section);
-  items=new LinearLayout(this);items.setOrientation(1);root.addView(items);showTimers();
+
  }
  private void backup(){
   try{
