@@ -9,6 +9,8 @@
 <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
 <intent-filter><action android:name="android.intent.action.SEND"/><category android:name="android.intent.category.DEFAULT"/><data android:mimeType="text/plain"/></intent-filter>
 </activity>
+<service android:name=".FloatingSyncService" android:exported="false" android:foregroundServiceType="specialUse"><property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="User enabled floating clipboard import shortcut"/></service>
+<activity android:name=".QuickImportActivity" android:exported="false" android:theme="@android:style/Theme.Material.Dialog"/>
 <receiver android:name=".BuilderAlarm" android:exported="false"/>
 <receiver android:name=".AlarmRestoreReceiver" android:exported="false">
 <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED"/><action android:name="android.intent.action.MY_PACKAGE_REPLACED"/><action android:name="android.intent.action.TIME_SET"/><action android:name="android.intent.action.TIMEZONE_CHANGED"/></intent-filter>
