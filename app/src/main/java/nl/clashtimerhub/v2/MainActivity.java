@@ -25,19 +25,19 @@ public final class MainActivity extends Activity {
  private final ArrayList<String> accounts=new ArrayList<>();
  private final ArrayList<JSONObject> upgrades=new ArrayList<>();
  private final ArrayList<JSONObject> pending=new ArrayList<>();
- private static final int PICK=12,IMPORT=13;
+ private static final int PICK=12,IMPORT=13,RESTORE=14;
  private Bitmap lastScanBitmap;
  private final android.os.Handler ticker=new android.os.Handler(android.os.Looper.getMainLooper());
  private final Runnable tick=new Runnable(){public void run(){if(items!=null)showTimers();if(dashboard!=null)renderDashboard();ticker.postDelayed(this,5000);}};
  @Override protected void onResume(){super.onResume();ticker.removeCallbacks(tick);ticker.post(tick);}
  @Override protected void onPause(){ticker.removeCallbacks(tick);super.onPause();}
  private static final Pattern TIME=Pattern.compile("(?i)(?:(\\d+)\\s*d\\s*)?(?:(\\d+)\\s*h\\s*)?(?:(\\d+)\\s*m\\s*)?(?:(\\d+)\\s*s\\s*)?");
- @Override public void onCreate(Bundle b){super.onCreate(b);load();draw();}
+ @Override public void onCreate(Bundle b){super.onCreate(b);load();draw();if(android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},55);TimerWidget.schedule(this);}
  private void load(){
   try{JSONArray a=new JSONArray(getPreferences(0).getString("accounts",new JSONArray(Arrays.asList("Ashot","Ashotgun","AshotRush","Rushot","Shotty","Ashotty","RushShot")).toString()));for(int i=0;i<a.length();i++)accounts.add(a.getString(i));}catch(Exception e){accounts.add("Ashot");}
   try{JSONArray a=new JSONArray(getPreferences(0).getString("upgrades","[]"));for(int i=0;i<a.length();i++)upgrades.add(a.getJSONObject(i));}catch(Exception ignored){}
  }
- private void persist(){getPreferences(0).edit().putString("accounts",new JSONArray(accounts).toString()).putString("upgrades",new JSONArray(upgrades).toString()).apply();}
+ private void persist(){getPreferences(0).edit().putString("accounts",new JSONArray(accounts).toString()).putString("upgrades",new JSONArray(upgrades).toString()).apply();TimerWidget.schedule(this);}
  private int dp(int value){return (int)(value*getResources().getDisplayMetrics().density+.5f);}
  private android.graphics.drawable.GradientDrawable shape(int color,int radius){
   android.graphics.drawable.GradientDrawable d=new android.graphics.drawable.GradientDrawable();
@@ -71,6 +71,8 @@ public final class MainActivity extends Activity {
   android.widget.AdapterView.OnItemSelectedListener refresh=new android.widget.AdapterView.OnItemSelectedListener(){public void onNothingSelected(android.widget.AdapterView<?> p){}public void onItemSelected(android.widget.AdapterView<?> p,View v,int pos,long id){showTimers();}};
   account.setOnItemSelectedListener(refresh);category.setOnItemSelectedListener(refresh);
   button("📋 Synchroniseer vanaf klembord",()->importClipboard());
+  button("Back-up delen",()->backup());
+  button("Back-up herstellen",()->{Intent i=new Intent(Intent.ACTION_GET_CONTENT);i.setType("*/*");i.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(i,RESTORE);});
   button("Importeer Clash-data (JSON)",()->{Intent i=new Intent(Intent.ACTION_GET_CONTENT);i.setType("*/*");i.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(i,IMPORT);});
   button("Scan screenshot",()->{Intent i=new Intent(Intent.ACTION_GET_CONTENT);i.setType("image/*");startActivityForResult(i,PICK);});
   LinearLayout actions=new LinearLayout(this);actions.setOrientation(LinearLayout.HORIZONTAL);root.addView(actions);
@@ -83,7 +85,7 @@ public final class MainActivity extends Activity {
   button("Deel timer-overzicht",()->shareTimers());
   button("Scanner kalibreren",()->calibrate());
   button("Alle accounts · Overzicht",()->overview());
-  button("Alle accounts · Eerstvolgende builder",()->showAllNextBuilders());
+
   TextView section=label("EERSTVOLGENDE UPGRADE  •  LIVE",18);section.setTypeface(null,android.graphics.Typeface.BOLD);root.addView(section);
   items=new LinearLayout(this);items.setOrientation(1);root.addView(items);showTimers();
  }
