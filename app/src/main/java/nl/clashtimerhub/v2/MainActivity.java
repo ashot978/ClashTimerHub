@@ -33,17 +33,19 @@ public final class MainActivity extends Activity {
   try{JSONArray a=new JSONArray(getPreferences(0).getString("upgrades","[]"));for(int i=0;i<a.length();i++)upgrades.add(a.getJSONObject(i));}catch(Exception ignored){}
  }
  private void persist(){getPreferences(0).edit().putString("accounts",new JSONArray(accounts).toString()).putString("upgrades",new JSONArray(upgrades).toString()).apply();}
- private TextView label(String s,int size){TextView v=new TextView(this);v.setText(s);v.setTextColor(Color.WHITE);v.setTextSize(size);v.setPadding(12,14,12,14);return v;}
- private void button(String title,Runnable run){Button b=new Button(this);b.setText(title);root.addView(b);b.setOnClickListener(v->run.run());}
+ private TextView label(String s,int size){TextView v=new TextView(this);v.setText(s);v.setTextColor(Color.WHITE);v.setTextSize(size);v.setPadding(14,14,14,14);return v;}
+ private void button(String title,Runnable run){Button b=new Button(this);b.setText(title);root.addView(b);b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xff6834b9));b.setTextColor(Color.WHITE);b.setOnClickListener(v->run.run());}
  private void draw(){
-  ScrollView scroll=new ScrollView(this);root=new LinearLayout(this);root.setOrientation(1);root.setPadding(16,16,16,24);root.setBackgroundColor(0xff171c17);scroll.addView(root);setContentView(scroll);
-  root.addView(label("Clash Timer Hub V2",25));
+  ScrollView scroll=new ScrollView(this);root=new LinearLayout(this);root.setOrientation(1);root.setPadding(16,16,16,24);root.setBackgroundColor(0xff101024);scroll.addView(root);setContentView(scroll);
+  root.addView(label("⚔  CLASH TIMER HUB  •  V3",26));
+  root.addView(label("Jouw upgrades. Altijd op tijd.",14));
   account=new Spinner(this);account.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,accounts));root.addView(account);
   category=new Spinner(this);category.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,categories));root.addView(category);
   button("Screenshot kiezen en scannen",()->{Intent i=new Intent(Intent.ACTION_GET_CONTENT);i.setType("image/*");startActivityForResult(i,PICK);});
   button("Timer handmatig toevoegen",()->manual());
   button("Account toevoegen",()->editAccount());
   button("Overzicht vernieuwen",()->showTimers());
+  root.addView(label("ACTIEVE UPGRADES",20));
   items=new LinearLayout(this);items.setOrientation(1);root.addView(items);showTimers();
  }
  private void editAccount(){EditText e=new EditText(this);e.setSingleLine(true);new android.app.AlertDialog.Builder(this).setTitle("Nieuw account").setView(e).setPositiveButton("Toevoegen",(d,w)->{String s=e.getText().toString().trim();if(!s.isEmpty()){accounts.add(s);persist();draw();}}).setNegativeButton("Annuleren",null).show();}
@@ -63,7 +65,7 @@ public final class MainActivity extends Activity {
   return found&&s.substring(consumed).trim().isEmpty()?total:0;
  }
  private static String format(long seconds){long d=seconds/86400,h=seconds%86400/3600,m=seconds%3600/60;return(d>0?d+"d ":"")+(h>0?h+"h ":"")+(m>0?m+"m ":"")+(seconds<3600?seconds%60+"s":"");}
- private void showTimers(){if(items==null)return;items.removeAllViews();long now=System.currentTimeMillis();for(JSONObject o:upgrades){String name=o.optString("name"),ac=o.optString("account"),cat=o.optString("category");long remain=Math.max(0,(o.optLong("finish")-now)/1000);TextView v=label(ac+" · "+cat+" · "+name+" — "+format(remain),16);items.addView(v);v.setOnLongClickListener(x->{new android.app.AlertDialog.Builder(this).setMessage("Timer verwijderen?").setPositiveButton("Verwijderen",(d,w)->{upgrades.remove(o);persist();showTimers();}).setNegativeButton("Annuleren",null).show();return true;});}}
+ private void showTimers(){if(items==null)return;items.removeAllViews();long now=System.currentTimeMillis();for(JSONObject o:upgrades){String name=o.optString("name"),ac=o.optString("account"),cat=o.optString("category");long remain=Math.max(0,(o.optLong("finish")-now)/1000);TextView v=label("⚒  "+name+"    •    "+format(remain)+"\n"+ac+"  /  "+cat,16);v.setBackgroundColor(0xff29253e);LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(0,5,0,5);items.addView(v,lp);v.setOnLongClickListener(x->{new android.app.AlertDialog.Builder(this).setMessage("Timer verwijderen?").setPositiveButton("Verwijderen",(d,w)->{upgrades.remove(o);persist();showTimers();}).setNegativeButton("Annuleren",null).show();return true;});}}
  @Override protected void onActivityResult(int req,int result,Intent data){super.onActivityResult(req,result,data);if(req!=PICK||result!=RESULT_OK||data==null)return;try(InputStream stream=getContentResolver().openInputStream(data.getData())){Bitmap bmp=BitmapFactory.decodeStream(stream);if(bmp!=null)scan(bmp);}catch(Exception e){toast("Foto kon niet worden geopend");}}
  private void scan(Bitmap bmp){
   // Seven builder slots are a maximum, not a target. Read all active rows, including brown hero/pet rows.
