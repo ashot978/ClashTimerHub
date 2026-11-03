@@ -79,7 +79,7 @@ public final class MainActivity extends Activity {
   button("Deel timer-overzicht",()->shareTimers());
   button("Scanner kalibreren",()->calibrate());
   button("Alle accounts · Overzicht",()->overview());
-  TextView section=label("ACTIVE UPGRADES  •  LIVE",18);section.setTypeface(null,android.graphics.Typeface.BOLD);root.addView(section);
+  TextView section=label("EERSTVOLGENDE UPGRADE  •  LIVE",18);section.setTypeface(null,android.graphics.Typeface.BOLD);root.addView(section);
   items=new LinearLayout(this);items.setOrientation(1);root.addView(items);showTimers();
  }
  private void shareTimers(){
@@ -206,44 +206,38 @@ public final class MainActivity extends Activity {
  }
  @Override protected void onActivityResult(int req,int result,Intent data){super.onActivityResult(req,result,data);if(req!=PICK||result!=RESULT_OK||data==null)return;try(InputStream stream=getContentResolver().openInputStream(data.getData())){Bitmap bmp=BitmapFactory.decodeStream(stream);if(bmp!=null)scan(bmp);}catch(Exception e){toast("Foto kon niet worden geopend");}}
  private void scan(Bitmap bmp){
-  // The Buildings & Heroes menu has seven fixed upgrade slots on this layout.
-  // Read each slot independently: whole-panel line grouping dropped the first
-  // and seventh rows when OCR split name and duration into different baselines.
+  // Only the FIRST active upgrade and the builder availability counter matter.
+  // The bottom-right builder badge (0/7 in the supplied screenshot) is below the list.
   int w=bmp.getWidth(),h=bmp.getHeight();
   int left=(int)(w*.587),right=Math.min(w,(int)(w*.998));
-  int first=(int)(h*.072),stride=(int)(h*.053),height=(int)(h*.046);
-  if(right<=left||first<0||first+6*stride+height>h){toast("Screenshotformaat niet ondersteund");return;}
+  int top=(int)(h*.072),height=(int)(h*.046);
+  if(right<=left||top+height>h){toast("Screenshotformaat niet ondersteund");return;}
   ArrayList<Rect> rows=new ArrayList<>();
-  for(int i=0;i<7;i++){
-   int y=first+i*stride;rows.add(new Rect(left,y,right,y+height));
-  }
-  pending.clear();scanRow(bmp,rows,0);
- }
- private void scanRow(Bitmap bmp,ArrayList<Rect> rows,int index){
-  if(index>=rows.size()){review();return;}
-  Rect r=rows.get(index);
-  int startPct=getPreferences(0).getInt("timerStart",70),endPct=getPreferences(0).getInt("timerEnd",94);
-  if(endPct<=startPct+3){startPct=70;endPct=94;}
-  int split=r.left+(int)(r.width()*startPct/100.0);
-  int timerRight=r.left+(int)(r.width()*endPct/100.0);
-  Bitmap name=Bitmap.createBitmap(bmp,r.left,r.top,split-r.left,r.height());
-  Bitmap timer=Bitmap.createBitmap(bmp,split,r.top,timerRight-split,r.height());
-  Bitmap n2=Bitmap.createScaledBitmap(name,name.getWidth()*3,name.getHeight()*3,true);
-  Bitmap t2=Bitmap.createScaledBitmap(timer,timer.getWidth()*3,timer.getHeight()*3,true);
-  name.recycle();timer.recycle();
+  rows.add(new Rect(left,top,right,top+height));
+  pending.clear();
+  // Read builder count independently so one failed OCR region does not lose the other.
+  int badgeLeft=(int)(w*.585),badgeTop=(int)(h*.915);
+  int badgeRight=(int)(w*.69),badgeBottom=Math.min(h,(int)(h*.995));
+  if(badgeRight<=badgeLeft||badgeBottom<=badgeTop){scanRow(bmp,rows,0);return;}
+  Bitmap badge=Bitmap.createBitmap(bmp,badgeLeft,badgeTop,badgeRight-badgeLeft,badgeBottom-badgeTop);
+  Bitmap enlarged=Bitmap.createScaledBitmap(badge,badge.getWidth()*3,badge.getHeight()*3,true);
+  badge.recycle();
   com.google.mlkit.vision.text.TextRecognizer recognizer=TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
-  recognizer.process(InputImage.fromBitmap(n2,0)).addOnSuccessListener(n->{
-   recognizer.process(InputImage.fromBitmap(t2,0)).addOnSuccessListener(t->{
-    String raw=t.getText().replace("\\n"," ").trim();
+  recognizer.process(InputImage.fromBitmap(enlarged,0)).addOnSuccessListener(result->{
+   String raw=result.getText().replaceAll("\\s+","").replace('O','0').replace('o','0');
+   java.util.regex.Matcher match=java.util.regex.Pattern.compile("(\\d+)\\s*[/|]\\s*(\\d+)").matcher(raw);
+   if(match.find()){
     try{
-     JSONObject o=new JSONObject();
-     o.put("name",cleanName(n.getText().replace("\\n"," ")));
-     o.put("raw",raw);o.put("seconds",parse(raw));o.put("row",index);
-     pending.add(o);
-    }catch(Exception ignored){}
-    n2.recycle();t2.recycle();recognizer.close();scanRow(bmp,rows,index+1);
-   }).addOnFailureListener(e->{n2.recycle();t2.recycle();recognizer.close();scanRow(bmp,rows,index+1);});
-  }).addOnFailureListener(e->{n2.recycle();t2.recycle();recognizer.close();scanRow(bmp,rows,index+1);});
+     int available=Integer.parseInt(match.group(1)),total=Integer.parseInt(match.group(2));
+     if(total>0&&total<=20&&available<=total){
+      getPreferences(0).edit().putInt("builderAvailable",available).putInt("builderTotal",total).apply();
+     }
+    }catch(NumberFormatException ignored){}
+   }else{
+    getPreferences(0).edit().remove("builderAvailable").remove("builderTotal").apply();
+   }
+   enlarged.recycle();recognizer.close();scanRow(bmp,rows,0);
+  }).addOnFailureListener(e->{enlarged.recycle();recognizer.close();scanRow(bmp,rows,0);});
  }
  private static String cleanName(String raw){
   String s=raw.toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z ]"," ").replaceAll("\\s+"," ").trim();
@@ -276,7 +270,9 @@ public final class MainActivity extends Activity {
  }
  private void review(){if(pending.isEmpty()){toast("Geen OCR-resultaten");return;}LinearLayout form=new LinearLayout(this);form.setOrientation(1);ScrollView scroll=new ScrollView(this);scroll.addView(form);ArrayList<EditText> names=new ArrayList<>(),times=new ArrayList<>();
   for(JSONObject o:pending){form.addView(label("Rij "+(o.optInt("row")+1),16));EditText n=new EditText(this),t=new EditText(this);n.setSingleLine(true);t.setSingleLine(true);n.setText(o.optString("name"));String recognized=o.optString("raw");t.setText(recognized);if(parse(recognized)>0)t.setCompoundDrawablesWithIntrinsicBounds(0,0,android.R.drawable.checkbox_on_background,0);else t.setError("Controleer deze tijd");n.setHint("Naam");t.setHint("Bijv. 3h 15m");form.addView(n);form.addView(t);names.add(n);times.add(t);}
-  android.app.AlertDialog dialog=new android.app.AlertDialog.Builder(this).setTitle("Controleer "+pending.size()+" rijen").setView(scroll).setPositiveButton("Opslaan",null).setNegativeButton("Annuleren",null).create();
+  int free=getPreferences(0).getInt("builderAvailable",-1),total=getPreferences(0).getInt("builderTotal",-1);
+  String counter=free>=0&&total>0?" · Vrije bouwers: "+free+"/"+total:" · Bouwersstatus niet herkend";
+  android.app.AlertDialog dialog=new android.app.AlertDialog.Builder(this).setTitle("Controleer eerste upgrade"+counter).setView(scroll).setPositiveButton("Opslaan",null).setNegativeButton("Annuleren",null).create();
   dialog.setOnShowListener(showEvent->dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
    String ac=accounts.get(account.getSelectedItemPosition()),cat=categories[category.getSelectedItemPosition()];long now=System.currentTimeMillis();
    ArrayList<JSONObject> replacement=new ArrayList<>();ArrayList<String> invalid=new ArrayList<>();
