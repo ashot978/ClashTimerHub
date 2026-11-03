@@ -28,7 +28,7 @@ public final class MainActivity extends Activity {
  private static final int PICK=12,IMPORT=13;
  private Bitmap lastScanBitmap;
  private final android.os.Handler ticker=new android.os.Handler(android.os.Looper.getMainLooper());
- private final Runnable tick=new Runnable(){public void run(){if(items!=null)showTimers();ticker.postDelayed(this,1000);}};
+ private final Runnable tick=new Runnable(){public void run(){if(items!=null)showTimers();if(dashboard!=null)renderDashboard();ticker.postDelayed(this,5000);}};
  @Override protected void onResume(){super.onResume();ticker.removeCallbacks(tick);ticker.post(tick);}
  @Override protected void onPause(){ticker.removeCallbacks(tick);super.onPause();}
  private static final Pattern TIME=Pattern.compile("(?i)(?:(\\d+)\\s*d\\s*)?(?:(\\d+)\\s*h\\s*)?(?:(\\d+)\\s*m\\s*)?(?:(\\d+)\\s*s\\s*)?");
