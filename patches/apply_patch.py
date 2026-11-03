@@ -206,6 +206,32 @@ new_photo='''try{
                 });
             }catch(Exception e){Toast.makeText(this,"Kan afbeelding niet openen",Toast.LENGTH_LONG).show();}'''
 activity=replace_once(activity,old_photo,new_photo,"screenshot gate")
+activity=replace_once(activity,
+    '''                        store.setPending(slot,cat,
+                            System.currentTimeMillis()+result.hit.seconds*1000L,result.hit.text);
+                        refresh();''',
+    '''                        org.json.JSONArray active=new org.json.JSONArray();
+                        long capturedAt=System.currentTimeMillis();
+                        for(int i=0;i<result.hits.size();i++){
+                            TimerParser.Hit timer=result.hits.get(i);
+                            org.json.JSONObject item=new org.json.JSONObject();
+                            try{
+                                String building=i<result.names.size()?result.names.get(i):"";
+                                item.put("label",building.isEmpty()?timer.text:building);
+                                item.put("finish",capturedAt+timer.seconds*1000L);
+                                active.put(item);
+                            }catch(org.json.JSONException ignored){}
+                        }
+                        getSharedPreferences("active_upgrades",MODE_PRIVATE).edit()
+                            .putString("slot_"+slot+"_category_"+cat,active.toString()).apply();
+                        store.setTimerAt(this,slot,cat,
+                            capturedAt+result.hit.seconds*1000L,result.hit.text);
+                        store.clearPending(slot,cat);
+                        Toast.makeText(this,""+active.length()+" upgrades opgeslagen",
+                            Toast.LENGTH_LONG).show();
+                        refresh();''',
+    "save all imported photo upgrades")
+
 # Expose region calibration as a menu action in the existing activity.
 # The calibration activity also works for a screenshot taken in the game.
 activity=activity.replace('super.onCreate(savedInstanceState);',
