@@ -35,6 +35,7 @@ public final class MenuTimerDetector {
         public final boolean menuOpen;
         public final TimerParser.Hit hit;
         public final List<TimerParser.Hit> hits;
+        public final List<String> names;
         public final int freeBuilders;
         Result(boolean menuOpen, TimerParser.Hit hit) {
             this(menuOpen, hit, -1);
@@ -44,6 +45,7 @@ public final class MenuTimerDetector {
             this.hit = hit;
             this.freeBuilders = freeBuilders;
             this.hits = new ArrayList<>();
+            this.names = new ArrayList<>();
         }
     }
 
@@ -96,76 +98,63 @@ public final class MenuTimerDetector {
             }
         }
 
-        ArrayList<Token> eligible = new ArrayList<>();
-        for (Token t : tokens) {
-            int y = t.centerY();
-            if (y > height * .065f && y < endOfActiveList &&
-                    t.right > width * .75f && t.left < width && t.top >= 0) {
-                eligible.add(t);
-            }
-        }
-        Collections.sort(eligible, (a,b) -> {
-            int diff = Integer.compare(a.centerY(), b.centerY());
-            return diff != 0 ? diff : Integer.compare(a.left, b.left);
-        });
-
-        // OCR can return "5H" and "14M" as separate elements. Join elements
-        // from the SAME visual row before parsing, not from arbitrary lines.
-        int rowTolerance = Math.max(11, Math.round(height * .022f));
-        ArrayList<ArrayList<Token>> rows = new ArrayList<>();
-        ArrayList<Integer> rowCenters = new ArrayList<>();
-        for (Token token : eligible) {
-            int bestRow = -1;
-            int minDistance = Integer.MAX_VALUE;
-            for (int i = 0; i < rows.size(); i++) {
-                int distance = Math.abs(token.centerY() - rowCenters.get(i));
-                if (distance <= rowTolerance && distance < minDistance) {
-                    bestRow = i;
-                    minDistance = distance;
-                }
-            }
-            if (bestRow == -1) {
-                ArrayList<Token> row = new ArrayList<>();
-                row.add(token);
-                rows.add(row);
-                rowCenters.add(token.centerY());
-            } else {
-                rows.get(bestRow).add(token);
-            }
-        }
-
-        TimerParser.Hit shortest = null;
+        // The active upgrade list is a fixed vertical stack in the right-hand panel.
+        // Use row centers from the green progress bars, not OCR line centers:
+        // a split "5d 10h" must never turn into an unrelated "10h".
         ArrayList<TimerParser.Hit> activeTimers = new ArrayList<>();
-        for (int i = 0; i < rows.size(); i++) {
-            int y = rowCenters.get(i);
-            // Builders & Heroes active rows have green progress bars. This
-            // extra visual check excludes suggested upgrades even if OCR
-            // failed to read the "Suggested upgrades" divider.
-            if (category == 0 && (validator == null || !validator.isActiveRow(y))) continue;
-            ArrayList<Token> row = rows.get(i);
-            Collections.sort(row, Comparator.comparingInt(t -> t.left));
-            StringBuilder merged = new StringBuilder();
-            for (Token t : row) merged.append(t.text).append(' ');
-            List<TimerParser.Hit> matches = TimerParser.findDurations(merged.toString());
-            if (matches.isEmpty()) continue;
-            // Prefer a complete multi-unit expression (5h 14m) over an OCR
-            // fragment (14m) that appears on the same visual row.
-            TimerParser.Hit mostComplete = null;
-            for (TimerParser.Hit hit : matches) {
-                if (mostComplete == null || unitCount(hit.text) > unitCount(mostComplete.text) ||
-                        (unitCount(hit.text) == unitCount(mostComplete.text) &&
-                         hit.text.length() > mostComplete.text.length())) {
-                    mostComplete = hit;
+        ArrayList<String> activeNames = new ArrayList<>();
+        TimerParser.Hit shortest = null;
+        if (category == 0) {
+            int start = Math.round(height * .072f);
+            int step = Math.round(height * .053f);
+            int rowHeight = Math.round(height * .045f);
+            for (int row = 0; row < 12; row++) {
+                int top = start + row * step;
+                int center = top + rowHeight / 2;
+                if (center >= endOfActiveList || center >= height * .80f) break;
+                if (validator == null || !validator.isActiveRow(center)) continue;
+                ArrayList<Token> rowTokens = new ArrayList<>();
+                for (Token t : tokens) {
+                    if (t.centerY() >= top && t.centerY() < top + rowHeight
+                            && t.left > width * .58f && t.right < width * .99f)
+                        rowTokens.add(t);
                 }
+                rowTokens.sort(Comparator.comparingInt(t -> t.left));
+                StringBuilder name = new StringBuilder();
+                StringBuilder time = new StringBuilder();
+                for (Token t : rowTokens) {
+                    if (t.left < width * .84f) name.append(t.text).append(' ');
+                    else time.append(t.text).append(' ');
+                }
+                List<TimerParser.Hit> durations = TimerParser.findDurations(time.toString());
+                TimerParser.Hit complete = null;
+                for (TimerParser.Hit candidate : durations)
+                    if (complete == null || unitCount(candidate.text) > unitCount(complete.text)
+                        || (unitCount(candidate.text) == unitCount(complete.text)
+                            && candidate.text.length() > complete.text.length()))
+                        complete = candidate;
+                if (complete == null) continue;
+                activeTimers.add(complete);
+                activeNames.add(name.toString().trim());
+                if (shortest == null || complete.seconds < shortest.seconds) shortest = complete;
             }
-            if (mostComplete != null) activeTimers.add(mostComplete);
-            if (mostComplete != null &&
-                    (shortest == null || mostComplete.seconds < shortest.seconds)) {
-                shortest = mostComplete;
+        } else {
+            ArrayList<Token> eligible = new ArrayList<>();
+            for (Token t : tokens)
+                if (t.centerY() > height * .065f && t.centerY() < endOfActiveList
+                        && t.left > width * .70f) eligible.add(t);
+            for (Token t : eligible) {
+                TimerParser.Hit hit = TimerParser.shortestInText(t.text);
+                if (hit != null) {
+                    activeTimers.add(hit);
+                    activeNames.add("");
+                    if (shortest == null || hit.seconds < shortest.seconds) shortest = hit;
+                }
             }
         }
         Result result = new Result(true, shortest, freeBuilders);
         result.hits.addAll(activeTimers);
+        result.names.addAll(activeNames);
         return result;
     }
 
