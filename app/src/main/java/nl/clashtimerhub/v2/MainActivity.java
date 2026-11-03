@@ -125,6 +125,10 @@ public final class MainActivity extends Activity {
    Button choice=new Button(this);choice.setText((ac.equals(selectedAccount)?"● ":"○ ")+ac);choice.setAllCaps(false);
    choice.setOnClickListener(v->{selectedAccount=ac;draw();});chips.addView(choice);
   }
+  if(selectedAccount.startsWith("#")){
+   Button link=new Button(this);link.setText("Koppel deze player tag aan bestaand account");link.setAllCaps(false);
+   link.setOnClickListener(v->linkImportedAccount(selectedAccount));screenContent.addView(link);
+  }
   account=new Spinner(this);account.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,accounts));
   account.setSelection(Math.max(0,accounts.indexOf(selectedAccount)));account.setVisibility(View.GONE);screenContent.addView(account);
   category=new Spinner(this);category.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,categories));
@@ -137,6 +141,28 @@ public final class MainActivity extends Activity {
    if(list.isEmpty())screenContent.addView(label("Geen actieve upgrades",12));
    for(JSONObject o:list)addTimerRow(screenContent,o,true);
   }
+ }
+ private void linkImportedAccount(String source){
+  ArrayList<String> targets=new ArrayList<>();
+  for(String ac:accounts)if(!ac.equals(source))targets.add(ac);
+  if(targets.isEmpty()){toast("Geen ander account om te koppelen");return;}
+  new android.app.AlertDialog.Builder(this).setTitle("Koppel "+source+" aan account")
+   .setItems(targets.toArray(new String[0]),(d,which)->{
+    String target=targets.get(which);
+    try{
+     JSONObject tags=new JSONObject(getPreferences(0).getString("playerTags","{}"));
+     String existing=tags.optString(target,"");
+     if(!existing.isEmpty()&&!existing.equalsIgnoreCase(source)){toast("Doelaccount is al gekoppeld aan een andere player tag");return;}
+     for(int i=upgrades.size()-1;i>=0;i--){
+      JSONObject o=upgrades.get(i);
+      if(target.equals(o.optString("account"))&&o.optBoolean("exported",false))upgrades.remove(i);
+     }
+     for(JSONObject o:upgrades)if(source.equals(o.optString("account")))o.put("account",target);
+     accounts.remove(source);tags.remove(source);tags.put(target,source);
+     getPreferences(0).edit().putString("playerTags",tags.toString()).apply();
+     selectedAccount=target;persist();draw();toast(source+" gekoppeld aan "+target);
+    }catch(Exception e){toast("Koppelen mislukt: "+e.getMessage());}
+   }).setNegativeButton("Annuleren",null).show();
  }
  private void showTimeline(){
   screenContent.addView(label("TIJDLIJN · ALLE ACCOUNTS",19));
