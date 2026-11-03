@@ -41,6 +41,16 @@ public class MenuTimerDetectorTest {
         assertTime(MenuTimerDetector.detect(noDivider,1500,1000,0,
             y->y<250),5*3600+14*60);
 
+        // Regression: a village shield timer is shorter than the active
+        // builder upgrade, but must never be selected.
+        List<MenuTimerDetector.Token> shield=Arrays.asList(
+            t("Buildings & Heroes",1030,24),
+            t("2H 34M",600,250),
+            t("Elixir Collector",950,117),t("4H 45M",1300,117),
+            t("Suggested Upgrades",1020,390));
+        assertTime(MenuTimerDetector.detect(shield,1500,1000,0,
+            y->y<250),4*3600+45*60);
+
         // Menu must correspond to the category the user selected.
         if(MenuTimerDetector.detect(active,1500,1000,1,y->true).menuOpen)
             throw new AssertionError("Wrong menu accepted");
