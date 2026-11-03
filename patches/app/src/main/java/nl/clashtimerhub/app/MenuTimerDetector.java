@@ -34,6 +34,7 @@ public final class MenuTimerDetector {
     public static final class Result {
         public final boolean menuOpen;
         public final TimerParser.Hit hit;
+        public final List<TimerParser.Hit> hits;
         public final int freeBuilders;
         Result(boolean menuOpen, TimerParser.Hit hit) {
             this(menuOpen, hit, -1);
@@ -42,6 +43,7 @@ public final class MenuTimerDetector {
             this.menuOpen = menuOpen;
             this.hit = hit;
             this.freeBuilders = freeBuilders;
+            this.hits = new ArrayList<>();
         }
     }
 
@@ -133,6 +135,7 @@ public final class MenuTimerDetector {
         }
 
         TimerParser.Hit shortest = null;
+        ArrayList<TimerParser.Hit> activeTimers = new ArrayList<>();
         for (int i = 0; i < rows.size(); i++) {
             int y = rowCenters.get(i);
             // Builders & Heroes active rows have green progress bars. This
@@ -155,12 +158,15 @@ public final class MenuTimerDetector {
                     mostComplete = hit;
                 }
             }
+            if (mostComplete != null) activeTimers.add(mostComplete);
             if (mostComplete != null &&
                     (shortest == null || mostComplete.seconds < shortest.seconds)) {
                 shortest = mostComplete;
             }
         }
-        return new Result(true, shortest, freeBuilders);
+        Result result = new Result(true, shortest, freeBuilders);
+        result.hits.addAll(activeTimers);
+        return result;
     }
 
     private static int unitCount(String text) {
