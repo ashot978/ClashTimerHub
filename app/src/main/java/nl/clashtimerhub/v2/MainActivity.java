@@ -204,13 +204,13 @@ public final class MainActivity extends Activity {
     active++;if(o.optLong("finish")==soonest)first=o;
    }
    LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
-   card.setPadding(dp(12),dp(7),dp(12),dp(7));
+   card.setPadding(dp(10),dp(2),dp(10),dp(2));
    card.setBackground(shape(first==null?0xff244735:0xff30243e,14));
-   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(0,dp(3),0,dp(3));dashboard.addView(card,lp);
+   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(0,dp(2),0,dp(2));dashboard.addView(card,lp);
    LinearLayout top=new LinearLayout(this);top.setOrientation(LinearLayout.HORIZONTAL);card.addView(top);
-   TextView title=label(ac,17);title.setTypeface(null,android.graphics.Typeface.BOLD);
+   TextView title=label(ac,15);title.setTypeface(null,android.graphics.Typeface.BOLD);
    top.addView(title,new LinearLayout.LayoutParams(0,-2,1));
-   TextView countdown=label(first==null?"VRIJ":format((soonest-now+999)/1000),18);
+   TextView countdown=label(first==null?"Geen timer":format((soonest-now+999)/1000),16);
    countdown.setTypeface(null,android.graphics.Typeface.BOLD);countdown.setTextColor(first==null?0xff82e8a7:0xffffd88a);top.addView(countdown);
    String tag=tags.optString(ac,"");
    String name=first==null?"Geen actieve buildertimer":cleanName(first.optString("name"));
