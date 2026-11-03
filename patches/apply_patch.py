@@ -224,10 +224,10 @@ activity=replace_once(activity,
                         }
                         getSharedPreferences("active_upgrades",MODE_PRIVATE).edit()
                             .putString("slot_"+slot+"_category_"+cat,active.toString()).apply();
-                        store.setTimerAt(this,slot,cat,
+                        store.setTimerAt(MainActivity.this,slot,cat,
                             capturedAt+result.hit.seconds*1000L,result.hit.text);
                         store.clearPending(slot,cat);
-                        Toast.makeText(this,""+active.length()+" upgrades opgeslagen",
+                        Toast.makeText(MainActivity.this,""+active.length()+" upgrades opgeslagen",
                             Toast.LENGTH_LONG).show();
                         refresh();''',
     "save all imported photo upgrades")
