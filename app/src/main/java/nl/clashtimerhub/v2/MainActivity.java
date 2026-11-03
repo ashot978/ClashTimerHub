@@ -74,11 +74,11 @@ public final class MainActivity extends Activity {
   items=new LinearLayout(this);items.setOrientation(1);root.addView(items);showTimers();
   root.addView(label("BEHEER EN SYNCHRONISATIE",15));
   button("📋 Synchroniseer vanaf klembord",()->importClipboard());
+  button("Back-up kopiëren",()->copyBackup());
   button("Back-up delen",()->backup());
   button("📋 Back-up herstellen vanaf klembord",()->restoreBackupClipboard());
   button("Back-up herstellen uit bestand",()->{Intent i=new Intent(Intent.ACTION_GET_CONTENT);i.setType("*/*");i.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(i,RESTORE);});
   button("Importeer Clash-data (JSON)",()->{Intent i=new Intent(Intent.ACTION_GET_CONTENT);i.setType("*/*");i.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(i,IMPORT);});
-  button("Scan screenshot",()->{Intent i=new Intent(Intent.ACTION_GET_CONTENT);i.setType("image/*");startActivityForResult(i,PICK);});
   LinearLayout actions=new LinearLayout(this);actions.setOrientation(LinearLayout.HORIZONTAL);root.addView(actions);
   Button manual=new Button(this);manual.setText("＋ Timer");manual.setAllCaps(false);manual.setOnClickListener(v->manual());
   manual.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xff49345c));
@@ -86,11 +86,20 @@ public final class MainActivity extends Activity {
   Button add=new Button(this);add.setText("＋ Account");add.setAllCaps(false);add.setOnClickListener(v->editAccount());
   add.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xff353853));
   LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(0,dp(52),1);ap.setMargins(dp(8),0,0,0);actions.addView(add,ap);
-  button("Deel timer-overzicht",()->shareTimers());
-  button("Scanner kalibreren",()->calibrate());
   button("Details per account",()->overview());
 
 
+ }
+ private void copyBackup(){
+  try{
+   JSONObject data=new JSONObject();data.put("format","clash-timer-hub-backup-v1");
+   data.put("accounts",new JSONArray(accounts));data.put("upgrades",new JSONArray(upgrades));
+   data.put("playerTags",new JSONObject(getPreferences(0).getString("playerTags","{}")));
+   android.content.ClipboardManager manager=(android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
+   if(manager==null){toast("Klembord niet beschikbaar");return;}
+   manager.setPrimaryClip(android.content.ClipData.newPlainText("Clash Timer Hub back-up",data.toString()));
+   toast("Back-up van "+accounts.size()+" accounts gekopieerd");
+  }catch(Exception e){toast("Back-up kopiëren mislukt");}
  }
  private void backup(){
   try{
