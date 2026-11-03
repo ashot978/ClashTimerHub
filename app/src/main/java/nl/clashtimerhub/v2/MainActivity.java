@@ -249,7 +249,27 @@ public final class MainActivity extends Activity {
    String tag=json.optString("tag",json.optString("playerTag",player==null?"":player.optString("tag",""))).trim().toUpperCase(java.util.Locale.ROOT);
    JSONObject tags=new JSONObject(getPreferences(0).getString("playerTags","{}"));
    String linked=tags.optString(ac,"");
-   if(!tag.isEmpty()&&!linked.isEmpty()&&!linked.equals(tag)){toast("Verkeerd account: verwacht "+linked+" maar export bevat "+tag);return;}
+   if(!tag.isEmpty()){
+    String matched=null;
+    for(String candidate:accounts)if(tag.equalsIgnoreCase(tags.optString(candidate,""))){matched=candidate;break;}
+    if(matched!=null){
+     ac=matched;
+    }else if(!linked.isEmpty()&&!linked.equalsIgnoreCase(tag)){
+     final String payload=input,detected=tag;
+     new android.app.AlertDialog.Builder(this).setTitle("Onbekende speler: "+tag)
+      .setMessage("Deze player tag hoort niet bij "+ac+". Kies het juiste account om verkeerd overschrijven te voorkomen.")
+      .setItems(accounts.toArray(new String[0]),(d,which)->{
+       String chosen=accounts.get(which);
+       String existing=tags.optString(chosen,"");
+       if(!existing.isEmpty()&&!existing.equalsIgnoreCase(detected)){
+        toast("Dit account is al gekoppeld aan "+existing);return;
+       }
+       account.setSelection(which);
+       importClashData(payload);
+      }).setNegativeButton("Annuleren",null).show();
+     return;
+    }
+   }
    long now=System.currentTimeMillis();
    long timestamp=json.optLong("timestamp",now/1000)*1000L;
    // Timestamp is the moment at which the exported remaining seconds were measured.
@@ -277,7 +297,7 @@ public final class MainActivity extends Activity {
     JSONObject old=upgrades.get(i);
     if(ac.equals(old.optString("account"))&&old.optBoolean("exported",false))upgrades.remove(i);
    }
-   upgrades.addAll(parsed);if(!tag.isEmpty()){tags.put(ac,tag);getPreferences(0).edit().putString("playerTags",tags.toString()).apply();}persist();showTimers();renderDashboard();toast(parsed.size()+" upgrades geïmporteerd voor "+ac);
+   upgrades.addAll(parsed);if(!tag.isEmpty()){tags.put(ac,tag);getPreferences(0).edit().putString("playerTags",tags.toString()).apply();}persist();int selectedIndex=accounts.indexOf(ac);if(selectedIndex>=0)account.setSelection(selectedIndex);showTimers();renderDashboard();toast(parsed.size()+" upgrades geïmporteerd voor "+ac);
   }catch(Exception e){toast("Ongeldige Clash-export: "+e.getMessage());}
  }
  private void addExportTimer(ArrayList<JSONObject> out,String ac,String cat,long id,long sec,long ts,int index)throws JSONException{
