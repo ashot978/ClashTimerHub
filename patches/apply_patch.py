@@ -227,6 +227,74 @@ activity=replace_once(activity,
             }
         }));''',
     "calibration and overlay UI")
+# Editable account roster: keep seven stable timer slots and allow soft deletion.
+# Soft deletion preserves existing timers and permits reactivation.
+activity=replace_once(activity,
+    '        String[] names=new String[7];for(int i=0;i<7;i++) names[i]=store.name(i);',
+    '''        String[] names=new String[7];for(int i=0;i<7;i++)
+            names[i]=accountEnabled(i)?store.name(i):"(verwijderd) "+store.name(i);''',
+    "account spinner labels")
+activity=replace_once(activity,
+    '        space(content,10);',
+    '''        LinearLayout accountActions=horizontal();
+        accountActions.addView(button("Account toevoegen",v->{
+            int free=-1;
+            for(int i=0;i<7;i++)if(!accountEnabled(i)){free=i;break;}
+            if(free<0){Toast.makeText(this,"Alle 7 accountplaatsen zijn bezet",Toast.LENGTH_LONG).show();return;}
+            final int index=free;
+            EditText input=new EditText(this);input.setSingleLine(true);input.setTextColor(Color.BLACK);
+            input.setHint("Accountnaam");
+            new AlertDialog.Builder(this).setTitle("Account toevoegen").setView(input)
+                .setNegativeButton("Annuleren",null)
+                .setPositiveButton("Toevoegen",(d,w)->{
+                    String name=input.getText().toString().trim();
+                    if(name.isEmpty())name="Account "+(index+1);
+                    store.setName(index,name);
+                    getSharedPreferences("account_roster",MODE_PRIVATE).edit()
+                        .putBoolean("active_"+index,true).apply();
+                    selectedSlot=index;buildUi();
+                }).show();
+        }),new LinearLayout.LayoutParams(0,dp(50),1));
+        accountActions.addView(button("Verwijderen",v->new AlertDialog.Builder(this)
+            .setTitle("Account verwijderen")
+            .setMessage("Account "+store.name(selectedSlot)+" verbergen? Timers blijven bewaard.")
+            .setNegativeButton("Annuleren",null)
+            .setPositiveButton("Verwijderen",(d,w)->{
+                getSharedPreferences("account_roster",MODE_PRIVATE).edit()
+                    .putBoolean("active_"+selectedSlot,false).apply();
+                for(int i=0;i<7;i++)if(accountEnabled(i)){selectedSlot=i;break;}
+                buildUi();
+            }).show()),new LinearLayout.LayoutParams(0,dp(50),1));
+        content.addView(accountActions);
+        space(content,10);''',
+    "account actions")
+activity=replace_once(activity,
+    '    private void buildUi(){',
+    '''    private boolean accountEnabled(int index){
+        return getSharedPreferences("account_roster",MODE_PRIVATE)
+            .getBoolean("active_"+index,true);
+    }
+    private void initializeAccountDefaults(){
+        android.content.SharedPreferences prefs=getSharedPreferences("account_roster",MODE_PRIVATE);
+        if(prefs.getBoolean("defaults_initialized",false))return;
+        String[] defaults={"Ashot","Ashotgun","AshotRush","Rushot","Shotty","Ashotty","RushShot"};
+        for(int i=0;i<7;i++){
+            String old=store.name(i);
+            if(old==null||old.trim().isEmpty()||old.matches("(?i)(account|dorp|village)\\\\s*[1-7]"))
+                store.setName(i,defaults[i]);
+        }
+        prefs.edit().putBoolean("defaults_initialized",true).apply();
+    }
+    private void buildUi(){''',
+    "account default initialization method")
+activity=replace_once(activity,
+    '        store=new TimerStore(this);',
+    '        store=new TimerStore(this);initializeAccountDefaults();',
+    "initialize default names")
+activity=replace_once(activity,
+    '        content.addView(text("Alle 7 accounts",18,Color.WHITE,true));',
+    '        content.addView(text("Accounts (maximaal 7)",18,Color.WHITE,true));',
+    "account overview title")
 activity_file.write_text(activity,encoding="utf-8")
 
 gradle_file=Path("app/build.gradle")
