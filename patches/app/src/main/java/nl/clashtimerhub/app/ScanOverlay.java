@@ -47,7 +47,7 @@ public final class ScanOverlay {
         panel.setBackground(panelBg);
         panel.addView(button);
         addAction("Scan upgrademenu",()->{ collapse(); onScan.run(); });
-        addAction("Screenshot verwerken",()->openApp());
+        addAction("Foto uploaden (in app)",()->openApp());
         addAction("Scangebied instellen",()->{
             collapse();
             Intent i=new Intent(context,ScanRegionActivity.class);
