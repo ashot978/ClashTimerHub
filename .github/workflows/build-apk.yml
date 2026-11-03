@@ -23,7 +23,8 @@ jobs:
         run: python3 -m py_compile patches/apply_patch.py
       - name: Inspect source lifecycle signatures
         run: |
-          grep -n -E 'onCreate|OcrScanner.scan|onResult' app/src/main/java/nl/clashtimerhub/app/{MainActivity,ProjectionScanService}.java || true
+          grep -n -E 'onCreate|OcrScanner.scan|onResult|setOnClickListener|setOnItemClickListener|setName|save|Opslaan|account|Account|EditText' app/src/main/java/nl/clashtimerhub/app/MainActivity.java || true
+          sed -n '1,240p' app/src/main/java/nl/clashtimerhub/app/MainActivity.java
       - name: Apply OCR menu safety patch
         run: |
           cp -r patches/app/src/main/java/nl/clashtimerhub/app/*.java app/src/main/java/nl/clashtimerhub/app/
