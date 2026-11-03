@@ -82,7 +82,7 @@ public final class MainActivity extends Activity {
  private void manual(){LinearLayout form=new LinearLayout(this);form.setOrientation(1);EditText n=new EditText(this),t=new EditText(this);n.setHint("Gebouwnaam");t.setHint("Tijd, bijvoorbeeld 3h 15m");form.addView(n);form.addView(t);new android.app.AlertDialog.Builder(this).setTitle("Timer toevoegen").setView(form).setPositiveButton("Opslaan",(d,w)->{long seconds=parse(t.getText().toString());if(seconds>0){try{JSONObject o=new JSONObject();o.put("id",UUID.randomUUID().toString());o.put("account",accounts.get(account.getSelectedItemPosition()));o.put("category",categories[category.getSelectedItemPosition()]);o.put("name",n.getText().toString());o.put("finish",System.currentTimeMillis()+seconds*1000);upgrades.add(o);persist();showTimers();}catch(Exception ignored){}}}).setNegativeButton("Annuleren",null).show();}
  private static long parse(String raw){
   String s=raw.trim().toLowerCase(java.util.Locale.ROOT).replace('ı','1');
-  s=s.replaceAll("(?i)(?<![a-z0-9])[il](?=\\s*[dhms])","1");
+  s=s.replaceAll("(?i)(?<![a-z0-9])[il](?=\\s*[dhms])","1");\n  s=s.replaceAll("(?i)(?<![a-z0-9])s(?=\\s*h)","5");
   s=s.replaceAll("(?i)(?<![a-z0-9])s(?=\\s*h)","5");
   s=s.replaceAll("(?i)(?<=\\d)o(?=\\s*[dhms])","0");
   java.util.regex.Matcher m=java.util.regex.Pattern.compile("(\\d+)\\s*([dhms])").matcher(s);
@@ -150,7 +150,7 @@ public final class MainActivity extends Activity {
  }
  private static String cleanName(String raw){
   String s=raw.toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z ]"," ").replaceAll("\\s+"," ").trim();
-  if(s.contains("craft")&&s.contains("station"))return "Crafting Station";
+  if(s.contains("craft")&&(s.contains("station")||s.contains("tation")))return "Crafting Station";
   if(s.contains("builder")&&s.contains("hut"))return "Builder's Hut";
   if(s.contains("hidden")&&s.contains("tesla"))return "Hidden Tesla";
   if(s.contains("elixir")&&s.contains("collector"))return "Elixir Collector";
@@ -161,9 +161,9 @@ public final class MainActivity extends Activity {
   Rect r=rows.get(index);
   int split=r.left+(int)(r.width()*.70);
   Bitmap name=Bitmap.createBitmap(bmp,r.left,r.top,split-r.left,r.height());
-  Bitmap timer=Bitmap.createBitmap(bmp,split,r.top,r.right-split,r.height());
+  int timerRight=r.left+(int)(r.width()*.94); // Exclude stopwatch icon\n  Bitmap timer=Bitmap.createBitmap(bmp,split,r.top,timerRight-split,r.height());
   Bitmap n2=Bitmap.createScaledBitmap(name,name.getWidth()*3,name.getHeight()*3,true);
-  Bitmap t2=Bitmap.createScaledBitmap(timer,timer.getWidth()*4,timer.getHeight()*4,true);
+  Bitmap t2=Bitmap.createScaledBitmap(timer,timer.getWidth()*3,timer.getHeight()*3,true);
   name.recycle();timer.recycle();
   com.google.mlkit.vision.text.TextRecognizer recognizer=TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
   recognizer.process(InputImage.fromBitmap(n2,0)).addOnSuccessListener(n->{
