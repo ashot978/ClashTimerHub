@@ -48,7 +48,7 @@ public final class MainActivity extends Activity {
  }
  private void button(String title,Runnable run){
   Button b=new Button(this);b.setText(title);b.setAllCaps(false);b.setTextSize(15);
-  b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xff7758e7));b.setTextColor(Color.WHITE);
+  b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xff8950c7));b.setTextColor(Color.WHITE);
   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,dp(56));lp.setMargins(0,dp(6),0,dp(6));root.addView(b,lp);
   b.setOnClickListener(v->run.run());
  }
@@ -56,12 +56,12 @@ public final class MainActivity extends Activity {
   getWindow().setStatusBarColor(0xff0e1020);getWindow().setNavigationBarColor(0xff0e1020);
   ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);
   root=new LinearLayout(this);root.setOrientation(1);root.setPadding(dp(16),dp(20),dp(16),dp(28));
-  root.setBackgroundColor(0xff0e1020);scroll.addView(root);setContentView(scroll);
-  TextView heading=label("CLASH TIMER HUB",27);heading.setTypeface(null,android.graphics.Typeface.BOLD);root.addView(heading);
+  root.setBackgroundColor(0xff160f25);scroll.addView(root);setContentView(scroll);
+  TextView heading=label("⚔  CLASH TIMER HUB",27);heading.setTypeface(null,android.graphics.Typeface.BOLD);heading.setTextColor(0xffffd88a);root.addView(heading);
   TextView subtitle=label("COMMAND CENTER   /   V3",12);subtitle.setTextColor(0xffb5a5ff);root.addView(subtitle);
   root.addView(label("ACCOUNT",12));
   account=new Spinner(this);account.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,accounts));
-  account.setBackground(shape(0xff262941,14));root.addView(account,new LinearLayout.LayoutParams(-1,dp(52)));
+  account.setBackground(shape(0xff38294d,14));root.addView(account,new LinearLayout.LayoutParams(-1,dp(52)));
   root.addView(label("UPGRADE TYPE",12));
   category=new Spinner(this);category.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,categories));
   category.setBackground(shape(0xff262941,14));root.addView(category,new LinearLayout.LayoutParams(-1,dp(52)));
@@ -70,12 +70,12 @@ public final class MainActivity extends Activity {
   button("Scan screenshot",()->{Intent i=new Intent(Intent.ACTION_GET_CONTENT);i.setType("image/*");startActivityForResult(i,PICK);});
   LinearLayout actions=new LinearLayout(this);actions.setOrientation(LinearLayout.HORIZONTAL);root.addView(actions);
   Button manual=new Button(this);manual.setText("＋ Timer");manual.setAllCaps(false);manual.setOnClickListener(v->manual());
-  manual.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xff353853));
+  manual.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xff49345c));
   actions.addView(manual,new LinearLayout.LayoutParams(0,dp(52),1));
   Button add=new Button(this);add.setText("＋ Account");add.setAllCaps(false);add.setOnClickListener(v->editAccount());
   add.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xff353853));
   LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(0,dp(52),1);ap.setMargins(dp(8),0,0,0);actions.addView(add,ap);
-  TextView section=label("ACTIVE UPGRADES",18);section.setTypeface(null,android.graphics.Typeface.BOLD);root.addView(section);
+  TextView section=label("ACTIVE UPGRADES  •  LIVE",18);section.setTypeface(null,android.graphics.Typeface.BOLD);root.addView(section);
   items=new LinearLayout(this);items.setOrientation(1);root.addView(items);showTimers();
  }
  private void editAccount(){EditText e=new EditText(this);e.setSingleLine(true);new android.app.AlertDialog.Builder(this).setTitle("Nieuw account").setView(e).setPositiveButton("Toevoegen",(d,w)->{String s=e.getText().toString().trim();if(!s.isEmpty()){accounts.add(s);persist();draw();}}).setNegativeButton("Annuleren",null).show();}
@@ -108,10 +108,10 @@ public final class MainActivity extends Activity {
    if(!ac.equals(chosenAccount)||!cat.equals(chosenCategory))continue;
    count++;long remain=Math.max(0,(o.optLong("finish")-now+999)/1000);
    LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
-   card.setPadding(dp(16),dp(10),dp(16),dp(12));card.setBackground(shape(0xff22263c,16));
+   card.setPadding(dp(16),dp(10),dp(16),dp(12));card.setBackground(shape(0xff30243e,16));
    LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(0,dp(5),0,dp(5));items.addView(card,lp);
-   TextView title=label(name,18);title.setTypeface(null,android.graphics.Typeface.BOLD);card.addView(title);
-   TextView time=label(remain==0?"✓ Gereed":format(remain),24);time.setTextColor(remain==0?0xff72e6b0:0xffc7baff);time.setTypeface(null,android.graphics.Typeface.BOLD);card.addView(time);
+   TextView title=label("⚒  "+name,18);title.setTypeface(null,android.graphics.Typeface.BOLD);card.addView(title);
+   TextView time=label(remain==0?"✓ Gereed":format(remain),24);time.setTextColor(remain==0?0xff72e6b0:0xffffd88a);time.setTypeface(null,android.graphics.Typeface.BOLD);card.addView(time);
    card.setOnLongClickListener(x->{new android.app.AlertDialog.Builder(this).setTitle(name).setMessage("Deze timer verwijderen?").setPositiveButton("Verwijderen",(d,w)->{upgrades.remove(o);persist();showTimers();}).setNegativeButton("Annuleren",null).show();return true;});
   }
   if(count==0){TextView empty=label("Nog geen actieve upgrades. Scan een screenshot om te beginnen.",15);empty.setTextColor(0xffa5a9c0);items.addView(empty);}
