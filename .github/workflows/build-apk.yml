@@ -31,7 +31,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh issue create --title "Android CI failure: patch #${{ github.run_number }}" --body "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\n\\`\\`\\`\n$(tail -c 12000 /tmp/clash-patch.log 2>/dev/null || echo 'See workflow logs')\n\\`\\`\\`" || true
+          {
+            echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo
+            echo '~~~'
+            tail -c 12000 /tmp/clash-patch.log 2>/dev/null || true
+            echo '~~~'
+          } > /tmp/clash-patch-issue.txt
+          gh issue create --title "Android CI failure: patch #${{ github.run_number }}" --body-file /tmp/clash-patch-issue.txt || true
       - name: Run pure Java regression tests
         run: |
           mkdir -p /tmp/clash-tests
@@ -73,6 +80,12 @@ jobs:
             tail -c 12000 /tmp/clash-gradle.log > /tmp/clash-error.txt
             gh issue create --title "Android CI failure: compile #${{ github.run_number }}" --body-file /tmp/clash-error.txt || true
           fi
+      - name: Report successful APK build
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create --title "Android APK build SUCCESS #${{ github.run_number }}" --body "Successful run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" || true
       - name: Upload installable APK
         uses: actions/upload-artifact@v4
         with:
