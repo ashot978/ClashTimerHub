@@ -61,10 +61,61 @@ service = replace_once(service,
         else store.setScanMessage(
                 "Upgrademenu gezien, maar geen actieve timer gevonden. Probeer een screenshot via Foto.");''',
     "scan failure messages")
+# Install a movable overlay button. The user explicitly arms OCR after
+# opening the desired upgrades menu instead of waiting for auto-detection.
+service = replace_once(service,
+    '    private volatile String bestText="";',
+    '    private volatile String bestText="";\n    private ScanOverlay floatingScanButton;\n    private volatile boolean manualScanArmed=false;',
+    "overlay fields")
+service = replace_once(service,
+    'consecutiveMenuFrames=0;menuWasOpened=false;startAt=System.currentTimeMillis();',
+    '''consecutiveMenuFrames=0;menuWasOpened=false;manualScanArmed=false;startAt=System.currentTimeMillis();
+        if(ScanOverlay.allowed(this)){
+            if(floatingScanButton!=null)floatingScanButton.hide();
+            floatingScanButton=new ScanOverlay(this,()->{
+                manualScanArmed=true;
+                startAt=System.currentTimeMillis();
+                consecutiveMenuFrames=0;
+                bestFinish=0;
+                bestText="";
+                floatingScanButton.hide();
+            });
+            floatingScanButton.show();
+        }''',
+    "overlay creation")
+service = replace_once(service,
+    'if(!closed && result.menuOpen){',
+    'if(!closed && manualScanArmed && result.menuOpen){',
+    "manual trigger gate")
+# Keep the scanner alive until the first tap; then enforce the usual timeout.
+service = service.replace('System.currentTimeMillis()-startAt', '(manualScanArmed ? System.currentTimeMillis()-startAt : 0)')
+
 service_file.write_text(service, encoding="utf-8")
+
+# Request overlay permission when opening the app; permission is granted by
+# Android settings and remains under user control.
+manifest_file=Path("app/src/main/AndroidManifest.xml")
+manifest=manifest_file.read_text(encoding="utf-8")
+if 'android.permission.SYSTEM_ALERT_WINDOW' not in manifest:
+    manifest=manifest.replace('<manifest ', '<manifest ', 1)
+    manifest=manifest.replace('<application', '<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />\\n    <application', 1)
+manifest_file.write_text(manifest,encoding="utf-8")
 
 activity_file=ROOT / "MainActivity.java"
 activity=activity_file.read_text(encoding="utf-8")
+activity=replace_once(activity,
+    'super.onCreate(savedInstanceState);',
+    '''super.onCreate(savedInstanceState);
+        if(!ScanOverlay.allowed(this)){
+            android.content.Intent overlayPermission=new android.content.Intent(
+                android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                android.net.Uri.parse("package:"+getPackageName()));
+            startActivity(overlayPermission);
+            android.widget.Toast.makeText(this,
+                "Sta Weergeven over andere apps toe voor Scan nu",
+                android.widget.Toast.LENGTH_LONG).show();
+        }''',
+    "overlay permission prompt")
 activity=replace_once(activity,
     'Open na de schermtoestemming zelf het juiste upgradescherm. Laat het circa 20 seconden in beeld en keer terug naar de app.',
     'Open na de toestemming Buildings & Heroes (voor bouwers). De scanner wacht op de menukop en negeert voorgestelde upgrades. Laat het menu 15-20 seconden open.',
@@ -114,7 +165,7 @@ activity_file.write_text(activity,encoding="utf-8")
 
 gradle_file=Path("app/build.gradle")
 gradle=gradle_file.read_text(encoding="utf-8")
-gradle=replace_once(gradle,"versionCode 1","versionCode 2","versionCode")
-gradle=replace_once(gradle,"versionName '0.1.0'","versionName '0.2.0'","versionName")
+gradle=replace_once(gradle,"versionCode 1","versionCode 3","versionCode")
+gradle=replace_once(gradle,"versionName '0.1.0'","versionName '0.3.0'","versionName")
 gradle_file.write_text(gradle,encoding="utf-8")
 print("Menu-gated scan patch applied")
