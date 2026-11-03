@@ -312,6 +312,16 @@ public final class MainActivity extends Activity {
      JSONObject entry=arr.optJSONObject(i);if(entry==null)continue;
      long id=entry.optLong("data",-1);if(id<0)continue;
      String cat="pets".equals(section)?"Pets":("units".equals(section)||"spells".equals(section))?"Laboratorium":"Bouwers";
+     JSONArray types=entry.optJSONArray("types");
+     if(types!=null)for(int t=0;t<types.length();t++){
+      JSONObject type=types.optJSONObject(t);if(type==null)continue;
+      JSONArray modules=type.optJSONArray("modules");if(modules==null)continue;
+      for(int m=0;m<modules.length();m++){
+       JSONObject module=modules.optJSONObject(m);if(module==null)continue;
+       long moduleId=module.optLong("data",-1);
+       if(moduleId>=0)addExportTimer(parsed,ac,cat,moduleId,module.optLong("timer"),timestamp,m);
+      }
+     }
      JSONArray timers=entry.optJSONArray("timers");
      if(timers!=null){
       for(int j=0;j<timers.length();j++){
