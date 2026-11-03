@@ -126,6 +126,7 @@ public final class MainActivity extends Activity {
     toast("Scannerkalibratie opgeslagen");
    }).setNegativeButton("Annuleren",null).show();
  }
+ private void renderDashboard(){if(dashboard==null)return;dashboard.removeAllViews();long now=System.currentTimeMillis();for(String ac:accounts){JSONObject first=null;long min=Long.MAX_VALUE;for(JSONObject o:upgrades){if(ac.equals(o.optString("account"))&&"Bouwers".equals(o.optString("category"))&&o.optLong("finish")>now&&o.optLong("finish")<min){min=o.optLong("finish");first=o;}}String summary=first==null?"Geen actieve builder":first.optString("name")+" · "+format((min-now+999)/1000);TextView card=label(ac+"\n"+summary,18);card.setBackground(shape(0xff30243e,14));dashboard.addView(card);card.setOnClickListener(v->{int i=accounts.indexOf(ac);if(i>=0)account.setSelection(i);});}}
  private void showAllNextBuilders(){
   LinearLayout list=new LinearLayout(this);list.setOrientation(1);list.setPadding(dp(12),dp(8),dp(12),dp(8));
   long now=System.currentTimeMillis();
