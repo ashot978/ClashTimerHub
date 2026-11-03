@@ -66,26 +66,61 @@ public final class MainActivity extends Activity {
  private void showTimers(){if(items==null)return;items.removeAllViews();long now=System.currentTimeMillis();for(JSONObject o:upgrades){String name=o.optString("name"),ac=o.optString("account"),cat=o.optString("category");long remain=Math.max(0,(o.optLong("finish")-now)/1000);TextView v=label(ac+" · "+cat+" · "+name+" — "+format(remain),16);items.addView(v);v.setOnLongClickListener(x->{new android.app.AlertDialog.Builder(this).setMessage("Timer verwijderen?").setPositiveButton("Verwijderen",(d,w)->{upgrades.remove(o);persist();showTimers();}).setNegativeButton("Annuleren",null).show();return true;});}}
  @Override protected void onActivityResult(int req,int result,Intent data){super.onActivityResult(req,result,data);if(req!=PICK||result!=RESULT_OK||data==null)return;try(InputStream stream=getContentResolver().openInputStream(data.getData())){Bitmap bmp=BitmapFactory.decodeStream(stream);if(bmp!=null)scan(bmp);}catch(Exception e){toast("Foto kon niet worden geopend");}}
  private void scan(Bitmap bmp){
-  // V2 uses independent row crops; never takes the shortest timer from the whole panel.
-  ArrayList<Rect> rows=new ArrayList<>();int w=bmp.getWidth(),h=bmp.getHeight();
-  int start=(int)(h*.07),end=(int)(h*.445),x=(int)(w*.61);
-  boolean in=false;int first=0,last=0;
-  for(int y=start;y<end;y+=2){int c=0;for(int xx=x;xx<x+w*.06;xx+=Math.max(2,w/500)){int pixel=bmp.getPixel(Math.min(w-1,xx),y);int red=(pixel>>16)&255,green=(pixel>>8)&255,blue=pixel&255;if(green>90&&green>red*1.15&&green>blue*1.17)c++;}
-   boolean active=c>=2;if(active){if(!in){first=y;in=true;}last=y;}else if(in&&y-last>h/170){if(rows.size()<7&&last-first>h*.014&&last-first<h*.07)rows.add(new Rect((int)(w*.59),Math.max(0,first-h/110),(int)(w*.99),Math.min(h,last+h/110)));in=false;}
-  }
-  if(in&&rows.size()<7&&last-first>h*.014&&last-first<h*.07)rows.add(new Rect((int)(w*.59),Math.max(0,first-h/110),(int)(w*.99),Math.min(h,last+h/110)));
-  if(rows.isEmpty()){toast("Geen actieve upgraderijen gevonden. Gebruik een volledige screenshot.");return;}
-  pending.clear();scanRow(bmp,rows,0);
+  // Seven builder slots are a maximum, not a target. Read all active rows, including brown hero/pet rows.
+  // The screenshot layout is 1312x1182: active rows end before the Suggested upgrades heading.
+  int w=bmp.getWidth(),h=bmp.getHeight();
+  int left=(int)(w*.587),right=(int)(w*.998);
+  int top=(int)(h*.071),bottom=(int)(h*.44);
+  if(right<=left||bottom<=top){toast("Ongeldig screenshotformaat");return;}
+  Bitmap panel=Bitmap.createBitmap(bmp,left,top,right-left,bottom-top);
+  TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS).process(InputImage.fromBitmap(panel,0))
+   .addOnSuccessListener(text->{
+    int cutoff=bottom;
+    for(Text.TextBlock block:text.getTextBlocks())for(Text.Line line:block.getLines()){
+     String s=line.getText().toLowerCase(java.util.Locale.ROOT);
+     if(s.contains("suggested")||s.contains("other upgrades")){
+      Rect rect=line.getBoundingBox();if(rect!=null)cutoff=Math.min(cutoff,top+rect.top);
+     }
+    }
+    panel.recycle();
+    // Fixed row bands follow the menu's own repeated row layout, not green pixels.
+    // Include the Elixir Collector, whose progress bar is brown.
+    ArrayList<Rect> rows=new ArrayList<>();
+    int first=(int)(h*.072),stride=(int)(h*.053),height=(int)(h*.046);
+    for(int i=0;i<7;i++){
+     int y=first+i*stride;
+     if(y+height>cutoff)break;
+     rows.add(new Rect(left,y,right,Math.min(h,y+height)));
+    }
+    if(rows.isEmpty()){toast("Geen actieve rijen gevonden");return;}
+    pending.clear();scanRow(bmp,rows,0);
+   }).addOnFailureListener(e->{panel.recycle();toast("Menudetectie mislukt");});
+ }
+ private static String cleanName(String raw){
+  String s=raw.toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z ]"," ").replaceAll("\\s+"," ").trim();
+  if(s.contains("craft")&&s.contains("station"))return "Crafting Station";
+  if(s.contains("builder")&&s.contains("hut"))return "Builder's Hut";
+  if(s.contains("hidden")&&s.contains("tesla"))return "Hidden Tesla";
+  if(s.contains("elixir")&&s.contains("collector"))return "Elixir Collector";
+  return raw.trim();
  }
  private void scanRow(Bitmap bmp,ArrayList<Rect> rows,int index){
   if(index>=rows.size()){review();return;}
-  Rect r=rows.get(index);Bitmap crop=Bitmap.createBitmap(bmp,r.left,r.top,r.width(),r.height());Bitmap enlarged=Bitmap.createScaledBitmap(crop,crop.getWidth()*2,crop.getHeight()*2,true);crop.recycle();
-  TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS).process(InputImage.fromBitmap(enlarged,0)).addOnSuccessListener(text->{
-   StringBuilder name=new StringBuilder(),time=new StringBuilder();
-   for(Text.TextBlock block:text.getTextBlocks())for(Text.Line line:block.getLines())for(Text.Element element:line.getElements()){Rect b=element.getBoundingBox();if(b==null)continue;if(b.centerX()>enlarged.getWidth()*.69)time.append(element.getText()).append(" ");else name.append(element.getText()).append(" ");}
-   try{JSONObject o=new JSONObject();o.put("name",name.toString().trim());o.put("raw",time.toString().trim());o.put("seconds",parse(time.toString()));o.put("row",index);pending.add(o);}catch(Exception ignored){}
-   scanRow(bmp,rows,index+1);
-  }).addOnFailureListener(e->scanRow(bmp,rows,index+1)).addOnCompleteListener(t->enlarged.recycle());
+  Rect r=rows.get(index);
+  int split=r.left+(int)(r.width()*.70);
+  Bitmap name=Bitmap.createBitmap(bmp,r.left,r.top,split-r.left,r.height());
+  Bitmap timer=Bitmap.createBitmap(bmp,split,r.top,r.right-split,r.height());
+  Bitmap n2=Bitmap.createScaledBitmap(name,name.getWidth()*3,name.getHeight()*3,true);
+  Bitmap t2=Bitmap.createScaledBitmap(timer,timer.getWidth()*4,timer.getHeight()*4,true);
+  name.recycle();timer.recycle();
+  com.google.mlkit.vision.text.TextRecognizer recognizer=TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
+  recognizer.process(InputImage.fromBitmap(n2,0)).addOnSuccessListener(n->{
+   recognizer.process(InputImage.fromBitmap(t2,0)).addOnSuccessListener(t->{
+    String raw=t.getText().replace("\\n"," ").trim();
+    try{JSONObject o=new JSONObject();o.put("name",cleanName(n.getText().replace("\\n"," ")));o.put("raw",raw);o.put("seconds",parse(raw));o.put("row",index);pending.add(o);}catch(Exception ignored){}
+    n2.recycle();t2.recycle();scanRow(bmp,rows,index+1);
+   }).addOnFailureListener(e->{n2.recycle();t2.recycle();scanRow(bmp,rows,index+1);});
+  }).addOnFailureListener(e->{n2.recycle();t2.recycle();scanRow(bmp,rows,index+1);});
  }
  private void review(){if(pending.isEmpty()){toast("Geen OCR-resultaten");return;}LinearLayout form=new LinearLayout(this);form.setOrientation(1);ScrollView scroll=new ScrollView(this);scroll.addView(form);ArrayList<EditText> names=new ArrayList<>(),times=new ArrayList<>();
   for(JSONObject o:pending){form.addView(label("Rij "+(o.optInt("row")+1),16));EditText n=new EditText(this),t=new EditText(this);n.setSingleLine(true);t.setSingleLine(true);n.setText(o.optString("name"));t.setText(o.optString("raw"));n.setHint("Naam");t.setHint("Bijv. 3h 15m");form.addView(n);form.addView(t);names.add(n);times.add(t);}
