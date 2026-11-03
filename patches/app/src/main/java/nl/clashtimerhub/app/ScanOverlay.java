@@ -16,11 +16,15 @@ public final class ScanOverlay {
     private final TextView button;
     private final WindowManager.LayoutParams params;
     private boolean visible;
+    private final Context context;
+    private final int category;
 
-    public ScanOverlay(Context context, Runnable onScan) {
+    public ScanOverlay(Context context, int category, Runnable onScan) {
+        this.context=context;
+        this.category=category;
         manager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         button = new TextView(context);
-        button.setText("Scan nu");
+        button.setText("Scan nu (vasthouden: gebied)");
         button.setTextColor(0xffffffff);
         button.setTextSize(14);
         button.setGravity(Gravity.CENTER);
@@ -46,9 +50,11 @@ public final class ScanOverlay {
             float startX, startY;
             int initialX, initialY;
             boolean dragged;
+            long pressedAt;
             @Override public boolean onTouch(android.view.View v, MotionEvent event) {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
+                        pressedAt=System.currentTimeMillis();
                         startX = event.getRawX();
                         startY = event.getRawY();
                         initialX = params.x;
@@ -66,7 +72,15 @@ public final class ScanOverlay {
                         }
                         return true;
                     case MotionEvent.ACTION_UP:
-                        if (!dragged) onScan.run();
+                        if (!dragged) {
+                            if (System.currentTimeMillis()-pressedAt > 700) {
+                                android.content.Intent intent=new android.content.Intent(
+                                    context,ScanRegionActivity.class);
+                                intent.putExtra("category",category);
+                                intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+                                context.startActivity(intent);
+                            } else onScan.run();
+                        }
                         return true;
                     default: return true;
                 }
