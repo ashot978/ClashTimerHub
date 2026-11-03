@@ -22,3 +22,24 @@ Het archief bevat de volledige Java-, Android-resource- en Gradle-projectbestand
 Selecteer een van zeven accounts en Bouwers/Laboratorium/Pets. Geef toestemming voor een korte Android-schermdeelsessie, bekijk de timer in het spel en bevestig de gevonden OCR-timer in de app. Er worden geen spelhandelingen uitgevoerd en geen Supercell-inloggegevens gevraagd.
 
 **Let op:** dit is een experimentele versie. OCR kan timers missen of verwarren; de app vraagt daarom om bevestiging voor het opslaan.
+
+## Experimentele scanbediening (in ontwikkeling)
+
+De Android-bronpatch bevat een zwevende knop **Scan nu**. Geef in Android
+toestemming voor **Weergeven over andere apps**, start de schermscan vanuit de
+app en open het gewenste upgrademenu in Clash. Tik kort op de zwevende knop om
+de scan te activeren.
+
+**Scangebied aanpassen:** houd de zwevende knop langer dan 0,7 seconde
+ingedrukt, kies een screenshot van het geopende Clash-upgrademenu, sleep een
+rechthoek rond de builderstand en de eerste actieve upgrade en tik op
+**Scangebied opslaan**. De selectie wordt per categorie als relatieve
+coördinaten bewaard. Met **Standaardgebied herstellen** kun je terug.
+
+De OCR-parser kan vrije builders herkennen uit een teller `0/6` t/m `6/6`
+of `0/7` t/m `7/7`. De widgetweergave van **builders vrij** is nog niet
+volledig geïntegreerd en deze functionaliteit is nog niet op een echte
+Samsung gevalideerd. Controleer daarom altijd het OCR-resultaat voordat je
+het opslaat.
+
+Voor een nieuwe APK: [Build Android test APK](https://github.com/ashot978/ClashTimerHub/actions/workflows/build-apk.yml).
