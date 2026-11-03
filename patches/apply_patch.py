@@ -107,7 +107,7 @@ activity_file=ROOT / "MainActivity.java"
 activity=activity_file.read_text(encoding="utf-8")
 import re
 activity, overlay_matches = re.subn(
-    r'super\\.onCreate\\(\\s*([A-Za-z_][A-Za-z_0-9]*)\\s*\\);',
+    r'super\.onCreate\(\s*([A-Za-z_][A-Za-z_0-9]*)\s*\);',
     lambda m: m.group(0) + '''
         if(!ScanOverlay.allowed(this)){
             android.content.Intent overlayPermission=new android.content.Intent(
