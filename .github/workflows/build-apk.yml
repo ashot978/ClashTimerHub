@@ -28,6 +28,7 @@ jobs:
           javac -d /tmp/clash-tests \
             app/src/main/java/nl/clashtimerhub/app/TimerParser.java \
             app/src/main/java/nl/clashtimerhub/app/MenuTimerDetector.java \
+            app/src/main/java/nl/clashtimerhub/app/BuilderAvailability.java \
             tests/TimerParserTest.java \
             patches/tests/MenuTimerDetectorTest.java
           java -cp /tmp/clash-tests TimerParserTest
