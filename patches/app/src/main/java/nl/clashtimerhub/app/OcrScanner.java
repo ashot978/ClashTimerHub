@@ -32,7 +32,8 @@ public final class OcrScanner {
             return;
         }
         try {
-            RECOGNIZER.process(InputImage.fromBitmap(cropUpgradePanel(bitmap), 0))
+            Bitmap panel = cropUpgradePanel(bitmap);
+            RECOGNIZER.process(InputImage.fromBitmap(panel, 0))
                 .addOnSuccessListener(text -> {
                     List<MenuTimerDetector.Token> tokens = new ArrayList<>();
                     for (Text.TextBlock block : text.getTextBlocks()) {
@@ -49,7 +50,8 @@ public final class OcrScanner {
                     callback.onResult(MenuTimerDetector.detect(
                         tokens, bitmap.getWidth(), bitmap.getHeight(), category, validator));
                 })
-                .addOnFailureListener(callback::onError);
+                .addOnFailureListener(callback::onError)
+                .addOnCompleteListener(task -> panel.recycle());
         } catch (RuntimeException error) {
             callback.onError(error);
         }
