@@ -63,27 +63,42 @@ public final class MainActivity extends Activity {
   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,dp(56));lp.setMargins(0,dp(6),0,dp(6));root.addView(b,lp);
   b.setOnClickListener(v->run.run());
  }
+ private int activeTab=0;
+ private LinearLayout screenContent;
+ private String selectedAccount="";
  private void draw(){
   getWindow().setStatusBarColor(0xff0e1020);getWindow().setNavigationBarColor(0xff0e1020);
+  LinearLayout shell=new LinearLayout(this);shell.setOrientation(1);shell.setBackgroundColor(0xff160f25);setContentView(shell);
   ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);
-  root=new LinearLayout(this);root.setOrientation(1);root.setPadding(dp(16),dp(20),dp(16),dp(28));
-  root.setBackgroundColor(0xff160f25);scroll.addView(root);setContentView(scroll);
-  TextView heading=label("⚔  CLASH TIMER HUB",27);heading.setTypeface(null,android.graphics.Typeface.BOLD);heading.setTextColor(0xffffd88a);root.addView(heading);
-  TextView subtitle=label("COMMAND CENTER   /   V3",12);subtitle.setTextColor(0xffb5a5ff);root.addView(subtitle);
-  root.addView(label("ALLE ACCOUNTS · EERSTVOLGENDE BOUWER",19));
-  if(accounts.isEmpty())root.addView(label("Welkom! Kopieer je Clash-spelerdata en synchroniseer om je eerste account toe te voegen.",15));
-  dashboard=new LinearLayout(this);dashboard.setOrientation(1);root.addView(dashboard);renderDashboard();
-  root.addView(label("ACCOUNT",12));
-  account=new Spinner(this);account.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,accounts));
-  account.setBackground(shape(0xff38294d,14));root.addView(account,new LinearLayout.LayoutParams(-1,dp(52)));
-  root.addView(label("UPGRADE TYPE",12));
-  category=new Spinner(this);category.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,categories));
-  category.setBackground(shape(0xff262941,14));root.addView(category,new LinearLayout.LayoutParams(-1,dp(52)));
-  android.widget.AdapterView.OnItemSelectedListener refresh=new android.widget.AdapterView.OnItemSelectedListener(){public void onNothingSelected(android.widget.AdapterView<?> p){}public void onItemSelected(android.widget.AdapterView<?> p,View v,int pos,long id){showTimers();}};
-  account.setOnItemSelectedListener(refresh);category.setOnItemSelectedListener(refresh);
-  TextView section=label("GESELECTEERD ACCOUNT  ·  LIVE",18);section.setTypeface(null,android.graphics.Typeface.BOLD);root.addView(section);
-  items=new LinearLayout(this);items.setOrientation(1);root.addView(items);showTimers();
-  root.addView(label("BEHEER EN SYNCHRONISATIE",15));
+  root=new LinearLayout(this);root.setOrientation(1);root.setPadding(dp(12),dp(12),dp(12),dp(18));scroll.addView(root);
+  shell.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
+  TextView heading=label("⚔  CLASH TIMER HUB",24);heading.setTypeface(null,android.graphics.Typeface.BOLD);heading.setTextColor(0xffffd88a);root.addView(heading);
+  TextView subtitle=label("COMMAND CENTER / V4",11);subtitle.setTextColor(0xffb5a5ff);root.addView(subtitle);
+  screenContent=new LinearLayout(this);screenContent.setOrientation(1);root.addView(screenContent);
+  LinearLayout nav=new LinearLayout(this);nav.setBackgroundColor(0xff261a36);shell.addView(nav);
+  String[] names={"⌂ Dashboard","◷ Tijdlijn","♟ Accounts","⚙ Instellingen"};
+  for(int i=0;i<names.length;i++){
+   final int tab=i;
+   Button button=new Button(this);button.setText(names[i]);button.setAllCaps(false);button.setTextSize(11);
+   button.setTextColor(i==activeTab?0xffffd88a:0xffc6b9d6);
+   button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(i==activeTab?0xff49335f:0xff261a36));
+   button.setOnClickListener(v->{activeTab=tab;draw();});
+   nav.addView(button,new LinearLayout.LayoutParams(0,dp(56),1));
+  }
+  if(activeTab==0){
+   screenContent.addView(label("ALLE ACCOUNTS · EERSTVOLGENDE BOUWER",17));
+   dashboard=new LinearLayout(this);dashboard.setOrientation(1);screenContent.addView(dashboard);
+   renderDashboard();
+  }else if(activeTab==1){
+   dashboard=null;showTimeline();
+  }else if(activeTab==2){
+   dashboard=null;showAccountScreen();
+  }else{
+   dashboard=null;showSettingsScreen();
+  }
+ }
+ private void showSettingsScreen(){
+  screenContent.addView(label("INSTELLINGEN EN SYNCHRONISATIE",19));
   button("⚔ Zwevende plakknop aan/uit",()->toggleFloatingSync());
   button("🔔 Meldingen instellen",()->notificationSettings());
   button("🔔 Testmelding versturen",()->sendTestNotification());
@@ -93,16 +108,66 @@ public final class MainActivity extends Activity {
   button("📋 Back-up herstellen vanaf klembord",()->restoreBackupClipboard());
   button("Back-up herstellen uit bestand",()->{Intent i=new Intent(Intent.ACTION_GET_CONTENT);i.setType("*/*");i.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(i,RESTORE);});
   button("Importeer Clash-data (JSON)",()->{Intent i=new Intent(Intent.ACTION_GET_CONTENT);i.setType("*/*");i.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(i,IMPORT);});
-  LinearLayout actions=new LinearLayout(this);actions.setOrientation(LinearLayout.HORIZONTAL);root.addView(actions);
-  Button manual=new Button(this);manual.setText("＋ Timer");manual.setAllCaps(false);manual.setOnClickListener(v->manual());
-  manual.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xff49345c));
-  actions.addView(manual,new LinearLayout.LayoutParams(0,dp(52),1));
-  Button add=new Button(this);add.setText("＋ Account");add.setAllCaps(false);add.setOnClickListener(v->editAccount());
-  add.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xff353853));
-  LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(0,dp(52),1);ap.setMargins(dp(8),0,0,0);actions.addView(add,ap);
-  button("Details per account",()->overview());
-
-
+  button("＋ Timer",()->manual());
+  button("＋ Account",()->editAccount());
+ }
+ private void showAccountScreen(){
+  screenContent.addView(label("ACCOUNTS · ALLE UPGRADES",19));
+  if(accounts.isEmpty()){screenContent.addView(label("Nog geen accounts. Gebruik de zwevende plakknop of importeer JSON.",14));return;}
+  if(!accounts.contains(selectedAccount))selectedAccount=accounts.get(0);
+  LinearLayout chips=new LinearLayout(this);chips.setOrientation(1);screenContent.addView(chips);
+  for(String ac:accounts){
+   Button choice=new Button(this);choice.setText((ac.equals(selectedAccount)?"● ":"○ ")+ac);choice.setAllCaps(false);
+   choice.setOnClickListener(v->{selectedAccount=ac;draw();});chips.addView(choice);
+  }
+  account=new Spinner(this);account.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,accounts));
+  account.setSelection(Math.max(0,accounts.indexOf(selectedAccount)));account.setVisibility(View.GONE);screenContent.addView(account);
+  category=new Spinner(this);category.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,categories));
+  category.setVisibility(View.GONE);screenContent.addView(category);
+  for(String cat:categories){
+   TextView header=label(cat.toUpperCase(java.util.Locale.ROOT),16);header.setTextColor(0xffbba7f3);screenContent.addView(header);
+   ArrayList<JSONObject> list=new ArrayList<>();
+   for(JSONObject o:upgrades)if(selectedAccount.equals(o.optString("account"))&&cat.equals(o.optString("category"))&&o.optLong("finish")>System.currentTimeMillis())list.add(o);
+   Collections.sort(list,(x,y)->Long.compare(x.optLong("finish"),y.optLong("finish")));
+   if(list.isEmpty())screenContent.addView(label("Geen actieve upgrades",12));
+   for(JSONObject o:list)addTimerRow(screenContent,o,true);
+  }
+ }
+ private void showTimeline(){
+  screenContent.addView(label("TIJDLIJN · ALLE ACCOUNTS",19));
+  final String[] filters={"Alles","Bouwers","Laboratorium","Pets"};
+  LinearLayout filterRow=new LinearLayout(this);screenContent.addView(filterRow);
+  for(String filter:filters){
+   Button b=new Button(this);b.setText(filter);b.setTextSize(10);b.setAllCaps(false);
+   b.setOnClickListener(v->{timelineFilter=filter;draw();});
+   b.setTextColor(filter.equals(timelineFilter)?0xffffd88a:0xffd5c9e2);
+   filterRow.addView(b,new LinearLayout.LayoutParams(0,dp(48),1));
+  }
+  ArrayList<JSONObject> list=new ArrayList<>();
+  for(JSONObject o:upgrades)if(o.optLong("finish")>System.currentTimeMillis()&&("Alles".equals(timelineFilter)||timelineFilter.equals(o.optString("category"))))list.add(o);
+  Collections.sort(list,(x,y)->Long.compare(x.optLong("finish"),y.optLong("finish")));
+  if(list.isEmpty())screenContent.addView(label("Geen actieve upgrades voor dit filter.",14));
+  for(JSONObject o:list)addTimerRow(screenContent,o,false);
+ }
+ private String timelineFilter="Alles";
+ private String finishAt(long timestamp){
+  java.text.SimpleDateFormat fmt=new java.text.SimpleDateFormat("HH:mm",java.util.Locale.forLanguageTag("nl-NL"));
+  java.util.Calendar now=java.util.Calendar.getInstance(),finish=java.util.Calendar.getInstance();finish.setTimeInMillis(timestamp);
+  boolean today=now.get(java.util.Calendar.YEAR)==finish.get(java.util.Calendar.YEAR)&&now.get(java.util.Calendar.DAY_OF_YEAR)==finish.get(java.util.Calendar.DAY_OF_YEAR);
+  now.add(java.util.Calendar.DAY_OF_YEAR,1);
+  boolean tomorrow=now.get(java.util.Calendar.YEAR)==finish.get(java.util.Calendar.YEAR)&&now.get(java.util.Calendar.DAY_OF_YEAR)==finish.get(java.util.Calendar.DAY_OF_YEAR);
+  if(today)return "Vandaag om "+fmt.format(new java.util.Date(timestamp));
+  if(tomorrow)return "Morgen om "+fmt.format(new java.util.Date(timestamp));
+  return new java.text.SimpleDateFormat("EEE d MMM · HH:mm",java.util.Locale.forLanguageTag("nl-NL")).format(new java.util.Date(timestamp));
+ }
+ private void addTimerRow(LinearLayout parent,JSONObject o,boolean editable){
+  long finish=o.optLong("finish"),remain=Math.max(0,(finish-System.currentTimeMillis()+999)/1000);
+  LinearLayout card=new LinearLayout(this);card.setOrientation(1);card.setPadding(dp(10),dp(5),dp(10),dp(5));card.setBackground(shape(remain<=1800?0xff46351f:0xff30243e,12));
+  LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(dp(2),dp(3),dp(2),dp(3));parent.addView(card,lp);
+  card.addView(label((editable?"":o.optString("account")+" · ")+cleanName(o.optString("name")),14));
+  TextView time=label(format(remain)+"  ·  "+finishAt(finish),13);time.setTextColor(0xffffd88a);card.addView(time);
+  if(editable)card.setOnClickListener(v->editTimer(o));
+  else card.setOnClickListener(v->{selectedAccount=o.optString("account");activeTab=2;draw();});
  }
  private void toggleFloatingSync(){
   android.content.SharedPreferences prefs=getPreferences(0);
