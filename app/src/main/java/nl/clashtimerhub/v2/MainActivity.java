@@ -141,7 +141,7 @@ public final class MainActivity extends Activity {
  private void editTimer(JSONObject o){
   LinearLayout form=new LinearLayout(this);form.setOrientation(1);form.setPadding(dp(16),dp(8),dp(16),0);
   EditText n=new EditText(this),t=new EditText(this);
-  n.setSingleLine(true);n.setText(o.optString("name"));n.setHint("Naam");
+  n.setSingleLine(true);n.setText(cleanName(o.optString("name")));n.setHint("Naam");
   t.setSingleLine(true);t.setHint("Bijv. 2d 5h");long remaining=Math.max(0,(o.optLong("finish")-System.currentTimeMillis()+999)/1000);
   t.setText(format(remaining));form.addView(n);form.addView(t);
   android.app.AlertDialog dialog=new android.app.AlertDialog.Builder(this).setTitle("Timer bewerken").setView(form)
@@ -190,7 +190,7 @@ public final class MainActivity extends Activity {
   String chosenCategory=category!=null&&category.getSelectedItem()!=null?category.getSelectedItem().toString():"";
   int count=0;
   for(JSONObject o:upgrades){
-   String name=o.optString("name"),ac=o.optString("account"),cat=o.optString("category");
+   String name=cleanName(o.optString("name")),ac=o.optString("account"),cat=o.optString("category");
    if(!ac.equals(chosenAccount)||!cat.equals(chosenCategory))continue;
    count++;long remain=Math.max(0,(o.optLong("finish")-now+999)/1000);
    LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
@@ -249,7 +249,7 @@ public final class MainActivity extends Activity {
   String s=raw.toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z ]"," ").replaceAll("\\s+"," ").trim();
   if(s.contains("craft")&&(s.contains("station")||s.contains("tation")))return "Crafting Station";
   if(s.contains("builder")&&s.contains("hut"))return "Builder's Hut";
-  if(s.contains("hidden")&&s.contains("tesla"))return "Hidden Tesla";
+  if((s.contains("hidden")||s.contains("hidde")||s.contains("hidd"))&&s.contains("tesla"))return "Hidden Tesla";
   if(s.contains("elixir")&&s.contains("collector"))return "Elixir Collector";
   return raw.trim();
  }
@@ -281,7 +281,7 @@ public final class MainActivity extends Activity {
    String ac=accounts.get(account.getSelectedItemPosition()),cat=categories[category.getSelectedItemPosition()];long now=System.currentTimeMillis();
    ArrayList<JSONObject> replacement=new ArrayList<>();ArrayList<String> invalid=new ArrayList<>();
    for(int i=0;i<names.size();i++){
-    long sec=parse(times.get(i).getText().toString());String name=names.get(i).getText().toString().trim();
+    long sec=parse(times.get(i).getText().toString());String name=cleanName(names.get(i).getText().toString().trim());
     if(sec<=0||name.isEmpty()){invalid.add("Rij "+(i+1));continue;}
     try{JSONObject o=new JSONObject();o.put("id",UUID.randomUUID().toString());o.put("account",ac);o.put("category",cat);o.put("name",name);o.put("finish",now+sec*1000);o.put("scanned",true);replacement.add(o);}catch(Exception ignored){}
    }
