@@ -21,6 +21,9 @@ jobs:
           tar -xJf /tmp/clashtimerhub-sources.tar.xz -C .
       - name: Validate patch syntax
         run: python3 -m py_compile patches/apply_patch.py
+      - name: Inspect source lifecycle signatures
+        run: |
+          grep -n -E 'onCreate|OcrScanner.scan|onResult' app/src/main/java/nl/clashtimerhub/app/{MainActivity,ProjectionScanService}.java || true
       - name: Apply OCR menu safety patch
         run: |
           cp -r patches/app/src/main/java/nl/clashtimerhub/app/*.java app/src/main/java/nl/clashtimerhub/app/
