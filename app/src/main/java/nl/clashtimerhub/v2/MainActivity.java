@@ -29,7 +29,7 @@ public final class MainActivity extends Activity {
  private static final Pattern TIME=Pattern.compile("(?i)(?:(\\d+)\\s*d\\s*)?(?:(\\d+)\\s*h\\s*)?(?:(\\d+)\\s*m\\s*)?(?:(\\d+)\\s*s\\s*)?");
  @Override public void onCreate(Bundle b){super.onCreate(b);load();draw();}
  private void load(){
-  try{JSONArray a=new JSONArray(getPreferences(0).getString("accounts","[\\"Ashot\\",\\"Ashotgun\\",\\"AshotRush\\",\\"Rushot\\",\\"Shotty\\",\\"Ashotty\\",\\"RushShot\\"]"));for(int i=0;i<a.length();i++)accounts.add(a.getString(i));}catch(Exception e){accounts.add("Ashot");}
+  try{JSONArray a=new JSONArray(getPreferences(0).getString("accounts",new JSONArray(Arrays.asList("Ashot","Ashotgun","AshotRush","Rushot","Shotty","Ashotty","RushShot")).toString()));for(int i=0;i<a.length();i++)accounts.add(a.getString(i));}catch(Exception e){accounts.add("Ashot");}
   try{JSONArray a=new JSONArray(getPreferences(0).getString("upgrades","[]"));for(int i=0;i<a.length();i++)upgrades.add(a.getJSONObject(i));}catch(Exception ignored){}
  }
  private void persist(){getPreferences(0).edit().putString("accounts",new JSONArray(accounts).toString()).putString("upgrades",new JSONArray(upgrades).toString()).apply();}
