@@ -10,6 +10,7 @@ public final class BuilderAlarm extends android.content.BroadcastReceiver {
   String ac=intent.getStringExtra("account"),name=intent.getStringExtra("name");
   if(ac==null||name==null)return;
   android.content.SharedPreferences prefs=context.getSharedPreferences("MainActivity",Context.MODE_PRIVATE);
+  if(!prefs.getBoolean("notifyEnabled",true))return;
   if(finish<=prefs.getLong("ack_"+ac,0L))return;
   boolean stillTracked=false;
   try{
