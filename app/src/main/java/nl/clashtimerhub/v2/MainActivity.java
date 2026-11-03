@@ -37,7 +37,7 @@ public final class MainActivity extends Activity {
  private void handleSharedJson(Intent intent){
   if(intent==null||!Intent.ACTION_SEND.equals(intent.getAction()))return;
   String payload=intent.getStringExtra(Intent.EXTRA_TEXT);
-  if(payload==null||payload.length()>10000000||!payload.contains("\\"buildings\\"")){toast("Geen geldige Clash JSON gedeeld");return;}
+  if(payload==null||payload.length()>10000000||!payload.contains("buildings")){toast("Geen geldige Clash JSON gedeeld");return;}
   new android.app.AlertDialog.Builder(this).setTitle("Clash-data snel importeren?")
    .setMessage("De player tag bepaalt welk account wordt bijgewerkt.")
    .setPositiveButton("Importeren",(d,w)->importClashData(payload))
