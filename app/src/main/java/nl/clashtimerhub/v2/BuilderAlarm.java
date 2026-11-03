@@ -16,7 +16,7 @@ public final class BuilderAlarm extends android.content.BroadcastReceiver {
   Intent open=new Intent(context,MainActivity.class);
   PendingIntent pi=PendingIntent.getActivity(context,0,open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
   Notification.Builder builder=Build.VERSION.SDK_INT>=26?new Notification.Builder(context,TimerWidget.CHANNEL):new Notification.Builder(context);
-  builder.setSmallIcon(android.R.drawable.ic_dialog_info).setContentTitle(ac+" · Bouwer vrij")
+  builder.setSmallIcon(android.R.drawable.ic_dialog_info).setContentTitle(ac+" · Upgrade voltooid")
    .setContentText(name+" is klaar").setAutoCancel(true).setContentIntent(pi);
   manager.notify((ac+"-"+name+"-"+finish).hashCode(),builder.build());
   TimerWidget.update(context);
