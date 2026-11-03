@@ -24,7 +24,7 @@ service = replace_once(service,
     "notification")
 service = replace_once(service,
     'OcrScanner.scan(frameBitmap,new OcrScanner.Callback(){',
-    'OcrScanner.scan(frameBitmap,category,new OcrScanner.Callback(){',
+    'OcrScanner.scan(frameBitmap,category,this,new OcrScanner.Callback(){',
     "OCR call")
 service = replace_once(service,
     """@Override public void onResult(TimerParser.Hit hit){
@@ -72,7 +72,7 @@ service = replace_once(service,
     '''consecutiveMenuFrames=0;menuWasOpened=false;manualScanArmed=false;startAt=System.currentTimeMillis();
         if(ScanOverlay.allowed(this)){
             if(floatingScanButton!=null)floatingScanButton.hide();
-            floatingScanButton=new ScanOverlay(this,()->{
+            floatingScanButton=new ScanOverlay(this,category,()->{
                 manualScanArmed=true;
                 startAt=System.currentTimeMillis();
                 consecutiveMenuFrames=0;
@@ -139,7 +139,7 @@ new_photo='''try{
                     bitmap=android.graphics.BitmapFactory.decodeStream(stream);
                 }
                 if(bitmap==null)throw new IllegalStateException("Geen afbeelding");
-                OcrScanner.scan(bitmap,cat,new OcrScanner.Callback(){
+                OcrScanner.scan(bitmap,cat,this,new OcrScanner.Callback(){
                     @Override public void onResult(MenuTimerDetector.Result result){
                         bitmap.recycle();
                         if(!result.menuOpen){
