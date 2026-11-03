@@ -113,7 +113,7 @@ public final class MainActivity extends Activity {
   button("Back-up delen",()->backup());
   button("📋 Back-up herstellen vanaf klembord",()->restoreBackupClipboard());
   button("Back-up herstellen uit bestand",()->{Intent i=new Intent(Intent.ACTION_GET_CONTENT);i.setType("*/*");i.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(i,RESTORE);});
-  button("Importeer Clash-data (JSON)",()->{Intent i=new Intent(Intent.ACTION_GET_CONTENT);i.setType("*/*");i.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(i,IMPORT);});
+
   button("＋ Timer",()->manual());
   button("＋ Account",()->editAccount());
  }
