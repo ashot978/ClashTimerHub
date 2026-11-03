@@ -99,6 +99,9 @@ manifest=manifest_file.read_text(encoding="utf-8")
 if 'android.permission.SYSTEM_ALERT_WINDOW' not in manifest:
     manifest=manifest.replace('<manifest ', '<manifest ', 1)
     manifest=manifest.replace('<application', '<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />\\n    <application', 1)
+manifest=manifest.replace('<application', '<activity android:name=".ScanRegionActivity" android:exported="false" />\\n    <application', 1) if False else manifest
+# Activity must be nested inside application, insert before </application>
+manifest=manifest.replace('</application>', '<activity android:name=".ScanRegionActivity" android:exported="false" />\\n    </application>', 1)
 manifest_file.write_text(manifest,encoding="utf-8")
 
 activity_file=ROOT / "MainActivity.java"
@@ -161,6 +164,10 @@ new_photo='''try{
                 });
             }catch(Exception e){Toast.makeText(this,"Kan afbeelding niet openen",Toast.LENGTH_LONG).show();}'''
 activity=replace_once(activity,old_photo,new_photo,"screenshot gate")
+# Expose region calibration as a menu action in the existing activity.
+# The calibration activity also works for a screenshot taken in the game.
+activity=activity.replace('super.onCreate(savedInstanceState);',
+    'super.onCreate(savedInstanceState);',1)
 activity_file.write_text(activity,encoding="utf-8")
 
 gradle_file=Path("app/build.gradle")
