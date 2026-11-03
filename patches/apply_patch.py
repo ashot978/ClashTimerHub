@@ -154,6 +154,45 @@ activity=replace_once(activity,old_photo,new_photo,"screenshot gate")
 # The calibration activity also works for a screenshot taken in the game.
 activity=activity.replace('super.onCreate(savedInstanceState);',
     'super.onCreate(savedInstanceState);',1)
+# Avoid mutating Spinner adapter while its selection listener is active.
+# A fresh adapter is safer than clear()/addAll() on a Spinner-attached adapter.
+activity=replace_once(activity,
+    '''((ArrayAdapter<String>)accountSpinner.getAdapter()).clear();
+            ((ArrayAdapter<String>)accountSpinner.getAdapter()).addAll(labels);
+            accountSpinner.setSelection(selectedSlot);TimersWidget.refreshAll(this);refresh();''',
+    '''ArrayAdapter<String> renamedAdapter=new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_dropdown_item,labels);
+            accountSpinner.setAdapter(renamedAdapter);
+            accountSpinner.setSelection(selectedSlot);
+            TimersWidget.refreshAll(this);
+            refresh();''',
+    "account save spinner adapter crash")
+
+# Make scan calibration discoverable and request overlay permission only on
+# user action, not during app startup.
+activity=replace_once(activity,
+    'content.addView(text("2  Scan de juiste timer",18,Color.WHITE,true));',
+    '''content.addView(text("2  Scan de juiste timer",18,Color.WHITE,true));
+        content.addView(button("Stel scangebied in",v->{
+            Intent region=new Intent(this,ScanRegionActivity.class);
+            region.putExtra("category",selectedCategory);
+            startActivity(region);
+        }));
+        content.addView(button("Zet zwevende scanknop aan",v->{
+            if(!ScanOverlay.allowed(this)){
+                Intent permission=new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:"+getPackageName()));
+                startActivity(permission);
+                Toast.makeText(this,
+                    "Sta Weergeven over andere apps toe en start daarna Scan spel",
+                    Toast.LENGTH_LONG).show();
+            }else{
+                Toast.makeText(this,
+                    "Toestemming actief. Tik Scan spel en bevestig Scherm opnemen",
+                    Toast.LENGTH_LONG).show();
+            }
+        }));''',
+    "calibration and overlay UI")
 activity_file.write_text(activity,encoding="utf-8")
 
 gradle_file=Path("app/build.gradle")
