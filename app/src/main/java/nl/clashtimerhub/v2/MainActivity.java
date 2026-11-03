@@ -76,31 +76,70 @@ public final class MainActivity extends Activity {
   add.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xff353853));
   LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(0,dp(52),1);ap.setMargins(dp(8),0,0,0);actions.addView(add,ap);
   button("Deel timer-overzicht",()->shareTimers());
+  button("Alle accounts · Overzicht",()->overview());
   TextView section=label("ACTIVE UPGRADES  •  LIVE",18);section.setTypeface(null,android.graphics.Typeface.BOLD);root.addView(section);
   items=new LinearLayout(this);items.setOrientation(1);root.addView(items);showTimers();
  }
  private void shareTimers(){
-  StringBuilder out=new StringBuilder("Clash Timer Hub · Upgrade overzicht\\n");
+  StringBuilder out=new StringBuilder("Clash Timer Hub · Upgrade overzicht\n");
   long now=System.currentTimeMillis();int count=0;
   for(String ac:accounts){
    StringBuilder section=new StringBuilder();
    for(JSONObject o:upgrades){
     if(!ac.equals(o.optString("account")))continue;
     long remain=Math.max(0,(o.optLong("finish")-now+999)/1000);
-    section.append("• ").append(o.optString("name")).append(" [").append(o.optString("category")).append("] — ").append(remain==0?"Gereed":format(remain)).append("\\n");
+    section.append("• ").append(o.optString("name")).append(" [").append(o.optString("category")).append("] — ").append(remain==0?"Gereed":format(remain)).append("\n");
     count++;
    }
-   if(section.length()>0)out.append("\\n").append(ac).append("\\n").append(section);
+   if(section.length()>0)out.append("\n").append(ac).append("\n").append(section);
   }
   if(count==0){toast("Er zijn nog geen timers om te delen");return;}
   Intent send=new Intent(Intent.ACTION_SEND);send.setType("text/plain");send.putExtra(Intent.EXTRA_TEXT,out.toString());
   startActivity(Intent.createChooser(send,"Deel je timers"));
  }
+ private void overview(){
+  long now=System.currentTimeMillis();StringBuilder result=new StringBuilder();
+  int active=0,done=0;
+  for(String ac:accounts){
+   int a=0,d=0;long next=Long.MAX_VALUE;
+   for(JSONObject o:upgrades)if(ac.equals(o.optString("account"))){
+    long finish=o.optLong("finish");if(finish<=now)d++;else{a++;next=Math.min(next,finish);}
+   }
+   active+=a;done+=d;
+   result.append(ac).append(": ").append(a).append(" bezig · ").append(d).append(" gereed");
+   if(next!=Long.MAX_VALUE)result.append(" · volgende over ").append(format((next-now+999)/1000));
+   result.append("\\n");
+  }
+  new android.app.AlertDialog.Builder(this).setTitle("Command Center · "+active+" bezig / "+done+" gereed")
+   .setMessage(result.toString()).setPositiveButton("Sluiten",null).show();
+ }
+ private void editTimer(JSONObject o){
+  LinearLayout form=new LinearLayout(this);form.setOrientation(1);form.setPadding(dp(16),dp(8),dp(16),0);
+  EditText n=new EditText(this),t=new EditText(this);
+  n.setSingleLine(true);n.setText(o.optString("name"));n.setHint("Naam");
+  t.setSingleLine(true);t.setHint("Bijv. 2d 5h");long remaining=Math.max(0,(o.optLong("finish")-System.currentTimeMillis()+999)/1000);
+  t.setText(format(remaining));form.addView(n);form.addView(t);
+  android.app.AlertDialog dialog=new android.app.AlertDialog.Builder(this).setTitle("Timer bewerken").setView(form)
+   .setPositiveButton("Opslaan",null).setNeutralButton("Verwijderen",(d,w)->confirmDelete(o))
+   .setNegativeButton("Annuleren",null).create();
+  dialog.setOnShowListener(ev->dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
+   long seconds=parse(t.getText().toString());String name=n.getText().toString().trim();
+   if(seconds<=0||name.isEmpty()){t.setError("Vul een geldige duur in, bijvoorbeeld 2d 5h");return;}
+   try{o.put("name",name);o.put("finish",System.currentTimeMillis()+seconds*1000);}catch(Exception ignored){}
+   persist();showTimers();dialog.dismiss();
+  }));dialog.show();
+ }
+ private void confirmDelete(JSONObject o){
+  new android.app.AlertDialog.Builder(this).setTitle("Timer verwijderen?")
+   .setMessage(o.optString("name")).setPositiveButton("Verwijderen",(d,w)->{upgrades.remove(o);persist();showTimers();})
+   .setNegativeButton("Annuleren",null).show();
+ }
  private void editAccount(){EditText e=new EditText(this);e.setSingleLine(true);new android.app.AlertDialog.Builder(this).setTitle("Nieuw account").setView(e).setPositiveButton("Toevoegen",(d,w)->{String s=e.getText().toString().trim();if(!s.isEmpty()){accounts.add(s);persist();draw();}}).setNegativeButton("Annuleren",null).show();}
  private void manual(){LinearLayout form=new LinearLayout(this);form.setOrientation(1);EditText n=new EditText(this),t=new EditText(this);n.setHint("Gebouwnaam");t.setHint("Tijd, bijvoorbeeld 3h 15m");form.addView(n);form.addView(t);new android.app.AlertDialog.Builder(this).setTitle("Timer toevoegen").setView(form).setPositiveButton("Opslaan",(d,w)->{long seconds=parse(t.getText().toString());if(seconds>0){try{JSONObject o=new JSONObject();o.put("id",UUID.randomUUID().toString());o.put("account",accounts.get(account.getSelectedItemPosition()));o.put("category",categories[category.getSelectedItemPosition()]);o.put("name",n.getText().toString());o.put("finish",System.currentTimeMillis()+seconds*1000);upgrades.add(o);persist();showTimers();}catch(Exception ignored){}}}).setNegativeButton("Annuleren",null).show();}
  private static long parse(String raw){
   String s=raw.trim().toLowerCase(java.util.Locale.ROOT).replace('ı','1');
-  s=s.replaceAll("(?i)(?<![a-z0-9])[il](?=\\s*[dhms])","1");\n  s=s.replaceAll("(?i)(?<![a-z0-9])s(?=\\s*h)","5");
+  s=s.replaceAll("(?i)(?<![a-z0-9])[il](?=\\s*[dhms])","1");
+  s=s.replaceAll("(?i)(?<![a-z0-9])s(?=\\s*h)","5");
   s=s.replaceAll("(?i)(?<=\\d)o(?=\\s*[dhms])","0");
   java.util.regex.Matcher m=java.util.regex.Pattern.compile("(\\d+)\\s*([dhms])").matcher(s);
   long total=0;int consumed=0;boolean found=false;java.util.HashSet<String> seen=new java.util.HashSet<>();
@@ -129,8 +168,10 @@ public final class MainActivity extends Activity {
    LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(0,dp(5),0,dp(5));items.addView(card,lp);
    TextView title=label("⚒  "+name,18);title.setTypeface(null,android.graphics.Typeface.BOLD);card.addView(title);
    TextView time=label(remain==0?"✓ Gereed":format(remain),24);time.setTextColor(remain==0?0xff72e6b0:0xffffd88a);time.setTypeface(null,android.graphics.Typeface.BOLD);card.addView(time);
-   card.setOnLongClickListener(x->{new android.app.AlertDialog.Builder(this).setTitle(name).setMessage("Deze timer verwijderen?").setPositiveButton("Verwijderen",(d,w)->{upgrades.remove(o);persist();showTimers();}).setNegativeButton("Annuleren",null).show();return true;});
+   card.setOnClickListener(x->editTimer(o));
+   card.setOnLongClickListener(x->{confirmDelete(o);return true;});
   }
+  if(count>0){TextView hint=label("Tik op een timer om deze te bewerken · Houd ingedrukt om te verwijderen",12);hint.setTextColor(0xffa5a9c0);items.addView(hint);}
   if(count==0){TextView empty=label("Nog geen actieve upgrades. Scan een screenshot om te beginnen.",15);empty.setTextColor(0xffa5a9c0);items.addView(empty);}
  }
  @Override protected void onActivityResult(int req,int result,Intent data){super.onActivityResult(req,result,data);if(req!=PICK||result!=RESULT_OK||data==null)return;try(InputStream stream=getContentResolver().openInputStream(data.getData())){Bitmap bmp=BitmapFactory.decodeStream(stream);if(bmp!=null)scan(bmp);}catch(Exception e){toast("Foto kon niet worden geopend");}}
@@ -178,7 +219,8 @@ public final class MainActivity extends Activity {
   Rect r=rows.get(index);
   int split=r.left+(int)(r.width()*.70);
   Bitmap name=Bitmap.createBitmap(bmp,r.left,r.top,split-r.left,r.height());
-  int timerRight=r.left+(int)(r.width()*.94); // Exclude stopwatch icon\n  Bitmap timer=Bitmap.createBitmap(bmp,split,r.top,timerRight-split,r.height());
+  int timerRight=r.left+(int)(r.width()*.94); // Exclude stopwatch icon
+  Bitmap timer=Bitmap.createBitmap(bmp,split,r.top,timerRight-split,r.height());
   Bitmap n2=Bitmap.createScaledBitmap(name,name.getWidth()*3,name.getHeight()*3,true);
   Bitmap t2=Bitmap.createScaledBitmap(timer,timer.getWidth()*3,timer.getHeight()*3,true);
   name.recycle();timer.recycle();
@@ -200,7 +242,7 @@ public final class MainActivity extends Activity {
    for(int i=0;i<names.size();i++){
     long sec=parse(times.get(i).getText().toString());String name=names.get(i).getText().toString().trim();
     if(sec<=0||name.isEmpty()){invalid.add("Rij "+(i+1));continue;}
-    try{JSONObject o=new JSONObject();o.put("id",UUID.randomUUID().toString());o.put("account",ac);o.put("category",cat);o.put("name",name);o.put("finish",now+sec*1000);replacement.add(o);}catch(Exception ignored){}
+    try{JSONObject o=new JSONObject();o.put("id",UUID.randomUUID().toString());o.put("account",ac);o.put("category",cat);o.put("name",name);o.put("finish",now+sec*1000);o.put("scanned",true);replacement.add(o);}catch(Exception ignored){}
    }
    if(!invalid.isEmpty()){
     new android.app.AlertDialog.Builder(this).setTitle("Scan niet opgeslagen")
@@ -208,7 +250,8 @@ public final class MainActivity extends Activity {
      .setPositiveButton("OK",null).show();
     return;
    }
-   for(int i=upgrades.size()-1;i>=0;i--){JSONObject old=upgrades.get(i);if(ac.equals(old.optString("account"))&&cat.equals(old.optString("category")))upgrades.remove(i);}
+   // Only replace previous screenshot-scanned entries; never destroy manually created timers.
+   for(int i=upgrades.size()-1;i>=0;i--){JSONObject old=upgrades.get(i);if(ac.equals(old.optString("account"))&&cat.equals(old.optString("category"))&&old.optBoolean("scanned",false))upgrades.remove(i);}
    upgrades.addAll(replacement);persist();showTimers();toast(replacement.size()+" timers opgeslagen");dialog.dismiss();
   }));dialog.show();
  }
