@@ -56,18 +56,28 @@ public final class TimerWidget extends AppWidgetProvider {
    long now=System.currentTimeMillis();
    AlarmManager alarms=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
    if(alarms==null)return;
+   boolean enabled=prefs.getBoolean("notifyEnabled",true);
+   boolean onFinish=prefs.getBoolean("notifyOnFinish",true);
+   int lead=Math.max(0,Math.min(10080,prefs.getInt("notifyLeadMinutes",15)));
    for(int i=0;i<upgrades.length();i++){
     JSONObject o=upgrades.getJSONObject(i);
     long finish=o.optLong("finish");
-    if(finish<=now)continue;
     String key=o.optString("id",o.optString("account")+i);
-    int request=key.hashCode();
-    Intent intent=new Intent(context,BuilderAlarm.class);
-    intent.putExtra("account",o.optString("account"));
-    intent.putExtra("name",o.optString("name"));
-    intent.putExtra("finish",finish);
-    PendingIntent pi=PendingIntent.getBroadcast(context,request,intent,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
-    alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,finish,pi);
+    for(int kind=0;kind<2;kind++){
+     int request=(key+":"+kind).hashCode();
+     Intent intent=new Intent(context,BuilderAlarm.class);
+     intent.putExtra("account",o.optString("account"));
+     intent.putExtra("name",o.optString("name"));
+     intent.putExtra("finish",finish);
+     intent.putExtra("early",kind==1);
+     PendingIntent pi=PendingIntent.getBroadcast(context,request,intent,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+     alarms.cancel(pi);
+     long trigger=kind==1?finish-lead*60000L:finish;
+     boolean active=enabled&&(kind==0?onFinish:lead>0);
+     if(active&&trigger>now&&finish>now){
+      alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,trigger,pi);
+     }
+    }
    }
   }catch(Exception ignored){}
   update(context);
