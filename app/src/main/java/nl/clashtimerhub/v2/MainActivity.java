@@ -301,7 +301,7 @@ public final class MainActivity extends Activity {
     for(int i=0;i<arr.length();i++){
      JSONObject entry=arr.optJSONObject(i);if(entry==null)continue;
      long id=entry.optLong("data",-1);if(id<0)continue;
-     String cat=(id>=73000000&&id<74000000)?"Pets":((id>=4000000&&id<5000000)||(id>=26000000&&id<27000000))?"Laboratorium":"Bouwers";
+     String cat="pets".equals(section)?"Pets":("units".equals(section)||"spells".equals(section))?"Laboratorium":"Bouwers";
      JSONArray timers=entry.optJSONArray("timers");
      if(timers!=null){
       for(int j=0;j<timers.length();j++){
@@ -415,7 +415,7 @@ public final class MainActivity extends Activity {
   String chosenCategory=category!=null&&category.getSelectedItem()!=null?category.getSelectedItem().toString():"";
   int count=0;long nextFinish=Long.MAX_VALUE;
   if("Bouwers".equals(chosenCategory))for(JSONObject candidate:upgrades){
-   if(chosenAccount.equals(candidate.optString("account"))&&"Bouwers".equals(candidate.optString("category")))
+   if(chosenAccount.equals(candidate.optString("account"))&&"Bouwers".equals(candidate.optString("category"))&&candidate.optLong("finish")>now)
     nextFinish=Math.min(nextFinish,candidate.optLong("finish"));
   }
   for(JSONObject o:upgrades){
@@ -432,7 +432,7 @@ public final class MainActivity extends Activity {
    card.setOnLongClickListener(x->{confirmDelete(o);return true;});
   }
   if(count>0){TextView hint=label("Tik op een timer om deze te bewerken · Houd ingedrukt om te verwijderen",12);hint.setTextColor(0xffa5a9c0);items.addView(hint);}
-  if(count==0){TextView empty=label("Nog geen actieve upgrades. Scan een screenshot om te beginnen.",15);empty.setTextColor(0xffa5a9c0);items.addView(empty);}
+  if(count==0){TextView empty=label("Geen actieve timers. Importeer Clash-data via het klembord.",15);empty.setTextColor(0xffa5a9c0);items.addView(empty);}
  }
  @Override protected void onActivityResult(int req,int result,Intent data){super.onActivityResult(req,result,data);if(result!=RESULT_OK||data==null)return;
   if(req==RESTORE){try(InputStream stream=getContentResolver().openInputStream(data.getData())){java.io.ByteArrayOutputStream buffer=new java.io.ByteArrayOutputStream();byte[] bytes=new byte[8192];int n;while((n=stream.read(bytes))!=-1){buffer.write(bytes,0,n);if(buffer.size()>2000000)throw new java.io.IOException("Back-up te groot");}restoreBackup(buffer.toString("UTF-8"));}catch(Exception e){toast("Herstellen mislukt: "+e.getMessage());}return;}
