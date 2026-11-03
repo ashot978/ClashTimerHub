@@ -221,6 +221,28 @@ public final class MainActivity extends Activity {
    card.setOnClickListener(v->{int i=accounts.indexOf(ac);if(i>=0)account.setSelection(i);});
   }
  }
+ private int completedCount(String ac,long now){
+  long acknowledged=getPreferences(0).getLong("ack_"+ac,0L);
+  int count=0;
+  for(JSONObject o:upgrades){
+   long finish=o.optLong("finish");
+   if(ac.equals(o.optString("account"))&&finish>acknowledged&&finish<=now)count++;
+  }
+  return count;
+ }
+ private long oldestCompleted(String ac,long now){
+  long acknowledged=getPreferences(0).getLong("ack_"+ac,0L);
+  long oldest=Long.MAX_VALUE;
+  for(JSONObject o:upgrades){
+   long finish=o.optLong("finish");
+   if(ac.equals(o.optString("account"))&&finish>acknowledged&&finish<=now)oldest=Math.min(oldest,finish);
+  }
+  return oldest;
+ }
+ private void acknowledgeAccount(String ac){
+  getPreferences(0).edit().putLong("ack_"+ac,System.currentTimeMillis()).apply();
+  renderDashboard();showTimers();
+ }
  private long nextBuilder(String ac,long now){
   long min=Long.MAX_VALUE;
   for(JSONObject o:upgrades)if(ac.equals(o.optString("account"))&&"Bouwers".equals(o.optString("category"))&&o.optLong("finish")>now)min=Math.min(min,o.optLong("finish"));
