@@ -331,13 +331,13 @@ public final class MainActivity extends Activity {
      }else addExportTimer(parsed,ac,cat,id,entry.optLong("timer"),timestamp,0);
     }
    }
-   if(parsed.isEmpty()){toast("Export bevat geen actieve timers");return;}
+   // An empty valid snapshot is still a successful account refresh.
    // Preserve manual timers and other accounts. Only replace earlier imports.
    for(int i=upgrades.size()-1;i>=0;i--){
     JSONObject old=upgrades.get(i);
     if(ac.equals(old.optString("account"))&&old.optBoolean("exported",false))upgrades.remove(i);
    }
-   upgrades.addAll(parsed);if(!tag.isEmpty()){tags.put(ac,tag);getPreferences(0).edit().putString("playerTags",tags.toString()).apply();}persist();((ArrayAdapter)account.getAdapter()).notifyDataSetChanged();int selectedIndex=accounts.indexOf(ac);if(selectedIndex>=0)account.setSelection(selectedIndex);showTimers();renderDashboard();toast(parsed.size()+" upgrades geïmporteerd voor "+ac);
+   upgrades.addAll(parsed);getPreferences(0).edit().putLong("ack_"+ac,System.currentTimeMillis()).apply();if(!tag.isEmpty()){tags.put(ac,tag);getPreferences(0).edit().putString("playerTags",tags.toString()).apply();}persist();((ArrayAdapter)account.getAdapter()).notifyDataSetChanged();int selectedIndex=accounts.indexOf(ac);if(selectedIndex>=0)account.setSelection(selectedIndex);showTimers();renderDashboard();toast(parsed.size()+" upgrades geïmporteerd voor "+ac);
   }catch(Exception e){toast("Ongeldige Clash-export: "+e.getMessage());}
  }
  private void addExportTimer(ArrayList<JSONObject> out,String ac,String cat,long id,long sec,long ts,int index)throws JSONException{
