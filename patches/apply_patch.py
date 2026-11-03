@@ -162,9 +162,10 @@ activity=replace_once(activity,
             accountSpinner.setSelection(selectedSlot);TimersWidget.refreshAll(this);refresh();''',
     '''ArrayAdapter<String> renamedAdapter=new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item,labels);
-            accountSpinner.setAdapter(renamedAdapter);
-            accountSpinner.setSelection(selectedSlot);
-            TimersWidget.refreshAll(this);
+            // Keep the existing Spinner and selection untouched during save.
+            // Rebuilding its adapter synchronously can trigger nested callbacks.
+            android.widget.Toast.makeText(this, "Accountnaam opgeslagen",
+                android.widget.Toast.LENGTH_SHORT).show();
             refresh();''',
     "account save spinner adapter crash")
 
