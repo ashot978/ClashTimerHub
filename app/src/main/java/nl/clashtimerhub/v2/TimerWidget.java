@@ -75,33 +75,47 @@ public final class TimerWidget extends AppWidgetProvider {
      long trigger=kind==1?finish-lead*60000L:finish;
      boolean active=enabled&&(kind==0?onFinish:lead>0);
      if(active&&trigger>now&&finish>now){
-      if(Build.VERSION.SDK_INT>=31&&alarms.canScheduleExactAlarms()){
-       alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,trigger,pi);
-      }else if(Build.VERSION.SDK_INT>=23&&Build.VERSION.SDK_INT<31){
-       alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,trigger,pi);
-      }else if(Build.VERSION.SDK_INT>=31){
-       // Exact-alarm permission denied: alarm-clock scheduling remains exact and user-visible.
-       PendingIntent show=PendingIntent.getActivity(context,0,new Intent(context,MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
-       alarms.setAlarmClock(new AlarmManager.AlarmClockInfo(trigger,show),pi);
-      }else{
-       alarms.set(AlarmManager.RTC_WAKEUP,trigger,pi);
-      }
+      scheduleOne(alarms,trigger,pi);
+
      }
     }
    }
   }catch(Exception e){android.util.Log.e("ClashTimerHub","Scheduling builder alarms failed",e);}
   update(context);
  }
- static void scheduleDiagnostic(Context context){
-  AlarmManager alarms=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-  if(alarms==null)return;
-  Intent intent=new Intent(context,BuilderAlarm.class).setAction("nl.clashtimerhub.v2.TEST_SCHEDULED_ALARM");
-  PendingIntent pi=PendingIntent.getBroadcast(context,90117,intent,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
-  long when=System.currentTimeMillis()+60000L;
-  if(Build.VERSION.SDK_INT>=31&&!alarms.canScheduleExactAlarms()){
-   PendingIntent show=PendingIntent.getActivity(context,0,new Intent(context,MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
-   alarms.setAlarmClock(new AlarmManager.AlarmClockInfo(when,show),pi);
-  }else if(Build.VERSION.SDK_INT>=23)alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,when,pi);
-  else alarms.setExact(AlarmManager.RTC_WAKEUP,when,pi);
+ /**
+  * Exact alarms require special access on Android 12+.
+  * Never use setAlarmClock to bypass a denied permission: it can throw SecurityException.
+  * Inexact fallback still works, but Android may deliver it late.
+  */
+ private static boolean scheduleOne(AlarmManager alarms,long at,PendingIntent operation){
+  if(Build.VERSION.SDK_INT>=23){
+   if(Build.VERSION.SDK_INT<31||alarms.canScheduleExactAlarms()){
+    try{
+     alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,at,operation);
+     return true;
+    }catch(SecurityException e){
+     android.util.Log.w("ClashTimerHub","Exact alarm permission denied; using inexact fallback",e);
+    }
+   }
+   alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,at,operation);
+   return false;
+  }
+  alarms.set(AlarmManager.RTC_WAKEUP,at,operation);
+  return false;
+ }
+ static String scheduleDiagnostic(Context context){
+  try{
+   AlarmManager alarms=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+   if(alarms==null)return "Alarmservice niet beschikbaar";
+   Intent intent=new Intent(context,BuilderAlarm.class).setAction("nl.clashtimerhub.v2.TEST_SCHEDULED_ALARM");
+   PendingIntent pi=PendingIntent.getBroadcast(context,90117,intent,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+   alarms.cancel(pi);
+   boolean exact=scheduleOne(alarms,System.currentTimeMillis()+60000L,pi);
+   return exact?"Alarmtest gepland over 1 minuut. Je kunt de app verlaten.":"Alarmtest gepland, maar exacte alarmtoestemming ontbreekt. De melding kan later komen. Zet 'Exacte alarmen' aan via Meldingen instellen.";
+  }catch(Exception e){
+   android.util.Log.e("ClashTimerHub","Alarmtest plannen mislukt",e);
+   return "Alarmtest mislukt: "+e.getClass().getSimpleName()+". Controleer de Android-alarmrechten.";
+  }
  }
 }
