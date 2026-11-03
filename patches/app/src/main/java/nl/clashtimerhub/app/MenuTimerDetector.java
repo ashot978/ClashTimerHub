@@ -105,9 +105,9 @@ public final class MenuTimerDetector {
         ArrayList<String> activeNames = new ArrayList<>();
         TimerParser.Hit shortest = null;
         if (category == 0) {
-            int start = Math.round(height * .072f);
+            int start = Math.round(height * .067f);
             int step = Math.round(height * .053f);
-            int rowHeight = Math.round(height * .045f);
+            int rowHeight = Math.round(height * .052f);
             for (int row = 0; row < 12; row++) {
                 int top = start + row * step;
                 int center = top + rowHeight / 2;
@@ -115,7 +115,7 @@ public final class MenuTimerDetector {
                 if (validator == null || !validator.isActiveRow(center)) continue;
                 ArrayList<Token> rowTokens = new ArrayList<>();
                 for (Token t : tokens) {
-                    if (t.centerY() >= top && t.centerY() < top + rowHeight
+                    if (t.centerY() >= top - height * .006f && t.centerY() < top + rowHeight
                             && t.left > width * .58f && t.right < width * .99f)
                         rowTokens.add(t);
                 }
