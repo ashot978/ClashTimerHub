@@ -68,12 +68,13 @@ public final class MainActivity extends Activity {
  private void scan(Bitmap bmp){
   // V2 uses independent row crops; never takes the shortest timer from the whole panel.
   ArrayList<Rect> rows=new ArrayList<>();int w=bmp.getWidth(),h=bmp.getHeight();
-  int start=(int)(h*.065),end=(int)(h*.75),x=(int)(w*.61);
+  int start=(int)(h*.07),end=(int)(h*.445),x=(int)(w*.61);
   boolean in=false;int first=0,last=0;
   for(int y=start;y<end;y+=2){int c=0;for(int xx=x;xx<x+w*.06;xx+=Math.max(2,w/500)){int pixel=bmp.getPixel(Math.min(w-1,xx),y);int red=(pixel>>16)&255,green=(pixel>>8)&255,blue=pixel&255;if(green>90&&green>red*1.15&&green>blue*1.17)c++;}
-   boolean active=c>=2;if(active){if(!in){first=y;in=true;}last=y;}else if(in&&y-last>h/170){if(last-first>h*.014&&last-first<h*.07)rows.add(new Rect((int)(w*.59),Math.max(0,first-h/110),(int)(w*.99),Math.min(h,last+h/110)));in=false;}
+   boolean active=c>=2;if(active){if(!in){first=y;in=true;}last=y;}else if(in&&y-last>h/170){if(rows.size()<7&&last-first>h*.014&&last-first<h*.07)rows.add(new Rect((int)(w*.59),Math.max(0,first-h/110),(int)(w*.99),Math.min(h,last+h/110)));in=false;}
   }
-  if(rows.isEmpty()){toast("Geen groene upgraderijen gevonden. Gebruik een volledige screenshot.");return;}
+  if(in&&rows.size()<7&&last-first>h*.014&&last-first<h*.07)rows.add(new Rect((int)(w*.59),Math.max(0,first-h/110),(int)(w*.99),Math.min(h,last+h/110)));
+  if(rows.isEmpty()){toast("Geen actieve upgraderijen gevonden. Gebruik een volledige screenshot.");return;}
   pending.clear();scanRow(bmp,rows,0);
  }
  private void scanRow(Bitmap bmp,ArrayList<Rect> rows,int index){
