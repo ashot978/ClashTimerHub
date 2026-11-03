@@ -67,7 +67,6 @@ public final class MenuTimerDetector {
         } else {
             return new Result(false, null);
         }
-        if (!found) return new Result(false, null);
         int freeBuilders = -1;
         if (category == 0) {
             for (Token t : tokens) {
@@ -82,6 +81,8 @@ public final class MenuTimerDetector {
                 }
             }
         }
+
+        if (!found) return new Result(false, null);
 
         // Recommendations have their own durations and MUST NOT be counted.
         int endOfActiveList = height;
