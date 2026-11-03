@@ -20,7 +20,7 @@ import java.util.regex.*;
 
 public final class MainActivity extends Activity {
  private final String[] categories={"Bouwers","Laboratorium","Pets"};
- private LinearLayout root,items;
+ private LinearLayout root,items,dashboard;
  private Spinner account,category;
  private final ArrayList<String> accounts=new ArrayList<>();
  private final ArrayList<JSONObject> upgrades=new ArrayList<>();
@@ -60,6 +60,8 @@ public final class MainActivity extends Activity {
   root.setBackgroundColor(0xff160f25);scroll.addView(root);setContentView(scroll);
   TextView heading=label("⚔  CLASH TIMER HUB",27);heading.setTypeface(null,android.graphics.Typeface.BOLD);heading.setTextColor(0xffffd88a);root.addView(heading);
   TextView subtitle=label("COMMAND CENTER   /   V3",12);subtitle.setTextColor(0xffb5a5ff);root.addView(subtitle);
+  root.addView(label("ALLE ACCOUNTS · EERSTVOLGENDE BOUWER",19));
+  dashboard=new LinearLayout(this);dashboard.setOrientation(1);root.addView(dashboard);renderDashboard();
   root.addView(label("ACCOUNT",12));
   account=new Spinner(this);account.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,accounts));
   account.setBackground(shape(0xff38294d,14));root.addView(account,new LinearLayout.LayoutParams(-1,dp(52)));
