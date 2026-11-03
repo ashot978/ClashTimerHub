@@ -108,7 +108,7 @@ service = replace_once(service,
     '// Timeout is scheduled when the floating Scan nu button is tapped.',
     "remove premature timeout")
 service = replace_once(service,
-    'if((manualScanArmed ? System.currentTimeMillis()-startAt : 0)>SCAN_LENGTH_MS)',
+    'if(System.currentTimeMillis()-startAt>SCAN_LENGTH_MS)',
     'if(manualScanArmed && System.currentTimeMillis()-startAt>SCAN_LENGTH_MS)',
     "scan timeout gate")
 service = replace_once(service,
