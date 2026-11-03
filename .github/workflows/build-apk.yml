@@ -61,7 +61,18 @@ jobs:
         with:
           gradle-version: '8.11.1'
       - name: Compile debug APK
-        run: gradle --no-daemon --stacktrace :app:assembleDebug
+        run: |
+          set -o pipefail
+          gradle --no-daemon --stacktrace :app:assembleDebug 2>&1 | tee /tmp/clash-gradle.log
+      - name: Report compile failure to GitHub issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -f /tmp/clash-gradle.log ]; then
+            tail -c 12000 /tmp/clash-gradle.log > /tmp/clash-error.txt
+            gh issue create --title "Android CI failure: compile #${{ github.run_number }}" --body-file /tmp/clash-error.txt || true
+          fi
       - name: Upload installable APK
         uses: actions/upload-artifact@v4
         with:
