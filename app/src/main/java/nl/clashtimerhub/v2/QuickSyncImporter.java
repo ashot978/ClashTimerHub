@@ -26,6 +26,9 @@ public final class QuickSyncImporter {
   String account=null;
   for(String name:accounts)if(tag.equalsIgnoreCase(tags.optString(name,""))){account=name;break;}
   String playerName=json.optString("name",player==null?"":player.optString("name","")).trim();
+  if(account==null&&!playerName.isEmpty())for(String existing:accounts){
+   if(existing.equalsIgnoreCase(playerName)&&tags.optString(existing,"").isEmpty()){account=existing;break;}
+  }
   if(account==null){
    String base=playerName.isEmpty()?tag:playerName;
    account=base;int suffix=2;
