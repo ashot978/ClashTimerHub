@@ -28,7 +28,7 @@ public final class MainActivity extends Activity {
  private static final int PICK=12,IMPORT=13,RESTORE=14;
  private Bitmap lastScanBitmap;
  private final android.os.Handler ticker=new android.os.Handler(android.os.Looper.getMainLooper());
- private final Runnable tick=new Runnable(){public void run(){if(items!=null)showTimers();if(dashboard!=null)renderDashboard();ticker.postDelayed(this,60000);}};
+ private final Runnable tick=new Runnable(){public void run(){if(items!=null)showTimers();if(dashboard!=null)renderDashboard();ticker.postDelayed(this,1000);}};
  @Override protected void onResume(){super.onResume();ticker.removeCallbacks(tick);ticker.post(tick);}
  @Override protected void onPause(){ticker.removeCallbacks(tick);super.onPause();}
  private static final Pattern TIME=Pattern.compile("(?i)(?:(\\d+)\\s*d\\s*)?(?:(\\d+)\\s*h\\s*)?(?:(\\d+)\\s*m\\s*)?(?:(\\d+)\\s*s\\s*)?");
@@ -85,6 +85,7 @@ public final class MainActivity extends Activity {
   items=new LinearLayout(this);items.setOrientation(1);root.addView(items);showTimers();
   root.addView(label("BEHEER EN SYNCHRONISATIE",15));
   button("🔔 Meldingen instellen",()->notificationSettings());
+  button("🔔 Testmelding versturen",()->sendTestNotification());
   button("📋 Synchroniseer vanaf klembord",()->importClipboard());
   button("Back-up kopiëren",()->copyBackup());
   button("Back-up delen",()->backup());
@@ -101,6 +102,14 @@ public final class MainActivity extends Activity {
   button("Details per account",()->overview());
 
 
+ }
+ private void sendTestNotification(){
+  if(android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED){
+   requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},55);
+   toast("Sta meldingen toe en druk daarna opnieuw op Testmelding");return;
+  }
+  BuilderAlarm.sendTest(this);
+  toast("Testmelding verzonden. Controleer je meldingenpaneel.");
  }
  private void notificationSettings(){
   android.content.SharedPreferences prefs=getPreferences(0);
