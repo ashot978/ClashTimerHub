@@ -28,8 +28,9 @@ public final class MainActivity extends Activity {
  private static final int PICK=12,IMPORT=13,RESTORE=14;
  private Bitmap lastScanBitmap;
  private final android.os.Handler ticker=new android.os.Handler(android.os.Looper.getMainLooper());
+ private String lastLoadedSnapshot="";
  private final Runnable tick=new Runnable(){public void run(){if(activeTab==0&&dashboard!=null)renderDashboard();else if(activeTab==1||activeTab==2)refreshVisibleTimers();ticker.postDelayed(this,1000);}};
- @Override protected void onResume(){super.onResume();ticker.removeCallbacks(tick);ticker.post(tick);}
+ @Override protected void onResume(){super.onResume();refreshExternalImport();ticker.removeCallbacks(tick);ticker.post(tick);}
  @Override protected void onPause(){ticker.removeCallbacks(tick);super.onPause();}
  private static final Pattern TIME=Pattern.compile("(?i)(?:(\\d+)\\s*d\\s*)?(?:(\\d+)\\s*h\\s*)?(?:(\\d+)\\s*m\\s*)?(?:(\\d+)\\s*s\\s*)?");
  @Override public void onCreate(Bundle b){super.onCreate(b);load();draw();if(android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},55);TimerWidget.schedule(this);handleSharedJson(getIntent());}
@@ -43,11 +44,14 @@ public final class MainActivity extends Activity {
    .setPositiveButton("Importeren",(d,w)->importClashData(payload))
    .setNegativeButton("Annuleren",null).show();
  }
+ private String snapshot(){android.content.SharedPreferences p=getPreferences(0);return p.getString("accounts","[]")+"|"+p.getString("upgrades","[]");}
+ private void refreshExternalImport(){String current=snapshot();if(!current.equals(lastLoadedSnapshot)){accounts.clear();upgrades.clear();load();if(!accounts.contains(selectedAccount)&&!accounts.isEmpty())selectedAccount=accounts.get(0);draw();}}
  private void load(){
   try{JSONArray a=new JSONArray(getPreferences(0).getString("accounts","[]"));for(int i=0;i<a.length();i++)accounts.add(a.getString(i));}catch(Exception ignored){}
   try{JSONArray a=new JSONArray(getPreferences(0).getString("upgrades","[]"));for(int i=0;i<a.length();i++)upgrades.add(a.getJSONObject(i));}catch(Exception ignored){}
+  lastLoadedSnapshot=snapshot();
  }
- private void persist(){getPreferences(0).edit().putString("accounts",new JSONArray(accounts).toString()).putString("upgrades",new JSONArray(upgrades).toString()).apply();TimerWidget.schedule(this);}
+ private void persist(){getPreferences(0).edit().putString("accounts",new JSONArray(accounts).toString()).putString("upgrades",new JSONArray(upgrades).toString()).apply();lastLoadedSnapshot=snapshot();TimerWidget.schedule(this);}
  private int dp(int value){return (int)(value*getResources().getDisplayMetrics().density+.5f);}
  private android.graphics.drawable.GradientDrawable shape(int color,int radius){
   android.graphics.drawable.GradientDrawable d=new android.graphics.drawable.GradientDrawable();
@@ -60,7 +64,7 @@ public final class MainActivity extends Activity {
  private void button(String title,Runnable run){
   Button b=new Button(this);b.setText(title);b.setAllCaps(false);b.setTextSize(15);
   b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xff8950c7));b.setTextColor(Color.WHITE);
-  LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,dp(56));lp.setMargins(0,dp(6),0,dp(6));root.addView(b,lp);
+  LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,dp(56));lp.setMargins(0,dp(8),0,dp(8));(screenContent!=null?screenContent:root).addView(b,lp);
   b.setOnClickListener(v->run.run());
  }
  private int activeTab=0;
@@ -70,12 +74,12 @@ public final class MainActivity extends Activity {
   getWindow().setStatusBarColor(0xff0e1020);getWindow().setNavigationBarColor(0xff0e1020);
   LinearLayout shell=new LinearLayout(this);shell.setOrientation(1);shell.setBackgroundColor(0xff160f25);setContentView(shell);
   ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);
-  root=new LinearLayout(this);root.setOrientation(1);root.setPadding(dp(12),dp(12),dp(12),dp(18));scroll.addView(root);
+  root=new LinearLayout(this);root.setOrientation(1);root.setPadding(dp(12),dp(22),dp(12),dp(64));scroll.addView(root);
 
   TextView heading=label("⚔  CLASH TIMER HUB",24);heading.setTypeface(null,android.graphics.Typeface.BOLD);heading.setTextColor(0xffffd88a);root.addView(heading);
   TextView subtitle=label("COMMAND CENTER / V4",11);subtitle.setTextColor(0xffb5a5ff);root.addView(subtitle);
   screenContent=new LinearLayout(this);screenContent.setOrientation(1);root.addView(screenContent);
-  LinearLayout nav=new LinearLayout(this);nav.setBackgroundColor(0xff261a36);nav.setPadding(dp(4),dp(4),dp(4),dp(4));shell.addView(nav);
+  LinearLayout nav=new LinearLayout(this);nav.setBackgroundColor(0xff261a36);nav.setPadding(dp(4),dp(20),dp(4),dp(12));shell.addView(nav);
   String[] names={"Dashboard","Tijdlijn","Accounts","Instellingen"};
   for(int i=0;i<names.length;i++){
    final int tab=i;
