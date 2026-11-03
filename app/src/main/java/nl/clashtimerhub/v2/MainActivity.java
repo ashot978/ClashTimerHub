@@ -264,7 +264,7 @@ public final class MainActivity extends Activity {
    if(start<0||end<=start)throw new JSONException("Geen JSON gevonden");
    JSONObject json=new JSONObject(input.substring(start,end+1));
    if(!json.has("buildings")&&!json.has("heroes")&&!json.has("units"))throw new JSONException("Geen Clash-export");
-   String ac=accounts.get(account.getSelectedItemPosition());
+   String ac=account.getSelectedItem()==null?"":account.getSelectedItem().toString();
    JSONObject player=json.optJSONObject("player");
    String tag=json.optString("tag",json.optString("playerTag",player==null?"":player.optString("tag",""))).trim().toUpperCase(java.util.Locale.ROOT);
    JSONObject tags=new JSONObject(getPreferences(0).getString("playerTags","{}"));
