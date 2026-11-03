@@ -134,6 +134,11 @@ public final class MenuTimerDetector {
                             && candidate.text.length() > complete.text.length()))
                         complete = candidate;
                 if (complete == null) continue;
+                // Avoid overwriting a precise timer with a truncated OCR
+                // result such as "3h" when the game shows "3h 36m".
+                String raw = complete.text.toLowerCase(Locale.ROOT);
+                if (complete.seconds < 86400L && complete.seconds >= 3600L
+                        && !raw.contains("m") && !raw.contains("s")) continue;
                 activeTimers.add(complete);
                 activeNames.add(name.toString().trim());
                 if (shortest == null || complete.seconds < shortest.seconds) shortest = complete;
