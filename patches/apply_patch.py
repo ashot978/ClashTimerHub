@@ -106,7 +106,7 @@ manifest_file.write_text(manifest,encoding="utf-8")
 activity_file=ROOT / "MainActivity.java"
 activity=activity_file.read_text(encoding="utf-8")
 activity=replace_once(activity,
-    'super.onCreate(savedInstanceState);',
+    'super.onCreate(state);',
     '''super.onCreate(savedInstanceState);
         if(!ScanOverlay.allowed(this)){
             android.content.Intent overlayPermission=new android.content.Intent(
