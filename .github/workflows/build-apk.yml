@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      issues: write
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -23,7 +24,14 @@ jobs:
       - name: Apply OCR menu safety patch
         run: |
           cp -r patches/app/src/main/java/nl/clashtimerhub/app/*.java app/src/main/java/nl/clashtimerhub/app/
-          python3 patches/apply_patch.py
+          python3 patches/apply_patch.py 2>&1 | tee /tmp/clash-patch.log
+          test ${PIPESTATUS[0]} -eq 0
+      - name: Report patch failure to GitHub issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create --title "Android CI failure: patch #${{ github.run_number }}" --body "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\n\\`\\`\\`\n$(tail -c 12000 /tmp/clash-patch.log 2>/dev/null || echo 'See workflow logs')\n\\`\\`\\`" || true
       - name: Run pure Java regression tests
         run: |
           mkdir -p /tmp/clash-tests
