@@ -51,6 +51,19 @@ public class MenuTimerDetectorTest {
         assertTime(MenuTimerDetector.detect(shield,1500,1000,0,
             y->y<250),4*3600+45*60);
 
+        // Screenshot regression: 0/7 builders, seven active upgrade rows,
+        // recommendations below the divider must not win.
+        List<MenuTimerDetector.Token> realScreen=Arrays.asList(
+            t("Buildings & Heroes",900,20),
+            t("Elixir Collector",800,90), t("2H 58M",1190,90),
+            t("Crafting Station",800,145), t("5H 43M",1190,145),
+            t("Builder's Hut",800,200), t("1D 5H",1190,200),
+            t("Hidden Tesla",800,305), t("1D 8H",1190,305),
+            t("Suggested upgrades",850,530),
+            t("Elixir Collector x 5",800,700), t("19H",1190,700));
+        assertTime(MenuTimerDetector.detect(realScreen,1311,1182,0,
+            y->y<510),2*3600+58*60);
+
         // Menu must correspond to the category the user selected.
         if(MenuTimerDetector.detect(active,1500,1000,1,y->true).menuOpen)
             throw new AssertionError("Wrong menu accepted");
