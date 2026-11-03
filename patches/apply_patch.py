@@ -300,7 +300,7 @@ activity=replace_once(activity,
 # Require overlay permission before starting screen capture; otherwise the
 # scan is silently unarmed and no floating button ever appears.
 activity=replace_once(activity,
-    '        selectedCategory=category;\\n        MediaProjectionManager mgr=',
+    '        selectedCategory=category;\n        MediaProjectionManager mgr=',
     '''        selectedCategory=category;
         if(!ScanOverlay.allowed(this)){
             new AlertDialog.Builder(this)
