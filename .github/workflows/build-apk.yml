@@ -18,6 +18,8 @@ jobs:
           cat source/chunk*.b64 | base64 --decode > /tmp/clashtimerhub-sources.tar.xz
           echo "0264159ac49365a072922cf1b78babe7ea67f736d378aba703ead2384238a430  /tmp/clashtimerhub-sources.tar.xz" | sha256sum --check
           tar -xJf /tmp/clashtimerhub-sources.tar.xz -C .
+      - name: Validate patch syntax
+        run: python3 -m py_compile patches/apply_patch.py
       - name: Apply OCR menu safety patch
         run: |
           cp -r patches/app/src/main/java/nl/clashtimerhub/app/*.java app/src/main/java/nl/clashtimerhub/app/
@@ -51,7 +53,7 @@ jobs:
         with:
           gradle-version: '8.11.1'
       - name: Compile debug APK
-        run: gradle --no-daemon :app:assembleDebug
+        run: gradle --no-daemon --stacktrace :app:assembleDebug
       - name: Upload installable APK
         uses: actions/upload-artifact@v4
         with:
