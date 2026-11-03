@@ -75,7 +75,8 @@ public final class MainActivity extends Activity {
   root.addView(label("BEHEER EN SYNCHRONISATIE",15));
   button("📋 Synchroniseer vanaf klembord",()->importClipboard());
   button("Back-up delen",()->backup());
-  button("Back-up herstellen",()->{Intent i=new Intent(Intent.ACTION_GET_CONTENT);i.setType("*/*");i.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(i,RESTORE);});
+  button("📋 Back-up herstellen vanaf klembord",()->restoreBackupClipboard());
+  button("Back-up herstellen uit bestand",()->{Intent i=new Intent(Intent.ACTION_GET_CONTENT);i.setType("*/*");i.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(i,RESTORE);});
   button("Importeer Clash-data (JSON)",()->{Intent i=new Intent(Intent.ACTION_GET_CONTENT);i.setType("*/*");i.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(i,IMPORT);});
   button("Scan screenshot",()->{Intent i=new Intent(Intent.ACTION_GET_CONTENT);i.setType("image/*");startActivityForResult(i,PICK);});
   LinearLayout actions=new LinearLayout(this);actions.setOrientation(LinearLayout.HORIZONTAL);root.addView(actions);
@@ -100,6 +101,16 @@ public final class MainActivity extends Activity {
    send.putExtra(Intent.EXTRA_TEXT,data.toString(2));
    startActivity(Intent.createChooser(send,"Deel Clash Timer Hub back-up"));
   }catch(Exception e){toast("Back-up maken mislukt");}
+ }
+ private void restoreBackupClipboard(){
+  android.content.ClipboardManager manager=(android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
+  if(manager==null||!manager.hasPrimaryClip()){toast("Klembord is leeg");return;}
+  android.content.ClipData clip=manager.getPrimaryClip();
+  if(clip==null||clip.getItemCount()==0){toast("Geen back-up op klembord");return;}
+  CharSequence text=clip.getItemAt(0).coerceToText(this);
+  if(text==null||text.length()==0){toast("Geen tekst op klembord");return;}
+  if(text.length()>2000000){toast("Back-up te groot");return;}
+  restoreBackup(text.toString());
  }
  private void restoreBackup(String input){
   try{
