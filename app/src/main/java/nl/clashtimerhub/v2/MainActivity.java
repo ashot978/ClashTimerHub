@@ -71,20 +71,21 @@ public final class MainActivity extends Activity {
   LinearLayout shell=new LinearLayout(this);shell.setOrientation(1);shell.setBackgroundColor(0xff160f25);setContentView(shell);
   ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);
   root=new LinearLayout(this);root.setOrientation(1);root.setPadding(dp(12),dp(12),dp(12),dp(18));scroll.addView(root);
-  shell.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
+
   TextView heading=label("⚔  CLASH TIMER HUB",24);heading.setTypeface(null,android.graphics.Typeface.BOLD);heading.setTextColor(0xffffd88a);root.addView(heading);
   TextView subtitle=label("COMMAND CENTER / V4",11);subtitle.setTextColor(0xffb5a5ff);root.addView(subtitle);
   screenContent=new LinearLayout(this);screenContent.setOrientation(1);root.addView(screenContent);
-  LinearLayout nav=new LinearLayout(this);nav.setBackgroundColor(0xff261a36);shell.addView(nav);
-  String[] names={"⌂ Dashboard","◷ Tijdlijn","♟ Accounts","⚙ Instellingen"};
+  LinearLayout nav=new LinearLayout(this);nav.setBackgroundColor(0xff261a36);nav.setPadding(dp(4),dp(4),dp(4),dp(4));shell.addView(nav);
+  String[] names={"Dashboard","Tijdlijn","Accounts","Instellingen"};
   for(int i=0;i<names.length;i++){
    final int tab=i;
-   Button button=new Button(this);button.setText(names[i]);button.setAllCaps(false);button.setTextSize(11);
+   Button button=new Button(this);button.setText(names[i]);button.setAllCaps(false);button.setTextSize(14);button.setTypeface(null,android.graphics.Typeface.BOLD);button.setSingleLine(false);
    button.setTextColor(i==activeTab?0xffffd88a:0xffc6b9d6);
    button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(i==activeTab?0xff49335f:0xff261a36));
    button.setOnClickListener(v->{activeTab=tab;draw();});
-   nav.addView(button,new LinearLayout.LayoutParams(0,dp(56),1));
+   nav.addView(button,new LinearLayout.LayoutParams(0,dp(64),1));
   }
+  shell.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
   if(activeTab==0){
    screenContent.addView(label("ALLE ACCOUNTS · EERSTVOLGENDE BOUWER",17));
    dashboard=new LinearLayout(this);dashboard.setOrientation(1);screenContent.addView(dashboard);
@@ -384,7 +385,7 @@ public final class MainActivity extends Activity {
    if(soonest!=Long.MAX_VALUE){
     TextView end=label(finishAt(soonest),12);end.setTextColor(0xffc9b9df);card.addView(end);
    }
-   TextView detail=label((first==null?"Geen actieve builder":cleanName(first.optString("name")))+"\n"+busy+" bezig · vrij: ?",12);
+   TextView detail=label((first==null?"Geen actieve builder":cleanName(first.optString("name")))+"\n"+busy+" bouwers bezig",12);
    detail.setTextColor(0xffd4c5e4);card.addView(detail);
    if(ready){
     Button checked=new Button(this);checked.setText("Gecontroleerd");checked.setTextSize(11);checked.setAllCaps(false);
