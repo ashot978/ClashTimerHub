@@ -186,6 +186,8 @@ public final class MainActivity extends Activity {
   long now=System.currentTimeMillis();
   ArrayList<String> ordered=new ArrayList<>(accounts);
   Collections.sort(ordered,(a,b)->{
+   int ca=completedCount(a,now),cb=completedCount(b,now);
+   if(ca!=cb)return Integer.compare(cb,ca);
    long x=nextBuilder(a,now),y=nextBuilder(b,now);
    if(x==Long.MAX_VALUE)return y==Long.MAX_VALUE?0:1;
    if(y==Long.MAX_VALUE)return -1;
