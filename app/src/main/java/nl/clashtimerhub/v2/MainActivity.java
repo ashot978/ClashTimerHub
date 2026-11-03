@@ -28,7 +28,7 @@ public final class MainActivity extends Activity {
  private static final int PICK=12,IMPORT=13,RESTORE=14;
  private Bitmap lastScanBitmap;
  private final android.os.Handler ticker=new android.os.Handler(android.os.Looper.getMainLooper());
- private final Runnable tick=new Runnable(){public void run(){if(items!=null)showTimers();if(dashboard!=null)renderDashboard();ticker.postDelayed(this,1000);}};
+ private final Runnable tick=new Runnable(){public void run(){if(activeTab==0&&dashboard!=null)renderDashboard();else if(activeTab==1||activeTab==2)refreshVisibleTimers();ticker.postDelayed(this,1000);}};
  @Override protected void onResume(){super.onResume();ticker.removeCallbacks(tick);ticker.post(tick);}
  @Override protected void onPause(){ticker.removeCallbacks(tick);super.onPause();}
  private static final Pattern TIME=Pattern.compile("(?i)(?:(\\d+)\\s*d\\s*)?(?:(\\d+)\\s*h\\s*)?(?:(\\d+)\\s*m\\s*)?(?:(\\d+)\\s*s\\s*)?");
@@ -149,6 +149,20 @@ public final class MainActivity extends Activity {
   if(list.isEmpty())screenContent.addView(label("Geen actieve upgrades voor dit filter.",14));
   for(JSONObject o:list)addTimerRow(screenContent,o,false);
  }
+ private void refreshVisibleTimers(){
+  if(screenContent==null)return;
+  for(int i=0;i<screenContent.getChildCount();i++){
+   View v=screenContent.getChildAt(i);
+   if(v instanceof LinearLayout){
+    LinearLayout group=(LinearLayout)v;
+    if(group.getTag() instanceof Long){
+     long finish=(Long)group.getTag();
+     if(group.getChildCount()>1&&group.getChildAt(1) instanceof TextView)
+      ((TextView)group.getChildAt(1)).setText(format(Math.max(0,(finish-System.currentTimeMillis()+999)/1000))+"  ·  "+finishAt(finish));
+    }
+   }
+  }
+ }
  private String timelineFilter="Alles";
  private String finishAt(long timestamp){
   java.text.SimpleDateFormat fmt=new java.text.SimpleDateFormat("HH:mm",java.util.Locale.forLanguageTag("nl-NL"));
@@ -162,7 +176,7 @@ public final class MainActivity extends Activity {
  }
  private void addTimerRow(LinearLayout parent,JSONObject o,boolean editable){
   long finish=o.optLong("finish"),remain=Math.max(0,(finish-System.currentTimeMillis()+999)/1000);
-  LinearLayout card=new LinearLayout(this);card.setOrientation(1);card.setPadding(dp(10),dp(5),dp(10),dp(5));card.setBackground(shape(remain<=1800?0xff46351f:0xff30243e,12));
+  LinearLayout card=new LinearLayout(this);card.setOrientation(1);card.setPadding(dp(10),dp(5),dp(10),dp(5));card.setBackground(shape(remain<=1800?0xff46351f:0xff30243e,12));card.setTag(finish);
   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(dp(2),dp(3),dp(2),dp(3));parent.addView(card,lp);
   card.addView(label((editable?"":o.optString("account")+" · ")+cleanName(o.optString("name")),14));
   TextView time=label(format(remain)+"  ·  "+finishAt(finish),13);time.setTextColor(0xffffd88a);card.addView(time);
@@ -337,11 +351,11 @@ public final class MainActivity extends Activity {
    if(ca!=cb)return Integer.compare(cb,ca);
    return Long.compare(nextBuilder(a,now),nextBuilder(b,now));
   });
-  int active=0,ready=0;
+  int active=0,totalReady=0;
   for(JSONObject o:upgrades)if("Bouwers".equals(o.optString("category"))&&o.optLong("finish")>now)active++;
-  for(String ac:accounts)ready+=completedCount(ac,now);
+  for(String ac:accounts)totalReady+=completedCount(ac,now);
   LinearLayout stats=new LinearLayout(this);dashboard.addView(stats);
-  String[] metrics={accounts.size()+"\\nACCOUNTS",active+"\\nBOUWERS BEZIG",ready+"\\nKLAAR"};
+  String[] metrics={accounts.size()+"\\nACCOUNTS",active+"\\nBOUWERS BEZIG",totalReady+"\\nKLAAR"};
   for(String metric:metrics){
    TextView view=label(metric.replace("\\n","\n"),13);view.setGravity(android.view.Gravity.CENTER);
    view.setTextColor(0xffffd88a);view.setBackground(shape(0xff292139,12));
@@ -446,7 +460,7 @@ public final class MainActivity extends Activity {
    if(start<0||end<=start)throw new JSONException("Geen JSON gevonden");
    JSONObject json=new JSONObject(input.substring(start,end+1));
    if(!json.has("buildings")&&!json.has("heroes")&&!json.has("units"))throw new JSONException("Geen Clash-export");
-   String ac=account.getSelectedItem()==null?"":account.getSelectedItem().toString();
+   String ac=account!=null&&account.getSelectedItem()!=null?account.getSelectedItem().toString():"";
    JSONObject player=json.optJSONObject("player");
    String tag=json.optString("tag",json.optString("playerTag",player==null?"":player.optString("tag",""))).trim().toUpperCase(java.util.Locale.ROOT);
    JSONObject tags=new JSONObject(getPreferences(0).getString("playerTags","{}"));
@@ -519,7 +533,7 @@ public final class MainActivity extends Activity {
     JSONObject old=upgrades.get(i);
     if(ac.equals(old.optString("account"))&&old.optBoolean("exported",false))upgrades.remove(i);
    }
-   upgrades.addAll(parsed);getPreferences(0).edit().putLong("ack_"+ac,System.currentTimeMillis()).apply();if(!tag.isEmpty()){tags.put(ac,tag);getPreferences(0).edit().putString("playerTags",tags.toString()).apply();}persist();((ArrayAdapter)account.getAdapter()).notifyDataSetChanged();int selectedIndex=accounts.indexOf(ac);if(selectedIndex>=0)account.setSelection(selectedIndex);showTimers();renderDashboard();toast(parsed.size()+" upgrades geïmporteerd voor "+ac);
+   upgrades.addAll(parsed);getPreferences(0).edit().putLong("ack_"+ac,System.currentTimeMillis()).apply();if(!tag.isEmpty()){tags.put(ac,tag);getPreferences(0).edit().putString("playerTags",tags.toString()).apply();}persist();selectedAccount=ac;draw();toast(parsed.size()+" upgrades geïmporteerd voor "+ac);
   }catch(Exception e){toast("Ongeldige Clash-export: "+e.getMessage());}
  }
  private void addExportTimer(ArrayList<JSONObject> out,String ac,String cat,long id,long sec,long ts,int index)throws JSONException{
