@@ -160,27 +160,41 @@ public final class MainActivity extends Activity {
    }).setNegativeButton("Annuleren",null).show();
  }
  private void renderDashboard(){
-  if(dashboard==null)return;dashboard.removeAllViews();
+  if(dashboard==null)return;
+  dashboard.removeAllViews();
   long now=System.currentTimeMillis();
   ArrayList<String> ordered=new ArrayList<>(accounts);
-  java.util.Collections.sort(ordered,(a,b)->{
+  Collections.sort(ordered,(a,b)->{
    long x=nextBuilder(a,now),y=nextBuilder(b,now);
-   if(x==Long.MAX_VALUE&&y!=Long.MAX_VALUE)return 1;
-   if(y==Long.MAX_VALUE&&x!=Long.MAX_VALUE)return -1;
+   if(x==Long.MAX_VALUE)return y==Long.MAX_VALUE?0:1;
+   if(y==Long.MAX_VALUE)return -1;
    return Long.compare(x,y);
   });
   JSONObject tags;
   try{tags=new JSONObject(getPreferences(0).getString("playerTags","{}"));}catch(Exception e){tags=new JSONObject();}
+  int totalActive=0;
+  for(JSONObject o:upgrades)if("Bouwers".equals(o.optString("category"))&&o.optLong("finish")>now)totalActive++;
+  TextView summary=label(accounts.size()+" accounts  ·  "+totalActive+" actieve bouwertimers",13);
+  summary.setTextColor(0xffb5a5ff);dashboard.addView(summary);
   for(String ac:ordered){
-   long soonest=nextBuilder(ac,now);JSONObject first=null;int active=0;
+   long soonest=nextBuilder(ac,now);
+   JSONObject first=null;int active=0;
    for(JSONObject o:upgrades)if(ac.equals(o.optString("account"))&&"Bouwers".equals(o.optString("category"))&&o.optLong("finish")>now){
     active++;if(o.optLong("finish")==soonest)first=o;
    }
-   String status=first==null?"Geen actieve builder":first.optString("name")+" · "+format((soonest-now+999)/1000);
+   LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
+   card.setPadding(dp(12),dp(7),dp(12),dp(7));
+   card.setBackground(shape(first==null?0xff244735:0xff30243e,14));
+   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(0,dp(3),0,dp(3));dashboard.addView(card,lp);
+   LinearLayout top=new LinearLayout(this);top.setOrientation(LinearLayout.HORIZONTAL);card.addView(top);
+   TextView title=label(ac,17);title.setTypeface(null,android.graphics.Typeface.BOLD);
+   top.addView(title,new LinearLayout.LayoutParams(0,-2,1));
+   TextView countdown=label(first==null?"VRIJ":format((soonest-now+999)/1000),18);
+   countdown.setTypeface(null,android.graphics.Typeface.BOLD);countdown.setTextColor(first==null?0xff82e8a7:0xffffd88a);top.addView(countdown);
    String tag=tags.optString(ac,"");
-   TextView card=label(ac+(tag.isEmpty()?"":" · "+tag)+"\n"+status,18);
-   card.setBackground(shape(first==null?0xff27523c:0xff30243e,14));
-   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(0,dp(4),0,dp(4));dashboard.addView(card,lp);
+   String name=first==null?"Geen actieve buildertimer":cleanName(first.optString("name"));
+   TextView detail=label(name+"  ·  "+active+" bezig"+(tag.isEmpty()?"":"  ·  "+tag),13);
+   detail.setTextColor(0xffc5b7d6);card.addView(detail);
    card.setOnClickListener(v->{int i=accounts.indexOf(ac);if(i>=0)account.setSelection(i);});
   }
  }
