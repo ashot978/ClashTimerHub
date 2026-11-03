@@ -43,12 +43,14 @@ service = replace_once(service,
                         if(consecutiveMenuFrames==1)
                             store.setScanMessage("Upgrademenu herkend. Timers worden gecontroleerd...");
                         // Two consecutive recognitions avoid accidental OCR artifacts.
-                        if(consecutiveMenuFrames>=2 && result.hit!=null){
+                        if(result.hit!=null){
                             long estimate=System.currentTimeMillis()+result.hit.seconds*1000L;
                             if(bestFinish==0||estimate<bestFinish){
                                 bestFinish=estimate;
                                 bestText=result.hit.text;
                                 store.setScanMessage("Timer herkend: "+result.hit.text+". Scan wordt afgerond.");
+                                finishScan("Timer gevonden");
+                                return;
                             }
                         }
                     } else {
@@ -91,7 +93,7 @@ service = replace_once(service,
                 bestFinish=0;
                 bestText="";
                 store.setScanMessage("Scanknop ingedrukt. OCR leest nu het geopende menu; wacht circa 15 seconden.");
-                floatingScanButton.hide();
+                // Keep the button visible until OCR returns a result.
             });
             floatingScanButton.show();
         }''',
@@ -116,6 +118,11 @@ service = replace_once(service,
     'if(!manualScanArmed){scheduleNext();return;}\n        if(recognizing.compareAndSet(false,true)){',
     "do not OCR before user tap")
 
+# Always remove the floating control when the capture session ends.
+service = replace_once(service,
+    '        store.setScanning(false);',
+    '        if(floatingScanButton!=null){floatingScanButton.hide();floatingScanButton=null;}\n        store.setScanning(false);',
+    "cleanup floating scan control")
 service_file.write_text(service, encoding="utf-8")
 
 # Request overlay permission when opening the app; permission is granted by
