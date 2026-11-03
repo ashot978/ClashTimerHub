@@ -43,10 +43,12 @@ public final class OcrScanner {
                     List<MenuTimerDetector.Token> tokens = new ArrayList<>();
                     for (Text.TextBlock block : text.getTextBlocks()) {
                         for (Text.Line line : block.getLines()) {
-                            Rect rect = line.getBoundingBox();
+                            for (Text.Element element : line.getElements()) {
+                            Rect rect = element.getBoundingBox();
                             if (rect != null) {
                                 tokens.add(new MenuTimerDetector.Token(
-                                    line.getText(), rect.left + cropLeft(bitmap, context, category), rect.top + cropTop(bitmap, context, category), rect.right + cropLeft(bitmap, context, category), rect.bottom + cropTop(bitmap, context, category)));
+                                    element.getText(), rect.left + cropLeft(bitmap, context, category), rect.top + cropTop(bitmap, context, category), rect.right + cropLeft(bitmap, context, category), rect.bottom + cropTop(bitmap, context, category)));
+                            }
                             }
                         }
                     }
