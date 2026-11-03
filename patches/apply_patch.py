@@ -78,6 +78,15 @@ service = replace_once(service,
             floatingScanButton=new ScanOverlay(this,category,()->{
                 manualScanArmed=true;
                 startAt=System.currentTimeMillis();
+                // Start the timeout only after the player taps the overlay.
+                if(handler!=null){
+                    handler.postDelayed(()->{
+                        if(!closed && manualScanArmed &&
+                           System.currentTimeMillis()-startAt>=SCAN_LENGTH_MS)
+                            finishScan("Scan afgerond");
+                    },SCAN_LENGTH_MS);
+                    handler.post(this::scanTick);
+                }
                 consecutiveMenuFrames=0;
                 bestFinish=0;
                 bestText="";
@@ -92,7 +101,20 @@ service = replace_once(service,
     'if(!closed && manualScanArmed && result.menuOpen){',
     "manual trigger gate")
 # Keep the scanner alive until the first tap; then enforce the usual timeout.
-service = service.replace('System.currentTimeMillis()-startAt', '(manualScanArmed ? System.currentTimeMillis()-startAt : 0)')
+# The capture session must not time out while waiting for the user to open
+# Clash and tap the overlay. Only count time after the manual trigger.
+service = replace_once(service,
+    'handler.postDelayed(()->finishScan("Scan afgerond"),SCAN_LENGTH_MS);',
+    '// Timeout is scheduled when the floating Scan nu button is tapped.',
+    "remove premature timeout")
+service = replace_once(service,
+    'if((manualScanArmed ? System.currentTimeMillis()-startAt : 0)>SCAN_LENGTH_MS)',
+    'if(manualScanArmed && System.currentTimeMillis()-startAt>SCAN_LENGTH_MS)',
+    "scan timeout gate")
+service = replace_once(service,
+    'if(recognizing.compareAndSet(false,true)){',
+    'if(!manualScanArmed){scheduleNext();return;}\n        if(recognizing.compareAndSet(false,true)){',
+    "do not OCR before user tap")
 
 service_file.write_text(service, encoding="utf-8")
 
