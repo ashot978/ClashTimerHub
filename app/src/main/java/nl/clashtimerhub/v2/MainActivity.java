@@ -199,7 +199,11 @@ public final class MainActivity extends Activity {
   for(JSONObject o:upgrades)if("Bouwers".equals(o.optString("category"))&&o.optLong("finish")>now)totalActive++;
   TextView summary=label(accounts.size()+" accounts  ·  "+totalActive+" actieve bouwertimers",13);
   summary.setTextColor(0xffb5a5ff);dashboard.addView(summary);
+  LinearLayout gridRow=null;
+  int gridIndex=0;
   for(String ac:ordered){
+   if(gridIndex%2==0){gridRow=new LinearLayout(this);gridRow.setOrientation(LinearLayout.HORIZONTAL);dashboard.addView(gridRow);}
+   gridIndex++;
    long soonest=nextBuilder(ac,now);
    JSONObject first=null;int active=0;
    for(JSONObject o:upgrades)if(ac.equals(o.optString("account"))&&"Bouwers".equals(o.optString("category"))&&o.optLong("finish")>now){
@@ -208,8 +212,8 @@ public final class MainActivity extends Activity {
    LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
    card.setPadding(dp(10),dp(2),dp(10),dp(2));
    card.setBackground(shape(first==null?0xff244735:0xff30243e,14));
-   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(0,dp(2),0,dp(2));dashboard.addView(card,lp);
-   LinearLayout top=new LinearLayout(this);top.setOrientation(LinearLayout.HORIZONTAL);card.addView(top);
+   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,-2,1);lp.setMargins(dp(2),dp(3),dp(2),dp(3));gridRow.addView(card,lp);
+   LinearLayout top=new LinearLayout(this);top.setOrientation(LinearLayout.VERTICAL);card.addView(top);
    TextView title=label(ac,15);title.setTypeface(null,android.graphics.Typeface.BOLD);
    top.addView(title,new LinearLayout.LayoutParams(0,-2,1));
    TextView countdown=label(first==null?"Geen timer":format((soonest-now+999)/1000),16);
@@ -219,7 +223,7 @@ public final class MainActivity extends Activity {
    int completed=completedCount(ac,now);
    long oldest=oldestCompleted(ac,now);
    String waiting=completed==0?"":(" · "+completed+" klaar · oudste "+format((now-oldest)/1000)+" geleden");
-   TextView detail=label(name+"  ·  "+active+" bezig · vrij: onbekend"+waiting,12);
+   TextView detail=label(name+"\n"+active+" bezig · vrij: ?"+waiting,12);
    detail.setTextColor(0xffc5b7d6);card.addView(detail);
    if(completed>0){
     Button checked=new Button(this);checked.setText("Gecontroleerd");checked.setAllCaps(false);
