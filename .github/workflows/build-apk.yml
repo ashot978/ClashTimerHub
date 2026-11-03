@@ -21,12 +21,10 @@ jobs:
         with:
           path: ~/.android/debug.keystore
           key: clashtimerhub-debug-signing-v1
-      - name: Set up signing key
+      - name: Verify original signing key is present
         run: |
-          mkdir -p "$HOME/.android"
-          if [ ! -f "$HOME/.android/debug.keystore" ]; then
-            keytool -genkeypair -keystore "$HOME/.android/debug.keystore" -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname "CN=Android Debug,O=Android,C=US"
-          fi
+          test -f "$HOME/.android/debug.keystore" || { echo 'ERROR: Existing signing key missing; refusing to create incompatible APK'; exit 1; }
+          keytool -list -v -keystore "$HOME/.android/debug.keystore" -storepass android | grep 'SHA256:'
       - name: Set version for upgrade
         run: sed -i -E "s/versionCode [0-9]+/versionCode ${{ github.run_number }}/" app/build.gradle
       - name: Build new app
