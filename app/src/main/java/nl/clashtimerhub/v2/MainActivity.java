@@ -157,7 +157,36 @@ public final class MainActivity extends Activity {
     toast("Scannerkalibratie opgeslagen");
    }).setNegativeButton("Annuleren",null).show();
  }
- private void renderDashboard(){if(dashboard==null)return;dashboard.removeAllViews();long now=System.currentTimeMillis();for(String ac:accounts){JSONObject first=null;long min=Long.MAX_VALUE;for(JSONObject o:upgrades){if(ac.equals(o.optString("account"))&&"Bouwers".equals(o.optString("category"))&&o.optLong("finish")>now&&o.optLong("finish")<min){min=o.optLong("finish");first=o;}}String summary=first==null?"Geen actieve builder":first.optString("name")+" · "+format((min-now+999)/1000);TextView card=label(ac+"\n"+summary,18);card.setBackground(shape(0xff30243e,14));dashboard.addView(card);card.setOnClickListener(v->{int i=accounts.indexOf(ac);if(i>=0)account.setSelection(i);});}}
+ private void renderDashboard(){
+  if(dashboard==null)return;dashboard.removeAllViews();
+  long now=System.currentTimeMillis();
+  ArrayList<String> ordered=new ArrayList<>(accounts);
+  java.util.Collections.sort(ordered,(a,b)->{
+   long x=nextBuilder(a,now),y=nextBuilder(b,now);
+   if(x==Long.MAX_VALUE&&y!=Long.MAX_VALUE)return -1;
+   if(y==Long.MAX_VALUE&&x!=Long.MAX_VALUE)return 1;
+   return Long.compare(x,y);
+  });
+  JSONObject tags;
+  try{tags=new JSONObject(getPreferences(0).getString("playerTags","{}"));}catch(Exception e){tags=new JSONObject();}
+  for(String ac:ordered){
+   long soonest=nextBuilder(ac,now);JSONObject first=null;int active=0;
+   for(JSONObject o:upgrades)if(ac.equals(o.optString("account"))&&"Bouwers".equals(o.optString("category"))&&o.optLong("finish")>now){
+    active++;if(o.optLong("finish")==soonest)first=o;
+   }
+   String status=first==null?"Geen actieve builder":first.optString("name")+" · "+format((soonest-now+999)/1000);
+   String tag=tags.optString(ac,"");
+   TextView card=label(ac+(tag.isEmpty()?"":" · "+tag)+"\n"+status,18);
+   card.setBackground(shape(first==null?0xff27523c:0xff30243e,14));
+   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(0,dp(4),0,dp(4));dashboard.addView(card,lp);
+   card.setOnClickListener(v->{int i=accounts.indexOf(ac);if(i>=0)account.setSelection(i);});
+  }
+ }
+ private long nextBuilder(String ac,long now){
+  long min=Long.MAX_VALUE;
+  for(JSONObject o:upgrades)if(ac.equals(o.optString("account"))&&"Bouwers".equals(o.optString("category"))&&o.optLong("finish")>now)min=Math.min(min,o.optLong("finish"));
+  return min;
+ }
  private void showAllNextBuilders(){
   LinearLayout list=new LinearLayout(this);list.setOrientation(1);list.setPadding(dp(12),dp(8),dp(12),dp(8));
   long now=System.currentTimeMillis();
