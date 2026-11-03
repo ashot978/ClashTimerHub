@@ -26,6 +26,7 @@ public final class MainActivity extends Activity {
  private final ArrayList<JSONObject> upgrades=new ArrayList<>();
  private final ArrayList<JSONObject> pending=new ArrayList<>();
  private static final int PICK=12;
+ private Bitmap lastScanBitmap;
  private final android.os.Handler ticker=new android.os.Handler(android.os.Looper.getMainLooper());
  private final Runnable tick=new Runnable(){public void run(){if(items!=null)showTimers();ticker.postDelayed(this,1000);}};
  @Override protected void onResume(){super.onResume();ticker.removeCallbacks(tick);ticker.post(tick);}
@@ -76,6 +77,7 @@ public final class MainActivity extends Activity {
   add.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xff353853));
   LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(0,dp(52),1);ap.setMargins(dp(8),0,0,0);actions.addView(add,ap);
   button("Deel timer-overzicht",()->shareTimers());
+  button("Scanner kalibreren",()->calibrate());
   button("Alle accounts · Overzicht",()->overview());
   TextView section=label("ACTIVE UPGRADES  •  LIVE",18);section.setTypeface(null,android.graphics.Typeface.BOLD);root.addView(section);
   items=new LinearLayout(this);items.setOrientation(1);root.addView(items);showTimers();
@@ -96,6 +98,29 @@ public final class MainActivity extends Activity {
   if(count==0){toast("Er zijn nog geen timers om te delen");return;}
   Intent send=new Intent(Intent.ACTION_SEND);send.setType("text/plain");send.putExtra(Intent.EXTRA_TEXT,out.toString());
   startActivity(Intent.createChooser(send,"Deel je timers"));
+ }
+ private void calibrate(){
+  LinearLayout form=new LinearLayout(this);form.setOrientation(1);form.setPadding(dp(18),dp(12),dp(18),dp(12));
+  TextView caption=label("Stel in waar de timertekst begint en eindigt binnen iedere upgrade-rij. De instelling wordt onthouden voor volgende scans.",14);form.addView(caption);
+  int[] vals={getPreferences(0).getInt("timerStart",70),getPreferences(0).getInt("timerEnd",94)};
+  TextView a=label("Timer begint: "+vals[0]+"%",15),b=label("Timer eindigt: "+vals[1]+"%",15);
+  SeekBar start=new SeekBar(this),end=new SeekBar(this);start.setMax(90);end.setMax(100);
+  start.setProgress(vals[0]);end.setProgress(vals[1]);
+  start.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener(){
+   public void onProgressChanged(SeekBar bar,int progress,boolean user){vals[0]=progress;a.setText("Timer begint: "+progress+"%");}
+   public void onStartTrackingTouch(SeekBar bar){}public void onStopTrackingTouch(SeekBar bar){}
+  });
+  end.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener(){
+   public void onProgressChanged(SeekBar bar,int progress,boolean user){vals[1]=progress;b.setText("Timer eindigt: "+progress+"%");}
+   public void onStartTrackingTouch(SeekBar bar){}public void onStopTrackingTouch(SeekBar bar){}
+  });
+  form.addView(a);form.addView(start);form.addView(b);form.addView(end);
+  new android.app.AlertDialog.Builder(this).setTitle("Timergebied kalibreren").setView(form)
+   .setPositiveButton("Opslaan",(d,w)->{
+    if(vals[1]<=vals[0]+3){toast("Eindpositie moet minimaal 4% na de beginpositie liggen");return;}
+    getPreferences(0).edit().putInt("timerStart",vals[0]).putInt("timerEnd",vals[1]).apply();
+    toast("Scannerkalibratie opgeslagen");
+   }).setNegativeButton("Annuleren",null).show();
  }
  private void overview(){
   long now=System.currentTimeMillis();StringBuilder result=new StringBuilder();
@@ -222,9 +247,11 @@ public final class MainActivity extends Activity {
  private void scanRow(Bitmap bmp,ArrayList<Rect> rows,int index){
   if(index>=rows.size()){review();return;}
   Rect r=rows.get(index);
-  int split=r.left+(int)(r.width()*.70);
+  int startPct=getPreferences(0).getInt("timerStart",70),endPct=getPreferences(0).getInt("timerEnd",94);
+  if(endPct<=startPct+3){startPct=70;endPct=94;}
+  int split=r.left+(int)(r.width()*startPct/100.0);
   Bitmap name=Bitmap.createBitmap(bmp,r.left,r.top,split-r.left,r.height());
-  int timerRight=r.left+(int)(r.width()*.94); // Exclude stopwatch icon
+  int timerRight=r.left+(int)(r.width()*endPct/100.0); // Exclude stopwatch icon
   Bitmap timer=Bitmap.createBitmap(bmp,split,r.top,timerRight-split,r.height());
   Bitmap n2=Bitmap.createScaledBitmap(name,name.getWidth()*3,name.getHeight()*3,true);
   Bitmap t2=Bitmap.createScaledBitmap(timer,timer.getWidth()*3,timer.getHeight()*3,true);
