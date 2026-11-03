@@ -9,6 +9,17 @@ public final class BuilderAlarm extends android.content.BroadcastReceiver {
   if(finish>System.currentTimeMillis()+60000)return;
   String ac=intent.getStringExtra("account"),name=intent.getStringExtra("name");
   if(ac==null||name==null)return;
+  android.content.SharedPreferences prefs=context.getSharedPreferences("MainActivity",Context.MODE_PRIVATE);
+  if(finish<=prefs.getLong("ack_"+ac,0L))return;
+  boolean stillTracked=false;
+  try{
+   org.json.JSONArray upgrades=new org.json.JSONArray(prefs.getString("upgrades","[]"));
+   for(int i=0;i<upgrades.length();i++){
+    org.json.JSONObject o=upgrades.getJSONObject(i);
+    if(ac.equals(o.optString("account"))&&finish==o.optLong("finish")&&name.equals(o.optString("name"))){stillTracked=true;break;}
+   }
+  }catch(Exception ignored){}
+  if(!stillTracked)return;
   NotificationManager manager=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
   if(manager==null)return;
   if(Build.VERSION.SDK_INT>=26)manager.createNotificationChannel(new NotificationChannel(TimerWidget.CHANNEL,"Builder gereed",NotificationManager.IMPORTANCE_DEFAULT));
