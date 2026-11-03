@@ -33,7 +33,7 @@ public final class FloatingSyncService extends Service {
   TextView view=new TextView(this);view.setText("⚔");view.setTextSize(23);view.setTextColor(Color.WHITE);view.setGravity(Gravity.CENTER);
   GradientDrawable bg=new GradientDrawable();bg.setColor(0xff6840a0);bg.setCornerRadius(100);view.setBackground(bg);view.setAlpha(.88f);
   int size=(int)(52*getResources().getDisplayMetrics().density);
-  params=new WindowManager.LayoutParams(size,size,Build.VERSION.SDK_INT>=26?WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY:WindowManager.LayoutParams.TYPE_PHONE,WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,PixelFormat.TRANSLUCENT);
+  params=new WindowManager.LayoutParams(size,size,Build.VERSION.SDK_INT>=26?WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY:WindowManager.LayoutParams.TYPE_PHONE,WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL|WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,PixelFormat.TRANSLUCENT);
   params.gravity=Gravity.TOP|Gravity.START;params.x=getResources().getDisplayMetrics().widthPixels-size;params.y=getResources().getDisplayMetrics().heightPixels/3;
   view.setOnTouchListener(new View.OnTouchListener(){
    float startX,startY;int originalX,originalY;boolean moved;
@@ -46,14 +46,26 @@ public final class FloatingSyncService extends Service {
       params.x=Math.max(0,originalX+dx);params.y=Math.max(0,originalY+dy);manager.updateViewLayout(view,params);return true;
      case MotionEvent.ACTION_UP:
       if(!moved){
-       Intent i=new Intent(FloatingSyncService.this,QuickImportActivity.class);
-       i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);startActivity(i);
+       pasteNow();
       }return true;
     }
     return false;
    }
   });
   bubble=view;manager.addView(bubble,params);
+ }
+ private void pasteNow(){
+  try{
+   android.content.ClipboardManager clipboard=(android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
+   if(clipboard==null||!clipboard.hasPrimaryClip())throw new IllegalArgumentException("Klembord is leeg");
+   android.content.ClipData clip=clipboard.getPrimaryClip();
+   if(clip==null||clip.getItemCount()==0)throw new IllegalArgumentException("Klembord is leeg");
+   CharSequence value=clip.getItemAt(0).coerceToText(this);
+   String result=QuickSyncImporter.importJson(this,value==null?"":value.toString());
+   Toast.makeText(this,result,Toast.LENGTH_LONG).show();
+  }catch(Exception e){
+   Toast.makeText(this,"Niet geplakt: "+e.getMessage(),Toast.LENGTH_LONG).show();
+  }
  }
  @Override public int onStartCommand(Intent intent,int flags,int startId){return START_STICKY;}
  @Override public void onDestroy(){if(manager!=null&&bubble!=null)manager.removeView(bubble);super.onDestroy();}
