@@ -335,48 +335,48 @@ public final class MainActivity extends Activity {
   Collections.sort(ordered,(a,b)->{
    int ca=completedCount(a,now),cb=completedCount(b,now);
    if(ca!=cb)return Integer.compare(cb,ca);
-   long x=nextBuilder(a,now),y=nextBuilder(b,now);
-   if(x==Long.MAX_VALUE)return y==Long.MAX_VALUE?0:1;
-   if(y==Long.MAX_VALUE)return -1;
-   return Long.compare(x,y);
+   return Long.compare(nextBuilder(a,now),nextBuilder(b,now));
   });
-  JSONObject tags;
-  try{tags=new JSONObject(getPreferences(0).getString("playerTags","{}"));}catch(Exception e){tags=new JSONObject();}
-  int totalActive=0;
-  for(JSONObject o:upgrades)if("Bouwers".equals(o.optString("category"))&&o.optLong("finish")>now)totalActive++;
-  TextView summary=label(accounts.size()+" accounts  ·  "+totalActive+" actieve bouwertimers",13);
-  summary.setTextColor(0xffb5a5ff);dashboard.addView(summary);
-  LinearLayout gridRow=null;
-  int gridIndex=0;
+  int active=0,ready=0;
+  for(JSONObject o:upgrades)if("Bouwers".equals(o.optString("category"))&&o.optLong("finish")>now)active++;
+  for(String ac:accounts)ready+=completedCount(ac,now);
+  LinearLayout stats=new LinearLayout(this);dashboard.addView(stats);
+  String[] metrics={accounts.size()+"\\nACCOUNTS",active+"\\nBOUWERS BEZIG",ready+"\\nKLAAR"};
+  for(String metric:metrics){
+   TextView view=label(metric.replace("\\n","\n"),13);view.setGravity(android.view.Gravity.CENTER);
+   view.setTextColor(0xffffd88a);view.setBackground(shape(0xff292139,12));
+   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,dp(70),1);lp.setMargins(dp(2),dp(3),dp(2),dp(3));stats.addView(view,lp);
+  }
+  LinearLayout gridRow=null;int index=0;
   for(String ac:ordered){
-   if(gridIndex%2==0){gridRow=new LinearLayout(this);gridRow.setOrientation(LinearLayout.HORIZONTAL);dashboard.addView(gridRow);}
-   gridIndex++;
+   if(index%2==0){gridRow=new LinearLayout(this);dashboard.addView(gridRow);}
+   index++;
    long soonest=nextBuilder(ac,now);
-   JSONObject first=null;int active=0;
+   JSONObject first=null;int busy=0;
    for(JSONObject o:upgrades)if(ac.equals(o.optString("account"))&&"Bouwers".equals(o.optString("category"))&&o.optLong("finish")>now){
-    active++;if(o.optLong("finish")==soonest)first=o;
+    busy++;if(o.optLong("finish")==soonest)first=o;
    }
-   LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
-   card.setPadding(dp(10),dp(2),dp(10),dp(2));
-   card.setBackground(shape(first==null?0xff244735:0xff30243e,14));
-   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,-2,1);lp.setMargins(dp(2),dp(3),dp(2),dp(3));gridRow.addView(card,lp);
-   LinearLayout top=new LinearLayout(this);top.setOrientation(LinearLayout.VERTICAL);card.addView(top);
-   TextView title=label(ac,15);title.setTypeface(null,android.graphics.Typeface.BOLD);
-   top.addView(title,new LinearLayout.LayoutParams(-1,-2));
-   TextView countdown=label(first==null?"Geen timer":format((soonest-now+999)/1000),16);
-   countdown.setTypeface(null,android.graphics.Typeface.BOLD);countdown.setTextColor(first==null?0xff82e8a7:0xffffd88a);top.addView(countdown);
-   String tag=tags.optString(ac,"");
-   String name=first==null?"Geen actieve buildertimer":cleanName(first.optString("name"));
    int completed=completedCount(ac,now);
-   long oldest=oldestCompleted(ac,now);
-   String waiting=completed==0?"":(" · "+completed+" klaar · oudste "+format((now-oldest)/1000)+" geleden");
-   TextView detail=label(name+"\n"+active+" bezig · vrij: ?"+waiting,12);
-   detail.setTextColor(0xffc5b7d6);card.addView(detail);
-   if(completed>0){
-    Button checked=new Button(this);checked.setText("Gecontroleerd");checked.setAllCaps(false);
+   boolean ready=completed>0,urgent=!ready&&soonest!=Long.MAX_VALUE&&soonest-now<=1800000L;
+   int color=ready?0xff213a30:urgent?0xff443420:0xff30233e;
+   LinearLayout card=new LinearLayout(this);card.setOrientation(1);card.setPadding(dp(8),dp(6),dp(8),dp(8));card.setBackground(shape(color,14));
+   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,-2,1);lp.setMargins(dp(2),dp(3),dp(2),dp(3));gridRow.addView(card,lp);
+   TextView name=label(ac,15);name.setTypeface(null,android.graphics.Typeface.BOLD);card.addView(name);
+   if(ready){
+    TextView done=label(completed+" BOUWER"+(completed==1?"":"S")+" KLAAR",14);done.setTextColor(0xff8be3ad);done.setTypeface(null,android.graphics.Typeface.BOLD);card.addView(done);
+   }
+   TextView timer=label(soonest==Long.MAX_VALUE?"Geen actieve builder":format(Math.max(0,(soonest-now+999)/1000)),18);
+   timer.setTextColor(ready?0xff8be3ad:0xffffd783);timer.setTypeface(null,android.graphics.Typeface.BOLD);card.addView(timer);
+   if(soonest!=Long.MAX_VALUE){
+    TextView end=label(finishAt(soonest),12);end.setTextColor(0xffc9b9df);card.addView(end);
+   }
+   TextView detail=label((first==null?"Geen actieve builder":cleanName(first.optString("name")))+"\n"+busy+" bezig · vrij: ?",12);
+   detail.setTextColor(0xffd4c5e4);card.addView(detail);
+   if(ready){
+    Button checked=new Button(this);checked.setText("Gecontroleerd");checked.setTextSize(11);checked.setAllCaps(false);
     checked.setOnClickListener(v->acknowledgeAccount(ac));card.addView(checked);
    }
-   card.setOnClickListener(v->{int i=accounts.indexOf(ac);if(i>=0)account.setSelection(i);});
+   card.setOnClickListener(v->{selectedAccount=ac;activeTab=2;draw();});
   }
  }
  private int completedCount(String ac,long now){
