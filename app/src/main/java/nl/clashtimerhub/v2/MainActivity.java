@@ -70,6 +70,7 @@ public final class MainActivity extends Activity {
   category.setBackground(shape(0xff262941,14));root.addView(category,new LinearLayout.LayoutParams(-1,dp(52)));
   android.widget.AdapterView.OnItemSelectedListener refresh=new android.widget.AdapterView.OnItemSelectedListener(){public void onNothingSelected(android.widget.AdapterView<?> p){}public void onItemSelected(android.widget.AdapterView<?> p,View v,int pos,long id){showTimers();}};
   account.setOnItemSelectedListener(refresh);category.setOnItemSelectedListener(refresh);
+  button("📋 Synchroniseer vanaf klembord",()->importClipboard());
   button("Importeer Clash-data (JSON)",()->{Intent i=new Intent(Intent.ACTION_GET_CONTENT);i.setType("*/*");i.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(i,IMPORT);});
   button("Scan screenshot",()->{Intent i=new Intent(Intent.ACTION_GET_CONTENT);i.setType("image/*");startActivityForResult(i,PICK);});
   LinearLayout actions=new LinearLayout(this);actions.setOrientation(LinearLayout.HORIZONTAL);root.addView(actions);
@@ -142,6 +143,25 @@ public final class MainActivity extends Activity {
   ScrollView scroll=new ScrollView(this);scroll.addView(list);
   new android.app.AlertDialog.Builder(this).setTitle("Alle accounts · Eerstvolgende builder")
    .setView(scroll).setPositiveButton("Sluiten",null).show();
+ }
+ private void importClipboard(){
+  if(account==null||account.getSelectedItem()==null){toast("Selecteer eerst een account");return;}
+  android.content.ClipboardManager manager=(android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
+  if(manager==null||!manager.hasPrimaryClip()){toast("Klembord is leeg. Kopieer eerst je spelergegevens in Clash of Clans.");return;}
+  android.content.ClipData clip=manager.getPrimaryClip();
+  if(clip==null||clip.getItemCount()==0){toast("Geen tekst op het klembord gevonden");return;}
+  CharSequence text=clip.getItemAt(0).coerceToText(this);
+  if(text==null||text.length()==0){toast("Geen Clash-data gevonden op het klembord");return;}
+  if(text.length()>10000000){toast("Gekopieerde data is te groot");return;}
+  String payload=text.toString().trim();
+  if(!payload.contains("\"buildings\"")&&!payload.contains("\"heroes\"")&&!payload.contains("\"units\"")){
+   toast("Dit lijkt geen Clash of Clans-spelerdata. Kopieer eerst Copy Player Data.");return;
+  }
+  String selected=account.getSelectedItem().toString();
+  new android.app.AlertDialog.Builder(this).setTitle("Synchroniseren met "+selected+"?")
+   .setMessage("De actieve upgrades uit de gekopieerde Clash-data worden aan dit account gekoppeld. Handmatige timers blijven behouden.")
+   .setPositiveButton("Synchroniseren",(d,w)->importClashData(payload))
+   .setNegativeButton("Annuleren",null).show();
  }
  private void importClashData(String input){
   try{
