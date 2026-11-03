@@ -238,7 +238,7 @@ public final class MainActivity extends Activity {
    LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,-2,1);lp.setMargins(dp(2),dp(3),dp(2),dp(3));gridRow.addView(card,lp);
    LinearLayout top=new LinearLayout(this);top.setOrientation(LinearLayout.VERTICAL);card.addView(top);
    TextView title=label(ac,15);title.setTypeface(null,android.graphics.Typeface.BOLD);
-   top.addView(title,new LinearLayout.LayoutParams(0,-2,1));
+   top.addView(title,new LinearLayout.LayoutParams(-1,-2));
    TextView countdown=label(first==null?"Geen timer":format((soonest-now+999)/1000),16);
    countdown.setTypeface(null,android.graphics.Typeface.BOLD);countdown.setTextColor(first==null?0xff82e8a7:0xffffd88a);top.addView(countdown);
    String tag=tags.optString(ac,"");
