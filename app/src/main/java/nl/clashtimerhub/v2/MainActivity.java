@@ -28,7 +28,7 @@ public final class MainActivity extends Activity {
  private static final int PICK=12,IMPORT=13,RESTORE=14;
  private Bitmap lastScanBitmap;
  private final android.os.Handler ticker=new android.os.Handler(android.os.Looper.getMainLooper());
- private final Runnable tick=new Runnable(){public void run(){if(items!=null)showTimers();if(dashboard!=null)renderDashboard();ticker.postDelayed(this,5000);}};
+ private final Runnable tick=new Runnable(){public void run(){if(items!=null)showTimers();if(dashboard!=null)renderDashboard();ticker.postDelayed(this,60000);}};
  @Override protected void onResume(){super.onResume();ticker.removeCallbacks(tick);ticker.post(tick);}
  @Override protected void onPause(){ticker.removeCallbacks(tick);super.onPause();}
  private static final Pattern TIME=Pattern.compile("(?i)(?:(\\d+)\\s*d\\s*)?(?:(\\d+)\\s*h\\s*)?(?:(\\d+)\\s*m\\s*)?(?:(\\d+)\\s*s\\s*)?");
@@ -103,12 +103,23 @@ public final class MainActivity extends Activity {
 
  }
  private void notificationSettings(){
-  boolean enabled=getPreferences(0).getBoolean("notifyEnabled",true);
+  android.content.SharedPreferences prefs=getPreferences(0);
   LinearLayout panel=new LinearLayout(this);panel.setOrientation(LinearLayout.VERTICAL);panel.setPadding(dp(16),dp(8),dp(16),dp(8));
-  CheckBox toggle=new CheckBox(this);toggle.setText("Meldingen bij voltooide upgrades");toggle.setChecked(enabled);panel.addView(toggle);
-  TextView hint=label("Android moet meldingen toestaan. Meldingen zijn lokaal en gebruiken de laatst geïmporteerde timers.",13);panel.addView(hint);
-  new android.app.AlertDialog.Builder(this).setTitle("Meldingen").setView(panel)
-   .setPositiveButton("Opslaan",(d,w)->{getPreferences(0).edit().putBoolean("notifyEnabled",toggle.isChecked()).apply();TimerWidget.schedule(this);})
+  CheckBox enabled=new CheckBox(this);enabled.setText("Meldingen inschakelen");enabled.setChecked(prefs.getBoolean("notifyEnabled",true));panel.addView(enabled);
+  CheckBox completed=new CheckBox(this);completed.setText("Melding zodra upgrade klaar is");completed.setChecked(prefs.getBoolean("notifyOnFinish",true));panel.addView(completed);
+  panel.addView(label("Waarschuw mij zoveel minuten vooraf (0 = uit)",13));
+  EditText lead=new EditText(this);lead.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);lead.setSingleLine(true);
+  lead.setText(String.valueOf(prefs.getInt("notifyLeadMinutes",15)));lead.setSelectAllOnFocus(true);panel.addView(lead);
+  panel.addView(label("Bijvoorbeeld 5, 10, 30, 45 of 120 minuten. Maximaal 10080 (7 dagen).",12));
+  new android.app.AlertDialog.Builder(this).setTitle("Meldingen instellen").setView(panel)
+   .setPositiveButton("Opslaan",(d,w)->{
+    int minutes=15;
+    try{minutes=Integer.parseInt(lead.getText().toString().trim());}catch(Exception ignored){}
+    minutes=Math.max(0,Math.min(10080,minutes));
+    prefs.edit().putBoolean("notifyEnabled",enabled.isChecked())
+     .putBoolean("notifyOnFinish",completed.isChecked()).putInt("notifyLeadMinutes",minutes).apply();
+    TimerWidget.schedule(this);toast("Meldingen opgeslagen");
+   })
    .setNeutralButton("Android-instellingen",(d,w)->{
     Intent i=new Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS);
     i.putExtra(android.provider.Settings.EXTRA_APP_PACKAGE,getPackageName());startActivity(i);
