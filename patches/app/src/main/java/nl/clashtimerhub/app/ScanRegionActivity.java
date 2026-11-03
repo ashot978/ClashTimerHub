@@ -53,10 +53,18 @@ public final class ScanRegionActivity extends Activity {
                 android.widget.Toast.makeText(this, "Selecteer eerst een screenshot en een gebied", 1).show();
                 return;
             }
-            ScanRegions.save(this, category, preview.selection,
-                screenshot.getWidth(), screenshot.getHeight());
-            android.widget.Toast.makeText(this, "Scangebied opgeslagen", 0).show();
-            finish();
+            try {
+                ScanRegions.save(this, category, preview.selection,
+                    screenshot.getWidth(), screenshot.getHeight());
+                android.widget.Toast.makeText(this, "Scangebied opgeslagen",
+                    android.widget.Toast.LENGTH_SHORT).show();
+                finish();
+            } catch (RuntimeException error) {
+                android.util.Log.e("ClashTimerHub", "Saving scan region failed", error);
+                android.widget.Toast.makeText(this,
+                    "Opslaan mislukt: " + error.getClass().getSimpleName(),
+                    android.widget.Toast.LENGTH_LONG).show();
+            }
         });
         layout.addView(save);
         Button reset = new Button(this);
