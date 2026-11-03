@@ -206,35 +206,60 @@ public final class MainActivity extends Activity {
  }
  @Override protected void onActivityResult(int req,int result,Intent data){super.onActivityResult(req,result,data);if(req!=PICK||result!=RESULT_OK||data==null)return;try(InputStream stream=getContentResolver().openInputStream(data.getData())){Bitmap bmp=BitmapFactory.decodeStream(stream);if(bmp!=null)scan(bmp);}catch(Exception e){toast("Foto kon niet worden geopend");}}
  private void scan(Bitmap bmp){
-  // Seven builder slots are a maximum, not a target. Read all active rows, including brown hero/pet rows.
-  // The screenshot layout is 1312x1182: active rows end before the Suggested upgrades heading.
+  // One OCR pass on the full active-upgrade panel. Text coordinates are used to
+  // group name and timer by their actual screen position, rather than fixed rows.
   int w=bmp.getWidth(),h=bmp.getHeight();
-  int left=(int)(w*.587),right=(int)(w*.998);
-  int top=(int)(h*.071),bottom=(int)(h*.44);
+  int left=(int)(w*.587),right=Math.min(w,(int)(w*.998));
+  int top=(int)(h*.071),bottom=Math.min(h,(int)(h*.44));
   if(right<=left||bottom<=top){toast("Ongeldig screenshotformaat");return;}
   Bitmap panel=Bitmap.createBitmap(bmp,left,top,right-left,bottom-top);
-  TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS).process(InputImage.fromBitmap(panel,0))
-   .addOnSuccessListener(text->{
-    int cutoff=bottom;
-    for(Text.TextBlock block:text.getTextBlocks())for(Text.Line line:block.getLines()){
-     String s=line.getText().toLowerCase(java.util.Locale.ROOT);
-     if(s.contains("suggested")||s.contains("other upgrades")){
-      Rect rect=line.getBoundingBox();if(rect!=null)cutoff=Math.min(cutoff,top+rect.top);
-     }
+  com.google.mlkit.vision.text.TextRecognizer recognizer=TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
+  recognizer.process(InputImage.fromBitmap(panel,0)).addOnSuccessListener(result->{
+   ArrayList<Text.Line> lines=new ArrayList<>();
+   int cutoff=panel.getHeight();
+   for(Text.TextBlock block:result.getTextBlocks())for(Text.Line line:block.getLines()){
+    Rect rect=line.getBoundingBox();if(rect==null)continue;
+    String t=line.getText().toLowerCase(java.util.Locale.ROOT);
+    if(t.contains("suggested")||t.contains("other upgrades"))cutoff=Math.min(cutoff,rect.top);
+    else lines.add(line);
+   }
+   java.util.Collections.sort(lines,(x,y)->Integer.compare(x.getBoundingBox().centerY(),y.getBoundingBox().centerY()));
+   // Group text into rows by actual Y coordinates, preserving the visual order.
+   ArrayList<ArrayList<Text.Line>> groups=new ArrayList<>();
+   int tolerance=Math.max(8,(int)(h*.014));
+   for(Text.Line line:lines){
+    Rect rect=line.getBoundingBox();
+    if(rect.centerY()>=cutoff)continue;
+    ArrayList<Text.Line> group=null;
+    for(ArrayList<Text.Line> existing:groups){
+     if(Math.abs(existing.get(0).getBoundingBox().centerY()-rect.centerY())<=tolerance){group=existing;break;}
     }
-    panel.recycle();
-    // Fixed row bands follow the menu's own repeated row layout, not green pixels.
-    // Include the Elixir Collector, whose progress bar is brown.
-    ArrayList<Rect> rows=new ArrayList<>();
-    int first=(int)(h*.072),stride=(int)(h*.053),height=(int)(h*.046);
-    for(int i=0;i<7;i++){
-     int y=first+i*stride;
-     if(y+height>cutoff)break;
-     rows.add(new Rect(left,y,right,Math.min(h,y+height)));
+    if(group==null){group=new ArrayList<>();groups.add(group);}
+    group.add(line);
+   }
+   pending.clear();
+   for(ArrayList<Text.Line> group:groups){
+    StringBuilder name=new StringBuilder(),time=new StringBuilder();
+    for(Text.Line line:group){
+     String raw=line.getText().trim();
+     if(raw.isEmpty())continue;
+     if(raw.toLowerCase(java.util.Locale.ROOT).contains("upgrade"))continue;
+     if(parse(raw)>0||raw.matches("(?i).*\\\\d+\\\\s*[dhms].*"))time.append(raw).append(" ");
+     else name.append(raw).append(" ");
     }
-    if(rows.isEmpty()){toast("Geen actieve rijen gevonden");return;}
-    pending.clear();scanRow(bmp,rows,0);
-   }).addOnFailureListener(e->{panel.recycle();toast("Menudetectie mislukt");});
+    String title=cleanName(name.toString());
+    String duration=time.toString().trim();
+    if(title.isEmpty()||duration.isEmpty())continue;
+    try{
+     JSONObject o=new JSONObject();o.put("name",title);o.put("raw",duration);
+     o.put("seconds",parse(duration));o.put("row",pending.size());pending.add(o);
+    }catch(Exception ignored){}
+    if(pending.size()==7)break;
+   }
+   panel.recycle();recognizer.close();
+   if(pending.isEmpty())toast("Geen timers gevonden. Probeer Scanner kalibreren of een nieuwe screenshot.");
+   else review();
+  }).addOnFailureListener(e->{panel.recycle();recognizer.close();toast("Scan mislukt: "+e.getMessage());});
  }
  private static String cleanName(String raw){
   String s=raw.toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z ]"," ").replaceAll("\\s+"," ").trim();
