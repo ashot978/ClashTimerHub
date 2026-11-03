@@ -197,7 +197,7 @@ public final class MainActivity extends Activity {
   if(id==28000001)return "Archer Queen";
   if(id==28000002)return "Grand Warden";
   if(id==28000004)return "Royal Champion";
-  return "Upgrade #"+id;
+  return ClashNames.name(id);
  }
  private void overview(){
   long now=System.currentTimeMillis();StringBuilder result=new StringBuilder();
