@@ -276,14 +276,12 @@ activity=replace_once(activity,
     }
     private void initializeAccountDefaults(){
         android.content.SharedPreferences prefs=getSharedPreferences("account_roster",MODE_PRIVATE);
-        if(prefs.getBoolean("defaults_initialized",false))return;
+        if(prefs.getBoolean("named_accounts_v2",false))return;
         String[] defaults={"Ashot","Ashotgun","AshotRush","Rushot","Shotty","Ashotty","RushShot"};
-        for(int i=0;i<7;i++){
-            String old=store.name(i);
-            if(old==null||old.trim().isEmpty()||old.matches("(?i)(account|dorp|village)\\\\s*[1-7]"))
-                store.setName(i,defaults[i]);
-        }
-        prefs.edit().putBoolean("defaults_initialized",true).apply();
+        // One-time migration: apply the seven requested names to existing installs too.
+        // Subsequent launches and APK updates retain user edits.
+        for(int i=0;i<7;i++)store.setName(i,defaults[i]);
+        prefs.edit().putBoolean("named_accounts_v2",true).apply();
     }
     private void buildUi(){''',
     "account default initialization method")
