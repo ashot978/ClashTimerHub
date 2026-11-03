@@ -50,7 +50,7 @@ public final class MainActivity extends Activity {
  private void manual(){LinearLayout form=new LinearLayout(this);form.setOrientation(1);EditText n=new EditText(this),t=new EditText(this);n.setHint("Gebouwnaam");t.setHint("Tijd, bijvoorbeeld 3h 15m");form.addView(n);form.addView(t);new android.app.AlertDialog.Builder(this).setTitle("Timer toevoegen").setView(form).setPositiveButton("Opslaan",(d,w)->{long seconds=parse(t.getText().toString());if(seconds>0){try{JSONObject o=new JSONObject();o.put("id",UUID.randomUUID().toString());o.put("account",accounts.get(account.getSelectedItemPosition()));o.put("category",categories[category.getSelectedItemPosition()]);o.put("name",n.getText().toString());o.put("finish",System.currentTimeMillis()+seconds*1000);upgrades.add(o);persist();showTimers();}catch(Exception ignored){}}}).setNegativeButton("Annuleren",null).show();}
  private static long parse(String raw){
   String s=raw.trim().toLowerCase(java.util.Locale.ROOT).replace('o','0');
-  java.util.regex.Matcher m=java.util.regex.Pattern.compile("(\\\\d+)\\\\s*([dhms])").matcher(s);
+  java.util.regex.Matcher m=java.util.regex.Pattern.compile("(\\d+)\\s*([dhms])").matcher(s);
   long total=0;int consumed=0;boolean found=false;java.util.HashSet<String> seen=new java.util.HashSet<>();
   while(m.find()){
    if(!s.substring(consumed,m.start()).trim().isEmpty())return 0;
