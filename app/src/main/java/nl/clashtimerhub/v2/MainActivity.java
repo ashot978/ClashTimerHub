@@ -61,6 +61,7 @@ public final class MainActivity extends Activity {
   TextView heading=label("⚔  CLASH TIMER HUB",27);heading.setTypeface(null,android.graphics.Typeface.BOLD);heading.setTextColor(0xffffd88a);root.addView(heading);
   TextView subtitle=label("COMMAND CENTER   /   V3",12);subtitle.setTextColor(0xffb5a5ff);root.addView(subtitle);
   root.addView(label("ALLE ACCOUNTS · EERSTVOLGENDE BOUWER",19));
+  if(accounts.isEmpty())root.addView(label("Welkom! Kopieer je Clash-spelerdata en synchroniseer om je eerste account toe te voegen.",15));
   dashboard=new LinearLayout(this);dashboard.setOrientation(1);root.addView(dashboard);renderDashboard();
   root.addView(label("ACCOUNT",12));
   account=new Spinner(this);account.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,accounts));
@@ -240,7 +241,6 @@ public final class MainActivity extends Activity {
    .setView(scroll).setPositiveButton("Sluiten",null).show();
  }
  private void importClipboard(){
-  if(account==null||account.getSelectedItem()==null){toast("Selecteer eerst een account");return;}
   android.content.ClipboardManager manager=(android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
   if(manager==null||!manager.hasPrimaryClip()){toast("Klembord is leeg. Kopieer eerst je spelergegevens in Clash of Clans.");return;}
   android.content.ClipData clip=manager.getPrimaryClip();
@@ -252,7 +252,7 @@ public final class MainActivity extends Activity {
   if(!payload.contains("\"buildings\"")&&!payload.contains("\"heroes\"")&&!payload.contains("\"units\"")){
    toast("Dit lijkt geen Clash of Clans-spelerdata. Kopieer eerst Copy Player Data.");return;
   }
-  String selected=account.getSelectedItem().toString();
+  String selected=account.getSelectedItem()==null?"nieuw account":account.getSelectedItem().toString();
   new android.app.AlertDialog.Builder(this).setTitle("Synchroniseren met "+selected+"?")
    .setMessage("De actieve upgrades uit de gekopieerde Clash-data worden aan dit account gekoppeld. Handmatige timers blijven behouden.")
    .setPositiveButton("Synchroniseren",(d,w)->importClashData(payload))
