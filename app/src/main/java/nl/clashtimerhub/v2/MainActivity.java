@@ -268,6 +268,8 @@ public final class MainActivity extends Activity {
    JSONObject player=json.optJSONObject("player");
    String tag=json.optString("tag",json.optString("playerTag",player==null?"":player.optString("tag",""))).trim().toUpperCase(java.util.Locale.ROOT);
    JSONObject tags=new JSONObject(getPreferences(0).getString("playerTags","{}"));
+   String playerName=json.optString("name",player==null?"":player.optString("name","")).trim();
+   if(ac.isEmpty()&&!tag.isEmpty()&&!playerName.isEmpty())ac=playerName;
    String linked=tags.optString(ac,"");
    if(!tag.isEmpty()){
     String matched=null;
