@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.ScrollView;
 
 /**
  * Choose a screenshot, drag a rectangle around the builder count and first
@@ -29,9 +30,12 @@ public final class ScanRegionActivity extends Activity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         category = getIntent().getIntExtra("category", 0);
+        ScrollView scroll = new ScrollView(this);
+        scroll.setFillViewport(true);
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(16,16,16,16);
+        scroll.addView(layout);
         TextView help = new TextView(this);
         help.setText("Kies een Clash-screenshot met het upgrademenu open. Sleep daarna een kader rond de builderstand en de bovenste actieve timer. Tik Opslaan.");
         layout.addView(help);
@@ -45,7 +49,7 @@ public final class ScanRegionActivity extends Activity {
         layout.addView(pick);
         preview = new Preview();
         layout.addView(preview, new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
+            LinearLayout.LayoutParams.MATCH_PARENT, 1200));
         Button save = new Button(this);
         save.setText("Scangebied opslaan");
         save.setOnClickListener(v -> {
@@ -74,7 +78,7 @@ public final class ScanRegionActivity extends Activity {
             finish();
         });
         layout.addView(reset);
-        setContentView(layout);
+        setContentView(scroll);
     }
 
     @Override protected void onActivityResult(int request, int result, Intent data) {
