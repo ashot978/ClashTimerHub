@@ -21,6 +21,8 @@ public final class BuilderAlarm extends android.content.BroadcastReceiver {
   manager.notify(880099,builder.build());
  }
  @Override public void onReceive(Context context,Intent intent){
+  if("nl.clashtimerhub.v2.TEST_SCHEDULED_ALARM".equals(intent.getAction())){sendTest(context);return;}
+
   long finish=intent.getLongExtra("finish",0);
   boolean early=intent.getBooleanExtra("early",false);
   if(!early&&finish>System.currentTimeMillis()+60000)return;
