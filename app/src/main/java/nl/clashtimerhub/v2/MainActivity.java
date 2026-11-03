@@ -51,14 +51,17 @@ public final class MainActivity extends Activity {
  private void editAccount(){EditText e=new EditText(this);e.setSingleLine(true);new android.app.AlertDialog.Builder(this).setTitle("Nieuw account").setView(e).setPositiveButton("Toevoegen",(d,w)->{String s=e.getText().toString().trim();if(!s.isEmpty()){accounts.add(s);persist();draw();}}).setNegativeButton("Annuleren",null).show();}
  private void manual(){LinearLayout form=new LinearLayout(this);form.setOrientation(1);EditText n=new EditText(this),t=new EditText(this);n.setHint("Gebouwnaam");t.setHint("Tijd, bijvoorbeeld 3h 15m");form.addView(n);form.addView(t);new android.app.AlertDialog.Builder(this).setTitle("Timer toevoegen").setView(form).setPositiveButton("Opslaan",(d,w)->{long seconds=parse(t.getText().toString());if(seconds>0){try{JSONObject o=new JSONObject();o.put("id",UUID.randomUUID().toString());o.put("account",accounts.get(account.getSelectedItemPosition()));o.put("category",categories[category.getSelectedItemPosition()]);o.put("name",n.getText().toString());o.put("finish",System.currentTimeMillis()+seconds*1000);upgrades.add(o);persist();showTimers();}catch(Exception ignored){}}}).setNegativeButton("Annuleren",null).show();}
  private static long parse(String raw){
-  String s=raw.trim().toLowerCase(java.util.Locale.ROOT).replace('o','0');
+  String s=raw.trim().toLowerCase(java.util.Locale.ROOT).replace('ı','1');
+  s=s.replaceAll("(?i)(?<![a-z0-9])[il](?=\\s*[dhms])","1");
+  s=s.replaceAll("(?i)(?<![a-z0-9])s(?=\\s*h)","5");
+  s=s.replaceAll("(?i)(?<=\\d)o(?=\\s*[dhms])","0");
   java.util.regex.Matcher m=java.util.regex.Pattern.compile("(\\d+)\\s*([dhms])").matcher(s);
   long total=0;int consumed=0;boolean found=false;java.util.HashSet<String> seen=new java.util.HashSet<>();
   while(m.find()){
    if(!s.substring(consumed,m.start()).trim().isEmpty())return 0;
    String unit=m.group(2);if(!seen.add(unit))return 0;
    long value;try{value=Long.parseLong(m.group(1));}catch(Exception e){return 0;}
-   if(value<0||value>9999)return 0;
+   if(value>9999)return 0;
    total+=value*(unit.equals("d")?86400L:unit.equals("h")?3600L:unit.equals("m")?60L:1L);
    consumed=m.end();found=true;
   }
@@ -126,17 +129,22 @@ public final class MainActivity extends Activity {
  }
  private void review(){if(pending.isEmpty()){toast("Geen OCR-resultaten");return;}LinearLayout form=new LinearLayout(this);form.setOrientation(1);ScrollView scroll=new ScrollView(this);scroll.addView(form);ArrayList<EditText> names=new ArrayList<>(),times=new ArrayList<>();
   for(JSONObject o:pending){form.addView(label("Rij "+(o.optInt("row")+1),16));EditText n=new EditText(this),t=new EditText(this);n.setSingleLine(true);t.setSingleLine(true);n.setText(o.optString("name"));t.setText(o.optString("raw"));n.setHint("Naam");t.setHint("Bijv. 3h 15m");form.addView(n);form.addView(t);names.add(n);times.add(t);}
-  new android.app.AlertDialog.Builder(this).setTitle("Controleer "+pending.size()+" gedetecteerde rijen (oude scan wordt vervangen)").setView(scroll).setPositiveButton("Gecorrigeerde timers opslaan",(d,w)->{
-   String ac=accounts.get(account.getSelectedItemPosition()),cat=categories[category.getSelectedItemPosition()];long now=System.currentTimeMillis();int count=0;
-   ArrayList<JSONObject> replacement=new ArrayList<>();
-   for(int i=0;i<names.size();i++){long sec=parse(times.get(i).getText().toString());String name=names.get(i).getText().toString().trim();if(sec<=0||name.isEmpty())continue;try{JSONObject o=new JSONObject();o.put("id",UUID.randomUUID().toString());o.put("account",ac);o.put("category",cat);o.put("name",name);o.put("finish",now+sec*1000);replacement.add(o);count++;}catch(Exception ignored){}}
-   if(count==0){toast("Geen geldige timers. Niets gewijzigd.");return;}
-   for(int i=upgrades.size()-1;i>=0;i--){
-    JSONObject old=upgrades.get(i);
-    if(ac.equals(old.optString("account"))&&cat.equals(old.optString("category")))upgrades.remove(i);
+  new android.app.AlertDialog.Builder(this).setTitle("Controleer "+pending.size()+" rijen").setView(scroll).setPositiveButton("Opslaan",(d,w)->{
+   String ac=accounts.get(account.getSelectedItemPosition()),cat=categories[category.getSelectedItemPosition()];long now=System.currentTimeMillis();
+   ArrayList<JSONObject> replacement=new ArrayList<>();ArrayList<String> invalid=new ArrayList<>();
+   for(int i=0;i<names.size();i++){
+    long sec=parse(times.get(i).getText().toString());String name=names.get(i).getText().toString().trim();
+    if(sec<=0||name.isEmpty()){invalid.add("Rij "+(i+1));continue;}
+    try{JSONObject o=new JSONObject();o.put("id",UUID.randomUUID().toString());o.put("account",ac);o.put("category",cat);o.put("name",name);o.put("finish",now+sec*1000);replacement.add(o);}catch(Exception ignored){}
    }
-   upgrades.addAll(replacement);
-   persist();showTimers();toast(count+" timers opgeslagen; vorige scan vervangen");
+   if(!invalid.isEmpty()){
+    new android.app.AlertDialog.Builder(this).setTitle("Scan niet opgeslagen")
+     .setMessage("Ongeldige timer(s): "+android.text.TextUtils.join(", ",invalid)+". Corrigeer deze rijen en scan opnieuw. Bestaande timers blijven behouden.")
+     .setPositiveButton("OK",null).show();
+    return;
+   }
+   for(int i=upgrades.size()-1;i>=0;i--){JSONObject old=upgrades.get(i);if(ac.equals(old.optString("account"))&&cat.equals(old.optString("category")))upgrades.remove(i);}
+   upgrades.addAll(replacement);persist();showTimers();toast(replacement.size()+" timers opgeslagen");
   }).setNegativeButton("Annuleren",null).show();
  }
  private void toast(String s){Toast.makeText(this,s,Toast.LENGTH_LONG).show();}
