@@ -32,7 +32,17 @@ public final class MainActivity extends Activity {
  @Override protected void onResume(){super.onResume();ticker.removeCallbacks(tick);ticker.post(tick);}
  @Override protected void onPause(){ticker.removeCallbacks(tick);super.onPause();}
  private static final Pattern TIME=Pattern.compile("(?i)(?:(\\d+)\\s*d\\s*)?(?:(\\d+)\\s*h\\s*)?(?:(\\d+)\\s*m\\s*)?(?:(\\d+)\\s*s\\s*)?");
- @Override public void onCreate(Bundle b){super.onCreate(b);load();draw();if(android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},55);TimerWidget.schedule(this);}
+ @Override public void onCreate(Bundle b){super.onCreate(b);load();draw();if(android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},55);TimerWidget.schedule(this);handleSharedJson(getIntent());}
+ @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);setIntent(intent);handleSharedJson(intent);}
+ private void handleSharedJson(Intent intent){
+  if(intent==null||!Intent.ACTION_SEND.equals(intent.getAction()))return;
+  String payload=intent.getStringExtra(Intent.EXTRA_TEXT);
+  if(payload==null||payload.length()>10000000||!payload.contains("\\"buildings\\"")){toast("Geen geldige Clash JSON gedeeld");return;}
+  new android.app.AlertDialog.Builder(this).setTitle("Clash-data snel importeren?")
+   .setMessage("De player tag bepaalt welk account wordt bijgewerkt.")
+   .setPositiveButton("Importeren",(d,w)->importClashData(payload))
+   .setNegativeButton("Annuleren",null).show();
+ }
  private void load(){
   try{JSONArray a=new JSONArray(getPreferences(0).getString("accounts","[]"));for(int i=0;i<a.length();i++)accounts.add(a.getString(i));}catch(Exception ignored){}
   try{JSONArray a=new JSONArray(getPreferences(0).getString("upgrades","[]"));for(int i=0;i<a.length();i++)upgrades.add(a.getJSONObject(i));}catch(Exception ignored){}
