@@ -23,6 +23,14 @@ public final class WidgetConfigActivity extends Activity {
   widgetId=getIntent().getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,AppWidgetManager.INVALID_APPWIDGET_ID);
   if(widgetId==AppWidgetManager.INVALID_APPWIDGET_ID){finish();return;}
   kind=WidgetV7.kind(this,widgetId);
+  if(kind==WidgetV7.SYNC){
+   new android.app.AlertDialog.Builder(this)
+    .setTitle("⚔ Sync")
+    .setMessage(I18n.english(this)?"Tap the Sync widget on your home screen to turn the floating sync button on or off.":"Tik op de Sync-widget op je startscherm om de zwevende sync-knop aan of uit te zetten.")
+    .setPositiveButton("OK",(d,w)->{setResult(RESULT_OK,new Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,widgetId));finish();})
+    .setOnCancelListener(d->finish()).show();
+   return;
+  }
   android.content.SharedPreferences prefs=getSharedPreferences("WidgetPreferences",MODE_PRIVATE);
   getWindow().setStatusBarColor(0xff171025);getWindow().setNavigationBarColor(0xff171025);
   ScrollView scroll=new ScrollView(this);

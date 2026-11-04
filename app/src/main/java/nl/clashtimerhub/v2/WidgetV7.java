@@ -12,7 +12,7 @@ import java.util.*;
 
 /** Shared presentation engine for V7 multi, account, and mini home widgets. */
 final class WidgetV7 {
- static final int MULTI=0, SINGLE=1, MINI=2;
+ static final int MULTI=0, SINGLE=1, MINI=2, SYNC=3;
  private WidgetV7(){}
  static final class Status {
   String account;
@@ -25,13 +25,14 @@ final class WidgetV7 {
   if(p==null||p.provider==null)return MULTI;
   String name=p.provider.getClassName();
   if(name.equals(MiniWidget.class.getName()))return MINI;
+  if(name.equals(SyncWidget.class.getName()))return SYNC;
   if(name.equals(AccountWidget.class.getName()))return SINGLE;
   return MULTI;
  }
  static int[] allIds(Context ctx){
   AppWidgetManager manager=AppWidgetManager.getInstance(ctx);
   ArrayList<Integer> ids=new ArrayList<>();
-  Class<?>[] providers={TimerWidget.class,MiniWidget.class,AccountWidget.class};
+  Class<?>[] providers={TimerWidget.class,MiniWidget.class,AccountWidget.class,SyncWidget.class};
   for(Class<?> provider:providers)for(int id:manager.getAppWidgetIds(new android.content.ComponentName(ctx,provider)))ids.add(id);
   int[] result=new int[ids.size()];for(int i=0;i<result.length;i++)result[i]=ids.get(i);
   return result;
@@ -165,15 +166,34 @@ final class WidgetV7 {
   w.setOnClickPendingIntent(R.id.v7_multi_title,PendingIntent.getActivity(ctx,140000+id,launch,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE));
   return w;
  }
- private static RemoteViews mini(Context ctx,int id,Status s){
-  RemoteViews w=new RemoteViews(ctx.getPackageName(),R.layout.widget_v7_mini);
-  w.setTextViewText(R.id.v7_mini_title,s==null?"Clash":s.account);
-  w.setTextViewText(R.id.v7_mini_ready,s==null?"—":String.valueOf(s.builderReady));
-  w.setTextViewText(R.id.v7_mini_lab,"⚗ "+(s==null?"—":s.labActive));
-  w.setTextViewText(R.id.v7_mini_pet,"🐾 "+(s==null?"—":s.petActive));
-  w.setOnClickPendingIntent(R.id.v7_mini_settings,settingsClick(ctx,id));
-  if(s!=null)w.setOnClickPendingIntent(R.id.v7_mini_body,accountClick(ctx,s.account,id));
-  return w;
+ private static RemoteViews mini(Context ctx,int id,Status s,long now){
+  RemoteViews view=new RemoteViews(ctx.getPackageName(),R.layout.widget_v7_mini);
+  view.setTextViewText(R.id.v7_mini_title,s==null?"Clash":s.account);
+  if(s==null){
+   timer(view,R.id.v7_mini_timer,R.id.v7_mini_idle,Long.MAX_VALUE,now);
+   view.setTextViewText(R.id.v7_mini_finish,"");
+   view.setTextViewText(R.id.v7_mini_status,I18n.english(ctx)?"No data":"Geen data");
+  }else{
+   timer(view,R.id.v7_mini_timer,R.id.v7_mini_idle,s.builderNext,now);
+   view.setTextViewText(R.id.v7_mini_finish,finish(ctx,s.builderNext,true));
+   view.setTextViewText(R.id.v7_mini_status,s.builderReady+" ✓  ·  "+s.builderActive+" ⚒");
+   view.setTextColor(R.id.v7_mini_status,s.builderReady>0?0xff8BE3AD:0xffCBB5D9);
+   view.setOnClickPendingIntent(R.id.v7_mini_body,accountClick(ctx,s.account,id));
+   view.setOnClickPendingIntent(R.id.v7_mini_title,accountClick(ctx,s.account,id));
+  }
+  view.setOnClickPendingIntent(R.id.v7_mini_settings,settingsClick(ctx,id));
+  return view;
+ }
+ private static RemoteViews sync(Context ctx,int id){
+  RemoteViews view=new RemoteViews(ctx.getPackageName(),R.layout.widget_v7_sync);
+  boolean active=AppData.prefs(ctx).getBoolean("floatingEnabled",false);
+  view.setTextViewText(R.id.v7_sync_status,active?"SYNC ON":"SYNC OFF");
+  view.setTextColor(R.id.v7_sync_status,active?0xff8BE3AD:0xffCBB5D9);
+  view.setTextViewText(R.id.v7_sync_hint,
+   I18n.english(ctx)?(active?"Tap to turn off":"Tap to turn on"):(active?"Tik om uit te zetten":"Tik om aan te zetten"));
+  view.setInt(R.id.v7_sync_symbol,"setBackgroundResource",active?R.drawable.widget_sync_ring_on:R.drawable.widget_sync_ring_off);
+  view.setOnClickPendingIntent(R.id.v7_sync_root,syncClick(ctx,id));
+  return view;
  }
  private static RemoteViews single(Context ctx,int id,Status s,long now){
   RemoteViews w=new RemoteViews(ctx.getPackageName(),R.layout.widget_v7_account);
@@ -206,7 +226,7 @@ final class WidgetV7 {
   ArrayList<Status> data=read(ctx,now);
   AppWidgetManager manager=AppWidgetManager.getInstance(ctx);
   android.content.SharedPreferences preferences=ctx.getSharedPreferences("WidgetPreferences",Context.MODE_PRIVATE);
-  Class<?>[] providers={TimerWidget.class,AccountWidget.class,MiniWidget.class};
+  Class<?>[] providers={TimerWidget.class,AccountWidget.class,MiniWidget.class,SyncWidget.class};
   for(int kind=0;kind<providers.length;kind++){
    for(int id:manager.getAppWidgetIds(new android.content.ComponentName(ctx,providers[kind]))){
     try{
@@ -216,7 +236,8 @@ final class WidgetV7 {
      if(selected==null&&!data.isEmpty())selected=data.get(0);
      RemoteViews view;
      if(kind==SINGLE)view=single(ctx,id,selected,now);
-     else if(kind==MINI)view=mini(ctx,id,selected);
+     else if(kind==MINI)view=mini(ctx,id,selected,now);
+     else if(kind==SYNC)view=sync(ctx,id);
      else{
       boolean all=preferences.getBoolean("all_"+id,true);
       HashSet<String> selectedNames=new HashSet<>();

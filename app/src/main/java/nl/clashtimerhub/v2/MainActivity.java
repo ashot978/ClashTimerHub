@@ -124,7 +124,7 @@ public final class MainActivity extends Activity {
   languageButton.setBackground(clashSurface(0xff332342,0xff75518f,12));
   LinearLayout.LayoutParams langParams=new LinearLayout.LayoutParams(dp(62),dp(48));langParams.setMargins(dp(4),0,dp(2),0);
   headingRow.addView(languageButton,langParams);languageButton.setOnClickListener(v->chooseLanguage());
-  TextView subtitle=label("COMMAND CENTER / V6",11);subtitle.setTextColor(0xffb5a5ff);root.addView(subtitle);
+  TextView subtitle=label("COMMAND CENTER / V7",11);subtitle.setTextColor(0xffb5a5ff);root.addView(subtitle);
   View accent=new View(this);accent.setBackgroundColor(0xffd2a96e);LinearLayout.LayoutParams accentLp=new LinearLayout.LayoutParams(dp(56),dp(2));accentLp.setMargins(dp(12),0,0,dp(8));root.addView(accent,accentLp);
   screenContent=new LinearLayout(this);screenContent.setOrientation(1);root.addView(screenContent);
   LinearLayout nav=new LinearLayout(this);nav.setOrientation(LinearLayout.HORIZONTAL);
@@ -233,7 +233,7 @@ public final class MainActivity extends Activity {
   String[] options=new String[ids.length];
   for(int i=0;i<ids.length;i++){
    int kind=WidgetV7.kind(this,ids[i]);
-   options[i]=(kind==WidgetV7.MINI?"Mini":kind==WidgetV7.SINGLE?"Account":"Multi")+" · "+(i+1);
+   options[i]=(kind==WidgetV7.SYNC?"Sync":kind==WidgetV7.MINI?"Mini":kind==WidgetV7.SINGLE?"Account":"Multi")+" · "+(i+1);
   }
   new android.app.AlertDialog.Builder(this).setTitle(t("Welke widget wil je instellen?"))
    .setItems(options,(dialog,index)->openWidgetSettings(ids[index]))
@@ -594,7 +594,11 @@ public final class MainActivity extends Activity {
    compact.setTextColor(0xffffd783);compact.setBackground(clashSurface(0xff292139,0xff644b76,12));
    dashboard.addView(compact);
   }else{
-   LinearLayout stats=new LinearLayout(this);dashboard.addView(stats);
+   LinearLayout stats=new LinearLayout(this);
+   stats.setOrientation(LinearLayout.HORIZONTAL);
+   stats.setBaselineAligned(false);
+   stats.setGravity(android.view.Gravity.TOP);
+   dashboard.addView(stats,new LinearLayout.LayoutParams(-1,dp(76)));
    String[] metrics={accounts.size()+"\\nACCOUNTS",active+"\\nBOUWERS BEZIG",totalReady+"\\nKLAAR"};
    for(String metric:metrics){
     TextView view=label(metric.replace("\\n","\n"),13);view.setGravity(android.view.Gravity.CENTER);

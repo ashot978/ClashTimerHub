@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ android:id="@+id/v7_sync_root" android:layout_width="match_parent"
+ android:layout_height="match_parent" android:orientation="vertical" android:gravity="center"
+ android:padding="4dp" android:background="@drawable/widget_background">
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:text="⚔ SYNC" android:gravity="center" android:textColor="#FFD783"
+  android:textStyle="bold" android:textSize="11sp" android:singleLine="true" android:includeFontPadding="false"/>
+ <TextView android:id="@+id/v7_sync_symbol" android:layout_width="37dp" android:layout_height="37dp"
+  android:text="⟳" android:gravity="center" android:textSize="29sp" android:textStyle="bold"
+  android:textColor="#FFD783" android:background="@drawable/widget_sync_ring_off"/>
+ <TextView android:id="@+id/v7_sync_status" android:layout_width="match_parent"
+  android:layout_height="wrap_content" android:text="SYNC OFF" android:gravity="center"
+  android:textColor="#CBB5D9" android:textStyle="bold" android:textSize="11sp"
+  android:singleLine="true" android:includeFontPadding="false"/>
+ <TextView android:id="@+id/v7_sync_hint" android:layout_width="match_parent"
+  android:layout_height="wrap_content" android:text="Tap to turn on" android:gravity="center"
+  android:textColor="#BCA7D5" android:textSize="8sp" android:singleLine="true"
+  android:ellipsize="end" android:includeFontPadding="false"/>
+</LinearLayout>
