@@ -469,12 +469,18 @@ public final class MainActivity extends Activity {
   if(!last.isEmpty()){
    TextView recent=label("↻  "+last,11);recent.setTextColor(0xffbba7d1);dashboard.addView(recent);
   }
-  LinearLayout stats=new LinearLayout(this);dashboard.addView(stats);
-  String[] metrics={accounts.size()+"\\nACCOUNTS",active+"\\nBOUWERS BEZIG",totalReady+"\\nKLAAR"};
-  for(String metric:metrics){
-   TextView view=label(metric.replace("\\n","\n"),13);view.setGravity(android.view.Gravity.CENTER);
-   view.setTextColor(0xffffd88a);view.setBackground(clashSurface(0xff292139,0xff644b76,12));
-   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,dp(70),1);lp.setMargins(dp(2),dp(3),dp(2),dp(3));stats.addView(view,lp);
+  if(foldExpanded){
+   TextView compact=label(accounts.size()+" accounts  ·  "+active+" bezig  ·  "+totalReady+" klaar",12);
+   compact.setTextColor(0xffffd783);compact.setBackground(clashSurface(0xff292139,0xff644b76,12));
+   dashboard.addView(compact);
+  }else{
+   LinearLayout stats=new LinearLayout(this);dashboard.addView(stats);
+   String[] metrics={accounts.size()+"\\nACCOUNTS",active+"\\nBOUWERS BEZIG",totalReady+"\\nKLAAR"};
+   for(String metric:metrics){
+    TextView view=label(metric.replace("\\n","\n"),13);view.setGravity(android.view.Gravity.CENTER);
+    view.setTextColor(0xffffd88a);view.setBackground(clashSurface(0xff292139,0xff644b76,12));
+    LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,dp(70),1);lp.setMargins(dp(2),dp(3),dp(2),dp(3));stats.addView(view,lp);
+   }
   }
   LinearLayout gridRow=null;int index=0;
   int columns=foldExpanded?1:2;
