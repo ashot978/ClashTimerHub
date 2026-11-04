@@ -38,7 +38,7 @@ public final class MainActivity extends Activity {
   if("syncRevision".equals(key))ticker.post(()->refreshExternalImport());
  };
  private final Runnable tick=new Runnable(){public void run(){if(activeTab==0&&dashboard!=null){refreshDashboardClocks();refreshVisibleTimers();}else if(activeTab==1||activeTab==2)refreshVisibleTimers();ticker.postDelayed(this,1000);}};
- @Override protected void onResume(){super.onResume();getPreferences(0).registerOnSharedPreferenceChangeListener(syncWatcher);refreshExternalImport();ticker.removeCallbacks(tick);ticker.post(tick);}
+ @Override protected void onResume(){super.onResume();getPreferences(0).registerOnSharedPreferenceChangeListener(syncWatcher);refreshExternalImport();ticker.removeCallbacks(tick);ticker.post(tick);long last=getPreferences(0).getLong("lastUpdateCheck",0);if(System.currentTimeMillis()-last>6L*3600000L)checkUpdates(true);}
  @Override protected void onPause(){getPreferences(0).unregisterOnSharedPreferenceChangeListener(syncWatcher);ticker.removeCallbacks(tick);super.onPause();}
  private static final Pattern TIME=Pattern.compile("(?i)(?:(\\d+)\\s*d\\s*)?(?:(\\d+)\\s*h\\s*)?(?:(\\d+)\\s*m\\s*)?(?:(\\d+)\\s*s\\s*)?");
  @Override public void onCreate(Bundle b){super.onCreate(b);AppData.migrate(this);load();draw();if(android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},55);TimerWidget.schedule(this);handleWidgetNavigation(getIntent());handleSharedJson(getIntent());}
@@ -353,7 +353,7 @@ public final class MainActivity extends Activity {
     }
    };
    if(android.os.Build.VERSION.SDK_INT>=33)
-    registerReceiver(receiver,new android.content.IntentFilter(android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE),Context.RECEIVER_NOT_EXPORTED);
+    registerReceiver(receiver,new android.content.IntentFilter(android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE),Context.RECEIVER_EXPORTED);
    else registerReceiver(receiver,new android.content.IntentFilter(android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE));
    toast("APK-download gestart. Bevestig de installatie in Android.");
   }catch(Exception e){toast("Download starten mislukt: "+e.getMessage());}
