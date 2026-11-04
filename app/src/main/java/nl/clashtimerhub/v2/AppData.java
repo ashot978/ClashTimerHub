@@ -14,6 +14,25 @@ final class AppData {
   // differs from the Java package name, that is the fully qualified class name.
   return context.getSharedPreferences(MainActivity.class.getName(),Context.MODE_PRIVATE);
  }
+ /** Friendly labels are presentation-only; player tags and timer keys remain unchanged. */
+ static String displayName(Context context,String account){
+  if(account==null)return "";
+  try{
+   JSONObject labels=new JSONObject(prefs(context).getString("accountNames","{}"));
+   String label=labels.optString(account,"").trim();
+   return label.isEmpty()?account:label;
+  }catch(Exception ignored){return account;}
+ }
+ static void saveAccountName(Context context,String account,String display){
+  try{
+   SharedPreferences p=prefs(context);
+   JSONObject labels=new JSONObject(p.getString("accountNames","{}"));
+   String value=display==null?"":display.trim();
+   if(value.isEmpty()||value.equals(account))labels.remove(account);
+   else labels.put(account,value);
+   p.edit().putString("accountNames",labels.toString()).apply();
+  }catch(Exception e){android.util.Log.e("ClashTimerHub","Could not save account display name",e);}
+ }
  static synchronized void migrate(Context context){
   SharedPreferences current=prefs(context);
   if(current.getBoolean("legacyOverlayMigratedV6",false))return;
