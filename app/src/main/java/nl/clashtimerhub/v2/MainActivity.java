@@ -308,13 +308,13 @@ public final class MainActivity extends Activity {
    StringBuilder message=new StringBuilder();
    boolean english=I18n.english(this);
    message.append(english?"Installed build: #":"Geïnstalleerde build: #")
-    .append(current>=1000?current-1000:current).append('\\n');
-   message.append(english?"Latest build: #":"Nieuwste build: #").append(build).append("\\n\\n");
+    .append(current>=1000?current-1000:current).append('\n');
+   message.append(english?"Latest build: #":"Nieuwste build: #").append(build).append("\n\n");
    message.append(newer?(english?"Update available":"Nieuwe update beschikbaar"):
     (english?"You are up to date":"Je hebt de nieuwste versie"));
    if(newer){
     String changes=cleanReleaseNotes(data.optString("notes",""));
-    if(!changes.isEmpty())message.append("\\n\\n").append(english?"What's new:":"Wat is er nieuw:").append("\\n").append(changes);
+    if(!changes.isEmpty())message.append("\n\n").append(english?"What's new:":"Wat is er nieuw:").append("\n").append(changes);
    }
    android.app.AlertDialog.Builder dialog=new android.app.AlertDialog.Builder(this)
     .setTitle(english?"App updates":"App-updates")
@@ -330,8 +330,8 @@ public final class MainActivity extends Activity {
  /** Convert GitHub release Markdown into a short, readable Android dialog. */
  private String cleanReleaseNotes(String input){
   if(input==null||input.isEmpty())return "";
-  String raw=input.replace("\\\\n","\\n");
-  String[] lines=raw.split("\\n");
+  String raw=input.replace("\\n","\n");
+  String[] lines=raw.split("\n");
   StringBuilder out=new StringBuilder();
   int bullets=0;
   for(String original:lines){
@@ -342,7 +342,7 @@ public final class MainActivity extends Activity {
    line=line.replace("**","").replace("`","").replaceAll("^[\\-*]\\s*","");
    if(line.startsWith("Build #")||line.startsWith("Android versionCode"))continue;
    if(line.length()>160)line=line.substring(0,157)+"…";
-   if(out.length()>0)out.append('\\n');
+   if(out.length()>0)out.append('\n');
    out.append("• ").append(line);
    if(++bullets>=5)break;
   }
