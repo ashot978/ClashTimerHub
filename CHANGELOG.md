@@ -1,5 +1,17 @@
 # ClashTimerHub release notes
 
+## 7.5.9-beta1 — 4 November 2026
+
+### Helperkolom op dezelfde regel — bredere multi-accountwidget
+- Helpers staan nu direct **na het aantal builders** en **vóór de 🧙 laboratoriumtimer** op dezelfde rij.
+- De losse tweede regel met helperstatus is volledig verwijderd; ieder account gebruikt weer 24dp hoogte, zodat zeven accounts onder elkaar kunnen blijven staan.
+- De helperkolom krijgt, net als de andere kolommen, een gezamenlijke breedte op basis van de langste helperstatus. Zo beginnen de 🧙 lab-, 🐾 pet- en bouwtimers op dezelfde horizontale positie bij ieder account.
+- De volledige overzichtswidget blijft in deze versie altijd **één regel per account**; smalle formaten schakelen niet meer over naar twee of meer regels.
+- De standaardwidget wordt breder geplaatst (doel: vier Android-launchercellen); reeds bestaande widgets kun je handmatig horizontaal verbreden.
+- Belangrijk: als de ingestelde widgetbreedte te klein is voor alle kolommen, kan Android inhoud rechts afsnijden. Vergroot de widget via het startscherm; Android staat niet toe dat de app een bestaande widget zelf groter maakt.
+- De instelling **Helpers tonen** per widget, de Alchemist-vinkjes, bestaande timers, data en back-ups blijven ongewijzigd.
+
+
 ## 7.5.8-beta1 — 4 November 2026
 
 ### Alchemist per account — standaard uit
