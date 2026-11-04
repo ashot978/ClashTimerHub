@@ -31,13 +31,13 @@ public final class FloatingSyncService extends Service {
   super.onCreate();
   if(!Settings.canDrawOverlays(this)){stopSelf();return;}
   if(Build.VERSION.SDK_INT>=26){
-   NotificationChannel channel=new NotificationChannel("floating_sync","Zwevende synchronisatie",NotificationManager.IMPORTANCE_LOW);
+   NotificationChannel channel=new NotificationChannel("floating_sync",I18n.tr(this,"Zwevende synchronisatie"),NotificationManager.IMPORTANCE_LOW);
    NotificationManager nm=getSystemService(NotificationManager.class);if(nm!=null)nm.createNotificationChannel(channel);
   }
   Intent open=new Intent(this,MainActivity.class);
   PendingIntent pi=PendingIntent.getActivity(this,12,open,PendingIntent.FLAG_IMMUTABLE|PendingIntent.FLAG_UPDATE_CURRENT);
   Notification.Builder nb=Build.VERSION.SDK_INT>=26?new Notification.Builder(this,"floating_sync"):new Notification.Builder(this);
-  nb.setSmallIcon(android.R.drawable.ic_menu_upload).setContentTitle("Clash Timer Hub").setContentText("Tik: sync · Sleep naar X of houd ingedrukt: uitschakelen").setContentIntent(pi).setOngoing(true);
+  nb.setSmallIcon(android.R.drawable.ic_menu_upload).setContentTitle("Clash Timer Hub").setContentText(I18n.tr(this,"Tik: sync · Sleep naar X of houd ingedrukt: uitschakelen")).setContentIntent(pi).setOngoing(true);
   if(Build.VERSION.SDK_INT>=29)startForeground(CHANNEL_ID,nb.build(),android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
   else startForeground(CHANNEL_ID,nb.build());
   manager=(WindowManager)getSystemService(WINDOW_SERVICE);
@@ -98,7 +98,7 @@ public final class FloatingSyncService extends Service {
  private void showDropTarget(){
   if(dropTarget!=null||manager==null)return;
   TextView target=new TextView(this);
-  target.setText("✕  Sleep hierheen om te sluiten");target.setTextColor(Color.WHITE);
+  target.setText(I18n.tr(this,"✕  Sleep hierheen om te sluiten"));target.setTextColor(Color.WHITE);
   target.setTextSize(14);target.setGravity(Gravity.CENTER);target.setTypeface(null,android.graphics.Typeface.BOLD);
   GradientDrawable bg=new GradientDrawable();bg.setColor(0xff873449);bg.setCornerRadius(dp(28));target.setBackground(bg);
   android.util.DisplayMetrics m=getResources().getDisplayMetrics();
@@ -121,7 +121,7 @@ public final class FloatingSyncService extends Service {
   if(dropTarget instanceof TextView){
    boolean near=isNearDropTarget();
    TextView text=(TextView)dropTarget;
-   text.setText(near?"✕  Laat los om te sluiten":"✕  Sleep hierheen om te sluiten");
+   text.setText(I18n.tr(this,near?"✕  Laat los om te sluiten":"✕  Sleep hierheen om te sluiten"));
    ((GradientDrawable)text.getBackground()).setColor(near?0xffcc304f:0xff873449);
   }
  }
@@ -135,7 +135,7 @@ public final class FloatingSyncService extends Service {
   if(shuttingDown)return;
   shuttingDown=true;cancelHold();hideDropTarget();
   AppData.prefs(this).edit().putBoolean("floatingEnabled",false).apply();
-  Toast.makeText(this,"Zwevende plakknop uitgeschakeld",Toast.LENGTH_SHORT).show();
+  Toast.makeText(this,I18n.tr(this,"Zwevende plakknop uitgeschakeld"),Toast.LENGTH_SHORT).show();
   stopSelf();
  }
  private void pasteNow(){
@@ -147,10 +147,10 @@ public final class FloatingSyncService extends Service {
    CharSequence value=clip.getItemAt(0).coerceToText(this);
    String result=QuickSyncImporter.importJson(this,value==null?"":value.toString());
    flashBubble(true);
-   showFeedback(result,true);
+   showFeedback(I18n.tr(this,result),true);
   }catch(Exception e){
    flashBubble(false);
-   showFeedback("Synchronisatie mislukt\n"+e.getMessage(),false);
+   showFeedback(I18n.tr(this,"Synchronisatie mislukt\n"+e.getMessage()),false);
   }
  }
  private void showFeedback(String message,boolean success){
