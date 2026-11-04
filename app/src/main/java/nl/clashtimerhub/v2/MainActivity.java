@@ -666,7 +666,7 @@ public final class MainActivity extends Activity {
    LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
    card.setPadding(dp(8),dp(6),dp(8),dp(6));
    card.setBackground(clashSurface(color,ready?0xff4c9b77:urgent?0xffc6a266:0xff57416b,14));
-   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,dp(178),1f);
+   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,dp(ready?220:190),1f);
    lp.setMargins(dp(3),dp(4),dp(3),dp(4));gridRow.addView(card,lp);
 
    TextView name=label((ac.equals(selectedAccount)&&foldExpanded?"◆  ":"⚔  ")+displayAccount(ac),15);
@@ -696,7 +696,12 @@ public final class MainActivity extends Activity {
    card.addView(end,new LinearLayout.LayoutParams(-1,dp(26)));
 
    String itemName=first==null?"Geen actieve builder":"⚒  "+cleanName(first.optString("name"));
-   TextView detail=label(itemName+"\n"+busy+" bouwers bezig",12);
+   int lab=0,pets=0;
+    for(JSONObject upgrade:upgrades)if(ac.equals(upgrade.optString("account"))&&upgrade.optLong("finish")>now){
+     if("Laboratorium".equals(upgrade.optString("category")))lab++;
+     else if("Pets".equals(upgrade.optString("category")))pets++;
+    }
+    TextView detail=label(itemName+"\n"+busy+" bouwers · ⚗ "+lab+" lab · 🐾 "+pets+" pets",12);
    detail.setTextColor(0xffd4c5e4);detail.setMaxLines(2);
    detail.setEllipsize(android.text.TextUtils.TruncateAt.END);
    detail.setGravity(android.view.Gravity.TOP);detail.setPadding(dp(6),dp(3),dp(3),0);
@@ -717,7 +722,7 @@ public final class MainActivity extends Activity {
   int count=0;
   for(JSONObject o:upgrades){
    long finish=o.optLong("finish");
-   if(ac.equals(o.optString("account"))&&finish>acknowledged&&finish<=now)count++;
+   if(ac.equals(o.optString("account"))&&"Bouwers".equals(o.optString("category"))&&finish>acknowledged&&finish<=now)count++;
   }
   return count;
  }
