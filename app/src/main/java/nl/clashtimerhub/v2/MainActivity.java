@@ -1338,7 +1338,7 @@ public final class MainActivity extends Activity {
    // Only replace previous screenshot-scanned entries; never destroy manually created timers.
    for(int i=upgrades.size()-1;i>=0;i--){JSONObject old=upgrades.get(i);if(ac.equals(old.optString("account"))&&cat.equals(old.optString("category"))&&old.optBoolean("scanned",false))upgrades.remove(i);}
    upgrades.addAll(replacement);persist();
-   GoogleDriveUi.afterSuccessfulSync(this);
+   
    showTimers();toast(replacement.size()+" timers opgeslagen");dialog.dismiss();
   }));dialog.show();
  }
