@@ -8,6 +8,7 @@
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
 <application android:label="Clash Timer Hub" android:icon="@drawable/clash_hub_icon" android:theme="@android:style/Theme.Material.NoActionBar">
+<provider android:name="androidx.core.content.FileProvider" android:authorities="${applicationId}.backups" android:exported="false" android:grantUriPermissions="true"><meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/backup_paths"/></provider>
 <activity android:name="nl.clashtimerhub.v2.MainActivity" android:exported="true">
 <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
 <intent-filter><action android:name="android.intent.action.SEND"/><category android:name="android.intent.category.DEFAULT"/><data android:mimeType="text/plain"/></intent-filter>
