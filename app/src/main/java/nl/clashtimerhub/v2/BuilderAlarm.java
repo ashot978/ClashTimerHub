@@ -9,14 +9,14 @@ public final class BuilderAlarm extends android.content.BroadcastReceiver {
   if(manager==null)return;
   if(Build.VERSION.SDK_INT>=33&&context.checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)return;
   if(Build.VERSION.SDK_INT>=26){
-   NotificationChannel channel=new NotificationChannel(TimerWidget.CHANNEL,"Upgrade meldingen",NotificationManager.IMPORTANCE_HIGH);
+   NotificationChannel channel=new NotificationChannel(TimerWidget.CHANNEL,I18n.tr(context,"Upgrade meldingen"),NotificationManager.IMPORTANCE_HIGH);
    manager.createNotificationChannel(channel);
   }
   Intent open=new Intent(context,MainActivity.class);
   PendingIntent pi=PendingIntent.getActivity(context,99,open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
   Notification.Builder builder=Build.VERSION.SDK_INT>=26?new Notification.Builder(context,TimerWidget.CHANNEL):new Notification.Builder(context);
-  builder.setSmallIcon(android.R.drawable.ic_dialog_info).setContentTitle("Clash Timer Hub · Testmelding")
-   .setContentText("Meldingen werken! Dit is een test vanuit de app.")
+  builder.setSmallIcon(android.R.drawable.ic_dialog_info).setContentTitle(I18n.tr(context,"Clash Timer Hub · Testmelding"))
+   .setContentText(I18n.tr(context,"Meldingen werken! Dit is een test vanuit de app."))
    .setAutoCancel(true).setContentIntent(pi);
   manager.notify(880099,builder.build());
  }
@@ -47,13 +47,13 @@ public final class BuilderAlarm extends android.content.BroadcastReceiver {
   if(!stillTracked)return;
   NotificationManager manager=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
   if(manager==null)return;
-  if(Build.VERSION.SDK_INT>=26)manager.createNotificationChannel(new NotificationChannel(TimerWidget.CHANNEL,"Builder gereed",NotificationManager.IMPORTANCE_DEFAULT));
+  if(Build.VERSION.SDK_INT>=26)manager.createNotificationChannel(new NotificationChannel(TimerWidget.CHANNEL,I18n.tr(context,"Builder gereed"),NotificationManager.IMPORTANCE_DEFAULT));
   if(Build.VERSION.SDK_INT>=33&&context.checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)return;
   Intent open=new Intent(context,MainActivity.class);
   PendingIntent pi=PendingIntent.getActivity(context,0,open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
   Notification.Builder builder=Build.VERSION.SDK_INT>=26?new Notification.Builder(context,TimerWidget.CHANNEL):new Notification.Builder(context);
-  builder.setSmallIcon(android.R.drawable.ic_dialog_info).setContentTitle(ac+(early?" · Upgrade bijna klaar":" · Upgrade voltooid"))
-   .setContentText(early?name+" · nog "+Math.max(1,(finish-System.currentTimeMillis()+59999)/60000)+" minuten":name+" is klaar").setAutoCancel(true).setContentIntent(pi);
+  builder.setSmallIcon(android.R.drawable.ic_dialog_info).setContentTitle(ac+I18n.tr(context,early?" · Upgrade bijna klaar":" · Upgrade voltooid"))
+   .setContentText(I18n.english(context)?(early?name+" · "+Math.max(1,(finish-System.currentTimeMillis()+59999)/60000)+" min remaining":name+" is ready"):(early?name+" · nog "+Math.max(1,(finish-System.currentTimeMillis()+59999)/60000)+" minuten":name+" is klaar")).setAutoCancel(true).setContentIntent(pi);
   manager.notify((ac+"-"+name+"-"+finish+"-"+early).hashCode(),builder.build());
   TimerWidget.update(context);
  }
