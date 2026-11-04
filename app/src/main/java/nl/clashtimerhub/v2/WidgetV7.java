@@ -116,8 +116,8 @@ final class WidgetV7 {
   return PendingIntent.getBroadcast(ctx,130000+id,intent,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
  }
  private static RemoteViews multiRow(Context ctx,Status s,int mode,long now,int id){
-  if(mode==2){
-   RemoteViews row=new RemoteViews(ctx.getPackageName(),R.layout.widget_v7_wide_row);
+  if(mode==2||mode==3){
+   RemoteViews row=new RemoteViews(ctx.getPackageName(),mode==3?R.layout.widget_v7_wide_row_dense:R.layout.widget_v7_wide_row);
    row.setTextViewText(R.id.v7_wide_name,s.account);
    row.setTextViewText(R.id.v7_wide_builders,s.builderReady+"✓ "+s.builderActive+"⚒");
    timer(row,R.id.v7_wide_lab_timer,R.id.v7_wide_lab_idle,s.labNext,now);
@@ -147,8 +147,13 @@ final class WidgetV7 {
    height=opts.getInt(landscape?AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT:AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,240);
    if(width<=0)width=190;if(height<=0)height=240;
   }
-  // All selected accounts always remain in the widget; only presentation density changes.
-  int mode=width>=510&&height>=230?2:width>=225&&height>=270?1:0;
+  // Samsung's launcher may allocate far less vertical space than the initial widget
+  // preview. Always keep all account rows; use the dense wide layout when short.
+  int rows=Math.max(1,visible.size());
+  int mode;
+  if(width>=510)mode=height<38+rows*24?3:2;
+  else if(width>=225&&height>=38+rows*34)mode=1;
+  else mode=0;
   RemoteViews w=new RemoteViews(ctx.getPackageName(),R.layout.widget_v7_multi);
   boolean narrow=width<230;
   int ready=0;for(Status s:visible)ready+=s.builderReady;
