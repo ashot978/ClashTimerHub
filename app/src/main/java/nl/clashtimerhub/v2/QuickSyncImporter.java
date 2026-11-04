@@ -51,7 +51,7 @@ public final class QuickSyncImporter {
      JSONObject type=types.optJSONObject(t);if(type==null)continue;
      JSONArray modules=type.optJSONArray("modules");if(modules==null)continue;
      for(int m=0;m<modules.length();m++){
-      JSONObject module=modules.optJSONObject(m);if(module!=null)add(parsed,account,category,module.optLong("data",-1),module.optLong("timer"),timestamp);
+      JSONObject module=modules.optJSONObject(m);if(module!=null)add(parsed,account,category,module.optLong("data",-1),module.optLong("timer"),timestamp,tag,section+"/module/"+id+"/"+t+"/"+m);
      }
     }
     JSONArray timers=entry.optJSONArray("timers");
@@ -59,10 +59,41 @@ public final class QuickSyncImporter {
      for(int j=0;j<timers.length();j++){
       Object value=timers.opt(j);
       long seconds=value instanceof JSONObject?((JSONObject)value).optLong("timer"):timers.optLong(j);
-      add(parsed,account,category,id,seconds,timestamp);
+      add(parsed,account,category,id,seconds,timestamp,tag,section+"/timer/"+id+"/"+j);
      }
-    }else add(parsed,account,category,id,entry.optLong("timer"),timestamp);
+    }else add(parsed,account,category,id,entry.optLong("timer"),timestamp,tag,section+"/item/"+id+"/"+i);
    }
+  }
+  // Reconcile only the matching player. A sync must never touch manual timers
+  // or another account, and identical snapshots must not create new identities.
+  Map<String,JSONObject> oldTimers=new LinkedHashMap<>();
+  for(int i=0;i<oldUpgrades.length();i++){
+   JSONObject old=oldUpgrades.optJSONObject(i);
+   if(old!=null&&account.equals(old.optString("account"))&&old.optBoolean("exported",false)){
+    String key=old.optString("syncKey","");
+    if(key.isEmpty())key=old.optString("category")+"|"+old.optLong("sourceId",-1)+"|"+old.optString("name");
+    oldTimers.put(key,old);
+   }
+  }
+  int added=0,changed=0,finished=0;
+  Set<String> seen=new HashSet<>();
+  for(int i=0;i<parsed.length();i++){
+   JSONObject timer=parsed.getJSONObject(i);
+   String key=timer.optString("syncKey");
+   JSONObject before=oldTimers.get(key);
+   if(before==null){
+    String legacy=timer.optString("category")+"|"+timer.optLong("sourceId",-1)+"|"+timer.optString("name");
+    before=oldTimers.get(legacy);
+    if(before!=null)seen.add(legacy);
+   }
+   if(before==null)added++;
+   else{
+    seen.add(key);
+    if(Math.abs(before.optLong("finish")-timer.optLong("finish"))>60000L)changed++;
+   }
+  }
+  for(Map.Entry<String,JSONObject> old:oldTimers.entrySet()){
+   if(!seen.contains(old.getKey())&&old.getValue().optLong("finish")<=now)finished++;
   }
   JSONArray merged=new JSONArray();
   for(int i=0;i<oldUpgrades.length();i++){
@@ -71,19 +102,24 @@ public final class QuickSyncImporter {
   }
   for(int i=0;i<parsed.length();i++)merged.put(parsed.getJSONObject(i));
   tags.put(account,tag);
+  String status=account+": "+parsed.length()+" actief · "+added+" nieuw · "+finished+" klaar · "+changed+" gewijzigd";
+  long revision=prefs.getLong("syncRevision",0L)+1L;
   SharedPreferences.Editor editor=prefs.edit().putString("accounts",new JSONArray(accounts).toString())
    .putString("upgrades",merged.toString()).putString("playerTags",tags.toString())
-   .putLong("ack_"+account,now);
+   .putLong("ack_"+account,now).putLong("syncRevision",revision)
+   .putLong("lastSyncAt_"+account,now).putString("lastSyncSummary",status);
   if(!editor.commit())throw new IllegalStateException("Opslaan mislukt");
   TimerWidget.schedule(context);
-  return account+" bijgewerkt · "+parsed.length()+" actieve upgrades";
+  return status;
  }
- private static void add(JSONArray out,String account,String category,long id,long seconds,long timestamp)throws JSONException{
+
+ private static void add(JSONArray out,String account,String category,long id,long seconds,long timestamp,String tag,String key)throws JSONException{
   if(id<0||seconds<=0)return;
   long finish=timestamp+seconds*1000L;
   if(finish<=System.currentTimeMillis())return;
   JSONObject timer=new JSONObject();
-  timer.put("id",UUID.randomUUID().toString());timer.put("account",account);
+  String stable=java.util.UUID.nameUUIDFromBytes((tag+"|"+key).getBytes(java.nio.charset.StandardCharsets.UTF_8)).toString();
+  timer.put("id",stable);timer.put("syncKey",key);timer.put("account",account);
   timer.put("category",category);timer.put("name",ClashNames.name(id));
   timer.put("finish",finish);timer.put("exported",true);timer.put("sourceId",id);
   out.put(timer);
