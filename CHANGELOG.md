@@ -1,5 +1,27 @@
 # ClashTimerHub release notes
 
+## 7.5.5-beta1 — 4 November 2026
+
+### Back-up — datum in bestandsnaam
+- Nieuwe JSON-back-ups heten standaard `ClashTimerHub-backup-YYYY-MM-DD.json`, gebaseerd op de datum van de telefoon.
+- De datum wordt gebruikt voor zowel **Opslaan in Google Drive** (Android Delen) als **Opslaan als bestand** (bestandskiezer).
+- Bestaande back-ups blijven importeerbaar. Google Drive kan nog steeds meerdere bestanden met dezelfde naam bewaren; automatisch overschrijven wordt niet beloofd.
+
+### APK Update Manager — betrouwbaarheid en herstel
+- De actieve APK-download (DownloadManager-ID, buildnummer, bestandslocatie en SHA-256) blijft bewaard wanneer de app naar de achtergrond verdwijnt of opnieuw wordt geopend.
+- Voltooide downloads worden bij terugkeer opnieuw gecontroleerd en daarna via Androids PackageInstaller aangeboden.
+- Tijdens een open app luistert de updater naar downloadafrondingen; downloaden/controle blijft doorgaan wanneer de app tijdelijk niet zichtbaar is.
+- Bij een vastgelopen of mislukte download verschijnt een concrete fout of Android-redencode.
+- Verificatie blijft verplicht: downloadcontrole, juiste app-ID, nieuwer versionCode en dezelfde APK-ondertekening.
+- Bij een installatiefout met een eerder **geverifieerde** APK kan de gebruiker **Via Android installeren** kiezen als alternatieve methode. Ook die methode controleert alles opnieuw.
+- Nieuw: **Instellingen → App-updates → Update-diagnose** met installed/latest build, installatietoestemming, actieve download, beschikbare APK en opgeslagen fout.
+- De alternatieve route gebruikt een tijdelijke, beveiligde FileProvider-toegang; de app vraagt nooit om je bestaande installatie te verwijderen.
+
+### Beperkingen
+- Android vereist nog altijd een bevestiging van de gebruiker om een APK te installeren.
+- Buildsucces op GitHub bewijst niet dat de installatie op Samsung One UI is gelukt; daarvoor is een toesteltest nodig.
+
+
 ## 7.5.4-beta1 — 4 November 2026
 
 ### Widget finish label correction
