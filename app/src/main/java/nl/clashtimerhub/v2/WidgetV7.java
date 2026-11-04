@@ -177,7 +177,8 @@ final class WidgetV7 {
   else if(sortMode==2){
    LinkedHashMap<String,Integer> order=new LinkedHashMap<>();
    try{
-    JSONArray arr=new JSONArray(AppData.prefs(ctx).getString("accounts","[]"));
+    JSONArray arr=new JSONArray(studio.getString("order_"+id,"[]"));
+    if(arr.length()==0)arr=new JSONArray(AppData.prefs(ctx).getString("accounts","[]"));
     for(int i=0;i<arr.length();i++)order.put(arr.optString(i),i);
    }catch(Exception ignored){}
    Collections.sort(ordered,(a,b)->Integer.compare(order.getOrDefault(a.account,9999),order.getOrDefault(b.account,9999)));
