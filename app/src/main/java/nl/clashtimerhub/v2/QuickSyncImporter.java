@@ -13,7 +13,17 @@ public final class QuickSyncImporter {
   int start=raw.indexOf('{'),end=raw.lastIndexOf('}');
   if(start<0||end<=start)throw new IllegalArgumentException("Geen JSON gevonden");
   JSONObject json=new JSONObject(raw.substring(start,end+1));
-  if(!json.has("buildings")&&!json.has("heroes")&&!json.has("units"))throw new IllegalArgumentException("Geen Clash-spelerdata");
+  // Reject truncated or malformed snapshots before touching previously stored timers.
+  int availableSections=0;
+  for(String section:new String[]{"buildings","heroes","units","spells","pets","traps"}){
+   if(!json.has(section))continue;
+   if(!(json.opt(section) instanceof JSONArray))
+    throw new IllegalArgumentException("Ongeldige sectie: "+section+". Bestaande timers blijven behouden.");
+   availableSections++;
+  }
+  if(availableSections==0)throw new IllegalArgumentException("Geen Clash-spelerdata");
+  if(!json.has("buildings")||!json.has("heroes")||!json.has("units"))
+   throw new IllegalArgumentException("Export is onvolledig (buildings/heroes/units ontbreken). Maak een volledige Clash-export.");
   JSONObject player=json.optJSONObject("player");
   String tag=json.optString("tag",json.optString("playerTag",player==null?"":player.optString("tag",""))).trim().toUpperCase(Locale.ROOT);
   if(tag.isEmpty())throw new IllegalArgumentException("Player tag ontbreekt: importeer via de app");
@@ -48,6 +58,19 @@ public final class QuickSyncImporter {
   long now=System.currentTimeMillis();
   long timestamp=json.optLong("timestamp",now/1000L)*1000L;
   if(timestamp>now+3600000L||timestamp<now-30L*86400000L)throw new IllegalArgumentException("Exporttijd is ongeldig of te oud");
+  // A missing section must never silently clear active timers of that category.
+  HashSet<String> previousCategories=new HashSet<>();
+  for(int i=0;i<oldUpgrades.length();i++){
+   JSONObject old=oldUpgrades.optJSONObject(i);
+   if(old!=null&&account.equals(old.optString("account"))&&old.optBoolean("exported",false)&&old.optLong("finish")>now)
+    previousCategories.add(old.optString("category"));
+  }
+  for(String cat:previousCategories){
+   boolean present="Pets".equals(cat)?json.has("pets"):
+    "Laboratorium".equals(cat)?json.has("units")&&json.has("spells"):
+    json.has("buildings")&&json.has("heroes")&&json.has("traps");
+   if(!present)throw new IllegalArgumentException("Export mist "+cat+"; eerdere timers zijn niet overschreven.");
+  }
   JSONArray parsed=new JSONArray();
   String[] sections={"buildings","heroes","units","spells","pets","traps"};
   for(String section:sections){
@@ -118,10 +141,17 @@ public final class QuickSyncImporter {
    }
   }
   tags.put(account,tag);
-  String status;
-  if(previous.isEmpty())status=account+" ✓ "+parsed.length()+" actieve timers opgeslagen";
-  else if(differences==0)status=account+" ✓ "+parsed.length()+" actieve timers\nGeen verschillen met vorige sync";
-  else status=account+" ✓ "+parsed.length()+" actieve timers\nWijzigingen sinds vorige sync gevonden";
+  int builders=0,laboratory=0,pets=0;
+  for(int i=0;i<parsed.length();i++){
+   String cat=parsed.getJSONObject(i).optString("category");
+   if("Bouwers".equals(cat))builders++;
+   else if("Laboratorium".equals(cat))laboratory++;
+   else if("Pets".equals(cat))pets++;
+  }
+  String status=AppData.displayName(context,account)+" ✓ "+parsed.length()+" timers (⚒ "+builders+" · ⚗ "+laboratory+" · 🐾 "+pets+")";
+  if(previous.isEmpty())status+="\\nEerste volledige synchronisatie";
+  else if(differences==0)status+="\\nGeen verschillen met vorige sync";
+  else status+="\\nWijzigingen sinds vorige sync gevonden";
   long revision=prefs.getLong("syncRevision",0L)+1L;
   SharedPreferences.Editor editor=prefs.edit().putString("accounts",new JSONArray(accounts).toString())
    .putString("upgrades",merged.toString()).putString("playerTags",tags.toString())
