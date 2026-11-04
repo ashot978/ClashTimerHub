@@ -594,6 +594,16 @@ public final class MainActivity extends Activity {
   if(last>0){TextView synced=label("↻ Gesynchroniseerd: "+finishAt(last),11);synced.setTextColor(0xffbba7d1);detailPanel.addView(synced);}
   if(ac.startsWith("#")){Button link=new Button(this);link.setAllCaps(false);link.setText(t("Koppel deze player tag aan bestaand account"));link.setOnClickListener(v->linkImportedAccount(ac));detailPanel.addView(link);}
   showAccountHelpers(detailPanel,ac);
+  CheckBox alchemist=new CheckBox(this);
+  alchemist.setText(I18n.english(this)?"Alchemist available":"Alchemist beschikbaar");
+  alchemist.setTextColor(0xff8be3ad);
+  alchemist.setChecked(HelperTracker.isAlchemistAvailable(this,ac));
+  detailPanel.addView(alchemist);
+  alchemist.setOnCheckedChangeListener((button,available)->{
+   HelperTracker.setAlchemistAvailable(this,ac,available);
+   TimerWidget.update(this);
+   renderSelectedDetail();
+  });
   TextView maxTitle=label("✓  MAX STATUS",14);
    maxTitle.setTextColor(0xff8be3ad);detailPanel.addView(maxTitle);
    for(String categoryName:categories){
@@ -714,6 +724,7 @@ public final class MainActivity extends Activity {
      accounts.remove(source);tags.remove(source);tags.put(target,source);
      getPreferences(0).edit().putString("playerTags",tags.toString()).apply();
      AppData.mergeMaxedAccount(this,source,target);
+     HelperTracker.mergeAlchemistAccount(this,source,target);
      selectedAccount=target;persist();draw();toast(source+" gekoppeld aan "+target);
     }catch(Exception e){toast("Koppelen mislukt: "+e.getMessage());}
    }).setNegativeButton(t("Annuleren"),null).show();
@@ -1003,7 +1014,10 @@ public final class MainActivity extends Activity {
        .putString("playerTags",data.optJSONObject("playerTags")==null?"{}":data.optJSONObject("playerTags").toString())
        .putString("accountNames",data.optJSONObject("accountNames")==null?"{}":data.optJSONObject("accountNames").toString())
        .putString("maxedCategories",data.optJSONObject("maxedCategories")==null?"{}":data.optJSONObject("maxedCategories").toString())
-       .putString(HelperTracker.KEY,data.optJSONObject("helpersByAccount")==null?"{}":data.optJSONObject("helpersByAccount").toString()).apply();
+       .putString(HelperTracker.KEY,data.optJSONObject("helpersByAccount")==null?"{}":data.optJSONObject("helpersByAccount").toString())
+       .putString(HelperTracker.ALCHEMIST_AVAILABLE_KEY,
+        data.optJSONObject("alchemistAvailableByAccount")==null?"{}":
+         data.optJSONObject("alchemistAvailableByAccount").toString()).apply();
      restorePreferences(data.optJSONObject("preferences"));
      restoreWidgetSettings(data.optJSONArray("widgets"));
      persist();draw();toast("Back-up hersteld, inclusief beschikbare instellingen");
