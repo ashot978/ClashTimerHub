@@ -81,7 +81,7 @@ final class WidgetV7 {
   boolean today=now.get(Calendar.YEAR)==date.get(Calendar.YEAR)&&now.get(Calendar.DAY_OF_YEAR)==date.get(Calendar.DAY_OF_YEAR);
   now.add(Calendar.DAY_OF_YEAR,1);
   boolean tomorrow=now.get(Calendar.YEAR)==date.get(Calendar.YEAR)&&now.get(Calendar.DAY_OF_YEAR)==date.get(Calendar.DAY_OF_YEAR);
-  if(shortForm)return (today?"":tomorrow?I18n.english(ctx)?"Tomorrow ":"Morgen ":new java.text.SimpleDateFormat("d MMM ",loc).format(new Date(when)))+clock;
+  if(shortForm)return (today?"":tomorrow?I18n.english(ctx)?"Tom ":"Mrg ":new java.text.SimpleDateFormat("d MMM ",loc).format(new Date(when)))+clock;
   if(today)return I18n.english(ctx)?"Today "+clock:"Vandaag "+clock;
   if(tomorrow)return I18n.english(ctx)?"Tomorrow "+clock:"Morgen "+clock;
   return new java.text.SimpleDateFormat("d MMM HH:mm",loc).format(new Date(when));
