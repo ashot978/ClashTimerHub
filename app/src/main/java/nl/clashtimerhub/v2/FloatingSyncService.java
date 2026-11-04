@@ -16,6 +16,15 @@ public final class FloatingSyncService extends Service {
  private View bubble;
  private WindowManager.LayoutParams params;
  private static final int CHANNEL_ID=11;
+ private View dropTarget;
+ private WindowManager.LayoutParams dropParams;
+ private final Handler holdHandler=new Handler(Looper.getMainLooper());
+ private Runnable holdAction;
+ private boolean shuttingDown=false;
+ private int dp(int n){return (int)(n*getResources().getDisplayMetrics().density+0.5f);}
+ private void cancelHold(){
+  if(holdAction!=null){holdHandler.removeCallbacks(holdAction);holdAction=null;}
+ }
  @Override public void onCreate(){
   super.onCreate();
   if(!Settings.canDrawOverlays(this)){stopSelf();return;}
@@ -26,7 +35,7 @@ public final class FloatingSyncService extends Service {
   Intent open=new Intent(this,MainActivity.class);
   PendingIntent pi=PendingIntent.getActivity(this,12,open,PendingIntent.FLAG_IMMUTABLE|PendingIntent.FLAG_UPDATE_CURRENT);
   Notification.Builder nb=Build.VERSION.SDK_INT>=26?new Notification.Builder(this,"floating_sync"):new Notification.Builder(this);
-  nb.setSmallIcon(android.R.drawable.ic_menu_upload).setContentTitle("Clash Timer Hub").setContentText("Zwevende synchronisatie actief").setContentIntent(pi).setOngoing(true);
+  nb.setSmallIcon(android.R.drawable.ic_menu_upload).setContentTitle("Clash Timer Hub").setContentText("Tik: sync · Sleep naar X of houd ingedrukt: uitschakelen").setContentIntent(pi).setOngoing(true);
   if(Build.VERSION.SDK_INT>=29)startForeground(CHANNEL_ID,nb.build(),android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
   else startForeground(CHANNEL_ID,nb.build());
   manager=(WindowManager)getSystemService(WINDOW_SERVICE);
@@ -35,24 +44,97 @@ public final class FloatingSyncService extends Service {
   int size=(int)(52*getResources().getDisplayMetrics().density);
   params=new WindowManager.LayoutParams(size,size,Build.VERSION.SDK_INT>=26?WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY:WindowManager.LayoutParams.TYPE_PHONE,WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL|WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,PixelFormat.TRANSLUCENT);
   params.gravity=Gravity.TOP|Gravity.START;params.x=getResources().getDisplayMetrics().widthPixels-size;params.y=getResources().getDisplayMetrics().heightPixels/3;
+  android.content.SharedPreferences preferences=AppData.prefs(this);
+  params.x=Math.max(0,preferences.getInt("floatingX",params.x));
+  params.y=Math.max(0,preferences.getInt("floatingY",params.y));
   view.setOnTouchListener(new View.OnTouchListener(){
    float startX,startY;int originalX,originalY;boolean moved;
-   @Override public boolean onTouch(View v,android.view.MotionEvent e){
-    switch(e.getAction()){
-     case MotionEvent.ACTION_DOWN:startX=e.getRawX();startY=e.getRawY();originalX=params.x;originalY=params.y;moved=false;return true;
+   @Override public boolean onTouch(View v,MotionEvent e){
+    switch(e.getActionMasked()){
+     case MotionEvent.ACTION_DOWN:
+      startX=e.getRawX();startY=e.getRawY();originalX=params.x;originalY=params.y;moved=false;
+      cancelHold();
+      holdAction=()->{
+       if(!moved&&!shuttingDown){
+        v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        disableBubble();
+       }
+      };
+      holdHandler.postDelayed(holdAction,1350);
+      return true;
      case MotionEvent.ACTION_MOVE:
       int dx=(int)(e.getRawX()-startX),dy=(int)(e.getRawY()-startY);
-      if(Math.abs(dx)>12||Math.abs(dy)>12)moved=true;
-      params.x=Math.max(0,originalX+dx);params.y=Math.max(0,originalY+dy);manager.updateViewLayout(view,params);return true;
+      if(Math.abs(dx)>dp(10)||Math.abs(dy)>dp(10)){
+       if(!moved){moved=true;cancelHold();showDropTarget();}
+      }
+      if(moved&&!shuttingDown){
+       android.util.DisplayMetrics metrics=getResources().getDisplayMetrics();
+       params.x=Math.max(0,Math.min(metrics.widthPixels-params.width,originalX+dx));
+       params.y=Math.max(0,Math.min(metrics.heightPixels-params.height,originalY+dy));
+       if(manager!=null)manager.updateViewLayout(v,params);
+       highlightDropTarget();
+      }
+      return true;
      case MotionEvent.ACTION_UP:
-      if(!moved){
-       pasteNow();
-      }return true;
+      cancelHold();
+      if(shuttingDown)return true;
+      if(moved){
+       boolean discard=isNearDropTarget();
+       hideDropTarget();
+       if(discard)disableBubble();
+       else AppData.prefs(FloatingSyncService.this).edit().putInt("floatingX",params.x).putInt("floatingY",params.y).apply();
+      }else pasteNow();
+      return true;
+     case MotionEvent.ACTION_CANCEL:
+      cancelHold();hideDropTarget();return true;
     }
     return false;
    }
   });
   bubble=view;manager.addView(bubble,params);
+ }
+ private void showDropTarget(){
+  if(dropTarget!=null||manager==null)return;
+  TextView target=new TextView(this);
+  target.setText("✕  Sleep hierheen om te sluiten");target.setTextColor(Color.WHITE);
+  target.setTextSize(14);target.setGravity(Gravity.CENTER);target.setTypeface(null,android.graphics.Typeface.BOLD);
+  GradientDrawable bg=new GradientDrawable();bg.setColor(0xff873449);bg.setCornerRadius(dp(28));target.setBackground(bg);
+  android.util.DisplayMetrics m=getResources().getDisplayMetrics();
+  int w=Math.min(m.widthPixels-dp(24),dp(240)),h=dp(55);
+  dropParams=new WindowManager.LayoutParams(w,h,params.type,
+   WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE|WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+   PixelFormat.TRANSLUCENT);
+  dropParams.gravity=Gravity.TOP|Gravity.START;
+  dropParams.x=Math.max(0,(m.widthPixels-w)/2);dropParams.y=Math.max(0,m.heightPixels-dp(140));
+  try{manager.addView(target,dropParams);dropTarget=target;}
+  catch(RuntimeException e){android.util.Log.w("ClashTimerHub","Cannot show discard target",e);}
+ }
+ private boolean isNearDropTarget(){
+  if(dropTarget==null||dropParams==null||params==null)return false;
+  int dx=params.x+params.width/2-(dropParams.x+dropParams.width/2);
+  int dy=params.y+params.height/2-(dropParams.y+dropParams.height/2);
+  return (long)dx*dx+(long)dy*dy<(long)dp(145)*dp(145);
+ }
+ private void highlightDropTarget(){
+  if(dropTarget instanceof TextView){
+   boolean near=isNearDropTarget();
+   TextView text=(TextView)dropTarget;
+   text.setText(near?"✕  Laat los om te sluiten":"✕  Sleep hierheen om te sluiten");
+   ((GradientDrawable)text.getBackground()).setColor(near?0xffcc304f:0xff873449);
+  }
+ }
+ private void hideDropTarget(){
+  if(manager!=null&&dropTarget!=null){
+   try{manager.removeView(dropTarget);}catch(RuntimeException ignored){}
+  }
+  dropTarget=null;dropParams=null;
+ }
+ private void disableBubble(){
+  if(shuttingDown)return;
+  shuttingDown=true;cancelHold();hideDropTarget();
+  AppData.prefs(this).edit().putBoolean("floatingEnabled",false).apply();
+  Toast.makeText(this,"Zwevende plakknop uitgeschakeld",Toast.LENGTH_SHORT).show();
+  stopSelf();
  }
  private void pasteNow(){
   try{
@@ -83,6 +165,12 @@ public final class FloatingSyncService extends Service {
   },1200);
  }
  @Override public int onStartCommand(Intent intent,int flags,int startId){return START_STICKY;}
- @Override public void onDestroy(){if(manager!=null&&bubble!=null)manager.removeView(bubble);super.onDestroy();}
+ @Override public void onDestroy(){
+  cancelHold();hideDropTarget();
+  if(manager!=null&&bubble!=null){
+   try{manager.removeView(bubble);}catch(RuntimeException ignored){}
+  }
+  super.onDestroy();
+ }
  @Override public IBinder onBind(Intent intent){return null;}
 }
