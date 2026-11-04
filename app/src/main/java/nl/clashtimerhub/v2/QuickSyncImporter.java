@@ -30,6 +30,15 @@ public final class QuickSyncImporter {
   if(account==null&&!playerName.isEmpty())for(String existing:accounts){
    if(existing.equalsIgnoreCase(playerName)&&tags.optString(existing,"").isEmpty()){account=existing;break;}
   }
+  // Preserve stable account keys, but save the real player name as a display label.
+  // Never overwrite a name that the user chose manually.
+  if(account!=null&&!playerName.isEmpty()&&!playerName.equalsIgnoreCase(account)){
+   JSONObject names=new JSONObject(prefs.getString("accountNames","{}"));
+   if(names.optString(account,"").trim().isEmpty()){
+    names.put(account,playerName);
+    prefs.edit().putString("accountNames",names.toString()).apply();
+   }
+  }
   if(account==null){
    String base=playerName.isEmpty()?tag:playerName;
    account=base;int suffix=2;
@@ -101,6 +110,13 @@ public final class QuickSyncImporter {
    if(upgrade!=null&&!(account.equals(upgrade.optString("account"))&&upgrade.optBoolean("exported",false)))merged.put(upgrade);
   }
   for(int i=0;i<parsed.length();i++)merged.put(parsed.getJSONObject(i));
+  if(!playerName.isEmpty()&&!playerName.equalsIgnoreCase(account)){
+   JSONObject names=new JSONObject(prefs.getString("accountNames","{}"));
+   if(names.optString(account,"").trim().isEmpty()){
+    names.put(account,playerName);
+    prefs.edit().putString("accountNames",names.toString()).apply();
+   }
+  }
   tags.put(account,tag);
   String status;
   if(previous.isEmpty())status=account+" ✓ "+parsed.length()+" actieve timers opgeslagen";
