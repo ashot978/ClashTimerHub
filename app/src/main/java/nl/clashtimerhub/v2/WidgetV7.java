@@ -242,6 +242,7 @@ final class WidgetV7 {
   android.content.SharedPreferences studio=ctx.getSharedPreferences("WidgetPreferences",Context.MODE_PRIVATE);
   boolean showLab=studio.getBoolean("lab_"+id,true),showPet=studio.getBoolean("pet_"+id,true);
   int fontSize=studio.getInt("size_"+id,1),sortMode=studio.getInt("sort_"+id,0);
+  boolean showHelpers=studio.getBoolean("helpers_"+id,true);
   int background=studio.getInt("bg_"+id,0);
   ArrayList<Status> ordered=new ArrayList<>(visible);
   if(sortMode==1)Collections.sort(ordered,(a,b)->AppData.displayName(ctx,a.account).compareToIgnoreCase(AppData.displayName(ctx,b.account)));
@@ -281,14 +282,30 @@ final class WidgetV7 {
   int rowHeight=mode==2?24:mode==4?42:mode==5?62:102;
   int reservedFooter=28,frame=8;
   int available=Math.max(0,height-reservedFooter-frame);
-  int count=Math.min(ordered.size(),Math.max(1,available/rowHeight));
+  int count=0,consumed=0;
+  for(Status item:ordered){
+   int helperExtra=showHelpers&&!HelperTracker.compact(ctx,item.account,now).isEmpty()?16:0;
+   if(count>0&&consumed+rowHeight+helperExtra>available)break;
+   consumed+=rowHeight+helperExtra;
+   count++;
+  }
   RemoteViews w=new RemoteViews(ctx.getPackageName(),R.layout.widget_v7_multi);
   w.setInt(R.id.v7_multi_root,"setBackgroundResource",background==1?R.drawable.widget_background_dark:
     background==2?R.drawable.widget_background_transparent:R.drawable.widget_background);
   w.removeAllViews(R.id.v7_multi_rows);
   if(ordered.isEmpty())w.addView(R.id.v7_multi_rows,new RemoteViews(ctx.getPackageName(),R.layout.widget_empty));
-  else for(int i=0;i<count;i++)w.addView(R.id.v7_multi_rows,
-    multiRow(ctx,ordered.get(i),mode,now,id,showLab,showPet,fontSize,background,columns));
+  else for(int i=0;i<count;i++){
+   Status item=ordered.get(i);
+   w.addView(R.id.v7_multi_rows,
+    multiRow(ctx,item,mode,now,id,showLab,showPet,fontSize,background,columns));
+   String helpers=showHelpers?HelperTracker.compact(ctx,item.account,now):"";
+   if(!helpers.isEmpty()){
+    RemoteViews line=new RemoteViews(ctx.getPackageName(),R.layout.widget_v7_helper_line);
+    line.setTextViewText(R.id.v7_helper_line_text,helpers);
+    line.setOnClickPendingIntent(R.id.v7_helper_line_root,accountClick(ctx,item.account,id));
+    w.addView(R.id.v7_multi_rows,line);
+   }
+  }
   boolean active=AppData.prefs(ctx).getBoolean("floatingEnabled",false);
   w.setTextViewText(R.id.v7_multi_sync,I18n.english(ctx)?("Sync "+(active?"ON":"OFF")):("Sync "+(active?"AAN":"UIT")));
   w.setOnClickPendingIntent(R.id.v7_multi_sync,syncClick(ctx,id));
