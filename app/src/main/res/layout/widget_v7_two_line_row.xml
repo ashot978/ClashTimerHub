@@ -3,29 +3,28 @@
  android:id="@+id/widget_account_root" android:layout_width="match_parent"
  android:layout_height="41dp" android:layout_marginBottom="1dp"
  android:paddingLeft="3dp" android:paddingRight="3dp"
- android:orientation="vertical" android:gravity="center_vertical"
+ android:orientation="vertical" android:gravity="start|center_vertical"
  android:background="@drawable/widget_row_background">
  <LinearLayout android:layout_width="match_parent" android:layout_height="20dp"
-  android:orientation="horizontal" android:gravity="center_vertical">
-  <TextView android:id="@+id/v7_wide_name" android:layout_width="wrap_content" android:maxWidth="98dp" android:layout_marginRight="4dp"
+  android:orientation="horizontal" android:gravity="start|center_vertical">
+  <TextView android:id="@+id/v7_wide_name" android:layout_width="wrap_content" android:layout_marginRight="4dp"
    android:layout_height="wrap_content" android:textSize="10sp" android:textColor="#FFFFFF"
    android:textStyle="bold" android:singleLine="true" android:ellipsize="none"
    android:includeFontPadding="false"/>
   <TextView android:id="@+id/v7_wide_builders" android:layout_width="54dp"
    android:layout_height="wrap_content" android:textSize="10sp" android:textColor="#8BE3AD"
-   android:gravity="center" android:singleLine="true" android:includeFontPadding="false"/>
-  <TextView android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/>
+   android:gravity="start" android:singleLine="true" android:includeFontPadding="false"/>
   <Chronometer android:id="@+id/v7_wide_builder_timer" android:layout_width="96dp"
    android:layout_height="wrap_content" android:textSize="10sp" android:textColor="#FFD783"
-   android:gravity="end" android:singleLine="true" android:includeFontPadding="false"/>
+   android:gravity="start" android:singleLine="true" android:includeFontPadding="false"/>
   <TextView android:id="@+id/v7_wide_builder_idle" android:layout_width="96dp"
    android:layout_height="wrap_content" android:textSize="10sp" android:textColor="#FFD783"
-   android:gravity="end" android:visibility="gone" android:includeFontPadding="false"/>
+   android:gravity="start" android:visibility="gone" android:includeFontPadding="false"/>
  </LinearLayout>
  <LinearLayout android:layout_width="match_parent" android:layout_height="20dp"
-  android:orientation="horizontal" android:gravity="center_vertical">
+  android:orientation="horizontal" android:gravity="start|center_vertical">
   <LinearLayout android:id="@+id/v7_wide_lab_group" android:layout_width="92dp" android:layout_height="wrap_content"
-   android:orientation="horizontal" android:gravity="center_vertical">
+   android:orientation="horizontal" android:gravity="start|center_vertical">
    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
     android:text="⚗" android:textSize="10sp" android:textColor="#D6BCEA"
     android:includeFontPadding="false"/>
@@ -37,7 +36,7 @@
     android:textColor="#BCA7D5" android:visibility="gone" android:includeFontPadding="false"/>
   </LinearLayout>
   <LinearLayout android:id="@+id/v7_wide_pet_group" android:layout_width="92dp" android:layout_height="wrap_content"
-   android:orientation="horizontal" android:gravity="center_vertical">
+   android:orientation="horizontal" android:gravity="start|center_vertical">
    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
     android:text="🐾" android:textSize="10sp" android:textColor="#D6BCEA"
     android:includeFontPadding="false"/>
@@ -48,10 +47,9 @@
     android:layout_height="wrap_content" android:text="—" android:textSize="10sp"
     android:textColor="#BCA7D5" android:visibility="gone" android:includeFontPadding="false"/>
   </LinearLayout>
-  <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="1dp"/>
   <TextView android:id="@+id/v7_wide_finish" android:layout_width="80dp"
    android:layout_height="wrap_content" android:textSize="10sp" android:textColor="#CBB5D9"
-   android:gravity="end" android:singleLine="true" android:ellipsize="none"
+   android:gravity="start" android:singleLine="true" android:ellipsize="none"
    android:includeFontPadding="false"/>
  </LinearLayout>
 </LinearLayout>
