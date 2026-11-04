@@ -81,7 +81,7 @@ final class WidgetV7 {
   boolean today=now.get(Calendar.YEAR)==date.get(Calendar.YEAR)&&now.get(Calendar.DAY_OF_YEAR)==date.get(Calendar.DAY_OF_YEAR);
   now.add(Calendar.DAY_OF_YEAR,1);
   boolean tomorrow=now.get(Calendar.YEAR)==date.get(Calendar.YEAR)&&now.get(Calendar.DAY_OF_YEAR)==date.get(Calendar.DAY_OF_YEAR);
-  if(shortForm)return (today?"":tomorrow?I18n.english(ctx)?"Tmr ":"Mrg ":new java.text.SimpleDateFormat("d/M ",loc).format(new Date(when)))+clock;
+  if(shortForm)return (today?"":tomorrow?I18n.english(ctx)?"Tomorrow ":"Morgen ":new java.text.SimpleDateFormat("d MMM ",loc).format(new Date(when)))+clock;
   if(today)return I18n.english(ctx)?"Today "+clock:"Vandaag "+clock;
   if(tomorrow)return I18n.english(ctx)?"Tomorrow "+clock:"Morgen "+clock;
   return new java.text.SimpleDateFormat("d MMM HH:mm",loc).format(new Date(when));
@@ -121,7 +121,58 @@ final class WidgetV7 {
   intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,id);
   return PendingIntent.getBroadcast(ctx,130000+id,intent,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
  }
- private static RemoteViews multiRow(Context ctx,Status s,int mode,long now,int id,boolean showLab,boolean showPet,int size,int background){
+
+ /** Exact per-widget column widths, computed once from the longest value in each
+  * column across EVERY visible account. No per-row shifting or abbreviated timers. */
+ private static final class Columns {
+  float name=0,builders=0,lab=0,pet=0,next=0,finish=0;
+  float singleLine(){return name+builders+lab+pet+next+finish+12f;}
+  float twoLine(){return Math.max(name+builders+next,lab+pet+finish)+12f;}
+  float threeLine(){return Math.max(name+builders,Math.max(lab+pet,next+finish))+12f;}
+  float fiveLine(){return Math.max(name+builders,Math.max(lab,Math.max(pet,Math.max(next,finish))))+12f;}
+ }
+ private static float textDp(Context ctx,String text,float sp,boolean bold){
+  android.util.DisplayMetrics m=ctx.getResources().getDisplayMetrics();
+  android.graphics.Paint p=new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+  p.setTextSize(android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_SP,sp,m));
+  if(bold)p.setTypeface(android.graphics.Typeface.create(android.graphics.Typeface.DEFAULT,android.graphics.Typeface.BOLD));
+  return p.measureText(text)/m.density;
+ }
+ private static String remainingForColumn(long when,long now){
+  if(when==Long.MAX_VALUE)return "✓";
+  long hours=Math.max(0,(when-now+999)/1000/3600);
+  // The currently running chronometer can require two extra seconds digits.
+  return hours>0?hours+":59:59":"59:59";
+ }
+ private static Columns sharedColumns(Context ctx,List<Status> values,long now,int fontSize){
+  Columns c=new Columns();
+  float boost=fontSize==2?0.5f:fontSize==0?-0.5f:0f;
+  for(Status item:values){
+   c.name=Math.max(c.name,textDp(ctx,AppData.displayName(ctx,item.account),11f+boost,true)+5f);
+   c.builders=Math.max(c.builders,textDp(ctx,item.builderReady+"✓ "+item.builderActive+"⚒",10f,false)+6f);
+   String lab=remainingForColumn(item.labNext,now);
+   String pet=remainingForColumn(item.petNext,now);
+   c.lab=Math.max(c.lab,textDp(ctx,"⚗ "+lab,10f,false)+9f);
+   c.pet=Math.max(c.pet,textDp(ctx,"🐾 "+pet,10f,false)+9f);
+   c.next=Math.max(c.next,textDp(ctx,remainingForColumn(item.builderNext,now),11f+boost,false)+12f);
+   c.finish=Math.max(c.finish,textDp(ctx,finish(ctx,item.builderNext,true),10f,false)+9f);
+  }
+  return c;
+ }
+ private static void setColumnWidth(RemoteViews row,int viewId,float dp){
+  if(android.os.Build.VERSION.SDK_INT>=31)
+   row.setViewLayoutWidth(viewId,(float)Math.ceil(dp),android.util.TypedValue.COMPLEX_UNIT_DIP);
+ }
+ private static void alignColumns(RemoteViews row,Columns c){
+  setColumnWidth(row,R.id.v7_wide_name,c.name);
+  setColumnWidth(row,R.id.v7_wide_builders,c.builders);
+  setColumnWidth(row,R.id.v7_wide_lab_group,c.lab);
+  setColumnWidth(row,R.id.v7_wide_pet_group,c.pet);
+  setColumnWidth(row,R.id.v7_wide_builder_timer,c.next);
+  setColumnWidth(row,R.id.v7_wide_builder_idle,c.next);
+  setColumnWidth(row,R.id.v7_wide_finish,c.finish);
+ }
+ private static RemoteViews multiRow(Context ctx,Status s,int mode,long now,int id,boolean showLab,boolean showPet,int size,int background,Columns columns){
   if(mode>=2&&mode<=6){
    int layout=mode==6?R.layout.widget_v7_five_line_row:
     mode==5?R.layout.widget_v7_three_line_row:
@@ -129,6 +180,7 @@ final class WidgetV7 {
    RemoteViews row=new RemoteViews(ctx.getPackageName(),layout);
    row.setInt(R.id.widget_account_root,"setBackgroundResource",rowTheme(background));
    row.setTextViewText(R.id.v7_wide_name,AppData.displayName(ctx,s.account));
+   alignColumns(row,columns);
    row.setViewVisibility(R.id.v7_wide_lab_group,showLab?View.VISIBLE:View.GONE);
    row.setViewVisibility(R.id.v7_wide_pet_group,showPet?View.VISIBLE:View.GONE);
    // Comfort enlarges only the primary name and next-builder countdown.
@@ -217,10 +269,13 @@ final class WidgetV7 {
   // Pixel/dp option width can differ by launcher; thresholds include breathing room.
   int rows=Math.max(1,ordered.size());
   int mode;
-  if(width>=540)mode=2;       // All data in one row, with compact names.
-  else if(width>=280)mode=4;  // Two lines per account, all timers visible.
-  else if(width>=200)mode=5;  // Three lines when timer groups need more width.
-  else mode=6;                // Five lines for the narrowest launcher sizes.
+  Columns columns=sharedColumns(ctx,ordered,now,fontSize);
+  // Choose the most compact row layout that fits the full shared column widths.
+  // Values use the widest account in each column, so EVERY row has the same starts.
+  if(width>=columns.singleLine())mode=2;
+  else if(width>=columns.twoLine())mode=4;
+  else if(width>=columns.threeLine())mode=5;
+  else mode=6;
   int rowHeight=mode==2?24:mode==4?42:mode==5?62:102;
   boolean showSync=height>=44+rowHeight;
   int available=Math.max(0,height-24-(showSync?20:0));
@@ -236,7 +291,7 @@ final class WidgetV7 {
   w.setTextViewText(R.id.v7_multi_summary,(hidden>0?count+"/"+ordered.size():String.valueOf(ordered.size()))+" · "+ready+"✓");
   w.removeAllViews(R.id.v7_multi_rows);
   if(ordered.isEmpty())w.addView(R.id.v7_multi_rows,new RemoteViews(ctx.getPackageName(),R.layout.widget_empty));
-  else for(int i=0;i<count;i++)w.addView(R.id.v7_multi_rows,multiRow(ctx,ordered.get(i),mode,now,id,showLab,showPet,fontSize,background));
+  else for(int i=0;i<count;i++)w.addView(R.id.v7_multi_rows,multiRow(ctx,ordered.get(i),mode,now,id,showLab,showPet,fontSize,background,columns));
   w.setViewVisibility(R.id.v7_multi_sync,showSync?View.VISIBLE:View.GONE);
   w.setInt(R.id.v7_multi_sync,"setBackgroundResource",rowTheme(background));
   boolean active=AppData.prefs(ctx).getBoolean("floatingEnabled",false);
