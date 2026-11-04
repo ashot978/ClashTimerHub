@@ -1,5 +1,18 @@
 # ClashTimerHub release notes
 
+## 7.4.1-beta1 — 4 November 2026
+
+### Fixed
+- **Consistent widget text size:** resizing to narrower home-screen columns no longer reduces fonts to 8sp; the app uses a readable two-line row for narrower widths instead. For short widget heights, fewer rows may fit; increase widget height to display every account.
+- **Update popup:** real line breaks, short release notes without raw Markdown and a compact up-to-date message.
+- **Settings backup:** account timers, display names and MAX statuses are now joined by language, OCR timer calibration, notification preferences and widget settings.
+- Old v1 backups still import. Widget presets are matched to currently installed widgets of the same type and order; a missing widget must be added to the launcher first.
+
+### Safety
+- Existing settings continue to persist through app updates without using backup/restore.
+- Android still requires confirmation before installing updates.
+
+
 ## 7.4.0-beta1 — 4 November 2026
 
 ### New
