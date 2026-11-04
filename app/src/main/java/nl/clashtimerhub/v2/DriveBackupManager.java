@@ -87,6 +87,7 @@ final class DriveBackupManager {
    entry.put("size",wp.getInt("size_"+id,1));
    entry.put("lab",wp.getBoolean("lab_"+id,true));
    entry.put("pet",wp.getBoolean("pet_"+id,true));
+   entry.put("helpers",wp.getBoolean("helpers_"+id,true));
    entry.put("bg",wp.getInt("bg_"+id,0));
    entry.put("account",wp.getString("account_"+id,""));
    widgets.put(entry);
