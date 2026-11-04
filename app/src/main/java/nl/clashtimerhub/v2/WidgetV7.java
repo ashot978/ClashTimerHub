@@ -148,14 +148,14 @@ final class WidgetV7 {
   Columns c=new Columns();
   float boost=fontSize==2?0.5f:fontSize==0?-0.5f:0f;
   for(Status item:values){
-   c.name=Math.max(c.name,textDp(ctx,AppData.displayName(ctx,item.account),11f+boost,true)+5f);
-   c.builders=Math.max(c.builders,textDp(ctx,item.builderReady+"✓ "+item.builderActive+"⚒",10f,false)+6f);
+   c.name=Math.max(c.name,textDp(ctx,AppData.displayName(ctx,item.account),11f+boost,true)+3f);
+   c.builders=Math.max(c.builders,textDp(ctx,item.builderReady+"✓ "+item.builderActive+"⚒",10f,false)+4f);
    String lab=remainingForColumn(item.labNext,now);
    String pet=remainingForColumn(item.petNext,now);
-   c.lab=Math.max(c.lab,textDp(ctx,"⚗ "+lab,10f,false)+9f);
-   c.pet=Math.max(c.pet,textDp(ctx,"🐾 "+pet,10f,false)+9f);
-   c.next=Math.max(c.next,textDp(ctx,remainingForColumn(item.builderNext,now),11f+boost,false)+12f);
-   c.finish=Math.max(c.finish,textDp(ctx,finish(ctx,item.builderNext,true),10f,false)+9f);
+   c.lab=Math.max(c.lab,textDp(ctx,"🧙 "+lab,10f,false)+6f);
+   c.pet=Math.max(c.pet,textDp(ctx,"🐾 "+pet,10f,false)+6f);
+   c.next=Math.max(c.next,textDp(ctx,remainingForColumn(item.builderNext,now),11f+boost,false)+6f);
+   c.finish=Math.max(c.finish,textDp(ctx,finish(ctx,item.builderNext,true),10f,false)+5f);
   }
   return c;
  }
@@ -220,7 +220,7 @@ final class WidgetV7 {
    String lab=s.labActive>0?String.valueOf(s.labActive):AppData.isMaxed(ctx,s.account,"Laboratorium")?"✓":"0";
    String pets=s.petActive>0?String.valueOf(s.petActive):AppData.isMaxed(ctx,s.account,"Pets")?"✓":"0";
    // In case a smaller launcher does use this fallback, tint only the MAX marks green.
-   android.text.SpannableStringBuilder subtitle=new android.text.SpannableStringBuilder("⚗ ");
+   android.text.SpannableStringBuilder subtitle=new android.text.SpannableStringBuilder("🧙 ");
    int labStart=subtitle.length();subtitle.append(lab);
    if("✓".equals(lab))subtitle.setSpan(new android.text.style.ForegroundColorSpan(0xff8BE3AD),labStart,subtitle.length(),android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
    subtitle.append("  🐾 ");int petStart=subtitle.length();subtitle.append(pets);
@@ -228,7 +228,7 @@ final class WidgetV7 {
    subtitle.append("  ·  ").append(finish(ctx,s.builderNext,true));
    if(!showLab&&!showPet)subtitle=new android.text.SpannableStringBuilder(finish(ctx,s.builderNext,true));
    else if(!showLab)subtitle=new android.text.SpannableStringBuilder("🐾 "+pets+" · "+finish(ctx,s.builderNext,true));
-   else if(!showPet)subtitle=new android.text.SpannableStringBuilder("⚗ "+lab+" · "+finish(ctx,s.builderNext,true));
+   else if(!showPet)subtitle=new android.text.SpannableStringBuilder("🧙 "+lab+" · "+finish(ctx,s.builderNext,true));
    row.setTextViewText(R.id.widget_subtitle,subtitle);
   }
   row.setOnClickPendingIntent(R.id.widget_account_root,accountClick(ctx,s.account,id));
@@ -286,16 +286,16 @@ final class WidgetV7 {
     background==2?R.drawable.widget_background_transparent:R.drawable.widget_background);
   boolean narrow=width<230;
   int ready=0;for(Status s:ordered)ready+=s.builderReady;
-  w.setTextViewText(R.id.v7_multi_title,narrow?("⚔ TIMERS"+(hidden>0?" +"+hidden:"")):"⚔ CLASH TIMER HUB");
-  w.setViewVisibility(R.id.v7_multi_summary,narrow?View.GONE:View.VISIBLE);
-  w.setTextViewText(R.id.v7_multi_summary,(hidden>0?count+"/"+ordered.size():String.valueOf(ordered.size()))+" · "+ready+"✓");
+  w.setTextViewText(R.id.v7_multi_title,narrow?"TIMERS":"CLASH TIMER HUB");
+  // No decorative crossed swords and no top-right account / ready counts.
+  w.setViewVisibility(R.id.v7_multi_summary,View.GONE);
   w.removeAllViews(R.id.v7_multi_rows);
   if(ordered.isEmpty())w.addView(R.id.v7_multi_rows,new RemoteViews(ctx.getPackageName(),R.layout.widget_empty));
   else for(int i=0;i<count;i++)w.addView(R.id.v7_multi_rows,multiRow(ctx,ordered.get(i),mode,now,id,showLab,showPet,fontSize,background,columns));
   w.setViewVisibility(R.id.v7_multi_sync,showSync?View.VISIBLE:View.GONE);
   w.setInt(R.id.v7_multi_sync,"setBackgroundResource",rowTheme(background));
   boolean active=AppData.prefs(ctx).getBoolean("floatingEnabled",false);
-  w.setTextViewText(R.id.v7_multi_sync,I18n.english(ctx)?("⚔ Sync "+(active?"ON":"OFF")):("⚔ Sync "+(active?"AAN":"UIT")));
+  w.setTextViewText(R.id.v7_multi_sync,I18n.english(ctx)?("Sync "+(active?"ON":"OFF")):("Sync "+(active?"AAN":"UIT")));
   w.setOnClickPendingIntent(R.id.v7_multi_sync,syncClick(ctx,id));
   w.setOnClickPendingIntent(R.id.v7_multi_settings,settingsClick(ctx,id));
   Intent launch=new Intent(ctx,MainActivity.class);
@@ -342,7 +342,7 @@ final class WidgetV7 {
   }
   if(s!=null){
    w.setTextViewText(R.id.v7_single_builders,s.builderReady+"✓  "+s.builderActive+"⚒");
-   w.setTextViewText(R.id.v7_single_lab_count,"⚗ "+s.labActive);
+   w.setTextViewText(R.id.v7_single_lab_count,"🧙 "+s.labActive);
    w.setTextViewText(R.id.v7_single_pet_count,"🐾 "+s.petActive);
    timer(w,R.id.v7_single_builder_timer,R.id.v7_single_builder_idle,s.builderNext,now);
    timer(w,R.id.v7_single_lab_timer,R.id.v7_single_lab_idle,s.labNext,now);
@@ -356,7 +356,7 @@ final class WidgetV7 {
    w.setOnClickPendingIntent(R.id.v7_single_name,accountClick(ctx,s.account,id));
   }
   boolean active=AppData.prefs(ctx).getBoolean("floatingEnabled",false);
-  w.setTextViewText(R.id.v7_single_sync,I18n.english(ctx)?"⚔ Sync "+(active?"ON":"OFF"):"⚔ Sync "+(active?"AAN":"UIT"));
+  w.setTextViewText(R.id.v7_single_sync,I18n.english(ctx)?"Sync "+(active?"ON":"OFF"):"Sync "+(active?"AAN":"UIT"));
   w.setOnClickPendingIntent(R.id.v7_single_sync,syncClick(ctx,id));
   return w;
  }
