@@ -291,7 +291,7 @@ public final class MainActivity extends Activity {
    if(isFinishing()||isDestroyed())return;
    if(error!=null){
     if(!silent)new android.app.AlertDialog.Builder(this).setTitle(t("Updatecontrole"))
-     .setMessage(error+"\\nControleer of GitHub de nieuwste APK als Release heeft gepubliceerd.")
+     .setMessage(error+"\nControleer of GitHub de nieuwste APK als Release heeft gepubliceerd.")
      .setPositiveButton(t("OK"),null).show();
     return;
    }
@@ -305,13 +305,20 @@ public final class MainActivity extends Activity {
     if(!newer||getPreferences(0).getLong("lastNotifiedVersionCode",0)>=versionCode)return;
     getPreferences(0).edit().putLong("lastNotifiedVersionCode",versionCode).apply();
    }
-   String notes=data.optString("notes","");
-   if(notes.length()>3500)notes=notes.substring(0,3500)+"…";
-   String message="Geïnstalleerd: #"+(current>=1000?current-1000:current)+
-    "\\nNieuwste build: #"+build+(newer?"\\n\\nNieuwe update beschikbaar!":"\\n\\nJe hebt de nieuwste versie.")+
-    (notes.isEmpty()?"":"\\n\\n"+notes);
-   android.app.AlertDialog.Builder dialog=new android.app.AlertDialog.Builder(this).setTitle(t("App-updates"))
-    .setMessage(message).setNegativeButton(t("Later"),null);
+   StringBuilder message=new StringBuilder();
+   boolean english=I18n.english(this);
+   message.append(english?"Installed build: #":"Geïnstalleerde build: #")
+    .append(current>=1000?current-1000:current).append('\\n');
+   message.append(english?"Latest build: #":"Nieuwste build: #").append(build).append("\\n\\n");
+   message.append(newer?(english?"Update available":"Nieuwe update beschikbaar"):
+    (english?"You are up to date":"Je hebt de nieuwste versie"));
+   if(newer){
+    String changes=cleanReleaseNotes(data.optString("notes",""));
+    if(!changes.isEmpty())message.append("\\n\\n").append(english?"What's new:":"Wat is er nieuw:").append("\\n").append(changes);
+   }
+   android.app.AlertDialog.Builder dialog=new android.app.AlertDialog.Builder(this)
+    .setTitle(english?"App updates":"App-updates")
+    .setMessage(message.toString()).setNegativeButton(t("Later"),null);
    if(newer)dialog.setPositiveButton(t("Update installeren"),(d,w)->{
     String apk=data.optString("apkUrl","");
     if(UpdateChecker.validHttps(apk))downloadUpdate(apk,build);
@@ -319,6 +326,27 @@ public final class MainActivity extends Activity {
    dialog.show();
    if(activeTab==3&&!silent)draw();
   });
+ }
+ /** Convert GitHub release Markdown into a short, readable Android dialog. */
+ private String cleanReleaseNotes(String input){
+  if(input==null||input.isEmpty())return "";
+  String raw=input.replace("\\\\n","\\n");
+  String[] lines=raw.split("\\n");
+  StringBuilder out=new StringBuilder();
+  int bullets=0;
+  for(String original:lines){
+   String line=original.trim();
+   if(line.startsWith("### Safety")||line.startsWith("### Important")||
+      line.startsWith("### Verification"))break;
+   if(line.isEmpty()||line.startsWith("#"))continue;
+   line=line.replace("**","").replace("`","").replaceAll("^[\\-*]\\s*","");
+   if(line.startsWith("Build #")||line.startsWith("Android versionCode"))continue;
+   if(line.length()>160)line=line.substring(0,157)+"…";
+   if(out.length()>0)out.append('\\n');
+   out.append("• ").append(line);
+   if(++bullets>=5)break;
+  }
+  return out.toString();
  }
  private void downloadUpdate(String apkUrl,long build){
   try{
