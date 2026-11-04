@@ -764,11 +764,17 @@ public final class MainActivity extends Activity {
    startActivity(Intent.createChooser(send,"Deel Clash Timer Hub back-up"));
   }catch(Exception e){toast("Back-up maken mislukt");}
  }
+ /** Date-stamped, portable filename for every exported JSON backup. */
+ private String backupFilename(){
+  return "ClashTimerHub-backup-"+
+   new java.text.SimpleDateFormat("yyyy-MM-dd",java.util.Locale.ROOT)
+    .format(new java.util.Date())+".json";
+ }
  private void shareBackupToDrive(){
   try{
    java.io.File folder=new java.io.File(getCacheDir(),"backup_exports");
    if(!folder.exists()&&!folder.mkdirs())throw new java.io.IOException("Kan back-upmap niet maken");
-   java.io.File file=new java.io.File(folder,"ClashTimerHub-backup.json");
+   java.io.File file=new java.io.File(folder,backupFilename());
    byte[] bytes=backupPayload().toString(2).getBytes(java.nio.charset.StandardCharsets.UTF_8);
    if(bytes.length>2_000_000)throw new java.io.IOException("Back-up te groot (max. 2 MB)");
    try(java.io.FileOutputStream out=new java.io.FileOutputStream(file,false)){out.write(bytes);out.getFD().sync();}
@@ -778,7 +784,7 @@ public final class MainActivity extends Activity {
    share.setType("application/json");
    share.putExtra(Intent.EXTRA_STREAM,uri);
    share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-   share.setClipData(android.content.ClipData.newUri(getContentResolver(),"ClashTimerHub-backup.json",uri));
+   share.setClipData(android.content.ClipData.newUri(getContentResolver(),file.getName(),uri));
    startActivity(Intent.createChooser(share,"Kies Google Drive om je back-up op te slaan"));
   }catch(Exception e){toast("Back-up delen mislukt: "+e.getMessage());}
  }
@@ -786,7 +792,7 @@ public final class MainActivity extends Activity {
   Intent intent=new Intent(Intent.ACTION_CREATE_DOCUMENT);
   intent.addCategory(Intent.CATEGORY_OPENABLE);
   intent.setType("application/json");
-  intent.putExtra(Intent.EXTRA_TITLE,"ClashTimerHub-backup.json");
+  intent.putExtra(Intent.EXTRA_TITLE,backupFilename());
   try{startActivityForResult(intent,BACKUP_SAVE);}
   catch(Exception e){toast("Kan bestand opslaan niet openen: "+e.getMessage());}
  }
