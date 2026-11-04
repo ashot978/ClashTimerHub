@@ -14,7 +14,7 @@
   <TextView android:id="@+id/v7_wide_builders" android:layout_width="54dp"
    android:layout_height="wrap_content" android:textSize="10sp" android:textColor="#8BE3AD"
    android:gravity="center" android:singleLine="true" android:includeFontPadding="false"/>
-  <Space android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/>
+  <TextView android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/>
   <Chronometer android:id="@+id/v7_wide_builder_timer" android:layout_width="96dp"
    android:layout_height="wrap_content" android:textSize="10sp" android:textColor="#FFD783"
    android:gravity="end" android:singleLine="true" android:includeFontPadding="false"/>
@@ -48,7 +48,7 @@
     android:layout_height="wrap_content" android:text="—" android:textSize="10sp"
     android:textColor="#BCA7D5" android:visibility="gone" android:includeFontPadding="false"/>
   </LinearLayout>
-  <Space android:layout_width="0dp" android:layout_weight="1" android:layout_height="1dp"/>
+  <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="1dp"/>
   <TextView android:id="@+id/v7_wide_finish" android:layout_width="80dp"
    android:layout_height="wrap_content" android:textSize="10sp" android:textColor="#CBB5D9"
    android:gravity="end" android:singleLine="true" android:ellipsize="none"
