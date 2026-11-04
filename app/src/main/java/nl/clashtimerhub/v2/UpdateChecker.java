@@ -73,8 +73,7 @@ final class UpdateChecker {
   return normalized;
  }
  static void check(Context ctx,Result result){
-  String custom=AppData.prefs(ctx).getString("updateFeedUrl","").trim();
-  String url=validHttps(custom)?custom:RELEASE_URL;
+  String url=RELEASE_URL; // Public repository: no external feed setup or credentials needed.
   new Thread(()->{
    JSONObject data=null;String error=null;
    try{
