@@ -62,6 +62,7 @@ final class DriveBackupManager {
   data.put("upgrades",new JSONArray(p.getString("upgrades","[]")));
   data.put("playerTags",new JSONObject(p.getString("playerTags","{}")));
   data.put("accountNames",new JSONObject(p.getString("accountNames","{}")));
+  data.put("helpersByAccount",new JSONObject(p.getString(HelperTracker.KEY,"{}")));
   data.put("maxedCategories",new JSONObject(p.getString("maxedCategories","{}")));
   JSONObject preferences=new JSONObject();
   preferences.put("language",I18n.code(context));
