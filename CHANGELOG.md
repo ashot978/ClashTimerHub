@@ -1,5 +1,20 @@
 # ClashTimerHub release notes
 
+## 7.4.0-beta1 — 4 November 2026
+
+### New
+- **Updates without ZIP files:** GitHub automatically publishes every successful APK build as a public Release.
+- **In-app update checks:** ClashTimerHub reads the latest GitHub Release directly; no extra feed, GitHub login, or API token is required.
+- **One-tap update start:** compare installed and latest build numbers, read release notes and download the APK from the app. Android still requires the user's confirmation for installation.
+- **Automatic reminder:** on opening the app, check at most once every six hours and offer a newer published build once per release.
+- **Fallback:** Settings links directly to the latest GitHub Release, never the Actions ZIP artifact.
+
+### Safety
+- The installer updates the existing app; local accounts and timers are not deleted.
+- The build workflow refuses to build if the previous signing key is missing.
+- GitHub must finish a successful build before the new APK is published.
+
+
 ## 7.3.1-beta1 — 4 November 2026
 
 ### Fixed
