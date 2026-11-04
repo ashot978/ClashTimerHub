@@ -28,7 +28,7 @@ public final class BuilderAlarm extends android.content.BroadcastReceiver {
   if(!early&&finish>System.currentTimeMillis()+60000)return;
   String ac=intent.getStringExtra("account"),name=intent.getStringExtra("name");
   if(ac==null||name==null)return;
-  android.content.SharedPreferences prefs=context.getSharedPreferences("MainActivity",Context.MODE_PRIVATE);
+  android.content.SharedPreferences prefs=AppData.prefs(context);
   if(!prefs.getBoolean("notifyEnabled",true))return;
   if(!early&&!prefs.getBoolean("notifyOnFinish",true))return;
   if(early){
