@@ -33,6 +33,43 @@ final class AppData {
    p.edit().putString("accountNames",labels.toString()).apply();
   }catch(Exception e){android.util.Log.e("ClashTimerHub","Could not save account display name",e);}
  }
+ /** A checked MAX flag is manually maintained, per account and upgrade category. */
+ static boolean isMaxed(Context context,String account,String category){
+  try{
+   JSONObject map=new JSONObject(prefs(context).getString("maxedCategories","{}"));
+   JSONObject entry=map.optJSONObject(account);
+   return entry!=null&&entry.optBoolean(category,false);
+  }catch(Exception e){return false;}
+ }
+ static void setMaxed(Context context,String account,String category,boolean maxed){
+  if(!("Bouwers".equals(category)||"Laboratorium".equals(category)||"Pets".equals(category)))return;
+  try{
+   SharedPreferences p=prefs(context);
+   JSONObject map=new JSONObject(p.getString("maxedCategories","{}"));
+   JSONObject entry=map.optJSONObject(account);
+   if(entry==null)entry=new JSONObject();
+   if(maxed)entry.put(category,true);
+   else entry.remove(category);
+   if(entry.length()==0)map.remove(account);
+   else map.put(account,entry);
+   p.edit().putString("maxedCategories",map.toString()).apply();
+  }catch(Exception e){android.util.Log.e("ClashTimerHub","Could not store MAX category",e);}
+ }
+ /** Keep MAX settings attached when a tag-only account is linked to a named one. */
+ static void mergeMaxedAccount(Context context,String source,String target){
+  try{
+   SharedPreferences p=prefs(context);
+   JSONObject map=new JSONObject(p.getString("maxedCategories","{}"));
+   JSONObject from=map.optJSONObject(source);
+   if(from==null)return;
+   JSONObject to=map.optJSONObject(target);
+   if(to==null)to=new JSONObject();
+   for(String category:new String[]{"Bouwers","Laboratorium","Pets"})
+    if(from.optBoolean(category,false)&&!to.has(category))to.put(category,true);
+   map.put(target,to);map.remove(source);
+   p.edit().putString("maxedCategories",map.toString()).apply();
+  }catch(Exception e){android.util.Log.e("ClashTimerHub","Could not merge MAX categories",e);}
+ }
  static synchronized void migrate(Context context){
   SharedPreferences current=prefs(context);
   if(current.getBoolean("legacyOverlayMigratedV6",false))return;
