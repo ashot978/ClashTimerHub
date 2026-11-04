@@ -3,5 +3,5 @@
  android:minWidth="55dp" android:minHeight="55dp" android:minResizeWidth="55dp" android:minResizeHeight="55dp"
  android:targetCellWidth="1" android:targetCellHeight="1"
  android:updatePeriodMillis="1800000" android:initialLayout="@layout/widget_v7_sync"
- android:resizeMode="horizontal|vertical" android:widgetCategory="home_screen"
+ android:resizeMode="horizontal|vertical" android:configure="nl.clashtimerhub.v2.WidgetConfigActivity" android:widgetCategory="home_screen"
  android:previewLayout="@layout/widget_v7_sync"/>
