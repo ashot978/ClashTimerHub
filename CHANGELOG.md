@@ -1,5 +1,18 @@
 # ClashTimerHub release notes
 
+## 7.4.4-beta1 — 4 November 2026
+
+### Fixed
+- **Uniform columns across accounts:** all seven account rows now use the same shared starting position for each successive column. Each column's width is calculated from the largest full content in that column, rather than from each account's individual string length.
+- **No shortening or abbreviations:** remove timer ellipses, remove name width clipping and use complete "Morgen"/"Tomorrow" labels instead of Tmr/Mrg.
+- **Start-aligned countdowns:** countdown and finish labels begin at the common column boundary instead of right-aligning within variably sized fields.
+- **Responsive widths:** only when the combined full columns cannot fit does the widget switch to multi-line account rows, without shrinking any text.
+- **Existing settings:** transparent theme, colors, MAX checkmarks, account sorting and timers remain unchanged.
+
+### Verification
+- GitHub Actions compiles/signs the Android APK. Visual validation on Samsung One UI remains necessary.
+
+
 ## 7.4.3-beta1 — 4 November 2026
 
 ### Fixed
