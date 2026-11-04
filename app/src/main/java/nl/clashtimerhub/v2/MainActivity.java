@@ -855,7 +855,7 @@ public final class MainActivity extends Activity {
  /** Date-stamped, portable filename for every exported JSON backup. */
  private String backupFilename(){
   return "ClashTimerHub-backup-"+
-   new java.text.SimpleDateFormat("yyyy-MM-dd",java.util.Locale.ROOT)
+   new java.text.SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS",java.util.Locale.ROOT)
     .format(new java.util.Date())+".json";
  }
  private void shareBackupToDrive(){
