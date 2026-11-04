@@ -131,10 +131,12 @@ final class WidgetV7 {
    row.setViewVisibility(R.id.v7_wide_pet_group,showPet?View.VISIBLE:View.GONE);
    // Comfort enlarges only the primary name and next-builder countdown.
    // Secondary countdowns stay at their readable base size to avoid clipping.
-   float small=mode==2?10f:8f;
-   float nameBase=mode==2?11f:mode==4?10f:8.5f;
-   float mainBase=mode==2?11f:mode==4?10f:9f;
-   float mainBoost=size==2?1f:size==0?-0.5f:0f;
+   // Keep font sizes stable when resizing 4 -> 3 -> 2 launcher columns.
+   // Narrow layouts reflow information instead of reducing its readability.
+   float small=10f;
+   float nameBase=11f;
+   float mainBase=11f;
+   float mainBoost=size==2?0.5f:size==0?-0.5f:0f;
    row.setTextViewTextSize(R.id.v7_wide_name,android.util.TypedValue.COMPLEX_UNIT_SP,nameBase+mainBoost);
    row.setTextViewTextSize(R.id.v7_wide_builder_timer,android.util.TypedValue.COMPLEX_UNIT_SP,mainBase+mainBoost);
    row.setTextViewTextSize(R.id.v7_wide_builder_idle,android.util.TypedValue.COMPLEX_UNIT_SP,mainBase+mainBoost);
@@ -216,10 +218,10 @@ final class WidgetV7 {
   // Samsung One UI reports roughly 225-269dp for three home-screen cells.
   // Keep the original single-line six-column design at that width; using
   // the medium mode here moved checks into an unstyled subtitle.
-  else if(width>=225)mode=3;
-  else if(width>=150)mode=4; // Two-line rows preserve every column on two home-screen cells.
+  else if(width>=290)mode=3; // Same text size; optimized fixed-width columns.
+  else if(width>=150)mode=4; // Reflow to two lines when a single line would clip.
   else mode=0;
-  int rowHeight=mode==4?32:mode==3?16:mode==2?24:mode==1?34:19;
+  int rowHeight=mode==4?36:mode==3?19:mode==2?24:mode==1?34:19;
   boolean showSync=height>=44+rowHeight;
   int available=Math.max(0,height-24-(showSync?20:0));
   int count=Math.min(ordered.size(),Math.max(1,available/rowHeight));
