@@ -38,7 +38,29 @@ public final class MainActivity extends Activity {
   if("syncRevision".equals(key))ticker.post(()->refreshExternalImport());
  };
  private final Runnable tick=new Runnable(){public void run(){if(activeTab==0&&dashboard!=null){refreshDashboardClocks();refreshVisibleTimers();}else if(activeTab==1||activeTab==2)refreshVisibleTimers();ticker.postDelayed(this,1000);}};
- @Override protected void onResume(){super.onResume();getPreferences(0).registerOnSharedPreferenceChangeListener(syncWatcher);refreshExternalImport();ticker.removeCallbacks(tick);ticker.post(tick);long last=getPreferences(0).getLong("lastUpdateCheck",0);if(System.currentTimeMillis()-last>6L*3600000L)checkUpdates(true);}
+ @Override protected void onResume(){
+  super.onResume();
+  getPreferences(0).registerOnSharedPreferenceChangeListener(syncWatcher);
+  refreshExternalImport();ticker.removeCallbacks(tick);ticker.post(tick);
+  String priorError=getPreferences(0).getString("lastInstallError","");
+  if(!priorError.isEmpty()){
+   getPreferences(0).edit().remove("lastInstallError").apply();
+   new android.app.AlertDialog.Builder(this)
+    .setTitle(t("Update niet geïnstalleerd"))
+    .setMessage(priorError+"\n\nJe huidige app en gegevens zijn behouden.")
+    .setPositiveButton(t("OK"),null).show();
+  }
+  String pending=getPreferences(0).getString("pendingVerifiedApk","");
+  if(!pending.isEmpty()&&getPackageManager().canRequestPackageInstalls()){
+   long build=getPreferences(0).getLong("pendingVerifiedBuild",0);
+   String hash=getPreferences(0).getString("pendingVerifiedSha256","");
+   getPreferences(0).edit().remove("pendingVerifiedApk").remove("pendingVerifiedBuild")
+    .remove("pendingVerifiedSha256").apply();
+   UpdateInstaller.install(this,new java.io.File(pending),build,hash);
+  }
+  long last=getPreferences(0).getLong("lastUpdateCheck",0);
+  if(System.currentTimeMillis()-last>6L*3600000L)checkUpdates(true);
+ }
  @Override protected void onPause(){getPreferences(0).unregisterOnSharedPreferenceChangeListener(syncWatcher);ticker.removeCallbacks(tick);super.onPause();}
  private static final Pattern TIME=Pattern.compile("(?i)(?:(\\d+)\\s*d\\s*)?(?:(\\d+)\\s*h\\s*)?(?:(\\d+)\\s*m\\s*)?(?:(\\d+)\\s*s\\s*)?");
  @Override public void onCreate(Bundle b){super.onCreate(b);AppData.migrate(this);load();draw();if(android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},55);TimerWidget.schedule(this);handleWidgetNavigation(getIntent());handleSharedJson(getIntent());}
@@ -321,7 +343,7 @@ public final class MainActivity extends Activity {
     .setMessage(message.toString()).setNegativeButton(t("Later"),null);
    if(newer)dialog.setPositiveButton(t("Update installeren"),(d,w)->{
     String apk=data.optString("apkUrl","");
-    if(UpdateChecker.validHttps(apk))downloadUpdate(apk,build);
+    if(UpdateChecker.validHttps(apk))downloadUpdate(apk,build,data.optString("sha256",""));
    });
    dialog.show();
    if(activeTab==3&&!silent)draw();
@@ -348,17 +370,31 @@ public final class MainActivity extends Activity {
   }
   return out.toString();
  }
- private void downloadUpdate(String apkUrl,long build){
+ void showUpdateInstallError(String reason){
+  runOnUiThread(()->{
+   if(isFinishing()||isDestroyed())return;
+   new android.app.AlertDialog.Builder(this)
+    .setTitle(t("Update niet geïnstalleerd"))
+    .setMessage(reason+"\n\nDe bestaande installatie is niet gewijzigd. Verwijder de app niet.")
+    .setPositiveButton(t("OK"),null).show();
+  });
+ }
+ private void downloadUpdate(String apkUrl,long build,String sha256){
   try{
    if(!UpdateChecker.validHttps(apkUrl))throw new IllegalArgumentException("Ongeldige APK-link");
    android.app.DownloadManager manager=(android.app.DownloadManager)getSystemService(DOWNLOAD_SERVICE);
    if(manager==null)throw new IllegalStateException("Downloadmanager niet beschikbaar");
+   String filename="ClashTimerHub-"+build+".apk";
+   java.io.File folder=getExternalFilesDir(android.os.Environment.DIRECTORY_DOWNLOADS);
+   if(folder==null)throw new java.io.IOException("Downloadmap is niet beschikbaar");
+   java.io.File file=new java.io.File(folder,filename);
+   if(file.exists()&&!file.delete())throw new java.io.IOException("Oude APK kon niet worden vervangen");
    android.app.DownloadManager.Request request=new android.app.DownloadManager.Request(android.net.Uri.parse(apkUrl));
    request.setTitle("ClashTimerHub build #"+build);
-   request.setDescription("APK downloaden voor installatie");
+   request.setDescription("Veilige APK-download");
    request.setMimeType("application/vnd.android.package-archive");
    request.setNotificationVisibility(android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-   request.setDestinationInExternalFilesDir(this,android.os.Environment.DIRECTORY_DOWNLOADS,"ClashTimerHub-"+build+".apk");
+   request.setDestinationInExternalFilesDir(this,android.os.Environment.DIRECTORY_DOWNLOADS,filename);
    long id=manager.enqueue(request);
    android.content.BroadcastReceiver receiver=new android.content.BroadcastReceiver(){
     @Override public void onReceive(Context context,Intent intent){
@@ -367,24 +403,18 @@ public final class MainActivity extends Activity {
      android.app.DownloadManager.Query query=new android.app.DownloadManager.Query().setFilterById(id);
      try(android.database.Cursor cursor=manager.query(query)){
       if(cursor==null||!cursor.moveToFirst()||
-         cursor.getInt(cursor.getColumnIndexOrThrow(android.app.DownloadManager.COLUMN_STATUS))!=android.app.DownloadManager.STATUS_SUCCESSFUL){
-       toast("Download mislukt. Open de nieuwste GitHub Release.");return;
+        cursor.getInt(cursor.getColumnIndexOrThrow(android.app.DownloadManager.COLUMN_STATUS))!=android.app.DownloadManager.STATUS_SUCCESSFUL){
+       showUpdateInstallError("De download is mislukt of onvolledig. Probeer opnieuw.");return;
       }
-     }
-     android.net.Uri fileUri=manager.getUriForDownloadedFile(id);
-     if(fileUri==null){toast("APK-bestand niet gevonden");return;}
-     Intent install=new Intent(Intent.ACTION_VIEW);
-     install.setDataAndType(fileUri,"application/vnd.android.package-archive");
-     install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_ACTIVITY_NEW_TASK);
-     try{startActivity(install);}
-     catch(Exception e){toast("Open de gedownloade APK via Bestanden om te installeren");}
+     }catch(Exception e){showUpdateInstallError("Kon de download niet controleren: "+e.getMessage());return;}
+     UpdateInstaller.install(MainActivity.this,file,build,sha256);
     }
    };
    if(android.os.Build.VERSION.SDK_INT>=33)
     registerReceiver(receiver,new android.content.IntentFilter(android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE),Context.RECEIVER_EXPORTED);
    else registerReceiver(receiver,new android.content.IntentFilter(android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-   toast("APK-download gestart. Bevestig de installatie in Android.");
-  }catch(Exception e){toast("Download starten mislukt: "+e.getMessage());}
+   toast("APK downloaden en controleren. Android vraagt bevestiging voor de installatie.");
+  }catch(Exception e){showUpdateInstallError("Download starten mislukt: "+e.getMessage());}
  }
  private void openUpdates(){
   new android.app.AlertDialog.Builder(this).setTitle(t("Nieuwe versie installeren"))
