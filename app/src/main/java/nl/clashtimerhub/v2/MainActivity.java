@@ -456,9 +456,17 @@ public final class MainActivity extends Activity {
   }
   if(ids.length==1){openWidgetSettings(ids[0]);return;}
   String[] options=new String[ids.length];
+  android.content.SharedPreferences widgetPreferences=getSharedPreferences("WidgetPreferences",MODE_PRIVATE);
   for(int i=0;i<ids.length;i++){
-   int kind=WidgetV7.kind(this,ids[i]);
-   options[i]=(kind==WidgetV7.SYNC?"Sync":kind==WidgetV7.MINI?"Mini":kind==WidgetV7.SINGLE?"Account":"Multi")+" · "+(i+1);
+   int widgetId=ids[i],kind=WidgetV7.kind(this,widgetId);
+   String type=kind==WidgetV7.SYNC?"Sync":
+    kind==WidgetV7.MINI?"Mini":kind==WidgetV7.SINGLE?"Account":"Multi-account";
+   String account=widgetPreferences.getString("account_"+widgetId,"");
+   String details=kind==WidgetV7.SYNC?"Floating Sync":
+    kind==WidgetV7.MULTI?(widgetPreferences.getBoolean("all_"+widgetId,true)?
+     "Alle accounts":"Accountselectie"):
+     (account.isEmpty()?"Niet ingesteld":AppData.displayName(this,account));
+   options[i]=type+" — "+details+"  (#"+widgetId+")";
   }
   new android.app.AlertDialog.Builder(this).setTitle(t("Welke widget wil je instellen?"))
    .setItems(options,(dialog,index)->openWidgetSettings(ids[index]))
