@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ android:id="@+id/v7_helper_line_root"
+ android:layout_width="match_parent" android:layout_height="16dp"
+ android:orientation="horizontal" android:gravity="center_vertical"
+ android:paddingLeft="8dp" android:paddingRight="4dp">
+ <TextView android:id="@+id/v7_helper_line_text"
+  android:layout_width="match_parent" android:layout_height="match_parent"
+  android:gravity="center_vertical" android:singleLine="true"
+  android:text="🤝 Helpers"
+  android:textSize="10sp" android:textColor="#8BE3AD"
+  android:includeFontPadding="false"/>
+</LinearLayout>
