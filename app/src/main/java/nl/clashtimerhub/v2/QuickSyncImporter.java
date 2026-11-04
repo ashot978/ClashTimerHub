@@ -159,6 +159,8 @@ public final class QuickSyncImporter {
    .putLong("lastSyncAt_"+account,now).putString("lastSyncSummary",status);
   if(!editor.commit())throw new IllegalStateException("Opslaan mislukt");
   TimerWidget.schedule(context);
+  // Run Drive backup independently: it must never make a successful Clash sync fail.
+  DriveBackupManager.afterSuccessfulSync(context);
   return status;
  }
 
