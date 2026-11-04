@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
- android:minWidth="185dp" android:minHeight="165dp"
- android:minResizeWidth="145dp" android:minResizeHeight="55dp"
- android:targetCellWidth="5" android:targetCellHeight="2"
+ android:minWidth="270dp" android:minHeight="165dp"
+ android:minResizeWidth="270dp" android:minResizeHeight="55dp"
+ android:targetCellWidth="3" android:targetCellHeight="2"
  android:updatePeriodMillis="1800000" android:initialLayout="@layout/widget_v7_multi"
  android:resizeMode="horizontal|vertical"
  android:configure="nl.clashtimerhub.v2.WidgetConfigActivity"
