@@ -138,6 +138,7 @@ public final class WidgetConfigActivity extends Activity {
    String key=manualOrder.get(i);
    LinearLayout line=new LinearLayout(this);line.setOrientation(0);line.setGravity(android.view.Gravity.CENTER_VERTICAL);
    CheckBox box=boxes.get(key);
+   if(box.getParent() instanceof android.view.ViewGroup)((android.view.ViewGroup)box.getParent()).removeView(box);
    line.addView(box,new LinearLayout.LayoutParams(0,dp(44),1));
    Button up=new Button(this);up.setText("↑");up.setTextSize(15);up.setAllCaps(false);
    up.setEnabled(index>0);up.setOnClickListener(v->{
