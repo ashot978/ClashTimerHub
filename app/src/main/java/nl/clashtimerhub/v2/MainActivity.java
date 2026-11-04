@@ -26,7 +26,7 @@ public final class MainActivity extends Activity {
  private final ArrayList<String> accounts=new ArrayList<>();
  private final ArrayList<JSONObject> upgrades=new ArrayList<>();
  private final ArrayList<JSONObject> pending=new ArrayList<>();
- private static final int PICK=12,IMPORT=13,RESTORE=14;
+ private static final int PICK=12,IMPORT=13,RESTORE=14,BACKUP_SAVE=76;
  private Bitmap lastScanBitmap;
  private PermissionWizard permissionWizard;
  private GoogleDriveUi googleDriveUi;
@@ -289,25 +289,14 @@ public final class MainActivity extends Activity {
   LinearLayout backups=settingsSection("▣  BACK-UP","Je opgeslagen accounts veilig bewaren");
   settingsItem(backups,"▣","Back-up kopiëren","Accounts, timers, taal, meldingen en widgetinstellingen",()->copyBackup());
   settingsItem(backups,"↶","Back-up herstellen","Herstel timers en opgeslagen voorkeuren",()->restoreBackupClipboard());
-  String driveStatus=GoogleDriveFiles.status(this);
-  TextView status=label("☁  Mijn Drive: "+driveStatus,12);
-  status.setTextColor(getPreferences(0).getString(GoogleDriveFiles.LAST_ERROR,"").isEmpty()?0xff8be3ad:0xffffb28f);
-  status.setPadding(dp(12),dp(10),dp(12),dp(10));backups.addView(status);
-  settingsItem(backups,"☁","Google-account koppelen",
-   "Rechtstreeks in Mijn Drive · geen Downloads of bestandskiezer",()->googleDriveUi.connect());
-  settingsItem(backups,"＋","Nieuwe Drive-back-up maken",
-   "Maak een normaal JSON-bestand in Mijn Drive",()->googleDriveUi.create());
-  settingsItem(backups,"↑","Bestaande Drive-back-up vervangen",
-   "Vervang het geselecteerde bestand of kies een ander",()->googleDriveUi.overwriteSelected());
-  settingsItem(backups,"↓","Back-up uit Mijn Drive herstellen",
-   "Selecteer een ClashTimerHub JSON-bestand en herstel na bevestiging",()->googleDriveUi.chooseForRestore());
-  settingsItem(backups,"▣","Automatisch back-upbestand kiezen",
-   "Kies een back-up in Mijn Drive om voortaan bij te werken",()->googleDriveUi.chooseForAuto());
-  settingsItem(backups,"↻","Automatische Drive-back-up",
-   GoogleDriveFiles.auto(this)?"Aan · na een succesvolle Clash-synchronisatie":"Uit · alleen handmatig back-uppen",
-   ()->googleDriveUi.toggleAuto());
-  settingsItem(backups,"×","Google Drive ontkoppelen",
-   "Trek toegang in zonder bestanden in Drive te verwijderen",()->googleDriveUi.disconnect());
+  settingsItem(backups,"☁","Opslaan in Google Drive",
+   "Deel een echt JSON-bestand rechtstreeks met de Google Drive-app",()->shareBackupToDrive());
+  settingsItem(backups,"↓","Opslaan als bestand",
+   "Kies een map en bestandsnaam voor een losse .json-back-up",()->saveBackupAsFile());
+  settingsItem(backups,"↑","Back-upbestand importeren",
+   "Kies een eerder opgeslagen .json-bestand om te herstellen",()->openBackupFile());
+  TextView tip=label("Drive-back-ups via Delen zijn handmatig. Voor automatisch vervangen is een aparte Drive-koppeling nodig.",12);
+  tip.setPadding(dp(12),dp(6),dp(12),dp(10));tip.setTextColor(0xffbca7d5);backups.addView(tip);
  }
  private void renameAccount(){
   if(accounts.isEmpty()){toast("Geen accounts beschikbaar");return;}
@@ -775,6 +764,51 @@ public final class MainActivity extends Activity {
    startActivity(Intent.createChooser(send,"Deel Clash Timer Hub back-up"));
   }catch(Exception e){toast("Back-up maken mislukt");}
  }
+ private void shareBackupToDrive(){
+  try{
+   java.io.File folder=new java.io.File(getCacheDir(),"backup_exports");
+   if(!folder.exists()&&!folder.mkdirs())throw new java.io.IOException("Kan back-upmap niet maken");
+   java.io.File file=new java.io.File(folder,"ClashTimerHub-backup.json");
+   byte[] bytes=backupPayload().toString(2).getBytes(java.nio.charset.StandardCharsets.UTF_8);
+   if(bytes.length>2_000_000)throw new java.io.IOException("Back-up te groot (max. 2 MB)");
+   try(java.io.FileOutputStream out=new java.io.FileOutputStream(file,false)){out.write(bytes);out.getFD().sync();}
+   android.net.Uri uri=androidx.core.content.FileProvider.getUriForFile(
+    this,getPackageName()+".backups",file);
+   Intent share=new Intent(Intent.ACTION_SEND);
+   share.setType("application/json");
+   share.putExtra(Intent.EXTRA_STREAM,uri);
+   share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+   share.setClipData(android.content.ClipData.newUri(getContentResolver(),"ClashTimerHub-backup.json",uri));
+   startActivity(Intent.createChooser(share,"Kies Google Drive om je back-up op te slaan"));
+  }catch(Exception e){toast("Back-up delen mislukt: "+e.getMessage());}
+ }
+ private void saveBackupAsFile(){
+  Intent intent=new Intent(Intent.ACTION_CREATE_DOCUMENT);
+  intent.addCategory(Intent.CATEGORY_OPENABLE);
+  intent.setType("application/json");
+  intent.putExtra(Intent.EXTRA_TITLE,"ClashTimerHub-backup.json");
+  try{startActivityForResult(intent,BACKUP_SAVE);}
+  catch(Exception e){toast("Kan bestand opslaan niet openen: "+e.getMessage());}
+ }
+ private void openBackupFile(){
+  Intent intent=new Intent(Intent.ACTION_OPEN_DOCUMENT);
+  intent.addCategory(Intent.CATEGORY_OPENABLE);
+  intent.setType("*/*");
+  intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+  try{startActivityForResult(intent,RESTORE);}
+  catch(Exception e){toast("Kan bestanden niet openen: "+e.getMessage());}
+ }
+ private void writeBackupToFile(android.net.Uri uri){
+  try{
+   byte[] bytes=backupPayload().toString(2).getBytes(java.nio.charset.StandardCharsets.UTF_8);
+   if(bytes.length>2_000_000)throw new java.io.IOException("Back-up te groot (max. 2 MB)");
+   try(java.io.OutputStream out=getContentResolver().openOutputStream(uri,"wt")){
+    if(out==null)throw new java.io.IOException("Geen toegang tot gekozen bestand");
+    out.write(bytes);out.flush();
+   }
+   toast("Back-upbestand opgeslagen");
+  }catch(Exception e){toast("Back-up opslaan mislukt: "+e.getMessage());}
+ }
  private void restorePreferences(JSONObject preferences){
   if(preferences==null)return; // Old backups retain the current device's settings.
   android.content.SharedPreferences.Editor edit=getPreferences(0).edit();
@@ -1184,6 +1218,7 @@ public final class MainActivity extends Activity {
    return;
   }
   if(result!=RESULT_OK||data==null)return;
+  if(req==BACKUP_SAVE){if(data.getData()!=null)writeBackupToFile(data.getData());return;}
   if(req==RESTORE){try(InputStream stream=getContentResolver().openInputStream(data.getData())){java.io.ByteArrayOutputStream buffer=new java.io.ByteArrayOutputStream();byte[] bytes=new byte[8192];int n;while((n=stream.read(bytes))!=-1){buffer.write(bytes,0,n);if(buffer.size()>2000000)throw new java.io.IOException("Back-up te groot");}restoreBackup(buffer.toString("UTF-8"));}catch(Exception e){toast("Herstellen mislukt: "+e.getMessage());}return;}
   if(req==IMPORT){try(InputStream stream=getContentResolver().openInputStream(data.getData())){
    java.io.ByteArrayOutputStream buffer=new java.io.ByteArrayOutputStream();byte[] bytes=new byte[8192];int n;
