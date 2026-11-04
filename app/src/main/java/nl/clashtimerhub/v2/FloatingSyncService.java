@@ -10,7 +10,7 @@ import android.provider.Settings;
 import android.view.*;
 import android.widget.*;
 
-/** User-controlled overlay. Clipboard access happens only in a visible activity. */
+/** User-controlled one-tap clipboard overlay. Never opens the main activity. */
 public final class FloatingSyncService extends Service {
  private WindowManager manager;
  private View bubble;
@@ -62,10 +62,25 @@ public final class FloatingSyncService extends Service {
    if(clip==null||clip.getItemCount()==0)throw new IllegalArgumentException("Klembord is leeg");
    CharSequence value=clip.getItemAt(0).coerceToText(this);
    String result=QuickSyncImporter.importJson(this,value==null?"":value.toString());
+   flashBubble(true);
    Toast.makeText(this,result,Toast.LENGTH_LONG).show();
   }catch(Exception e){
+   flashBubble(false);
    Toast.makeText(this,"Niet geplakt: "+e.getMessage(),Toast.LENGTH_LONG).show();
   }
+ }
+ private void flashBubble(boolean success){
+  if(!(bubble instanceof TextView))return;
+  TextView text=(TextView)bubble;
+  text.setText(success?"✓":"!");
+  GradientDrawable shape=(GradientDrawable)text.getBackground();
+  shape.setColor(success?0xff267c57:0xffa33b53);
+  text.postDelayed(()->{
+   if(bubble==text){
+    text.setText("⚔");
+    shape.setColor(0xff6840a0);
+   }
+  },1200);
  }
  @Override public int onStartCommand(Intent intent,int flags,int startId){return START_STICKY;}
  @Override public void onDestroy(){if(manager!=null&&bubble!=null)manager.removeView(bubble);super.onDestroy();}
