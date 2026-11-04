@@ -121,16 +121,26 @@ final class WidgetV7 {
   intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,id);
   return PendingIntent.getBroadcast(ctx,130000+id,intent,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
  }
- private static RemoteViews multiRow(Context ctx,Status s,int mode,long now,int id,boolean showLab,boolean showPet,int size){
-  if(mode==2||mode==3){
-   RemoteViews row=new RemoteViews(ctx.getPackageName(),mode==3?R.layout.widget_v7_wide_row_dense:R.layout.widget_v7_wide_row);
+ private static RemoteViews multiRow(Context ctx,Status s,int mode,long now,int id,boolean showLab,boolean showPet,int size,int background){
+  if(mode==2||mode==3||mode==4){
+   int layout=mode==4?R.layout.widget_v7_two_line_row:mode==3?R.layout.widget_v7_wide_row_dense:R.layout.widget_v7_wide_row;
+   RemoteViews row=new RemoteViews(ctx.getPackageName(),layout);
+   row.setInt(R.id.widget_account_root,"setBackgroundResource",rowTheme(background));
    row.setTextViewText(R.id.v7_wide_name,AppData.displayName(ctx,s.account));
    row.setViewVisibility(R.id.v7_wide_lab_group,showLab?View.VISIBLE:View.GONE);
    row.setViewVisibility(R.id.v7_wide_pet_group,showPet?View.VISIBLE:View.GONE);
-   float font=(mode==3?8f:10f)+(size==0?-1f:size==2?1f:0f);
-   for(int textId:new int[]{R.id.v7_wide_name,R.id.v7_wide_builders,R.id.v7_wide_lab_timer,R.id.v7_wide_lab_idle,
-      R.id.v7_wide_pet_timer,R.id.v7_wide_pet_idle,R.id.v7_wide_builder_timer,R.id.v7_wide_builder_idle,R.id.v7_wide_finish})
-    row.setTextViewTextSize(textId,android.util.TypedValue.COMPLEX_UNIT_SP,font);
+   // Comfort enlarges only the primary name and next-builder countdown.
+   // Secondary countdowns stay at their readable base size to avoid clipping.
+   float small=mode==2?10f:8f;
+   float nameBase=mode==2?11f:mode==4?10f:8.5f;
+   float mainBase=mode==2?11f:mode==4?10f:9f;
+   float mainBoost=size==2?1f:size==0?-0.5f:0f;
+   row.setTextViewTextSize(R.id.v7_wide_name,android.util.TypedValue.COMPLEX_UNIT_SP,nameBase+mainBoost);
+   row.setTextViewTextSize(R.id.v7_wide_builder_timer,android.util.TypedValue.COMPLEX_UNIT_SP,mainBase+mainBoost);
+   row.setTextViewTextSize(R.id.v7_wide_builder_idle,android.util.TypedValue.COMPLEX_UNIT_SP,mainBase+mainBoost);
+   for(int textId:new int[]{R.id.v7_wide_builders,R.id.v7_wide_lab_timer,R.id.v7_wide_lab_idle,
+    R.id.v7_wide_pet_timer,R.id.v7_wide_pet_idle,R.id.v7_wide_finish})
+     row.setTextViewTextSize(textId,android.util.TypedValue.COMPLEX_UNIT_SP,small);
 
    row.setTextViewText(R.id.v7_wide_builders,s.builderReady+"✓ "+s.builderActive+"⚒");
    timer(row,R.id.v7_wide_lab_timer,R.id.v7_wide_lab_idle,s.labNext,now);
@@ -145,6 +155,7 @@ final class WidgetV7 {
   }
   boolean medium=mode==1;
   RemoteViews row=new RemoteViews(ctx.getPackageName(),medium?R.layout.widget_account_compact:R.layout.widget_account_mini);
+  row.setInt(R.id.widget_account_root,"setBackgroundResource",rowTheme(background));
   row.setTextViewText(R.id.widget_account_name,AppData.displayName(ctx,s.account));
   row.setViewVisibility(R.id.widget_ready,s.builderReady>0?View.VISIBLE:View.GONE);
   if(s.builderReady>0)row.setTextViewText(R.id.widget_ready,"●"+s.builderReady);
@@ -166,6 +177,10 @@ final class WidgetV7 {
   }
   row.setOnClickPendingIntent(R.id.widget_account_root,accountClick(ctx,s.account,id));
   return row;
+ }
+ private static int rowTheme(int style){
+  return style==2?R.drawable.widget_row_background_transparent:
+   style==1?R.drawable.widget_row_background_dark:R.drawable.widget_row_background;
  }
  private static RemoteViews multi(Context ctx,int id,List<Status> visible,long now){
   android.content.SharedPreferences studio=ctx.getSharedPreferences("WidgetPreferences",Context.MODE_PRIVATE);
@@ -202,8 +217,9 @@ final class WidgetV7 {
   // Keep the original single-line six-column design at that width; using
   // the medium mode here moved checks into an unstyled subtitle.
   else if(width>=225)mode=3;
+  else if(width>=150)mode=4; // Two-line rows preserve every column on two home-screen cells.
   else mode=0;
-  int rowHeight=mode==3?16:mode==2?24:mode==1?34:19;
+  int rowHeight=mode==4?32:mode==3?16:mode==2?24:mode==1?34:19;
   boolean showSync=height>=44+rowHeight;
   int available=Math.max(0,height-24-(showSync?20:0));
   int count=Math.min(ordered.size(),Math.max(1,available/rowHeight));
@@ -218,8 +234,9 @@ final class WidgetV7 {
   w.setTextViewText(R.id.v7_multi_summary,(hidden>0?count+"/"+ordered.size():String.valueOf(ordered.size()))+" · "+ready+"✓");
   w.removeAllViews(R.id.v7_multi_rows);
   if(ordered.isEmpty())w.addView(R.id.v7_multi_rows,new RemoteViews(ctx.getPackageName(),R.layout.widget_empty));
-  else for(int i=0;i<count;i++)w.addView(R.id.v7_multi_rows,multiRow(ctx,ordered.get(i),mode,now,id,showLab,showPet,fontSize));
+  else for(int i=0;i<count;i++)w.addView(R.id.v7_multi_rows,multiRow(ctx,ordered.get(i),mode,now,id,showLab,showPet,fontSize,background));
   w.setViewVisibility(R.id.v7_multi_sync,showSync?View.VISIBLE:View.GONE);
+  w.setInt(R.id.v7_multi_sync,"setBackgroundResource",rowTheme(background));
   boolean active=AppData.prefs(ctx).getBoolean("floatingEnabled",false);
   w.setTextViewText(R.id.v7_multi_sync,I18n.english(ctx)?("⚔ Sync "+(active?"ON":"OFF")):("⚔ Sync "+(active?"AAN":"UIT")));
   w.setOnClickPendingIntent(R.id.v7_multi_sync,syncClick(ctx,id));
