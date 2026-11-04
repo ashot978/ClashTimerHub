@@ -29,12 +29,20 @@ public final class MainActivity extends Activity {
  private Bitmap lastScanBitmap;
  private final android.os.Handler ticker=new android.os.Handler(android.os.Looper.getMainLooper());
  private String lastLoadedSnapshot="";
+ private final android.content.SharedPreferences.OnSharedPreferenceChangeListener syncWatcher=(prefs,key)->{
+  if("syncRevision".equals(key))ticker.post(()->refreshExternalImport());
+ };
  private final Runnable tick=new Runnable(){public void run(){if(activeTab==0&&dashboard!=null)renderDashboard();else if(activeTab==1||activeTab==2)refreshVisibleTimers();ticker.postDelayed(this,1000);}};
- @Override protected void onResume(){super.onResume();refreshExternalImport();ticker.removeCallbacks(tick);ticker.post(tick);}
- @Override protected void onPause(){ticker.removeCallbacks(tick);super.onPause();}
+ @Override protected void onResume(){super.onResume();getPreferences(0).registerOnSharedPreferenceChangeListener(syncWatcher);refreshExternalImport();ticker.removeCallbacks(tick);ticker.post(tick);}
+ @Override protected void onPause(){getPreferences(0).unregisterOnSharedPreferenceChangeListener(syncWatcher);ticker.removeCallbacks(tick);super.onPause();}
  private static final Pattern TIME=Pattern.compile("(?i)(?:(\\d+)\\s*d\\s*)?(?:(\\d+)\\s*h\\s*)?(?:(\\d+)\\s*m\\s*)?(?:(\\d+)\\s*s\\s*)?");
- @Override public void onCreate(Bundle b){super.onCreate(b);load();draw();if(android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},55);TimerWidget.schedule(this);handleSharedJson(getIntent());}
- @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);setIntent(intent);handleSharedJson(intent);}
+ @Override public void onCreate(Bundle b){super.onCreate(b);load();draw();if(android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},55);TimerWidget.schedule(this);handleWidgetNavigation(getIntent());handleSharedJson(getIntent());}
+ @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);setIntent(intent);handleWidgetNavigation(intent);handleSharedJson(intent);}
+ private void handleWidgetNavigation(Intent intent){
+  if(intent==null)return;
+  String open=intent.getStringExtra("openAccount");
+  if(open!=null&&accounts.contains(open)){selectedAccount=open;activeTab=2;draw();}
+ }
  private void handleSharedJson(Intent intent){
   if(intent==null||!Intent.ACTION_SEND.equals(intent.getAction()))return;
   String payload=intent.getStringExtra(Intent.EXTRA_TEXT);
