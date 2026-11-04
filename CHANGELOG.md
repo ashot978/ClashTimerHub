@@ -1,5 +1,21 @@
 # ClashTimerHub release notes
 
+## 7.5.2-beta1 — 4 November 2026
+
+### Back-up — Google Drive without Google Cloud
+- **Opslaan in Google Drive:** Creates a real, portable `ClashTimerHub-backup.json` file and opens Android's sharing sheet. Choose the Google Drive app to upload it directly to My Drive. No Downloads file picker, Google Cloud or OAuth registration required.
+- **Opslaan als bestand:** Uses Android's Save As document picker for a standalone .json backup on the device or a compatible cloud document provider.
+- **Back-upbestand importeren:** Choose a previously saved JSON file and confirm restoration of accounts, timers and settings. The existing clipboard backup remains available.
+- The previous direct OAuth Drive controls were replaced by this simpler user-controlled flow. **Drive uploads via sharing are manual**; they do not automatically replace an existing file or upload after every sync.
+- Existing backup JSON schema, data, widget settings and local timers remain compatible.
+
+### Widget — compact all-account layout
+- Remove the top title/header entirely to recover vertical space for account rows.
+- Move the settings gear to the bottom-right corner, beside a large always-visible Sync ON/OFF control.
+- Recalculate account row capacity without the former header allocation. The number of visible accounts still depends on the physical widget height and whether the data fits in one or multiple lines; no text is shortened to force additional rows.
+- Preserve transparent backgrounds, aligned columns, category icons and text sizes.
+
+
 ## 7.5.1-beta1 — 4 November 2026
 
 ### Native Google Drive backups
