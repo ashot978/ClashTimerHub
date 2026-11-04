@@ -157,6 +157,10 @@ public final class QuickSyncImporter {
    .putString("upgrades",merged.toString()).putString("playerTags",tags.toString())
    .putLong("ack_"+account,now).putLong("syncRevision",revision)
    .putLong("lastSyncAt_"+account,now).putString("lastSyncSummary",status);
+  // Helper snapshots are independent of upgrades. Exports without helpers
+  // retain the last known helper state instead of erasing it.
+  String helperJson=HelperTracker.merged(prefs,json,account,timestamp);
+  if(helperJson!=null)editor.putString(HelperTracker.KEY,helperJson);
   if(!editor.commit())throw new IllegalStateException("Opslaan mislukt");
   TimerWidget.schedule(context);
   // Run Drive backup independently: it must never make a successful Clash sync fail.
