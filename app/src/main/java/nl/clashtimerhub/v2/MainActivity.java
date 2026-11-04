@@ -26,7 +26,7 @@ public final class MainActivity extends Activity {
  private final ArrayList<String> accounts=new ArrayList<>();
  private final ArrayList<JSONObject> upgrades=new ArrayList<>();
  private final ArrayList<JSONObject> pending=new ArrayList<>();
- private static final int PICK=12,IMPORT=13,RESTORE=14;
+ private static final int PICK=12,IMPORT=13,RESTORE=14,DRIVE_CREATE=61,DRIVE_OPEN=62;
  private Bitmap lastScanBitmap;
  private PermissionWizard permissionWizard;
  private final android.os.Handler ticker=new android.os.Handler(android.os.Looper.getMainLooper());
@@ -287,6 +287,25 @@ public final class MainActivity extends Activity {
   LinearLayout backups=settingsSection("▣  BACK-UP","Je opgeslagen accounts veilig bewaren");
   settingsItem(backups,"▣","Back-up kopiëren","Accounts, timers, taal, meldingen en widgetinstellingen",()->copyBackup());
   settingsItem(backups,"↶","Back-up herstellen","Herstel timers en opgeslagen voorkeuren",()->restoreBackupClipboard());
+  String driveStatus=DriveBackupManager.status(this);
+  TextView status=label("☁  Google Drive: "+driveStatus,12);
+  status.setTextColor(getPreferences(0).getString(DriveBackupManager.KEY_ERROR,"").isEmpty()?0xff8be3ad:0xffffb28f);
+  status.setPadding(dp(12),dp(10),dp(12),dp(10));backups.addView(status);
+  settingsItem(backups,"☁","Drive-back-up instellen",
+   DriveBackupManager.isLinked(this)?"Gekoppeld bestand wijzigen":"Kies een JSON-bestand in Google Drive",
+   ()->selectDriveDocument());
+  settingsItem(backups,"↑","Nu naar Drive back-uppen",
+   DriveBackupManager.isLinked(this)?"Schrijf alle accounts, timers en instellingen weg":"Kies eerst een bestand in Google Drive",
+   ()->backupToDriveNow());
+  settingsItem(backups,"↓","Herstellen uit Google Drive",
+   "Kies een eerder opgeslagen ClashTimerHub-back-up en controleer voor vervangen",()->restoreFromDrive());
+  if(DriveBackupManager.isLinked(this)){
+   settingsItem(backups,"↻","Automatische Drive-back-up",
+    DriveBackupManager.isAutomatic(this)?"Aan · na iedere succesvolle Clash-synchronisatie":"Uit · alleen handmatige back-ups",
+    ()->{DriveBackupManager.enableAutomatic(this,!DriveBackupManager.isAutomatic(this));draw();});
+   settingsItem(backups,"×","Drive-back-up loskoppelen",
+    "Stop automatische back-ups; het bestand in Drive blijft behouden",()->confirmUnlinkDrive());
+  }
  }
  private void renameAccount(){
   if(accounts.isEmpty()){toast("Geen accounts beschikbaar");return;}
@@ -735,42 +754,76 @@ public final class MainActivity extends Activity {
    }).setNegativeButton(t("Annuleren"),null).show();
  }
  private JSONObject backupPayload()throws JSONException{
-  JSONObject data=new JSONObject();data.put("format","clash-timer-hub-backup-v1");
-  data.put("accounts",new JSONArray(accounts));data.put("upgrades",new JSONArray(upgrades));
-  android.content.SharedPreferences p=getPreferences(0);
-  data.put("playerTags",new JSONObject(p.getString("playerTags","{}")));
-  data.put("accountNames",new JSONObject(p.getString("accountNames","{}")));
-  data.put("maxedCategories",new JSONObject(p.getString("maxedCategories","{}")));
-  // Optional additions keep older backup-v1 files compatible.
-  JSONObject preferences=new JSONObject();
-  preferences.put("language",I18n.code(this));
-  preferences.put("timerStart",p.getInt("timerStart",70));
-  preferences.put("timerEnd",p.getInt("timerEnd",94));
-  preferences.put("notifyEnabled",p.getBoolean("notifyEnabled",true));
-  preferences.put("notifyOnFinish",p.getBoolean("notifyOnFinish",true));
-  preferences.put("notifyLeadMinutes",p.getInt("notifyLeadMinutes",15));
-  data.put("preferences",preferences);
-  JSONArray widgets=new JSONArray();
-  android.content.SharedPreferences wp=getSharedPreferences("WidgetPreferences",MODE_PRIVATE);
-  HashMap<Integer,Integer> sequence=new HashMap<>();
-  for(int widgetId:WidgetV7.allIds(this)){
-   int type=WidgetV7.kind(this,widgetId);
-   int index=sequence.getOrDefault(type,0);sequence.put(type,index+1);
-   JSONObject entry=new JSONObject();
-   entry.put("type",type).put("index",index);
-   entry.put("all",wp.getBoolean("all_"+widgetId,true));
-   entry.put("selected",new JSONArray(wp.getString("selected_"+widgetId,"[]")));
-   entry.put("order",new JSONArray(wp.getString("order_"+widgetId,"[]")));
-   entry.put("sort",wp.getInt("sort_"+widgetId,0));
-   entry.put("size",wp.getInt("size_"+widgetId,1));
-   entry.put("lab",wp.getBoolean("lab_"+widgetId,true));
-   entry.put("pet",wp.getBoolean("pet_"+widgetId,true));
-   entry.put("bg",wp.getInt("bg_"+widgetId,0));
-   entry.put("account",wp.getString("account_"+widgetId,""));
-   widgets.put(entry);
+  return DriveBackupManager.buildPayload(this);
+ }
+ private void selectDriveDocument(){
+  Intent chooser=new Intent(Intent.ACTION_CREATE_DOCUMENT);
+  chooser.addCategory(Intent.CATEGORY_OPENABLE);
+  chooser.setType("application/json");
+  chooser.putExtra(Intent.EXTRA_TITLE,"ClashTimerHub-backup.json");
+  chooser.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_WRITE_URI_PERMISSION|
+   Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+  try{startActivityForResult(chooser,DRIVE_CREATE);}
+  catch(Exception e){toast("Kan bestandskiezer niet openen: "+e.getMessage());}
+ }
+ private void backupToDriveNow(){
+  android.net.Uri dest=DriveBackupManager.linkedUri(this);
+  if(dest==null){
+   new android.app.AlertDialog.Builder(this).setTitle("Google Drive-back-up")
+    .setMessage("Kies in het volgende Android-scherm Google Drive en maak een back-upbestand. Daarna kan ClashTimerHub dit bestand na iedere succesvolle synchronisatie automatisch bijwerken.")
+    .setPositiveButton("Drive-bestand kiezen",(d,w)->selectDriveDocument())
+    .setNegativeButton(t("Annuleren"),null).show();
+   return;
   }
-  data.put("widgets",widgets);
-  return data;
+  toast("Back-up naar gekozen Drive-bestand gestart");
+  DriveBackupManager.writeAsync(this,dest,(ok,detail)->{
+   if(isFinishing()||isDestroyed())return;
+   draw();
+   new android.app.AlertDialog.Builder(this)
+    .setTitle(ok?"Drive-back-up opgeslagen":"Drive-back-up mislukt")
+    .setMessage(ok?"Je accounts, timers en instellingen zijn opgeslagen in het gekozen bestand.":detail+
+     "\n\nControleer de internetverbinding en of je nog toegang hebt tot het bestand.")
+    .setPositiveButton("OK",null).show();
+  });
+ }
+ private void restoreFromDrive(){
+  Intent picker=new Intent(Intent.ACTION_OPEN_DOCUMENT);
+  picker.addCategory(Intent.CATEGORY_OPENABLE);
+  picker.setType("*/*");
+  picker.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+  try{startActivityForResult(picker,DRIVE_OPEN);}
+  catch(Exception e){toast("Kan Drive-bestandskiezer niet openen: "+e.getMessage());}
+ }
+ private void confirmUnlinkDrive(){
+  new android.app.AlertDialog.Builder(this)
+   .setTitle("Drive-bestand loskoppelen?")
+   .setMessage("Automatische back-ups worden gestopt. Het bestaande JSON-bestand blijft gewoon in Google Drive staan.")
+   .setPositiveButton("Loskoppelen",(d,w)->{DriveBackupManager.unlink(this);draw();})
+   .setNegativeButton(t("Annuleren"),null).show();
+ }
+ private String driveDisplayName(android.net.Uri uri){
+  try(android.database.Cursor cur=getContentResolver().query(uri,
+   new String[]{android.provider.OpenableColumns.DISPLAY_NAME},null,null,null)){
+   if(cur!=null&&cur.moveToFirst())return cur.getString(0);
+  }catch(Exception ignored){}
+  return "ClashTimerHub-backup.json";
+ }
+ private void handleDriveDocumentChosen(Intent data){
+  android.net.Uri uri=data.getData();
+  if(uri==null){toast("Geen back-upbestand gekozen");return;}
+  int flags=data.getFlags()&(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+  try{
+   if((flags&Intent.FLAG_GRANT_WRITE_URI_PERMISSION)==0)
+    throw new SecurityException("Geen schrijfrechten voor dit bestand");
+   getContentResolver().takePersistableUriPermission(uri,flags);
+   android.net.Uri old=DriveBackupManager.linkedUri(this);
+   if(old!=null&&!old.equals(uri))DriveBackupManager.unlink(this);
+   DriveBackupManager.link(this,uri,driveDisplayName(uri),true);
+   draw();
+   backupToDriveNow();
+  }catch(Exception e){
+   toast("Kan blijvende toegang tot Drive niet instellen: "+e.getMessage());
+  }
  }
  private void copyBackup(){
   try{
@@ -1192,6 +1245,15 @@ public final class MainActivity extends Activity {
   if(count==0){TextView empty=label("Geen actieve timers. Importeer Clash-data via het klembord.",15);empty.setTextColor(0xffa5a9c0);items.addView(empty);}
  }
  @Override protected void onActivityResult(int req,int result,Intent data){super.onActivityResult(req,result,data);if(result!=RESULT_OK||data==null)return;
+  if(req==DRIVE_CREATE){handleDriveDocumentChosen(data);return;}
+  if(req==DRIVE_OPEN){
+   if(data.getData()==null){toast("Geen back-upbestand gekozen");return;}
+   DriveBackupManager.readAsync(this,data.getData(),(json,error)->{
+    if(isFinishing()||isDestroyed())return;
+    if(error!=null)toast("Drive-back-up herstellen mislukt: "+error);
+    else restoreBackup(json);
+   });return;
+  }
   if(req==RESTORE){try(InputStream stream=getContentResolver().openInputStream(data.getData())){java.io.ByteArrayOutputStream buffer=new java.io.ByteArrayOutputStream();byte[] bytes=new byte[8192];int n;while((n=stream.read(bytes))!=-1){buffer.write(bytes,0,n);if(buffer.size()>2000000)throw new java.io.IOException("Back-up te groot");}restoreBackup(buffer.toString("UTF-8"));}catch(Exception e){toast("Herstellen mislukt: "+e.getMessage());}return;}
   if(req==IMPORT){try(InputStream stream=getContentResolver().openInputStream(data.getData())){
    java.io.ByteArrayOutputStream buffer=new java.io.ByteArrayOutputStream();byte[] bytes=new byte[8192];int n;
