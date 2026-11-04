@@ -21,7 +21,7 @@
   <LinearLayout android:id="@+id/v7_wide_lab_group" android:layout_width="94dp"
    android:layout_height="wrap_content" android:orientation="horizontal">
    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-    android:text="⚗" android:textSize="10sp" android:textColor="#D6BCEA"/>
+    android:text="🧙" android:textSize="10sp" android:textColor="#D6BCEA"/>
    <Chronometer android:id="@+id/v7_wide_lab_timer" android:layout_width="wrap_content"
     android:layout_height="wrap_content" android:textSize="10sp" android:textColor="#D6BCEA"
     android:singleLine="true" android:ellipsize="none" android:includeFontPadding="false"/>
@@ -51,7 +51,7 @@
    android:visibility="gone" android:includeFontPadding="false"/>
   <TextView android:id="@+id/v7_wide_finish" android:layout_width="83dp"
    android:layout_height="wrap_content" android:textSize="10sp" android:textColor="#CBB5D9"
-   android:gravity="start" android:singleLine="true" android:ellipsize="none"
+   android:gravity="end" android:singleLine="true" android:ellipsize="none"
    android:includeFontPadding="false"/>
  </LinearLayout>
 </LinearLayout>
