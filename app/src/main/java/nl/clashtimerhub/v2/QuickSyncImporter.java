@@ -104,8 +104,8 @@ public final class QuickSyncImporter {
   tags.put(account,tag);
   String status;
   if(previous.isEmpty())status=account+" ✓ "+parsed.length()+" actieve timers opgeslagen";
-  else if(differences==0)status=account+" ✓ "+parsed.length()+" actieve timers\\nGeen verschillen met vorige sync";
-  else status=account+" ✓ "+parsed.length()+" actieve timers\\n"+differences+" verschil"+(differences==1?"":"len")+" met vorige sync";
+  else if(differences==0)status=account+" ✓ "+parsed.length()+" actieve timers\nGeen verschillen met vorige sync";
+  else status=account+" ✓ "+parsed.length()+" actieve timers\n"+differences+" verschil"+(differences==1?"":"len")+" met vorige sync";
   long revision=prefs.getLong("syncRevision",0L)+1L;
   SharedPreferences.Editor editor=prefs.edit().putString("accounts",new JSONArray(accounts).toString())
    .putString("upgrades",merged.toString()).putString("playerTags",tags.toString())
