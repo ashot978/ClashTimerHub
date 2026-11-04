@@ -160,7 +160,7 @@ public final class QuickSyncImporter {
   if(!editor.commit())throw new IllegalStateException("Opslaan mislukt");
   TimerWidget.schedule(context);
   // Run Drive backup independently: it must never make a successful Clash sync fail.
-  DriveBackupManager.afterSuccessfulSync(context);
+  GoogleDriveUi.afterSuccessfulSync(context);
   return status;
  }
 
