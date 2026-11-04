@@ -65,37 +65,36 @@ public final class QuickSyncImporter {
     }else add(parsed,account,category,id,entry.optLong("timer"),timestamp,tag,section+"/item/"+id+"/"+i);
    }
   }
-  // Reconcile only the matching player. A sync must never touch manual timers
-  // or another account, and identical snapshots must not create new identities.
-  Map<String,JSONObject> oldTimers=new LinkedHashMap<>();
+  // Count actual differences against the previous export. Do not infer
+  // whether a changed end time represents a new upgrade or an edit.
+  ArrayList<JSONObject> previous=new ArrayList<>();
   for(int i=0;i<oldUpgrades.length();i++){
    JSONObject old=oldUpgrades.optJSONObject(i);
-   if(old!=null&&account.equals(old.optString("account"))&&old.optBoolean("exported",false)){
-    String key=old.optString("syncKey","");
-    if(key.isEmpty())key=old.optString("category")+"|"+old.optLong("sourceId",-1)+"|"+old.optString("name");
-    oldTimers.put(key,old);
-   }
+   if(old!=null&&account.equals(old.optString("account"))&&old.optBoolean("exported",false))previous.add(old);
   }
-  int added=0,changed=0,finished=0;
-  Set<String> seen=new HashSet<>();
+  HashSet<Integer> matched=new HashSet<>();
+  int newOrChanged=0;
   for(int i=0;i<parsed.length();i++){
-   JSONObject timer=parsed.getJSONObject(i);
-   String key=timer.optString("syncKey");
-   JSONObject before=oldTimers.get(key);
-   if(before==null){
-    String legacy=timer.optString("category")+"|"+timer.optLong("sourceId",-1)+"|"+timer.optString("name");
-    before=oldTimers.get(legacy);
-    if(before!=null)seen.add(legacy);
+   JSONObject incoming=parsed.optJSONObject(i);
+   if(incoming==null)continue;
+   long closest=Long.MAX_VALUE;int found=-1;
+   for(int j=0;j<previous.size();j++){
+    if(matched.contains(j))continue;
+    JSONObject old=previous.get(j);
+    if(!incoming.optString("category").equals(old.optString("category")))continue;
+    long oldId=old.optLong("sourceId",-1),newId=incoming.optLong("sourceId",-1);
+    if(oldId>=0&&newId>=0?oldId!=newId:!incoming.optString("name").equals(old.optString("name")))continue;
+    long delta=Math.abs(old.optLong("finish")-incoming.optLong("finish"));
+    if(delta<closest){closest=delta;found=j;}
    }
-   if(before==null)added++;
-   else{
-    seen.add(key);
-    if(Math.abs(before.optLong("finish")-timer.optLong("finish"))>60000L)changed++;
-   }
+   // Timer finish times can drift slightly between exports.
+   if(found>=0&&closest<=120000L)matched.add(found);
+   else newOrChanged++;
   }
-  for(Map.Entry<String,JSONObject> old:oldTimers.entrySet()){
-   if(!seen.contains(old.getKey())&&old.getValue().optLong("finish")<=now)finished++;
-  }
+  int noLongerActive=0;
+  for(int i=0;i<previous.size();i++)
+   if(!matched.contains(i)&&previous.get(i).optLong("finish")>now)noLongerActive++;
+  int differences=Math.max(newOrChanged,noLongerActive);
   JSONArray merged=new JSONArray();
   for(int i=0;i<oldUpgrades.length();i++){
    JSONObject upgrade=oldUpgrades.optJSONObject(i);
@@ -103,7 +102,10 @@ public final class QuickSyncImporter {
   }
   for(int i=0;i<parsed.length();i++)merged.put(parsed.getJSONObject(i));
   tags.put(account,tag);
-  String status=account+": "+parsed.length()+" actief · "+added+" nieuw · "+finished+" klaar · "+changed+" gewijzigd";
+  String status;
+  if(previous.isEmpty())status=account+" ✓ "+parsed.length()+" actieve timers opgeslagen";
+  else if(differences==0)status=account+" ✓ "+parsed.length()+" actieve timers\\nGeen verschillen met vorige sync";
+  else status=account+" ✓ "+parsed.length()+" actieve timers\\n"+differences+" verschil"+(differences==1?"":"len")+" met vorige sync";
   long revision=prefs.getLong("syncRevision",0L)+1L;
   SharedPreferences.Editor editor=prefs.edit().putString("accounts",new JSONArray(accounts).toString())
    .putString("upgrades",merged.toString()).putString("playerTags",tags.toString())
