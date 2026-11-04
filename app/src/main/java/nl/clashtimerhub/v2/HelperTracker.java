@@ -103,7 +103,7 @@ final class HelperTracker {
   int total=snapshot.items.size();
   long next=snapshot.soonest(now);
   if(available==0&&next==Long.MAX_VALUE)return "🤝 "+total+" helpers";
-  if(next==Long.MAX_VALUE)return "🤝 "+available+"/"+total+" ✓";
+  if(next==Long.MAX_VALUE)return "🤝 "+available+"/"+total+(available==total?" ✓":" · ?");
   long mins=Math.max(1,(next-now+59999)/60000);
   String remain=mins>=60?(mins/60)+"h"+String.format(java.util.Locale.ROOT,"%02d",mins%60):
     mins+"m";
