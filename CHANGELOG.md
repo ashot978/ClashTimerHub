@@ -1,5 +1,16 @@
 # ClashTimerHub release notes
 
+## 7.5.8-beta1 — 4 November 2026
+
+### Alchemist per account — standaard uit
+- **Alchemist beschikbaar** is een accountgebonden selectievakje onder de helpersectie, net als de bestaande MAX-vinkjes.
+- De Alchemist is standaard uitgeschakeld voor alle accounts, ook als de Clash-export helperdata bevat.
+- Alleen wanneer **Alchemist beschikbaar** voor een account is aangevinkt, wordt deze helper getoond en meegerekend in de Helper Tracker en multi-accountwidget.
+- Builder's Apprentice en Lab Assistant blijven zichtbaar volgens de beschikbare exportgegevens.
+- Wisselen van de instelling werkt direct de widget bij. De helperdata blijven opgeslagen, zodat terugschakelen geen nieuwe import vereist.
+- De instelling wordt meegenomen in JSON-back-ups en bij koppelen van player tags aan bestaande accounts. Eerdere back-ups en timers blijven bruikbaar.
+
+
 ## 7.5.7-beta1 — 4 November 2026
 
 ### Helper Tracker — automatisch bij volledige Clash Sync
