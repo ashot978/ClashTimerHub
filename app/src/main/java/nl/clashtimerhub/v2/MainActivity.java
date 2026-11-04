@@ -3,6 +3,7 @@ package nl.clashtimerhub.v2;
 import android.app.Activity;
 import android.os.Bundle;
 import android.content.Intent;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -232,17 +233,12 @@ public final class MainActivity extends Activity {
   long known=getPreferences(0).getLong("latestFeedBuild",0);
   long installedCode=UpdateChecker.installedVersionCode(this);
   long installedBuild=installedCode>=1000?installedCode-1000:installedCode;
-  TextView latestBuild=label(known>0?"Nieuwste bekende build: #"+known+(known>installedBuild?" · UPDATE BESCHIKBAAR":" · Up-to-date"):"Nieuwste build: nog niet gecontroleerd",12);
+  TextView latestBuild=label(known>0?"Nieuwste GitHub-build: #"+known+(known>installedBuild?" · UPDATE BESCHIKBAAR":" · Up-to-date"):"Nieuwste GitHub-build: nog niet gecontroleerd",12);
   latestBuild.setTextColor(0xffbba7d1);
   latestBuild.setPadding(dp(12),dp(2),dp(12),dp(8));
   releases.addView(latestBuild);
   settingsItem(releases,"↻","Controleer op updates","Vergelijk met de nieuwste gepubliceerde APK",()->checkUpdates(false));
-  settingsItem(releases,"⚙","Updatefeed instellen","Openbare HTTPS-versiebron voor een private GitHub-repository",()->configureUpdateFeed());
   settingsItem(releases,"↓","GitHub-builds bekijken","Open de builds in je browser",()->openUpdates());
-  if(!getPreferences(0).getString("updateFeedUrl","").isEmpty()){
-   long last=getPreferences(0).getLong("lastUpdateCheck",0);
-   if(System.currentTimeMillis()-last>6L*3600000L)checkUpdates(true);
-  }
   LinearLayout backups=settingsSection("▣  BACK-UP","Je opgeslagen accounts veilig bewaren");
   settingsItem(backups,"▣","Back-up kopiëren","Kopieer je gegevens naar het klembord",()->copyBackup());
   settingsItem(backups,"↶","Back-up herstellen","Herstel een gekopieerde back-up",()->restoreBackupClipboard());
@@ -295,7 +291,7 @@ public final class MainActivity extends Activity {
    if(isFinishing()||isDestroyed())return;
    if(error!=null){
     if(!silent)new android.app.AlertDialog.Builder(this).setTitle(t("Updatecontrole"))
-     .setMessage(error+"\\nDe repository blijft privé; de updatefeed moet apart openbaar gepubliceerd worden.")
+     .setMessage(error+"\\nControleer of GitHub de nieuwste APK als Release heeft gepubliceerd.")
      .setPositiveButton(t("OK"),null).show();
     return;
    }
@@ -305,25 +301,67 @@ public final class MainActivity extends Activity {
    getPreferences(0).edit().putLong("latestFeedBuild",build)
     .putLong("lastUpdateCheck",System.currentTimeMillis()).apply();
    boolean newer=versionCode>current;
-   if(!newer&&silent)return;
+   if(silent){
+    if(!newer||getPreferences(0).getLong("lastNotifiedVersionCode",0)>=versionCode)return;
+    getPreferences(0).edit().putLong("lastNotifiedVersionCode",versionCode).apply();
+   }
    String notes=data.optString("notes","");
+   if(notes.length()>3500)notes=notes.substring(0,3500)+"…";
    String message="Geïnstalleerd: #"+(current>=1000?current-1000:current)+
     "\\nNieuwste build: #"+build+(newer?"\\n\\nNieuwe update beschikbaar!":"\\n\\nJe hebt de nieuwste versie.")+
     (notes.isEmpty()?"":"\\n\\n"+notes);
    android.app.AlertDialog.Builder dialog=new android.app.AlertDialog.Builder(this).setTitle(t("App-updates"))
-    .setMessage(message).setNegativeButton(t("Sluiten"),null);
-   if(newer)dialog.setPositiveButton(t("Download APK"),(d,w)->{
+    .setMessage(message).setNegativeButton(t("Later"),null);
+   if(newer)dialog.setPositiveButton(t("Update installeren"),(d,w)->{
     String apk=data.optString("apkUrl","");
-    if(UpdateChecker.validHttps(apk))startActivity(new Intent(Intent.ACTION_VIEW,android.net.Uri.parse(apk)));
+    if(UpdateChecker.validHttps(apk))downloadUpdate(apk,build);
    });
    dialog.show();
-   if(activeTab==3)draw();
+   if(activeTab==3&&!silent)draw();
   });
+ }
+ private void downloadUpdate(String apkUrl,long build){
+  try{
+   if(!UpdateChecker.validHttps(apkUrl))throw new IllegalArgumentException("Ongeldige APK-link");
+   android.app.DownloadManager manager=(android.app.DownloadManager)getSystemService(DOWNLOAD_SERVICE);
+   if(manager==null)throw new IllegalStateException("Downloadmanager niet beschikbaar");
+   android.app.DownloadManager.Request request=new android.app.DownloadManager.Request(android.net.Uri.parse(apkUrl));
+   request.setTitle("ClashTimerHub build #"+build);
+   request.setDescription("APK downloaden voor installatie");
+   request.setMimeType("application/vnd.android.package-archive");
+   request.setNotificationVisibility(android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+   request.setDestinationInExternalFilesDir(this,android.os.Environment.DIRECTORY_DOWNLOADS,"ClashTimerHub-"+build+".apk");
+   long id=manager.enqueue(request);
+   android.content.BroadcastReceiver receiver=new android.content.BroadcastReceiver(){
+    @Override public void onReceive(Context context,Intent intent){
+     if(intent==null||intent.getLongExtra(android.app.DownloadManager.EXTRA_DOWNLOAD_ID,-1)!=id)return;
+     try{unregisterReceiver(this);}catch(Exception ignored){}
+     android.app.DownloadManager.Query query=new android.app.DownloadManager.Query().setFilterById(id);
+     try(android.database.Cursor cursor=manager.query(query)){
+      if(cursor==null||!cursor.moveToFirst()||
+         cursor.getInt(cursor.getColumnIndexOrThrow(android.app.DownloadManager.COLUMN_STATUS))!=android.app.DownloadManager.STATUS_SUCCESSFUL){
+       toast("Download mislukt. Open de nieuwste GitHub Release.");return;
+      }
+     }
+     android.net.Uri fileUri=manager.getUriForDownloadedFile(id);
+     if(fileUri==null){toast("APK-bestand niet gevonden");return;}
+     Intent install=new Intent(Intent.ACTION_VIEW);
+     install.setDataAndType(fileUri,"application/vnd.android.package-archive");
+     install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_ACTIVITY_NEW_TASK);
+     try{startActivity(install);}
+     catch(Exception e){toast("Open de gedownloade APK via Bestanden om te installeren");}
+    }
+   };
+   if(android.os.Build.VERSION.SDK_INT>=33)
+    registerReceiver(receiver,new android.content.IntentFilter(android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE),Context.RECEIVER_NOT_EXPORTED);
+   else registerReceiver(receiver,new android.content.IntentFilter(android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+   toast("APK-download gestart. Bevestig de installatie in Android.");
+  }catch(Exception e){toast("Download starten mislukt: "+e.getMessage());}
  }
  private void openUpdates(){
   new android.app.AlertDialog.Builder(this).setTitle(t("Nieuwe versie installeren"))
-   .setMessage(t("GitHub Actions opent in je browser. Open de nieuwste succesvolle build, download de APK en installeer over de bestaande app. Verwijder de app niet."))
-   .setPositiveButton(t("Open GitHub"),(d,w)->startActivity(new Intent(Intent.ACTION_VIEW,android.net.Uri.parse("https://github.com/ashot978/ClashTimerHub/actions/workflows/build-apk.yml"))))
+   .setMessage(t("Open de nieuwste GitHub Release. De APK is direct te downloaden zonder ZIP-bestand. Verwijder je bestaande app niet."))
+   .setPositiveButton(t("Open GitHub"),(d,w)->startActivity(new Intent(Intent.ACTION_VIEW,android.net.Uri.parse("https://github.com/ashot978/ClashTimerHub/releases/latest"))))
    .setNegativeButton(t("Annuleren"),null).show();
  }
  private void showWidgetSettings(){
