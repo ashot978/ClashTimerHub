@@ -48,16 +48,17 @@ public final class TimerWidget extends AppWidgetProvider {
   }catch(Exception e){android.util.Log.e("ClashTimerHub","Widget state failed",e);}
   return result;
  }
- private static String endAt(long timestamp){
+ private static String endAt(Context context,long timestamp){
   java.util.Calendar today=java.util.Calendar.getInstance();
   java.util.Calendar end=java.util.Calendar.getInstance();end.setTimeInMillis(timestamp);
-  String hhmm=new java.text.SimpleDateFormat("HH:mm",Locale.forLanguageTag("nl-NL")).format(new Date(timestamp));
+  Locale userLocale=I18n.english(context)?Locale.UK:Locale.forLanguageTag("nl-NL");
+  String hhmm=new java.text.SimpleDateFormat("HH:mm",userLocale).format(new Date(timestamp));
   if(today.get(java.util.Calendar.YEAR)==end.get(java.util.Calendar.YEAR)&&today.get(java.util.Calendar.DAY_OF_YEAR)==end.get(java.util.Calendar.DAY_OF_YEAR))
-   return "vandaag "+hhmm;
+   return I18n.tr(context,"vandaag ")+hhmm;
   today.add(java.util.Calendar.DAY_OF_YEAR,1);
   if(today.get(java.util.Calendar.YEAR)==end.get(java.util.Calendar.YEAR)&&today.get(java.util.Calendar.DAY_OF_YEAR)==end.get(java.util.Calendar.DAY_OF_YEAR))
-   return "morgen "+hhmm;
-  return new java.text.SimpleDateFormat("d MMM HH:mm",Locale.forLanguageTag("nl-NL")).format(new Date(timestamp));
+   return I18n.tr(context,"morgen ")+hhmm;
+  return new java.text.SimpleDateFormat("d MMM HH:mm",userLocale).format(new Date(timestamp));
  }
  private static RemoteViews makeAccount(Context context,Status s,boolean expanded,long now){
   RemoteViews row=new RemoteViews(context.getPackageName(),expanded?R.layout.widget_account_expanded:R.layout.widget_account_compact);
@@ -70,8 +71,8 @@ public final class TimerWidget extends AppWidgetProvider {
   if(active){
    row.setChronometer(R.id.widget_timer,SystemClock.elapsedRealtime()+Math.max(0,s.next-now),null,true);
    row.setChronometerCountDown(R.id.widget_timer,true);
-  }else row.setTextViewText(R.id.widget_idle,s.ready>0?"GEREED":"—");
-  row.setTextViewText(R.id.widget_subtitle,active?(expanded?s.name+" · ":"Klaar ")+endAt(s.next):s.ready>0?"Builder beschikbaar":"Geen actieve builder");
+  }else row.setTextViewText(R.id.widget_idle,s.ready>0?I18n.tr(context,"Gereed"):"—");
+  row.setTextViewText(R.id.widget_subtitle,active?(expanded?s.name+" · ":I18n.tr(context,"Klaar "))+endAt(context,s.next):I18n.tr(context,s.ready>0?"Builder beschikbaar":"Geen actieve builder"));
   Intent open=new Intent(context,MainActivity.class);
   open.setAction("nl.clashtimerhub.v2.OPEN_ACCOUNT."+s.account);
   open.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -101,7 +102,7 @@ public final class TimerWidget extends AppWidgetProvider {
    }
    RemoteViews widget=new RemoteViews(context.getPackageName(),R.layout.builder_widget);
    widget.setTextViewText(R.id.widget_title,"⚔ CLASH TIMER HUB");
-   widget.setTextViewText(R.id.widget_summary,visible.size()+" accounts · "+ready+" klaar");
+   widget.setTextViewText(R.id.widget_summary,I18n.tr(context,visible.size()+" accounts · "+ready+" klaar"));
    widget.removeAllViews(R.id.widget_rows);
    if(visible.isEmpty()){
     RemoteViews placeholder=new RemoteViews(context.getPackageName(),R.layout.widget_empty);
@@ -132,7 +133,7 @@ public final class TimerWidget extends AppWidgetProvider {
   ArrayList<Status> s=states(context,System.currentTimeMillis());
   StringBuilder b=new StringBuilder();
   for(Status a:s){if(b.length()>0)b.append("\n");b.append(a.account).append(": ");
-   b.append(a.ready>0?a.ready+" klaar":a.next!=Long.MAX_VALUE?endAt(a.next):"geen timer");
+   b.append(a.ready>0?I18n.tr(context,a.ready+" klaar"):a.next!=Long.MAX_VALUE?endAt(context,a.next):I18n.tr(context,"geen timer"));
   }return b.toString();
  }
  @Override public void onUpdate(Context context,AppWidgetManager manager,int[] ids){update(context);}
