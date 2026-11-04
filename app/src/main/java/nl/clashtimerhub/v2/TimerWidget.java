@@ -61,7 +61,7 @@ public final class TimerWidget extends AppWidgetProvider {
   return new java.text.SimpleDateFormat("d MMM HH:mm",userLocale).format(new Date(timestamp));
  }
  private static RemoteViews makeAccount(Context context,Status s,boolean expanded,long now){
-  RemoteViews row=new RemoteViews(context.getPackageName(),expanded?R.layout.widget_account_expanded:R.layout.widget_account_compact);
+  RemoteViews row=new RemoteViews(context.getPackageName(),expanded?R.layout.widget_account_compact:R.layout.widget_account_mini);
   row.setTextViewText(R.id.widget_account_name,s.account);
   row.setViewVisibility(R.id.widget_ready,s.ready>0?View.VISIBLE:View.GONE);
   if(s.ready>0)row.setTextViewText(R.id.widget_ready,"●"+s.ready);
@@ -72,7 +72,7 @@ public final class TimerWidget extends AppWidgetProvider {
    row.setChronometer(R.id.widget_timer,SystemClock.elapsedRealtime()+Math.max(0,s.next-now),null,true);
    row.setChronometerCountDown(R.id.widget_timer,true);
   }else row.setTextViewText(R.id.widget_idle,s.ready>0?I18n.tr(context,"Gereed"):"—");
-  row.setTextViewText(R.id.widget_subtitle,active?(expanded?s.name+" · ":I18n.tr(context,"Klaar "))+endAt(context,s.next):I18n.tr(context,s.ready>0?"Builder beschikbaar":"Geen actieve builder"));
+  if(expanded)row.setTextViewText(R.id.widget_subtitle,active?I18n.tr(context,"Klaar ")+endAt(context,s.next):I18n.tr(context,s.ready>0?"Builder beschikbaar":"Geen actieve builder"));
   Intent open=new Intent(context,MainActivity.class);
   open.setAction("nl.clashtimerhub.v2.OPEN_ACCOUNT."+s.account);
   open.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -100,17 +100,35 @@ public final class TimerWidget extends AppWidgetProvider {
    for(Status s:data)if(showAll||chosen.contains(s.account)){
     visible.add(s);ready+=s.ready;
    }
+   // Samsung resizes widgets in launcher cells; switch layouts on each resize.
+   // Portrait uses the shorter width and taller height, landscape vice versa.
+   android.os.Bundle options=manager.getAppWidgetOptions(widgetId);
+   int widthDp=190,heightDp=240;
+   if(options!=null){
+    boolean landscape=context.getResources().getConfiguration().orientation==
+      android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+    widthDp=options.getInt(landscape?AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH:
+       AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,190);
+    heightDp=options.getInt(landscape?AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT:
+       AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,240);
+    if(widthDp<=0)widthDp=190;
+    if(heightDp<=0)heightDp=240;
+   }
+   // Seven mini rows need about 188dp; extra room shows finishing clock times.
+   boolean showEndTimes=widthDp>=210&&heightDp>=260;
+   boolean narrow=widthDp<195;
    RemoteViews widget=new RemoteViews(context.getPackageName(),R.layout.builder_widget);
-   widget.setTextViewText(R.id.widget_title,"⚔ CLASH TIMER HUB");
-   widget.setTextViewText(R.id.widget_summary,I18n.tr(context,visible.size()+" accounts · "+ready+" klaar"));
+
+   widget.setTextViewText(R.id.widget_title,narrow?"⚔ TIMERS":"⚔ CLASH TIMER HUB");
+   widget.setViewVisibility(R.id.widget_summary,narrow?View.GONE:View.VISIBLE);
+   if(!narrow)widget.setTextViewText(R.id.widget_summary,I18n.tr(context,visible.size()+" accounts · "+ready+" klaar"));
    widget.removeAllViews(R.id.widget_rows);
    if(visible.isEmpty()){
     RemoteViews placeholder=new RemoteViews(context.getPackageName(),R.layout.widget_empty);
     widget.addView(R.id.widget_rows,placeholder);
    }else{
-    // Fixed layout: never crop accounts based on width/height. The widget's
-    // minimum height is sized for seven compact rows.
-    for(Status s:visible)widget.addView(R.id.widget_rows,makeAccount(context,s,false,now));
+    // Seven rows are always included. Only row density changes when resized.
+    for(Status s:visible)widget.addView(R.id.widget_rows,makeAccount(context,s,showEndTimes,now));
    }
    Intent open=new Intent(context,MainActivity.class);
    PendingIntent home=PendingIntent.getActivity(context,90119,open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
