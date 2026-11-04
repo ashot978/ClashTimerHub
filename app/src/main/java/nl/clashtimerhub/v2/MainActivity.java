@@ -45,7 +45,12 @@ public final class MainActivity extends Activity {
  private void handleWidgetNavigation(Intent intent){
   if(intent==null)return;
   String open=intent.getStringExtra("openAccount");
-  if(open!=null&&accounts.contains(open)){selectedAccount=open;activeTab=2;draw();}
+  if(open!=null&&accounts.contains(open)){selectedAccount=open;activeTab=0;draw();}
+ }
+ @Override public void onBackPressed(){
+  if(activeTab==0&&!selectedAccount.isEmpty()){selectedAccount="";draw();return;}
+  if(activeTab!=0){activeTab=0;selectedAccount="";draw();return;}
+  super.onBackPressed();
  }
  private void handleSharedJson(Intent intent){
   if(intent==null||!Intent.ACTION_SEND.equals(intent.getAction()))return;
@@ -102,32 +107,39 @@ public final class MainActivity extends Activity {
   View accent=new View(this);accent.setBackgroundColor(0xffd2a96e);LinearLayout.LayoutParams accentLp=new LinearLayout.LayoutParams(dp(56),dp(2));accentLp.setMargins(dp(12),0,0,dp(8));root.addView(accent,accentLp);
   screenContent=new LinearLayout(this);screenContent.setOrientation(1);root.addView(screenContent);
   LinearLayout nav=new LinearLayout(this);nav.setBackgroundColor(0xff261a36);nav.setPadding(dp(4),dp(20),dp(4),dp(12));shell.addView(nav);
-  String[] names={"Dashboard","Tijdlijn","Accounts","Instellingen"};
+  String[] names={"Overzicht","Tijdlijn","Instellingen"};
+  int[] navTabs={0,1,3};
   for(int i=0;i<names.length;i++){
-   final int tab=i;
+   final int tab=navTabs[i];
    Button button=new Button(this);button.setText(names[i]);button.setAllCaps(false);button.setTextSize(14);button.setTypeface(null,android.graphics.Typeface.BOLD);button.setSingleLine(false);
-   button.setTextColor(i==activeTab?0xffffd88a:0xffc6b9d6);
-   button.setBackground(clashSurface(i==activeTab?0xff49335f:0xff261a36,i==activeTab?0xffd8ae69:0xff352742,10));
+   button.setTextColor(tab==activeTab?0xffffd88a:0xffc6b9d6);
+   button.setBackground(clashSurface(tab==activeTab?0xff49335f:0xff261a36,tab==activeTab?0xffd8ae69:0xff352742,10));
    button.setOnClickListener(v->{activeTab=tab;draw();});
    nav.addView(button,new LinearLayout.LayoutParams(0,dp(64),1));
   }
   shell.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
   if(activeTab==0){
-   if(foldExpanded){
+   boolean open=selectedAccount!=null&&!selectedAccount.isEmpty()&&accounts.contains(selectedAccount);
+   if(foldExpanded&&open){
     LinearLayout columns=new LinearLayout(this);columns.setOrientation(0);screenContent.addView(columns);
     LinearLayout left=new LinearLayout(this);left.setOrientation(1);
     LinearLayout right=new LinearLayout(this);right.setOrientation(1);
-    LinearLayout.LayoutParams leftParams=new LinearLayout.LayoutParams(0,-2,46);
-    LinearLayout.LayoutParams rightParams=new LinearLayout.LayoutParams(0,-2,54);rightParams.setMargins(dp(10),0,0,0);
+    LinearLayout.LayoutParams leftParams=new LinearLayout.LayoutParams(0,-2,45);
+    LinearLayout.LayoutParams rightParams=new LinearLayout.LayoutParams(0,-2,55);rightParams.setMargins(dp(10),0,0,0);
     columns.addView(left,leftParams);columns.addView(right,rightParams);
-    left.addView(label("⚒  ACCOUNTS",16));
+    left.addView(label("⚒  ALLE ACCOUNTS",16));
     dashboard=new LinearLayout(this);dashboard.setOrientation(1);left.addView(dashboard);
     detailPanel=new LinearLayout(this);detailPanel.setOrientation(1);detailPanel.setPadding(dp(8),dp(8),dp(8),dp(8));
     detailPanel.setBackground(shape(0xff261c35,16));right.addView(detailPanel);
-    if(!accounts.contains(selectedAccount)&&!accounts.isEmpty())selectedAccount=accounts.get(0);
     renderDashboard();renderSelectedDetail();
+   }else if(open){
+    dashboard=null;
+    detailPanel=new LinearLayout(this);detailPanel.setOrientation(1);detailPanel.setPadding(dp(8),dp(8),dp(8),dp(8));
+    detailPanel.setBackground(shape(0xff261c35,16));screenContent.addView(detailPanel);
+    renderSelectedDetail();
    }else{
-    screenContent.addView(label("ALLE ACCOUNTS · EERSTVOLGENDE BOUWER",17));
+    selectedAccount="";
+    screenContent.addView(label("⚔  ALLE ACCOUNTS",17));
     dashboard=new LinearLayout(this);dashboard.setOrientation(1);screenContent.addView(dashboard);
     renderDashboard();
    }
@@ -156,6 +168,8 @@ public final class MainActivity extends Activity {
   detailPanel.removeAllViews();
   if(accounts.isEmpty()){detailPanel.addView(label("Synchroniseer een account met de zwevende knop.",14));return;}
   String ac=selectedAccount;
+  Button back=new Button(this);back.setAllCaps(false);back.setText("‹  Terug naar alle accounts");back.setTextSize(13);
+  back.setOnClickListener(v->{selectedAccount="";activeTab=0;draw();});detailPanel.addView(back);
   TextView title=label("⚔  "+ac,20);title.setTextColor(0xffffd783);
   title.setTypeface(null,android.graphics.Typeface.BOLD);detailPanel.addView(title);
   int ready=completedCount(ac,System.currentTimeMillis());
@@ -166,6 +180,8 @@ public final class MainActivity extends Activity {
   }
   long last=getPreferences(0).getLong("lastSyncAt_"+ac,0);
   if(last>0){TextView synced=label("↻ Gesynchroniseerd: "+finishAt(last),11);synced.setTextColor(0xffbba7d1);detailPanel.addView(synced);}
+  if(ac.startsWith("#")){Button link=new Button(this);link.setAllCaps(false);link.setText("Koppel deze player tag aan bestaand account");link.setOnClickListener(v->linkImportedAccount(ac));detailPanel.addView(link);}
+  renderTimelinePreview(detailPanel);
   for(String cat:categories){
    TextView section=label(("Bouwers".equals(cat)?"⚒  ":"Laboratorium".equals(cat)?"⚗  ":"🐾  ")+cat.toUpperCase(java.util.Locale.ROOT),14);
    section.setTextColor(0xffd9b8ff);section.setTypeface(null,android.graphics.Typeface.BOLD);detailPanel.addView(section);
@@ -175,6 +191,26 @@ public final class MainActivity extends Activity {
    if(list.isEmpty()){TextView none=label("Geen actieve upgrades",11);none.setTextColor(0xffa99bb8);detailPanel.addView(none);}
    else for(JSONObject o:list)addTimerRow(detailPanel,o,true);
   }
+ }
+ private void renderTimelinePreview(LinearLayout parent){
+  TextView header=label("◷  TIJDLIJN · ALLE ACCOUNTS",15);header.setTextColor(0xffffd783);parent.addView(header);
+  ArrayList<JSONObject> pending=new ArrayList<>();
+  long now=System.currentTimeMillis();
+  for(JSONObject o:upgrades)if(o.optLong("finish")>now)pending.add(o);
+  Collections.sort(pending,(x,y)->Long.compare(x.optLong("finish"),y.optLong("finish")));
+  int shown=Math.min(6,pending.size());
+  if(shown==0)parent.addView(label("Geen aankomende upgrades",12));
+  for(int i=0;i<shown;i++){
+   JSONObject o=pending.get(i);
+   long finish=o.optLong("finish");
+   String name=cleanName(o.optString("name")),who=o.optString("account");
+   TextView row=label(finishAt(finish)+"  ·  "+who+"\n"+name,12);
+   row.setTextColor(0xfff1debd);row.setBackground(clashSurface(0xff2e2340,0xff53416a,10));
+   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(0,dp(2),0,dp(2));parent.addView(row,lp);
+   row.setOnClickListener(v->{selectedAccount=who;activeTab=0;draw();});
+  }
+  Button full=new Button(this);full.setText("Bekijk volledige tijdlijn ›");full.setTextSize(12);full.setAllCaps(false);
+  full.setOnClickListener(v->{activeTab=1;draw();});parent.addView(full);
  }
  private void showAccountScreen(){
   screenContent.addView(label("ACCOUNTS · ALLE UPGRADES",19));
@@ -292,7 +328,7 @@ public final class MainActivity extends Activity {
   card.addView(label((editable?"":o.optString("account")+" · ")+cleanName(o.optString("name")),14));
   TextView time=label(format(remain)+"  ·  "+finishAt(finish),13);time.setTextColor(0xffffd88a);card.addView(time);
   if(editable)card.setOnClickListener(v->editTimer(o));
-  else card.setOnClickListener(v->{selectedAccount=o.optString("account");activeTab=2;draw();});
+  else card.setOnClickListener(v->{selectedAccount=o.optString("account");activeTab=0;draw();});
  }
  private void toggleFloatingSync(){
   android.content.SharedPreferences prefs=getPreferences(0);
@@ -483,7 +519,7 @@ public final class MainActivity extends Activity {
    }
   }
   LinearLayout gridRow=null;int index=0;
-  int columns=foldExpanded?1:2;
+  int columns=foldExpanded&&!selectedAccount.isEmpty()?1:2;
   for(String ac:ordered){
    if(index%columns==0){gridRow=new LinearLayout(this);dashboard.addView(gridRow);}
    index++;
@@ -513,7 +549,7 @@ public final class MainActivity extends Activity {
     Button checked=new Button(this);checked.setText("Gecontroleerd");checked.setTextSize(11);checked.setAllCaps(false);
     checked.setOnClickListener(v->acknowledgeAccount(ac));card.addView(checked);
    }
-   card.setOnClickListener(v->{selectedAccount=ac;if(foldExpanded&&activeTab==0){renderSelectedDetail();renderDashboard();}else{activeTab=2;draw();}});
+   card.setOnClickListener(v->{selectedAccount=ac.equals(selectedAccount)?"":ac;activeTab=0;draw();});
   }
  }
  private int completedCount(String ac,long now){
