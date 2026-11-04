@@ -1,0 +1,127 @@
+package nl.clashtimerhub.v2;
+
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageInstaller;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
+import android.os.Build;
+import android.provider.Settings;
+import android.net.Uri;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.OutputStream;
+import java.security.MessageDigest;
+import java.util.Arrays;
+import java.util.Locale;
+
+/** Verified APK update via the official PackageInstaller session API. */
+final class UpdateInstaller {
+ private UpdateInstaller(){}
+ static void install(MainActivity activity,File apk,long expectedBuild,String expectedSha256){
+  new Thread(()->{
+   try {
+    verify(activity,apk,expectedBuild,expectedSha256);
+    if(!activity.getPackageManager().canRequestPackageInstalls()){
+     activity.runOnUiThread(()->new android.app.AlertDialog.Builder(activity)
+      .setTitle("Toestemming voor app-updates")
+      .setMessage("Sta 'Apps uit deze bron toestaan' toe voor Clash Timer Hub. Je APK is gecontroleerd; je bestaande gegevens blijven behouden.")
+      .setPositiveButton("Toestaan",(d,w)->{
+       try{
+        AppData.prefs(activity).edit()
+         .putString("pendingVerifiedApk",apk.getAbsolutePath())
+         .putString("pendingVerifiedSha256",expectedSha256==null?"":expectedSha256)
+         .putLong("pendingVerifiedBuild",expectedBuild).apply();
+        Intent settings=new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+         Uri.parse("package:"+activity.getPackageName()));
+        activity.startActivity(settings);
+       }catch(Exception e){activity.showUpdateInstallError("Kan installatietoestemming niet openen: "+e.getMessage());}
+      }).setNegativeButton("Later",null).show());
+     return;
+    }
+    PackageManager pm=activity.getPackageManager();
+    PackageInstaller installer=pm.getPackageInstaller();
+    PackageInstaller.SessionParams params=new PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+    params.setAppPackageName(activity.getPackageName());
+    params.setSize(apk.length());
+    if(Build.VERSION.SDK_INT>=31)params.setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_REQUIRED);
+    int sessionId=installer.createSession(params);
+    boolean committed=false;
+    try(PackageInstaller.Session session=installer.openSession(sessionId)){
+     try(FileInputStream in=new FileInputStream(apk);
+         OutputStream out=session.openWrite("base.apk",0,apk.length())){
+      byte[] bytes=new byte[64*1024];int length;
+      while((length=in.read(bytes))!=-1)out.write(bytes,0,length);
+      session.fsync(out);
+     }
+     Intent status=new Intent(activity,UpdateInstallReceiver.class);
+     status.setAction(UpdateInstallReceiver.ACTION_STATUS);
+     PendingIntent pending=PendingIntent.getBroadcast(activity,sessionId,status,
+      PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_MUTABLE);
+     session.commit(pending.getIntentSender());
+     committed=true;
+    }finally{
+     if(!committed){try{installer.abandonSession(sessionId);}catch(Exception ignored){}}
+    }
+   }catch(Exception error){
+    android.util.Log.e("ClashTimerHub","Update verification or staging failed",error);
+    activity.showUpdateInstallError(error.getMessage()==null?"APK-installatie mislukt":error.getMessage());
+   }
+  },"ClashTimerHub-install-update").start();
+ }
+
+ private static void verify(MainActivity context,File file,long expectedBuild,String digest)throws Exception{
+  if(file==null||!file.isFile()||file.length()<1024*1024)
+   throw new java.io.IOException("Download is onvolledig of geen APK. Download opnieuw.");
+  if(digest!=null&&!digest.trim().isEmpty()){
+   String expected=digest.toLowerCase(Locale.ROOT).replace("sha256:","").trim();
+   if(!expected.matches("[0-9a-f]{64}"))
+    throw new java.io.IOException("GitHub leverde een ongeldige controlehash.");
+   MessageDigest sha=MessageDigest.getInstance("SHA-256");
+   try(FileInputStream in=new FileInputStream(file)){
+    byte[] chunk=new byte[65536];int n;
+    while((n=in.read(chunk))!=-1)sha.update(chunk,0,n);
+   }
+   StringBuilder actual=new StringBuilder();
+   for(byte b:sha.digest())actual.append(String.format(Locale.ROOT,"%02x",b&0xff));
+   if(!expected.equals(actual.toString()))
+    throw new java.io.IOException("APK-controlehash komt niet overeen. Download opnieuw.");
+  }
+
+  PackageManager pm=context.getPackageManager();
+  int flags=Build.VERSION.SDK_INT>=28?PackageManager.GET_SIGNING_CERTIFICATES:PackageManager.GET_SIGNATURES;
+  PackageInfo candidate=pm.getPackageArchiveInfo(file.getAbsolutePath(),flags);
+  if(candidate==null||!context.getPackageName().equals(candidate.packageName))
+   throw new java.io.IOException("Geen geldige Clash Timer Hub-APK of onjuiste pakketnaam.");
+  long currentVersion=UpdateChecker.installedVersionCode(context);
+  long futureVersion=Build.VERSION.SDK_INT>=28?candidate.getLongVersionCode():candidate.versionCode;
+  if(futureVersion<=currentVersion)
+   throw new java.io.IOException("Deze APK is niet nieuwer (geïnstalleerd: "+currentVersion+", APK: "+futureVersion+").");
+  if(expectedBuild>0&&futureVersion!=1000+expectedBuild)
+   throw new java.io.IOException("APK-buildnummer komt niet overeen met GitHub. Download opnieuw.");
+
+  PackageInfo installed=pm.getPackageInfo(context.getPackageName(),flags);
+  Signature[] older=signatures(installed);
+  Signature[] newer=signatures(candidate);
+  if(older==null||newer==null||older.length==0||newer.length==0)
+   throw new java.io.IOException("Kan de APK-ondertekening niet controleren. Installatie uit voorzorg gestopt.");
+  if(older.length!=newer.length)
+   throw new java.io.IOException("APK heeft een andere ondertekeningssleutel. Verwijder de bestaande app NIET.");
+  boolean matches=true;
+  for(Signature first:older){
+   boolean found=false;
+   for(Signature second:newer)if(Arrays.equals(first.toByteArray(),second.toByteArray())){found=true;break;}
+   if(!found){matches=false;break;}
+  }
+  if(!matches)throw new java.io.IOException(
+   "Ondertekening verschilt van de geïnstalleerde app. Android kan deze APK niet veilig als update installeren. Verwijder de app NIET; maak eerst een back-up en herstel de originele signing key.");
+ }
+ private static Signature[] signatures(PackageInfo pkg){
+  if(Build.VERSION.SDK_INT>=28&&pkg.signingInfo!=null){
+   return pkg.signingInfo.hasMultipleSigners()?pkg.signingInfo.getApkContentsSigners():
+    pkg.signingInfo.getSigningCertificateHistory();
+  }
+  return pkg.signatures;
+ }
+}
