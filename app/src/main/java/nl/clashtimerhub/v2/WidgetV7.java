@@ -145,7 +145,14 @@ final class WidgetV7 {
   if(medium){
    String lab=s.labActive>0?String.valueOf(s.labActive):AppData.isMaxed(ctx,s.account,"Laboratorium")?"✓":"0";
    String pets=s.petActive>0?String.valueOf(s.petActive):AppData.isMaxed(ctx,s.account,"Pets")?"✓":"0";
-   row.setTextViewText(R.id.widget_subtitle,"⚗ "+lab+"  🐾 "+pets+"  ·  "+finish(ctx,s.builderNext,true));
+   // In case a smaller launcher does use this fallback, tint only the MAX marks green.
+   android.text.SpannableStringBuilder subtitle=new android.text.SpannableStringBuilder("⚗ ");
+   int labStart=subtitle.length();subtitle.append(lab);
+   if("✓".equals(lab))subtitle.setSpan(new android.text.style.ForegroundColorSpan(0xff8BE3AD),labStart,subtitle.length(),android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+   subtitle.append("  🐾 ");int petStart=subtitle.length();subtitle.append(pets);
+   if("✓".equals(pets))subtitle.setSpan(new android.text.style.ForegroundColorSpan(0xff8BE3AD),petStart,subtitle.length(),android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+   subtitle.append("  ·  ").append(finish(ctx,s.builderNext,true));
+   row.setTextViewText(R.id.widget_subtitle,subtitle);
   }
   row.setOnClickPendingIntent(R.id.widget_account_root,accountClick(ctx,s.account,id));
   return row;
@@ -165,8 +172,10 @@ final class WidgetV7 {
   int rows=Math.max(1,visible.size());
   int mode;
   if(width>=510)mode=height<44+rows*24?3:2;
-  else if(width>=270)mode=3; // Preserve all six columns, including lab, pets and finish, at 3 home-screen cells.
-  else if(width>=225&&height>=44+rows*34)mode=1;
+  // Samsung One UI reports roughly 225-269dp for three home-screen cells.
+  // Keep the original single-line six-column design at that width; using
+  // the medium mode here moved checks into an unstyled subtitle.
+  else if(width>=225)mode=3;
   else mode=0;
   int rowHeight=mode==3?16:mode==2?24:mode==1?34:19;
   boolean showSync=height>=44+rowHeight;
