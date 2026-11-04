@@ -1,5 +1,20 @@
 # ClashTimerHub release notes
 
+## 7.4.5-beta1 — 4 November 2026
+
+### Widget polish
+- Remove the crossed-swords decoration from the multi-account title and Sync labels.
+- Remove the top-right total-account and ready-builder summary; keep the Settings gear.
+- Replace the indistinct purple research symbol with a recognizable wizard 🧙 in multi-account, compact and single-account widgets.
+- Right-align finish times within their shared column so all finish times end at the same position, while retaining full text.
+- Reduce horizontal spacing and keep a common shared column grid for all accounts.
+- Make the multi-account, single-account and mini cards content-height instead of filling a tall block of empty background.
+
+### Notes
+- The visible account count in a compact multi-widget still depends on its actual available height. Increase the widget height to show more accounts when it reflows to multiple lines.
+- Successful Android build does not replace hands-on Samsung One UI testing; local data and user settings stay intact.
+
+
 ## 7.4.4-beta1 — 4 November 2026
 
 ### Fixed
