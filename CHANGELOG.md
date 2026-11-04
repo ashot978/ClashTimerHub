@@ -1,5 +1,12 @@
 # ClashTimerHub release notes
 
+## 7.5.4-beta1 — 4 November 2026
+
+### Widget finish label correction
+- English next-day dates now show **Tmr** instead of **Tom**, for example `Tmr 00:22`.
+- Dutch **Mrg** remains unchanged; the shared widget column adjusts to the displayed text.
+
+
 ## 7.5.3-beta1 — 4 November 2026
 
 ### Compact widget finish labels
