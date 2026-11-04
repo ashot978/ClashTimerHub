@@ -159,8 +159,8 @@ public final class FloatingSyncService extends Service {
  private void showFeedback(String message,boolean success){
   clearFeedback();
   // Accept both real and literal newlines from older exports; never print \\n on screen.
-  String normalized=(message==null?"":message).replace("\\\\n","\\n").trim();
-  String[] parts=normalized.split("\\n",3);
+  String normalized=(message==null?"":message).replace("\\n","\n").trim();
+  String[] parts=normalized.split("\n",3);
   String first=parts.length>0?parts[0]:"",last=parts.length>1?parts[1]:"";
   int marker=first.indexOf(" ✓ ");
   String title=success&&marker>0?"✓ "+first.substring(0,marker).trim():
