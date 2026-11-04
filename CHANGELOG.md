@@ -1,5 +1,18 @@
 # ClashTimerHub release notes
 
+## 7.4.8-beta1 — 4 November 2026
+
+### Widget improvements
+- **Sync widget is configurable:** Use its new gear to open that widget instance's settings and change its background independently. Tapping the rest of the widget still toggles floating Sync.
+- **Sync widget setup:** Android's widget picker can launch configuration when adding a new Sync widget.
+- **Single-account widget can be shorter:** Reduced the minimum and resize heights, targets a 3-column by 2-row home-screen widget rather than requiring four vertical cells.
+- **Compact layout:** Reduced account widget padding and row heights while preserving builders, lab, pets, finish times and Sync status.
+- Existing account data, timers and other widget settings stay intact.
+
+### Testing
+- Exact home-screen cell sizing depends on the Samsung One UI launcher. If an existing widget remains four rows high after updating, try resizing it or removing and re-adding only the widget (not the app).
+
+
 ## 7.4.7-beta1 — 4 November 2026
 
 ### Widget settings editor
