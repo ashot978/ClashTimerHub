@@ -151,17 +151,65 @@ public final class MainActivity extends Activity {
    dashboard=null;showSettingsScreen();
   }
  }
+ private LinearLayout settingsSection(String title,String subtitle){
+  TextView header=label(title,16);header.setTypeface(null,android.graphics.Typeface.BOLD);header.setTextColor(0xffffd783);screenContent.addView(header);
+  if(!subtitle.isEmpty()){TextView sub=label(subtitle,12);sub.setTextColor(0xffb6a9c8);screenContent.addView(sub);}
+  LinearLayout card=new LinearLayout(this);card.setOrientation(1);card.setPadding(dp(6),dp(5),dp(6),dp(5));
+  card.setBackground(clashSurface(0xff2c203b,0xff654875,14));
+  LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(dp(2),dp(3),dp(2),dp(12));screenContent.addView(card,lp);
+  return card;
+ }
+ private void settingsItem(LinearLayout section,String iconText,String title,String description,Runnable task){
+  LinearLayout item=new LinearLayout(this);item.setOrientation(0);item.setGravity(android.view.Gravity.CENTER_VERTICAL);item.setPadding(dp(10),dp(4),dp(8),dp(4));item.setMinimumHeight(dp(62));
+  item.setBackground(new android.graphics.drawable.RippleDrawable(android.content.res.ColorStateList.valueOf(0x44ffffff),shape(0xff352748,9),null));
+  TextView icon=label(iconText,20);icon.setTextColor(0xffffd783);icon.setPadding(dp(3),0,dp(10),0);
+  item.addView(icon,new LinearLayout.LayoutParams(dp(44),-2));
+  LinearLayout copy=new LinearLayout(this);copy.setOrientation(1);
+  TextView name=label(title,15);name.setTypeface(null,android.graphics.Typeface.BOLD);name.setPadding(0,dp(3),0,dp(2));copy.addView(name);
+  TextView helper=label(description,12);helper.setTextColor(0xffbdadce);helper.setPadding(0,0,0,dp(3));copy.addView(helper);
+  item.addView(copy,new LinearLayout.LayoutParams(0,-2,1));
+  TextView chevron=label("›",22);chevron.setTextColor(0xffd8ae69);chevron.setPadding(dp(8),0,dp(5),0);item.addView(chevron);
+  LinearLayout.LayoutParams row=new LinearLayout.LayoutParams(-1,-2);row.setMargins(0,dp(2),0,dp(2));section.addView(item,row);
+  item.setOnClickListener(v->task.run());
+ }
  private void showSettingsScreen(){
-  screenContent.addView(label("INSTELLINGEN EN SYNCHRONISATIE",19));
-  button("⚔ Zwevende plakknop aan/uit",()->toggleFloatingSync());
-  button("🔔 Meldingen instellen",()->notificationSettings());
-  button("🔔 Testmelding versturen",()->sendTestNotification());
-  button("⏰ Alarmtest over 1 minuut",()->{String status=TimerWidget.scheduleDiagnostic(this);new android.app.AlertDialog.Builder(this).setTitle("Alarmtest").setMessage(status).setPositiveButton("OK",null).show();});
-  button("📋 Synchroniseer vanaf klembord",()->importClipboard());
-  button("Back-up kopiëren",()->copyBackup());
-  button("Back-up delen",()->backup());
-  button("📋 Back-up herstellen vanaf klembord",()->restoreBackupClipboard());
-
+  screenContent.addView(label("INSTELLINGEN",20));
+  LinearLayout sync=settingsSection("↻  SYNCHRONISATIE","Accounts bijwerken zonder Clash te verlaten");
+  settingsItem(sync,"⚔","Zwevende plakknop",getPreferences(0).getBoolean("floatingEnabled",false)?"Actief · tik om uit te schakelen":"Uit · tik om in te schakelen",()->{toggleFloatingSync();draw();});
+  settingsItem(sync,"▤","Synchroniseer vanaf klembord","Importeer een gekopieerde Clash-export",()->importClipboard());
+  LinearLayout notifications=settingsSection("♧  MELDINGEN","Upgrade-alarmen en tests");
+  settingsItem(notifications,"♧","Meldingen instellen","Gereedmelding en waarschuwingen",()->notificationSettings());
+  settingsItem(notifications,"✓","Testmelding","Controleer of notificaties aankomen",()->sendTestNotification());
+  settingsItem(notifications,"◷","Alarmtest over 1 minuut","Controleer of Android een alarm uitvoert",()->{
+   String status=TimerWidget.scheduleDiagnostic(this);
+   new android.app.AlertDialog.Builder(this).setTitle("Alarmtest").setMessage(status).setPositiveButton("OK",null).show();
+  });
+  LinearLayout widget=settingsSection("▦  HOMESCREENWIDGET","Toon standaard al je accounts");
+  settingsItem(widget,"⚙","Widget instellen","Alle accounts of een eigen selectie",()->showWidgetSettings());
+  LinearLayout backups=settingsSection("▣  BACK-UP","Je opgeslagen accounts veilig bewaren");
+  settingsItem(backups,"▣","Back-up kopiëren","Kopieer je gegevens naar het klembord",()->copyBackup());
+  settingsItem(backups,"↶","Back-up herstellen","Herstel een gekopieerde back-up",()->restoreBackupClipboard());
+ }
+ private void showWidgetSettings(){
+  android.appwidget.AppWidgetManager manager=android.appwidget.AppWidgetManager.getInstance(this);
+  int[] ids=manager.getAppWidgetIds(new android.content.ComponentName(this,TimerWidget.class));
+  if(ids.length==0){
+   new android.app.AlertDialog.Builder(this).setTitle("Widget instellen")
+    .setMessage("Voeg eerst de Clash Timer Hub-widget toe via je Samsung-startscherm. Tijdens het toevoegen kun je meteen 'Alle accounts tonen' kiezen.")
+    .setPositiveButton("Begrepen",null).show();
+   return;
+  }
+  if(ids.length==1){openWidgetSettings(ids[0]);return;}
+  String[] options=new String[ids.length];
+  for(int i=0;i<ids.length;i++)options[i]="Widget "+(i+1);
+  new android.app.AlertDialog.Builder(this).setTitle("Welke widget wil je instellen?")
+   .setItems(options,(dialog,index)->openWidgetSettings(ids[index]))
+   .setNegativeButton("Annuleren",null).show();
+ }
+ private void openWidgetSettings(int id){
+  Intent intent=new Intent(this,WidgetConfigActivity.class);
+  intent.putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_ID,id);
+  startActivity(intent);
  }
  private void renderSelectedDetail(){
   if(detailPanel==null)return;
