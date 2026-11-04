@@ -1,5 +1,19 @@
 # ClashTimerHub release notes
 
+## 7.3.1-beta1 — 4 November 2026
+
+### Fixed
+- Multi-account widget supports a **two-column** home-screen size with a two-line account row. All the key information remains available: account name, builder status, lab, pets, next countdown, finish time.
+- Widget Studio **Comfort/Large** text now enlarges the account name and main countdown rather than every secondary value, preventing overlapping or cramped labels.
+- **Transparent/Dark** themes also apply to every account row and the Sync footer, not only the outer card.
+- The transparent widget background is lighter to reveal more of the wallpaper.
+- Floating Sync feedback shows account, timer counts, and result in a small readable card; literal `\\n` is fixed at both the source and display.
+- Existing widgets and account data remain unchanged after installing the update.
+
+### Verification
+- APK is compiled and signed by GitHub Actions. Samsung One UI launcher sizing and theme appearance still need on-device confirmation.
+
+
 ## 7.3.0-beta1 — 4 November 2026
 
 ### New
