@@ -32,7 +32,8 @@ jobs:
       - name: Verify original signing key is present
         run: |
           test -f "$HOME/.android/debug.keystore" || { echo 'ERROR: Existing signing key missing; refusing to create incompatible APK'; exit 1; }
-          keytool -list -v -keystore "$HOME/.android/debug.keystore" -storepass android | grep 'SHA256:'
+          echo "Signing certificate (for the Google Cloud Android OAuth client):"
+          keytool -list -v -keystore "$HOME/.android/debug.keystore" -storepass android | grep -E 'SHA1:|SHA256:'
       - name: Set version for upgrade
         run: sed -i -E "s/versionCode [0-9]+/versionCode $((1000 + ${{ github.run_number }}))/" app/build.gradle
       - name: Build new app
