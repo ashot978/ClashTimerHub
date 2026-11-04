@@ -14,7 +14,8 @@ public final class WidgetConfigActivity extends Activity {
  private int widgetId=AppWidgetManager.INVALID_APPWIDGET_ID;
  private final LinkedHashMap<String,CheckBox> boxes=new LinkedHashMap<>();
  private RadioButton all,custom;
- private Spinner accountPicker;
+ private Spinner accountPicker,sortPicker,sizePicker,backgroundPicker;
+ private CheckBox labCheck,petCheck;
  private ArrayList<String> accounts=new ArrayList<>();
  private int kind=WidgetV7.MULTI;
  @Override public void onCreate(Bundle state){
@@ -67,6 +68,29 @@ public final class WidgetConfigActivity extends Activity {
    int chosen=accounts.indexOf(saved);
    accountPicker.setSelection(Math.max(0,chosen));root.addView(accountPicker);
   }
+  if(kind==WidgetV7.MULTI){
+   boolean en=I18n.english(this);
+   root.addView(label(en?"WIDGET STUDIO":"WIDGET STUDIO",18,0xffffd783));
+   root.addView(label(en?"Account order":"Accountvolgorde",14,0xffcdbbdc));
+   sortPicker=new Spinner(this);
+   sortPicker.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,
+    en?new String[]{"Next builder","Account name","Manual account order"}:new String[]{"Volgende bouwer","Accountnaam","Eigen accountvolgorde"}));
+   sortPicker.setSelection(Math.max(0,Math.min(2,prefs.getInt("sort_"+widgetId,0))));root.addView(sortPicker);
+   root.addView(label(en?"Text size":"Tekstgrootte",14,0xffcdbbdc));
+   sizePicker=new Spinner(this);
+   sizePicker.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,
+    new String[]{"Small / Klein","Normal / Normaal","Large / Groot"}));
+   sizePicker.setSelection(Math.max(0,Math.min(2,prefs.getInt("size_"+widgetId,1))));root.addView(sizePicker);
+   labCheck=new CheckBox(this);labCheck.setText(en?"Show laboratory":"Laboratorium tonen");
+   labCheck.setTextColor(Color.WHITE);labCheck.setChecked(prefs.getBoolean("lab_"+widgetId,true));root.addView(labCheck);
+   petCheck=new CheckBox(this);petCheck.setText(en?"Show pets":"Pets tonen");
+   petCheck.setTextColor(Color.WHITE);petCheck.setChecked(prefs.getBoolean("pet_"+widgetId,true));root.addView(petCheck);
+   root.addView(label(en?"Background":"Achtergrond",14,0xffcdbbdc));
+   backgroundPicker=new Spinner(this);
+   backgroundPicker.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,
+    en?new String[]{"Original purple","Dark","Transparent"}:new String[]{"Origineel paars","Donker","Transparant"}));
+   backgroundPicker.setSelection(Math.max(0,Math.min(2,prefs.getInt("bg_"+widgetId,0))));root.addView(backgroundPicker);
+  }
   Button save=new Button(this);
   save.setText(I18n.english(this)?"✓ Save widget":"✓ Widget opslaan");save.setAllCaps(false);
   save.setTextColor(Color.WHITE);save.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xff7652a3));
@@ -81,6 +105,11 @@ public final class WidgetConfigActivity extends Activity {
      Toast.makeText(this,I18n.english(this)?"Select at least one account":"Selecteer minstens één account",Toast.LENGTH_LONG).show();return;
     }
     editor.putBoolean("all_"+widgetId,all.isChecked()).putString("selected_"+widgetId,selected.toString());
+    editor.putInt("sort_"+widgetId,sortPicker.getSelectedItemPosition());
+    editor.putInt("size_"+widgetId,sizePicker.getSelectedItemPosition());
+    editor.putBoolean("lab_"+widgetId,labCheck.isChecked());
+    editor.putBoolean("pet_"+widgetId,petCheck.isChecked());
+    editor.putInt("bg_"+widgetId,backgroundPicker.getSelectedItemPosition());
    }else editor.putString("account_"+widgetId,accounts.get(accountPicker.getSelectedItemPosition()));
    editor.apply();TimerWidget.update(this);
    Intent result=new Intent();result.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,widgetId);
