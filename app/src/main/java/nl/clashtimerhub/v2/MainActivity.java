@@ -554,22 +554,16 @@ public final class MainActivity extends Activity {
    .setView(scroll).setPositiveButton("Sluiten",null).show();
  }
  private void importClipboard(){
-  android.content.ClipboardManager manager=(android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
-  if(manager==null||!manager.hasPrimaryClip()){toast("Klembord is leeg. Kopieer eerst je spelergegevens in Clash of Clans.");return;}
-  android.content.ClipData clip=manager.getPrimaryClip();
-  if(clip==null||clip.getItemCount()==0){toast("Geen tekst op het klembord gevonden");return;}
-  CharSequence text=clip.getItemAt(0).coerceToText(this);
-  if(text==null||text.length()==0){toast("Geen Clash-data gevonden op het klembord");return;}
-  if(text.length()>10000000){toast("Gekopieerde data is te groot");return;}
-  String payload=text.toString().trim();
-  if(!payload.contains("\"buildings\"")&&!payload.contains("\"heroes\"")&&!payload.contains("\"units\"")){
-   toast("Dit lijkt geen Clash of Clans-spelerdata. Kopieer eerst Copy Player Data.");return;
-  }
-  String selected=selectedAccount.isEmpty()?"automatisch herkend account":selectedAccount;
-  new android.app.AlertDialog.Builder(this).setTitle("Synchroniseren met "+selected+"?")
-   .setMessage("De actieve upgrades uit de gekopieerde Clash-data worden aan dit account gekoppeld. Handmatige timers blijven behouden.")
-   .setPositiveButton("Synchroniseren",(d,w)->importClashData(payload))
-   .setNegativeButton("Annuleren",null).show();
+  try{
+   android.content.ClipboardManager clipboard=(android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
+   if(clipboard==null||!clipboard.hasPrimaryClip())throw new IllegalArgumentException("Klembord is leeg");
+   android.content.ClipData clip=clipboard.getPrimaryClip();
+   if(clip==null||clip.getItemCount()==0)throw new IllegalArgumentException("Geen Clash-data gevonden");
+   CharSequence raw=clip.getItemAt(0).coerceToText(this);
+   String result=QuickSyncImporter.importJson(this,raw==null?"":raw.toString());
+   refreshExternalImport();
+   toast(result);
+  }catch(Exception e){toast("Synchroniseren mislukt: "+e.getMessage());}
  }
  private void importClashData(String input){
   try{
