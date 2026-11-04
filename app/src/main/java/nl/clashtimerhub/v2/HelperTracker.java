@@ -15,6 +15,36 @@ import java.util.List;
  */
 final class HelperTracker {
  static final String KEY="helpersByAccount";
+ static final String ALCHEMIST_AVAILABLE_KEY="alchemistAvailableByAccount";
+ static final long ALCHEMIST_ID=93000002L;
+
+ /** An explicit per-account opt-in, off for all existing and new accounts. */
+ static boolean isAlchemistAvailable(Context context,String account){
+  try{
+   JSONObject flags=new JSONObject(AppData.prefs(context).getString(ALCHEMIST_AVAILABLE_KEY,"{}"));
+   return flags.optBoolean(account,false);
+  }catch(Exception e){return false;}
+ }
+ static void setAlchemistAvailable(Context context,String account,boolean available){
+  try{
+   SharedPreferences prefs=AppData.prefs(context);
+   JSONObject flags=new JSONObject(prefs.getString(ALCHEMIST_AVAILABLE_KEY,"{}"));
+   if(available)flags.put(account,true);
+   else flags.remove(account);
+   prefs.edit().putString(ALCHEMIST_AVAILABLE_KEY,flags.toString()).apply();
+  }catch(Exception e){android.util.Log.e("ClashTimerHub","Unable to save Alchemist availability",e);}
+ }
+ /** Keep the setting when a player-tag account is linked to a named account. */
+ static void mergeAlchemistAccount(Context context,String source,String target){
+  try{
+   SharedPreferences prefs=AppData.prefs(context);
+   JSONObject flags=new JSONObject(prefs.getString(ALCHEMIST_AVAILABLE_KEY,"{}"));
+   if(flags.optBoolean(source,false)&&!flags.has(target))flags.put(target,true);
+   flags.remove(source);
+   prefs.edit().putString(ALCHEMIST_AVAILABLE_KEY,flags.toString()).apply();
+  }catch(Exception e){android.util.Log.e("ClashTimerHub","Unable to merge Alchemist availability",e);}
+ }
+
  private static final long MAX_COOLDOWN_SECONDS=172800L;
  private HelperTracker(){}
 
@@ -29,7 +59,7 @@ final class HelperTracker {
    if(id==93000001L)return en?"Lab Assistant":"Labassistent";
    // Keep the ID in labels for newer/unknown helpers, rather than
    // incorrectly identifying a helper if Supercell changes game data.
-   if(id==93000002L)return en?"Alchemist":"Alchemist";
+   if(id==ALCHEMIST_ID)return "Alchemist";
    if(id==93000003L)return en?"Helper #4":"Helper #4";
    return "Helper "+id;
   }
@@ -87,9 +117,12 @@ final class HelperTracker {
    JSONArray arr=value.optJSONArray("items");
    if(arr==null)return null;
    ArrayList<Helper> helpers=new ArrayList<>();
+   boolean showAlchemist=isAlchemistAvailable(ctx,account);
    for(int i=0;i<arr.length();i++){
     JSONObject obj=arr.optJSONObject(i);if(obj==null)continue;
-    helpers.add(new Helper(obj.optLong("id",-1),obj.optInt("level",0),
+    long id=obj.optLong("id",-1);
+    if(id==ALCHEMIST_ID&&!showAlchemist)continue;
+    helpers.add(new Helper(id,obj.optInt("level",0),
       obj.optLong("readyAt",timestamp),obj.optLong("workingUntil",timestamp)));
    }
    return new Snapshot(timestamp,helpers);
