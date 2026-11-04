@@ -1,5 +1,19 @@
 # ClashTimerHub release notes
 
+## 7.4.2-beta1 — 4 November 2026
+
+### Fixed
+- APK updates now use Android's official PackageInstaller session instead of forwarding an unverified DownloadManager content URI.
+- Before installing, verify the APK is complete, matches the expected GitHub SHA-256 digest, uses ClashTimerHub's package ID, has a higher versionCode, and is signed with the installed app's certificate.
+- Installation consent is shown by Android. If 'Install unknown apps' permission is missing, guide the user to enable it for ClashTimerHub.
+- If an installation fails, show a useful reason (e.g. signature conflict, corrupted APK, incompatible Android version, blocked permission, or insufficient storage) instead of leaving only the generic 'App not installed' message.
+- Existing accounts, timers, widgets and preferences are never deleted as part of this update.
+
+### Note
+- A build that passes GitHub Actions may still be incompatible with an already installed APK if an older build uses a different signing key. The app now detects that conflict before attempting to install.
+- Android installation confirmation is still mandatory; silent installs are unsupported.
+
+
 ## 7.4.1-beta1 — 4 November 2026
 
 ### Fixed
