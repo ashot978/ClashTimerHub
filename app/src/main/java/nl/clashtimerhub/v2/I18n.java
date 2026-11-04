@@ -5,6 +5,7 @@ import java.util.*;
 /** Presentation-only translations. Account names, JSON keys and stored categories never change. */
 final class I18n {
  private static final LinkedHashMap<String,String> EN=new LinkedHashMap<>();
+ private static final ArrayList<Map.Entry<String,String>> ORDERED=new ArrayList<>();
  static{
   LinkedHashMap<String,String> p=EN;
   p.put("Onbekende speler:","Unknown player:");
@@ -248,6 +249,8 @@ final class I18n {
   p.put("Bijv.","e.g.");
   p.put("Naam","Name");
   p.put("Rij","Row");
+  ORDERED.addAll(EN.entrySet());
+  ORDERED.sort((a,b)->Integer.compare(b.getKey().length(),a.getKey().length()));
  }
  private I18n(){}
  static boolean english(Context context){return !"nl".equals(AppData.prefs(context).getString("language","en"));}
@@ -261,7 +264,7 @@ final class I18n {
  static String tr(Context context,String value){
   if(value==null||!english(context))return value;
   String result=value;
-  for(Map.Entry<String,String> item:EN.entrySet())result=result.replace(item.getKey(),item.getValue());
+  for(Map.Entry<String,String> item:ORDERED)result=result.replace(item.getKey(),item.getValue());
   return result;
  }
 }
