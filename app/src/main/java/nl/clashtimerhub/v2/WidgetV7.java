@@ -122,8 +122,10 @@ final class WidgetV7 {
   return PendingIntent.getBroadcast(ctx,130000+id,intent,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
  }
  private static RemoteViews multiRow(Context ctx,Status s,int mode,long now,int id,boolean showLab,boolean showPet,int size,int background){
-  if(mode==2||mode==3||mode==4){
-   int layout=mode==4?R.layout.widget_v7_two_line_row:mode==3?R.layout.widget_v7_wide_row_dense:R.layout.widget_v7_wide_row;
+  if(mode>=2&&mode<=6){
+   int layout=mode==6?R.layout.widget_v7_five_line_row:
+    mode==5?R.layout.widget_v7_three_line_row:
+    mode==4?R.layout.widget_v7_two_line_row:R.layout.widget_v7_wide_row;
    RemoteViews row=new RemoteViews(ctx.getPackageName(),layout);
    row.setInt(R.id.widget_account_root,"setBackgroundResource",rowTheme(background));
    row.setTextViewText(R.id.v7_wide_name,AppData.displayName(ctx,s.account));
@@ -210,15 +212,16 @@ final class WidgetV7 {
    height=opts.getInt(landscape?AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT:AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,240);
    if(width<=0)width=190;if(height<=0)height=240;
   }
-  // Use dense rows when needed, then fit as many accounts as the launcher allows.
-  // A one-cell widget has room for its header and a timer, not the sync footer.
+  // Fixed-width timer cells cannot be sacrificed to a flexible account-name column.
+  // Reflow rather than scale the timer text or show ellipses as the widget narrows.
+  // Pixel/dp option width can differ by launcher; thresholds include breathing room.
   int rows=Math.max(1,ordered.size());
   int mode;
-  // Never shrink lettering to fit: choose a two-line row when wide fields cannot fit.
-  if(width>=620)mode=height<44+rows*24?3:2;
-  else if(width>=440)mode=3;
-  else mode=4;
-  int rowHeight=mode==4?38:mode==3?21:24;
+  if(width>=540)mode=2;       // All data in one row, with compact names.
+  else if(width>=280)mode=4;  // Two lines per account, all timers visible.
+  else if(width>=200)mode=5;  // Three lines when timer groups need more width.
+  else mode=6;                // Five lines for the narrowest launcher sizes.
+  int rowHeight=mode==2?24:mode==4?42:mode==5?62:102;
   boolean showSync=height>=44+rowHeight;
   int available=Math.max(0,height-24-(showSync?20:0));
   int count=Math.min(ordered.size(),Math.max(1,available/rowHeight));
