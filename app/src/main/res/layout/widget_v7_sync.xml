@@ -4,7 +4,7 @@
  android:layout_height="match_parent" android:orientation="vertical" android:gravity="center"
  android:padding="4dp" android:background="@drawable/widget_background">
  <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-  android:text="⚔ SYNC" android:gravity="center" android:textColor="#FFD783"
+  android:text="SYNC" android:gravity="center" android:textColor="#FFD783"
   android:textStyle="bold" android:textSize="11sp" android:singleLine="true" android:includeFontPadding="false"/>
  <TextView android:id="@+id/v7_sync_symbol" android:layout_width="37dp" android:layout_height="37dp"
   android:text="⟳" android:gravity="center" android:textSize="29sp" android:textStyle="bold"
