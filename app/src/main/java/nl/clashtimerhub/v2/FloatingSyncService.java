@@ -158,33 +158,59 @@ public final class FloatingSyncService extends Service {
  }
  private void showFeedback(String message,boolean success){
   clearFeedback();
-  if(manager==null||params==null){
-   Toast.makeText(this,message,Toast.LENGTH_LONG).show();return;
+  // Accept both real and literal newlines from older exports; never print \\n on screen.
+  String normalized=(message==null?"":message).replace("\\\\n","\\n").trim();
+  String[] parts=normalized.split("\\n",3);
+  String first=parts.length>0?parts[0]:"",last=parts.length>1?parts[1]:"";
+  int marker=first.indexOf(" ✓ ");
+  String title=success&&marker>0?"✓ "+first.substring(0,marker).trim():
+   success?"✓ Synchronisatie gelukt":"⚠ Synchronisatie mislukt";
+  String details=success&&marker>0?first.substring(marker+3).trim():first;
+  if(details.endsWith(")")){
+   int open=details.indexOf(" (");
+   if(open>0)details=details.substring(0,open)+"  ·  "+details.substring(open+2,details.length()-1);
   }
-  TextView banner=new TextView(this);
-  banner.setText(message);banner.setTextColor(Color.WHITE);banner.setTextSize(14);
-  banner.setTypeface(null,android.graphics.Typeface.BOLD);
-  banner.setGravity(Gravity.CENTER_VERTICAL);banner.setPadding(dp(14),dp(8),dp(14),dp(8));
+  if(last.isEmpty()&&parts.length>2)last=parts[2];
+  if(manager==null||params==null){
+   Toast.makeText(this,normalized,Toast.LENGTH_LONG).show();return;
+  }
+  LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
+  card.setPadding(dp(12),dp(8),dp(12),dp(8));
+  TextView heading=new TextView(this);heading.setText(title);heading.setTextColor(Color.WHITE);
+  heading.setTextSize(13);heading.setTypeface(null,android.graphics.Typeface.BOLD);
+  heading.setSingleLine(true);heading.setEllipsize(android.text.TextUtils.TruncateAt.END);
+  card.addView(heading);
+  if(!details.isEmpty()){
+   TextView meta=new TextView(this);meta.setText(details);meta.setTextColor(0xffe7ddeb);
+   meta.setTextSize(11);meta.setSingleLine(true);meta.setEllipsize(android.text.TextUtils.TruncateAt.END);
+   card.addView(meta);
+  }
+  if(!last.isEmpty()){
+   TextView subtitle=new TextView(this);subtitle.setText(last);subtitle.setTextSize(10);
+   subtitle.setTextColor(0xffc5e3d6);subtitle.setMaxLines(2);
+   subtitle.setEllipsize(android.text.TextUtils.TruncateAt.END);
+   card.addView(subtitle);
+  }
   GradientDrawable bg=new GradientDrawable();
-  bg.setColor(success?0xff235540:0xff783245);
-  bg.setStroke(dp(1),success?0xff65d4a5:0xffef859c);
-  bg.setCornerRadius(dp(14));banner.setBackground(bg);
+  bg.setColor(success?0xe0204135:0xe0442435);
+  bg.setStroke(dp(1),success?0xff65ba94:0xffd66b84);
+  bg.setCornerRadius(dp(12));card.setBackground(bg);
   android.util.DisplayMetrics m=getResources().getDisplayMetrics();
-  int width=Math.min(dp(260),m.widthPixels-dp(20));
+  int width=Math.min(dp(295),m.widthPixels-dp(24));
   WindowManager.LayoutParams popup=new WindowManager.LayoutParams(width,WindowManager.LayoutParams.WRAP_CONTENT,
    params.type,WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE|
    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,PixelFormat.TRANSLUCENT);
   popup.gravity=Gravity.TOP|Gravity.START;
   popup.x=Math.max(dp(8),Math.min(m.widthPixels-width-dp(8),params.x+params.width/2-width/2));
-  popup.y=params.y+params.height+dp(9);
-  if(popup.y>m.heightPixels-dp(110))popup.y=Math.max(dp(8),params.y-dp(95));
+  popup.y=params.y+params.height+dp(8);
+  if(popup.y>m.heightPixels-dp(125))popup.y=Math.max(dp(8),params.y-dp(105));
   try{
-   manager.addView(banner,popup);feedback=banner;
+   manager.addView(card,popup);feedback=card;
    feedbackDismiss=this::clearFeedback;
-   holdHandler.postDelayed(feedbackDismiss,2800);
+   holdHandler.postDelayed(feedbackDismiss,3200);
   }catch(RuntimeException e){
-   Toast.makeText(this,message,Toast.LENGTH_LONG).show();
+   Toast.makeText(this,normalized,Toast.LENGTH_LONG).show();
   }
  }
  private void clearFeedback(){
