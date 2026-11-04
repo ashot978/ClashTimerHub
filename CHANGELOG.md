@@ -1,5 +1,23 @@
 # ClashTimerHub release notes
 
+## 7.5.0-beta1 — 4 November 2026
+
+### Google Drive backup manager
+- **Save to Google Drive:** In Settings > Back-up, select Google Drive in Android's file picker and create a `ClashTimerHub-backup.json` document. The app keeps the document permission for future backups without a Google password or broad account access.
+- **Automatic after successful Sync:** After a completed clipboard/game-export sync or accepted screenshot OCR scan, the app writes a new snapshot to the selected document if Auto backup is enabled. A Drive failure never causes an otherwise successful Clash sync to fail.
+- **Back up now:** Manually overwrite the selected backup file with the latest accounts and timers.
+- **Restore from Google Drive:** Select any existing ClashTimerHub JSON backup via Android's file picker. The app validates the content and asks for confirmation before replacing current accounts and timers.
+- **Visible status:** Shows the linked file, whether Auto backup is enabled, the last successful write time, and the latest error.
+- **Disconnect:** Forget access to the linked document and disable automatic backups; do not delete the file.
+
+### Data and compatibility
+- Preserves existing v1 JSON format and previous clipboard backups.
+- Includes player tags, account names, active upgrades, MAX flags, notification settings, language, screenshot timer calibration and all installed widget presets.
+- On a new device widget IDs are assigned by Android, so the widgets themselves may need to be added first.
+- Backup uses Android's Storage Access Framework, not a direct OAuth Drive integration. The user chooses Google Drive (or another document provider) in the picker; Drive may sync a selected file to the cloud asynchronously.
+- The Android provider's write permissions and online availability are required for subsequent automatic backups; status shows failures, and the app retains an extra last-backup copy in app-private storage.
+
+
 ## 7.4.8-beta1 — 4 November 2026
 
 ### Widget improvements
