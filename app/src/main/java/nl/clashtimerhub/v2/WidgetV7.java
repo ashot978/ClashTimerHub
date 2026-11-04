@@ -121,10 +121,17 @@ final class WidgetV7 {
   intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,id);
   return PendingIntent.getBroadcast(ctx,130000+id,intent,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
  }
- private static RemoteViews multiRow(Context ctx,Status s,int mode,long now,int id){
+ private static RemoteViews multiRow(Context ctx,Status s,int mode,long now,int id,boolean showLab,boolean showPet,int size){
   if(mode==2||mode==3){
    RemoteViews row=new RemoteViews(ctx.getPackageName(),mode==3?R.layout.widget_v7_wide_row_dense:R.layout.widget_v7_wide_row);
    row.setTextViewText(R.id.v7_wide_name,AppData.displayName(ctx,s.account));
+   row.setViewVisibility(R.id.v7_wide_lab_group,showLab?View.VISIBLE:View.GONE);
+   row.setViewVisibility(R.id.v7_wide_pet_group,showPet?View.VISIBLE:View.GONE);
+   float font=(mode==3?8f:10f)+(size==0?-1f:size==2?1f:0f);
+   for(int textId:new int[]{R.id.v7_wide_name,R.id.v7_wide_builders,R.id.v7_wide_lab_timer,R.id.v7_wide_lab_idle,
+      R.id.v7_wide_pet_timer,R.id.v7_wide_pet_idle,R.id.v7_wide_builder_timer,R.id.v7_wide_builder_idle,R.id.v7_wide_finish})
+    row.setTextViewTextSize(textId,android.util.TypedValue.COMPLEX_UNIT_SP,font);
+
    row.setTextViewText(R.id.v7_wide_builders,s.builderReady+"✓ "+s.builderActive+"⚒");
    timer(row,R.id.v7_wide_lab_timer,R.id.v7_wide_lab_idle,s.labNext,now);
    timer(row,R.id.v7_wide_pet_timer,R.id.v7_wide_pet_idle,s.petNext,now);
@@ -152,12 +159,30 @@ final class WidgetV7 {
    subtitle.append("  🐾 ");int petStart=subtitle.length();subtitle.append(pets);
    if("✓".equals(pets))subtitle.setSpan(new android.text.style.ForegroundColorSpan(0xff8BE3AD),petStart,subtitle.length(),android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
    subtitle.append("  ·  ").append(finish(ctx,s.builderNext,true));
+   if(!showLab&&!showPet)subtitle=new android.text.SpannableStringBuilder(finish(ctx,s.builderNext,true));
+   else if(!showLab)subtitle=new android.text.SpannableStringBuilder("🐾 "+pets+" · "+finish(ctx,s.builderNext,true));
+   else if(!showPet)subtitle=new android.text.SpannableStringBuilder("⚗ "+lab+" · "+finish(ctx,s.builderNext,true));
    row.setTextViewText(R.id.widget_subtitle,subtitle);
   }
   row.setOnClickPendingIntent(R.id.widget_account_root,accountClick(ctx,s.account,id));
   return row;
  }
  private static RemoteViews multi(Context ctx,int id,List<Status> visible,long now){
+  android.content.SharedPreferences studio=ctx.getSharedPreferences("WidgetPreferences",Context.MODE_PRIVATE);
+  boolean showLab=studio.getBoolean("lab_"+id,true),showPet=studio.getBoolean("pet_"+id,true);
+  int fontSize=studio.getInt("size_"+id,1),sortMode=studio.getInt("sort_"+id,0);
+  int background=studio.getInt("bg_"+id,0);
+  ArrayList<Status> ordered=new ArrayList<>(visible);
+  if(sortMode==1)Collections.sort(ordered,(a,b)->AppData.displayName(ctx,a.account).compareToIgnoreCase(AppData.displayName(ctx,b.account)));
+  else if(sortMode==2){
+   LinkedHashMap<String,Integer> order=new LinkedHashMap<>();
+   try{
+    JSONArray arr=new JSONArray(AppData.prefs(ctx).getString("accounts","[]"));
+    for(int i=0;i<arr.length();i++)order.put(arr.optString(i),i);
+   }catch(Exception ignored){}
+   Collections.sort(ordered,(a,b)->Integer.compare(order.getOrDefault(a.account,9999),order.getOrDefault(b.account,9999)));
+  }
+
   AppWidgetManager manager=AppWidgetManager.getInstance(ctx);
   android.os.Bundle opts=manager.getAppWidgetOptions(id);
   int width=190,height=240;
@@ -169,7 +194,7 @@ final class WidgetV7 {
   }
   // Use dense rows when needed, then fit as many accounts as the launcher allows.
   // A one-cell widget has room for its header and a timer, not the sync footer.
-  int rows=Math.max(1,visible.size());
+  int rows=Math.max(1,ordered.size());
   int mode;
   if(width>=510)mode=height<44+rows*24?3:2;
   // Samsung One UI reports roughly 225-269dp for three home-screen cells.
@@ -180,17 +205,19 @@ final class WidgetV7 {
   int rowHeight=mode==3?16:mode==2?24:mode==1?34:19;
   boolean showSync=height>=44+rowHeight;
   int available=Math.max(0,height-24-(showSync?20:0));
-  int count=Math.min(visible.size(),Math.max(1,available/rowHeight));
-  int hidden=visible.size()-count;
+  int count=Math.min(ordered.size(),Math.max(1,available/rowHeight));
+  int hidden=ordered.size()-count;
   RemoteViews w=new RemoteViews(ctx.getPackageName(),R.layout.widget_v7_multi);
+  w.setInt(R.id.v7_multi_root,"setBackgroundResource",background==1?R.drawable.widget_background_dark:
+    background==2?R.drawable.widget_background_transparent:R.drawable.widget_background);
   boolean narrow=width<230;
-  int ready=0;for(Status s:visible)ready+=s.builderReady;
+  int ready=0;for(Status s:ordered)ready+=s.builderReady;
   w.setTextViewText(R.id.v7_multi_title,narrow?("⚔ TIMERS"+(hidden>0?" +"+hidden:"")):"⚔ CLASH TIMER HUB");
   w.setViewVisibility(R.id.v7_multi_summary,narrow?View.GONE:View.VISIBLE);
-  w.setTextViewText(R.id.v7_multi_summary,(hidden>0?count+"/"+visible.size():String.valueOf(visible.size()))+" · "+ready+"✓");
+  w.setTextViewText(R.id.v7_multi_summary,(hidden>0?count+"/"+ordered.size():String.valueOf(ordered.size()))+" · "+ready+"✓");
   w.removeAllViews(R.id.v7_multi_rows);
-  if(visible.isEmpty())w.addView(R.id.v7_multi_rows,new RemoteViews(ctx.getPackageName(),R.layout.widget_empty));
-  else for(int i=0;i<count;i++)w.addView(R.id.v7_multi_rows,multiRow(ctx,visible.get(i),mode,now,id));
+  if(ordered.isEmpty())w.addView(R.id.v7_multi_rows,new RemoteViews(ctx.getPackageName(),R.layout.widget_empty));
+  else for(int i=0;i<count;i++)w.addView(R.id.v7_multi_rows,multiRow(ctx,ordered.get(i),mode,now,id,showLab,showPet,fontSize));
   w.setViewVisibility(R.id.v7_multi_sync,showSync?View.VISIBLE:View.GONE);
   boolean active=AppData.prefs(ctx).getBoolean("floatingEnabled",false);
   w.setTextViewText(R.id.v7_multi_sync,I18n.english(ctx)?("⚔ Sync "+(active?"ON":"OFF")):("⚔ Sync "+(active?"AAN":"UIT")));
