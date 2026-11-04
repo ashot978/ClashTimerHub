@@ -52,7 +52,7 @@ public final class WidgetConfigActivity extends Activity {
    try{JSONArray arr=new JSONArray(prefs.getString("selected_"+widgetId,"[]"));
     for(int j=0;j<arr.length();j++)chosen.add(arr.optString(j));}catch(Exception ignored){}
    for(String name:accounts){
-    CheckBox box=new CheckBox(this);box.setText(name);box.setTextColor(Color.WHITE);
+    CheckBox box=new CheckBox(this);box.setText(AppData.displayName(this,name));box.setTextColor(Color.WHITE);
     box.setChecked(showAll||chosen.contains(name));boxes.put(name,box);root.addView(box);
    }
    all.setChecked(showAll);custom.setChecked(!showAll);
@@ -61,7 +61,7 @@ public final class WidgetConfigActivity extends Activity {
   }else{
    root.addView(label(I18n.english(this)?"Choose one account for this widget.":"Kies één account voor deze widget.",14,0xffcdbbdc));
    accountPicker=new Spinner(this);
-   ArrayAdapter<String> adapter=new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,accounts);
+   ArrayAdapter<String> adapter=new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,displayLabels());
    accountPicker.setAdapter(adapter);
    String saved=prefs.getString("account_"+widgetId,"");
    int chosen=accounts.indexOf(saved);
@@ -86,6 +86,11 @@ public final class WidgetConfigActivity extends Activity {
    Intent result=new Intent();result.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,widgetId);
    setResult(RESULT_OK,result);finish();
   });
+ }
+ private ArrayList<String> displayLabels(){
+  ArrayList<String> labels=new ArrayList<>();
+  for(String account:accounts)labels.add(AppData.displayName(this,account));
+  return labels;
  }
  private TextView label(String value,int size,int color){
   TextView t=new TextView(this);t.setText(value);t.setTextSize(size);t.setTextColor(color);
