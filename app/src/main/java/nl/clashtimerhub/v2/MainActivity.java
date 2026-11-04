@@ -56,10 +56,10 @@ public final class MainActivity extends Activity {
   if(intent==null||!Intent.ACTION_SEND.equals(intent.getAction()))return;
   String payload=intent.getStringExtra(Intent.EXTRA_TEXT);
   if(payload==null||payload.length()>10000000||!payload.contains("buildings")){toast("Geen geldige Clash JSON gedeeld");return;}
-  new android.app.AlertDialog.Builder(this).setTitle("Clash-data snel importeren?")
-   .setMessage("De player tag bepaalt welk account wordt bijgewerkt.")
-   .setPositiveButton("Importeren",(d,w)->importClashData(payload))
-   .setNegativeButton("Annuleren",null).show();
+  new android.app.AlertDialog.Builder(this).setTitle(t("Clash-data snel importeren?"))
+   .setMessage(t("De player tag bepaalt welk account wordt bijgewerkt."))
+   .setPositiveButton(t("Importeren"),(d,w)->importClashData(payload))
+   .setNegativeButton(t("Annuleren"),null).show();
  }
  private String snapshot(){android.content.SharedPreferences p=getPreferences(0);return p.getString("accounts","[]")+"|"+p.getString("upgrades","[]");}
  private void refreshExternalImport(){String current=snapshot();if(!current.equals(lastLoadedSnapshot)){accounts.clear();upgrades.clear();load();if(!accounts.contains(selectedAccount)&&!accounts.isEmpty())selectedAccount=accounts.get(0);draw();}}
@@ -69,6 +69,18 @@ public final class MainActivity extends Activity {
   lastLoadedSnapshot=snapshot();
  }
  private void persist(){getPreferences(0).edit().putString("accounts",new JSONArray(accounts).toString()).putString("upgrades",new JSONArray(upgrades).toString()).apply();lastLoadedSnapshot=snapshot();TimerWidget.schedule(this);}
+ private String t(String dutch){return I18n.tr(this,dutch);}
+ private void chooseLanguage(){
+  String[] languages={"🇬🇧  English","🇳🇱  Nederlands"};
+  int selected=I18n.english(this)?0:1;
+  new android.app.AlertDialog.Builder(this).setTitle(t("Taal / Language"))
+   .setSingleChoiceItems(languages,selected,(dialog,choice)->{
+    I18n.choose(this,choice==0?"en":"nl");
+    dialog.dismiss();
+    draw();
+    toast(choice==0?"Language saved: English":"Taal opgeslagen: Nederlands");
+   }).setNegativeButton(t("Annuleren"),null).show();
+ }
  private int dp(int value){return (int)(value*getResources().getDisplayMetrics().density+.5f);}
  private android.graphics.drawable.GradientDrawable shape(int color,int radius){
   android.graphics.drawable.GradientDrawable d=new android.graphics.drawable.GradientDrawable();
@@ -82,11 +94,11 @@ public final class MainActivity extends Activity {
   return drawable;
  }
  private TextView label(String s,int size){
-  TextView v=new TextView(this);v.setText(s);v.setTextColor(0xfff5f4ff);v.setTextSize(size);
+  TextView v=new TextView(this);v.setText(t(s));v.setTextColor(0xfff5f4ff);v.setTextSize(size);
   v.setPadding(dp(12),dp(12),dp(12),dp(12));return v;
  }
  private void button(String title,Runnable run){
-  Button b=new Button(this);b.setText(title);b.setAllCaps(false);b.setTextSize(15);
+  Button b=new Button(this);b.setText(t(title));b.setAllCaps(false);b.setTextSize(15);
   b.setBackground(new android.graphics.drawable.RippleDrawable(android.content.res.ColorStateList.valueOf(0x55ffffff),clashSurface(0xff49315e,0xff76548e,12),null));b.setTextColor(Color.WHITE);
   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,dp(56));lp.setMargins(0,dp(8),0,dp(8));(screenContent!=null?screenContent:root).addView(b,lp);
   b.setOnClickListener(v->run.run());
@@ -102,7 +114,15 @@ public final class MainActivity extends Activity {
   ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);
   root=new LinearLayout(this);root.setOrientation(1);root.setPadding(dp(12),dp(22),dp(12),dp(64));scroll.addView(root);
 
-  TextView heading=label("⚔  CLASH TIMER HUB",24);heading.setTypeface(null,android.graphics.Typeface.BOLD);heading.setTextColor(0xffffd88a);root.addView(heading);
+  LinearLayout headingRow=new LinearLayout(this);headingRow.setOrientation(0);headingRow.setGravity(android.view.Gravity.CENTER_VERTICAL);
+  root.addView(headingRow,new LinearLayout.LayoutParams(-1,-2));
+  TextView heading=label("⚔  CLASH TIMER HUB",24);heading.setTypeface(null,android.graphics.Typeface.BOLD);heading.setTextColor(0xffffd88a);
+  headingRow.addView(heading,new LinearLayout.LayoutParams(0,-2,1));
+  TextView languageButton=label(I18n.flag(this)+" ▾",20);languageButton.setGravity(android.view.Gravity.CENTER);
+  languageButton.setContentDescription(t("Taal wijzigen"));
+  languageButton.setBackground(clashSurface(0xff332342,0xff75518f,12));
+  LinearLayout.LayoutParams langParams=new LinearLayout.LayoutParams(dp(62),dp(48));langParams.setMargins(dp(4),0,dp(2),0);
+  headingRow.addView(languageButton,langParams);languageButton.setOnClickListener(v->chooseLanguage());
   TextView subtitle=label("COMMAND CENTER / V6",11);subtitle.setTextColor(0xffb5a5ff);root.addView(subtitle);
   View accent=new View(this);accent.setBackgroundColor(0xffd2a96e);LinearLayout.LayoutParams accentLp=new LinearLayout.LayoutParams(dp(56),dp(2));accentLp.setMargins(dp(12),0,0,dp(8));root.addView(accent,accentLp);
   screenContent=new LinearLayout(this);screenContent.setOrientation(1);root.addView(screenContent);
@@ -111,7 +131,7 @@ public final class MainActivity extends Activity {
   int[] navTabs={0,1,3};
   for(int i=0;i<names.length;i++){
    final int tab=navTabs[i];
-   Button button=new Button(this);button.setText(names[i]);button.setAllCaps(false);button.setTextSize(14);button.setTypeface(null,android.graphics.Typeface.BOLD);button.setSingleLine(false);
+   Button button=new Button(this);button.setText(t(names[i]));button.setAllCaps(false);button.setTextSize(14);button.setTypeface(null,android.graphics.Typeface.BOLD);button.setSingleLine(false);
    button.setTextColor(tab==activeTab?0xffffd88a:0xffc6b9d6);
    button.setBackground(clashSurface(tab==activeTab?0xff49335f:0xff261a36,tab==activeTab?0xffd8ae69:0xff352742,10));
    button.setOnClickListener(v->{activeTab=tab;draw();});
@@ -174,6 +194,8 @@ public final class MainActivity extends Activity {
  }
  private void showSettingsScreen(){
   screenContent.addView(label("INSTELLINGEN",20));
+  LinearLayout language=settingsSection("🌐  TAAL / LANGUAGE","Choose your preferred language / Kies je taal");
+  settingsItem(language,I18n.flag(this),"Taal / Language",I18n.flag(this)+"  "+I18n.label(this),()->chooseLanguage());
   LinearLayout sync=settingsSection("↻  SYNCHRONISATIE","Accounts bijwerken zonder Clash te verlaten");
   settingsItem(sync,"⚔","Zwevende plakknop",getPreferences(0).getBoolean("floatingEnabled",false)?"Actief · tik om uit te schakelen":"Uit · tik om in te schakelen",()->{toggleFloatingSync();draw();});
   settingsItem(sync,"▤","Synchroniseer vanaf klembord","Importeer een gekopieerde Clash-export",()->importClipboard());
@@ -182,7 +204,7 @@ public final class MainActivity extends Activity {
   settingsItem(notifications,"✓","Testmelding","Controleer of notificaties aankomen",()->sendTestNotification());
   settingsItem(notifications,"◷","Alarmtest over 1 minuut","Controleer of Android een alarm uitvoert",()->{
    String status=TimerWidget.scheduleDiagnostic(this);
-   new android.app.AlertDialog.Builder(this).setTitle("Alarmtest").setMessage(status).setPositiveButton("OK",null).show();
+   new android.app.AlertDialog.Builder(this).setTitle(t("Alarmtest")).setMessage(status).setPositiveButton(t("OK"),null).show();
   });
   LinearLayout widget=settingsSection("▦  HOMESCREENWIDGET","Toon standaard al je accounts");
   settingsItem(widget,"⚙","Widget instellen","Alle accounts of een eigen selectie",()->showWidgetSettings());
@@ -194,17 +216,17 @@ public final class MainActivity extends Activity {
   android.appwidget.AppWidgetManager manager=android.appwidget.AppWidgetManager.getInstance(this);
   int[] ids=manager.getAppWidgetIds(new android.content.ComponentName(this,TimerWidget.class));
   if(ids.length==0){
-   new android.app.AlertDialog.Builder(this).setTitle("Widget instellen")
-    .setMessage("Voeg eerst de Clash Timer Hub-widget toe via je Samsung-startscherm. Tijdens het toevoegen kun je meteen 'Alle accounts tonen' kiezen.")
-    .setPositiveButton("Begrepen",null).show();
+   new android.app.AlertDialog.Builder(this).setTitle(t("Widget instellen"))
+    .setMessage(t("Voeg eerst de Clash Timer Hub-widget toe via je Samsung-startscherm. Tijdens het toevoegen kun je meteen 'Alle accounts tonen' kiezen."))
+    .setPositiveButton(t("Begrepen"),null).show();
    return;
   }
   if(ids.length==1){openWidgetSettings(ids[0]);return;}
   String[] options=new String[ids.length];
   for(int i=0;i<ids.length;i++)options[i]="Widget "+(i+1);
-  new android.app.AlertDialog.Builder(this).setTitle("Welke widget wil je instellen?")
+  new android.app.AlertDialog.Builder(this).setTitle(t("Welke widget wil je instellen?"))
    .setItems(options,(dialog,index)->openWidgetSettings(ids[index]))
-   .setNegativeButton("Annuleren",null).show();
+   .setNegativeButton(t("Annuleren"),null).show();
  }
  private void openWidgetSettings(int id){
   Intent intent=new Intent(this,WidgetConfigActivity.class);
@@ -216,19 +238,19 @@ public final class MainActivity extends Activity {
   detailPanel.removeAllViews();
   if(accounts.isEmpty()){detailPanel.addView(label("Synchroniseer een account met de zwevende knop.",14));return;}
   String ac=selectedAccount;
-  Button back=new Button(this);back.setAllCaps(false);back.setText("‹  Terug naar alle accounts");back.setTextSize(13);
+  Button back=new Button(this);back.setAllCaps(false);back.setText(t("‹  Terug naar alle accounts"));back.setTextSize(13);
   back.setOnClickListener(v->{selectedAccount="";activeTab=0;draw();});detailPanel.addView(back);
   TextView title=label("⚔  "+ac,20);title.setTextColor(0xffffd783);
   title.setTypeface(null,android.graphics.Typeface.BOLD);detailPanel.addView(title);
   int ready=completedCount(ac,System.currentTimeMillis());
   if(ready>0){
    TextView done=label("✓  "+ready+" builders klaar",14);done.setTextColor(0xff8be3ad);detailPanel.addView(done);
-   Button checked=new Button(this);checked.setText("Markeer als gecontroleerd");checked.setTextSize(12);checked.setAllCaps(false);
+   Button checked=new Button(this);checked.setText(t("Markeer als gecontroleerd"));checked.setTextSize(12);checked.setAllCaps(false);
    checked.setOnClickListener(v->{acknowledgeAccount(ac);renderSelectedDetail();});detailPanel.addView(checked);
   }
   long last=getPreferences(0).getLong("lastSyncAt_"+ac,0);
   if(last>0){TextView synced=label("↻ Gesynchroniseerd: "+finishAt(last),11);synced.setTextColor(0xffbba7d1);detailPanel.addView(synced);}
-  if(ac.startsWith("#")){Button link=new Button(this);link.setAllCaps(false);link.setText("Koppel deze player tag aan bestaand account");link.setOnClickListener(v->linkImportedAccount(ac));detailPanel.addView(link);}
+  if(ac.startsWith("#")){Button link=new Button(this);link.setAllCaps(false);link.setText(t("Koppel deze player tag aan bestaand account"));link.setOnClickListener(v->linkImportedAccount(ac));detailPanel.addView(link);}
   renderTimelinePreview(detailPanel);
   for(String cat:categories){
    TextView section=label(("Bouwers".equals(cat)?"⚒  ":"Laboratorium".equals(cat)?"⚗  ":"🐾  ")+cat.toUpperCase(java.util.Locale.ROOT),14);
@@ -257,7 +279,7 @@ public final class MainActivity extends Activity {
    LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(0,dp(2),0,dp(2));parent.addView(row,lp);
    row.setOnClickListener(v->{selectedAccount=who;activeTab=0;draw();});
   }
-  Button full=new Button(this);full.setText("Bekijk volledige tijdlijn ›");full.setTextSize(12);full.setAllCaps(false);
+  Button full=new Button(this);full.setText(t("Bekijk volledige tijdlijn ›"));full.setTextSize(12);full.setAllCaps(false);
   full.setOnClickListener(v->{activeTab=1;draw();});parent.addView(full);
  }
  private void showAccountScreen(){
@@ -270,7 +292,7 @@ public final class MainActivity extends Activity {
    choice.setOnClickListener(v->{selectedAccount=ac;draw();});chips.addView(choice);
   }
   if(selectedAccount.startsWith("#")){
-   Button link=new Button(this);link.setText("Koppel deze player tag aan bestaand account");link.setAllCaps(false);
+   Button link=new Button(this);link.setText(t("Koppel deze player tag aan bestaand account"));link.setAllCaps(false);
    link.setOnClickListener(v->linkImportedAccount(selectedAccount));screenContent.addView(link);
   }
   account=new Spinner(this);account.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,accounts));
@@ -306,7 +328,7 @@ public final class MainActivity extends Activity {
      getPreferences(0).edit().putString("playerTags",tags.toString()).apply();
      selectedAccount=target;persist();draw();toast(source+" gekoppeld aan "+target);
     }catch(Exception e){toast("Koppelen mislukt: "+e.getMessage());}
-   }).setNegativeButton("Annuleren",null).show();
+   }).setNegativeButton(t("Annuleren"),null).show();
  }
  private void showTimeline(){
   screenContent.addView(label("TIJDLIJN · ALLE ACCOUNTS",19));
@@ -390,12 +412,12 @@ public final class MainActivity extends Activity {
   }
   if(!android.provider.Settings.canDrawOverlays(this)){
    new android.app.AlertDialog.Builder(this)
-    .setTitle("Zwevende plakknop")
-    .setMessage("Geef Clash Timer Hub toestemming om over andere apps te worden weergegeven. Kom daarna terug en tik nogmaals op de knop.")
-    .setPositiveButton("Toestemming geven",(d,w)->{
+    .setTitle(t("Zwevende plakknop"))
+    .setMessage(t("Geef Clash Timer Hub toestemming om over andere apps te worden weergegeven. Kom daarna terug en tik nogmaals op de knop."))
+    .setPositiveButton(t("Toestemming geven"),(d,w)->{
      Intent i=new Intent(android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,android.net.Uri.parse("package:"+getPackageName()));
      startActivity(i);
-    }).setNegativeButton("Annuleren",null).show();
+    }).setNegativeButton(t("Annuleren"),null).show();
    return;
   }
   try{
@@ -416,8 +438,8 @@ public final class MainActivity extends Activity {
  private void notificationSettings(){
   android.content.SharedPreferences prefs=getPreferences(0);
   LinearLayout panel=new LinearLayout(this);panel.setOrientation(LinearLayout.VERTICAL);panel.setPadding(dp(16),dp(8),dp(16),dp(8));
-  CheckBox enabled=new CheckBox(this);enabled.setText("Meldingen inschakelen");enabled.setChecked(prefs.getBoolean("notifyEnabled",true));panel.addView(enabled);
-  CheckBox completed=new CheckBox(this);completed.setText("Melding zodra upgrade klaar is");completed.setChecked(prefs.getBoolean("notifyOnFinish",true));panel.addView(completed);
+  CheckBox enabled=new CheckBox(this);enabled.setText(t("Meldingen inschakelen"));enabled.setChecked(prefs.getBoolean("notifyEnabled",true));panel.addView(enabled);
+  CheckBox completed=new CheckBox(this);completed.setText(t("Melding zodra upgrade klaar is"));completed.setChecked(prefs.getBoolean("notifyOnFinish",true));panel.addView(completed);
   panel.addView(label("Waarschuw mij zoveel minuten vooraf (0 = uit)",13));
   EditText lead=new EditText(this);lead.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);lead.setSingleLine(true);
   lead.setText(String.valueOf(prefs.getInt("notifyLeadMinutes",15)));lead.setSelectAllOnFocus(true);panel.addView(lead);
@@ -425,7 +447,7 @@ public final class MainActivity extends Activity {
   if(android.os.Build.VERSION.SDK_INT>=31){
    android.app.AlarmManager alarm=(android.app.AlarmManager)getSystemService(ALARM_SERVICE);
    if(alarm!=null&&!alarm.canScheduleExactAlarms()){
-    Button precise=new Button(this);precise.setText("Sta exacte alarmen toe");
+    Button precise=new Button(this);precise.setText(t("Sta exacte alarmen toe"));
     precise.setOnClickListener(v->{
      try{startActivity(new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,android.net.Uri.parse("package:"+getPackageName())));}
      catch(Exception e){toast("Open de alarmtoestemming via Android-instellingen");}
@@ -433,8 +455,8 @@ public final class MainActivity extends Activity {
     panel.addView(precise);
    }
   }
-  new android.app.AlertDialog.Builder(this).setTitle("Meldingen instellen").setView(panel)
-   .setPositiveButton("Opslaan",(d,w)->{
+  new android.app.AlertDialog.Builder(this).setTitle(t("Meldingen instellen")).setView(panel)
+   .setPositiveButton(t("Opslaan"),(d,w)->{
     int minutes=15;
     try{minutes=Integer.parseInt(lead.getText().toString().trim());}catch(Exception ignored){}
     minutes=Math.max(0,Math.min(10080,minutes));
@@ -442,10 +464,10 @@ public final class MainActivity extends Activity {
      .putBoolean("notifyOnFinish",completed.isChecked()).putInt("notifyLeadMinutes",minutes).apply();
     TimerWidget.schedule(this);toast("Meldingen opgeslagen");
    })
-   .setNeutralButton("Android-instellingen",(d,w)->{
+   .setNeutralButton(t("Android-instellingen"),(d,w)->{
     Intent i=new Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS);
     i.putExtra(android.provider.Settings.EXTRA_APP_PACKAGE,getPackageName());startActivity(i);
-   }).setNegativeButton("Annuleren",null).show();
+   }).setNegativeButton(t("Annuleren"),null).show();
  }
  private void copyBackup(){
   try{
@@ -487,13 +509,13 @@ public final class MainActivity extends Activity {
    ArrayList<String> names=new ArrayList<>();ArrayList<JSONObject> timers=new ArrayList<>();
    for(int i=0;i<a.length();i++){String n=a.getString(i).trim();if(n.isEmpty()||names.contains(n))throw new JSONException("Ongeldig account");names.add(n);}
    for(int i=0;i<u.length();i++){JSONObject o=u.getJSONObject(i);if(!names.contains(o.optString("account"))||o.optLong("finish")<=0)throw new JSONException("Ongeldige timer");timers.add(o);}
-   new android.app.AlertDialog.Builder(this).setTitle("Back-up herstellen?")
+   new android.app.AlertDialog.Builder(this).setTitle(t("Back-up herstellen?"))
     .setMessage("Dit vervangt alle bestaande accounts en timers door "+names.size()+" accounts en "+timers.size()+" timers.")
-    .setPositiveButton("Herstellen",(d,w)->{
+    .setPositiveButton(t("Herstellen"),(d,w)->{
      accounts.clear();accounts.addAll(names);upgrades.clear();upgrades.addAll(timers);
      getPreferences(0).edit().putString("playerTags",data.optJSONObject("playerTags")==null?"{}":data.optJSONObject("playerTags").toString()).apply();
      persist();draw();toast("Back-up hersteld");
-    }).setNegativeButton("Annuleren",null).show();
+    }).setNegativeButton(t("Annuleren"),null).show();
   }catch(Exception e){toast("Ongeldige back-up: "+e.getMessage());}
  }
  private void shareTimers(){
@@ -529,12 +551,12 @@ public final class MainActivity extends Activity {
    public void onStartTrackingTouch(SeekBar bar){}public void onStopTrackingTouch(SeekBar bar){}
   });
   form.addView(a);form.addView(start);form.addView(b);form.addView(end);
-  new android.app.AlertDialog.Builder(this).setTitle("Timergebied kalibreren").setView(form)
-   .setPositiveButton("Opslaan",(d,w)->{
+  new android.app.AlertDialog.Builder(this).setTitle(t("Timergebied kalibreren")).setView(form)
+   .setPositiveButton(t("Opslaan"),(d,w)->{
     if(vals[1]<=vals[0]+3){toast("Eindpositie moet minimaal 4% na de beginpositie liggen");return;}
     getPreferences(0).edit().putInt("timerStart",vals[0]).putInt("timerEnd",vals[1]).apply();
     toast("Scannerkalibratie opgeslagen");
-   }).setNegativeButton("Annuleren",null).show();
+   }).setNegativeButton(t("Annuleren"),null).show();
  }
  private void renderDashboard(){
   if(dashboard==null)return;
@@ -594,7 +616,7 @@ public final class MainActivity extends Activity {
    TextView detail=label((first==null?"Geen actieve builder":"⚒  "+cleanName(first.optString("name")))+"\n"+busy+" bouwers bezig",12);
    detail.setTextColor(0xffd4c5e4);card.addView(detail);
    if(ready){
-    Button checked=new Button(this);checked.setText("Gecontroleerd");checked.setTextSize(11);checked.setAllCaps(false);
+    Button checked=new Button(this);checked.setText(t("Gecontroleerd"));checked.setTextSize(11);checked.setAllCaps(false);
     checked.setOnClickListener(v->acknowledgeAccount(ac));card.addView(checked);
    }
    card.setOnClickListener(v->{selectedAccount=ac.equals(selectedAccount)?"":ac;activeTab=0;draw();});
@@ -640,8 +662,8 @@ public final class MainActivity extends Activity {
    line.setBackground(shape(0xff30243e,12));list.addView(line);
   }
   ScrollView scroll=new ScrollView(this);scroll.addView(list);
-  new android.app.AlertDialog.Builder(this).setTitle("Alle accounts · Eerstvolgende builder")
-   .setView(scroll).setPositiveButton("Sluiten",null).show();
+  new android.app.AlertDialog.Builder(this).setTitle(t("Alle accounts · Eerstvolgende builder"))
+   .setView(scroll).setPositiveButton(t("Sluiten"),null).show();
  }
  private void importClipboard(){
   try{
@@ -685,7 +707,7 @@ public final class MainActivity extends Activity {
        }
        account.setSelection(which);
        importClashData(payload);
-      }).setNegativeButton("Annuleren",null).show();
+      }).setNegativeButton(t("Annuleren"),null).show();
      return;
     }
    }
@@ -777,18 +799,18 @@ public final class MainActivity extends Activity {
    LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(0,dp(4),0,dp(4));list.addView(line,lp);
   }
   ScrollView scroll=new ScrollView(this);scroll.addView(list);
-  new android.app.AlertDialog.Builder(this).setTitle("Alle accounts · Details")
-   .setView(scroll).setPositiveButton("Sluiten",null).show();
+  new android.app.AlertDialog.Builder(this).setTitle(t("Alle accounts · Details"))
+   .setView(scroll).setPositiveButton(t("Sluiten"),null).show();
  }
  private void editTimer(JSONObject o){
   LinearLayout form=new LinearLayout(this);form.setOrientation(1);form.setPadding(dp(16),dp(8),dp(16),0);
   EditText n=new EditText(this),t=new EditText(this);
-  n.setSingleLine(true);n.setText(cleanName(o.optString("name")));n.setHint("Naam");
-  t.setSingleLine(true);t.setHint("Bijv. 2d 5h");long remaining=Math.max(0,(o.optLong("finish")-System.currentTimeMillis()+999)/1000);
+  n.setSingleLine(true);n.setText(cleanName(o.optString("name")));n.setHint(t("Naam"));
+  t.setSingleLine(true);t.setHint(t("Bijv. 2d 5h"));long remaining=Math.max(0,(o.optLong("finish")-System.currentTimeMillis()+999)/1000);
   t.setText(format(remaining));form.addView(n);form.addView(t);
-  android.app.AlertDialog dialog=new android.app.AlertDialog.Builder(this).setTitle("Timer bewerken").setView(form)
-   .setPositiveButton("Opslaan",null).setNeutralButton("Verwijderen",(d,w)->confirmDelete(o))
-   .setNegativeButton("Annuleren",null).create();
+  android.app.AlertDialog dialog=new android.app.AlertDialog.Builder(this).setTitle(t("Timer bewerken")).setView(form)
+   .setPositiveButton(t("Opslaan"),null).setNeutralButton(t("Verwijderen"),(d,w)->confirmDelete(o))
+   .setNegativeButton(t("Annuleren"),null).create();
   dialog.setOnShowListener(ev->dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
    long seconds=parse(t.getText().toString());String name=n.getText().toString().trim();
    if(seconds<=0||name.isEmpty()){t.setError("Vul een geldige duur in, bijvoorbeeld 2d 5h");return;}
@@ -797,12 +819,12 @@ public final class MainActivity extends Activity {
   }));dialog.show();
  }
  private void confirmDelete(JSONObject o){
-  new android.app.AlertDialog.Builder(this).setTitle("Timer verwijderen?")
-   .setMessage(o.optString("name")).setPositiveButton("Verwijderen",(d,w)->{upgrades.remove(o);persist();showTimers();})
-   .setNegativeButton("Annuleren",null).show();
+  new android.app.AlertDialog.Builder(this).setTitle(t("Timer verwijderen?"))
+   .setMessage(o.optString("name")).setPositiveButton(t("Verwijderen"),(d,w)->{upgrades.remove(o);persist();showTimers();})
+   .setNegativeButton(t("Annuleren"),null).show();
  }
- private void editAccount(){EditText e=new EditText(this);e.setSingleLine(true);new android.app.AlertDialog.Builder(this).setTitle("Nieuw account").setView(e).setPositiveButton("Toevoegen",(d,w)->{String s=e.getText().toString().trim();if(!s.isEmpty()&&!accounts.contains(s)){accounts.add(s);selectedAccount=s;persist();draw();}}).setNegativeButton("Annuleren",null).show();}
- private void manual(){LinearLayout form=new LinearLayout(this);form.setOrientation(1);EditText n=new EditText(this),t=new EditText(this);n.setHint("Gebouwnaam");t.setHint("Tijd, bijvoorbeeld 3h 15m");form.addView(n);form.addView(t);new android.app.AlertDialog.Builder(this).setTitle("Timer toevoegen").setView(form).setPositiveButton("Opslaan",(d,w)->{long seconds=parse(t.getText().toString());if(seconds>0&&!accounts.isEmpty()){try{JSONObject o=new JSONObject();o.put("id",UUID.randomUUID().toString());o.put("account",selectedAccount.isEmpty()?accounts.get(0):selectedAccount);o.put("category","Bouwers");o.put("name",n.getText().toString());o.put("finish",System.currentTimeMillis()+seconds*1000);upgrades.add(o);persist();draw();}catch(Exception ignored){}}}).setNegativeButton("Annuleren",null).show();}
+ private void editAccount(){EditText e=new EditText(this);e.setSingleLine(true);new android.app.AlertDialog.Builder(this).setTitle(t("Nieuw account")).setView(e).setPositiveButton(t("Toevoegen"),(d,w)->{String s=e.getText().toString().trim();if(!s.isEmpty()&&!accounts.contains(s)){accounts.add(s);selectedAccount=s;persist();draw();}}).setNegativeButton(t("Annuleren"),null).show();}
+ private void manual(){LinearLayout form=new LinearLayout(this);form.setOrientation(1);EditText n=new EditText(this),t=new EditText(this);n.setHint(t("Gebouwnaam"));t.setHint(t("Tijd, bijvoorbeeld 3h 15m"));form.addView(n);form.addView(t);new android.app.AlertDialog.Builder(this).setTitle(t("Timer toevoegen")).setView(form).setPositiveButton(t("Opslaan"),(d,w)->{long seconds=parse(t.getText().toString());if(seconds>0&&!accounts.isEmpty()){try{JSONObject o=new JSONObject();o.put("id",UUID.randomUUID().toString());o.put("account",selectedAccount.isEmpty()?accounts.get(0):selectedAccount);o.put("category","Bouwers");o.put("name",n.getText().toString());o.put("finish",System.currentTimeMillis()+seconds*1000);upgrades.add(o);persist();draw();}catch(Exception ignored){}}}).setNegativeButton(t("Annuleren"),null).show();}
  private static long parse(String raw){
   if(raw==null)return 0;
   String s=raw.toLowerCase(java.util.Locale.ROOT).replace('ı','1');
@@ -923,10 +945,10 @@ public final class MainActivity extends Activity {
   }).addOnFailureListener(e->{n2.recycle();t2.recycle();scanRow(bmp,rows,index+1);});
  }
  private void review(){if(pending.isEmpty()){toast("Geen OCR-resultaten");return;}LinearLayout form=new LinearLayout(this);form.setOrientation(1);ScrollView scroll=new ScrollView(this);scroll.addView(form);ArrayList<EditText> names=new ArrayList<>(),times=new ArrayList<>();
-  for(JSONObject o:pending){form.addView(label("Rij "+(o.optInt("row")+1),16));EditText n=new EditText(this),t=new EditText(this);n.setSingleLine(true);t.setSingleLine(true);n.setText(o.optString("name"));String recognized=o.optString("raw");t.setText(recognized);if(parse(recognized)>0)t.setCompoundDrawablesWithIntrinsicBounds(0,0,android.R.drawable.checkbox_on_background,0);else t.setError("Controleer deze tijd");n.setHint("Naam");t.setHint("Bijv. 3h 15m");form.addView(n);form.addView(t);names.add(n);times.add(t);}
+  for(JSONObject o:pending){form.addView(label("Rij "+(o.optInt("row")+1),16));EditText n=new EditText(this),t=new EditText(this);n.setSingleLine(true);t.setSingleLine(true);n.setText(o.optString("name"));String recognized=o.optString("raw");t.setText(recognized);if(parse(recognized)>0)t.setCompoundDrawablesWithIntrinsicBounds(0,0,android.R.drawable.checkbox_on_background,0);else t.setError("Controleer deze tijd");n.setHint(t("Naam"));t.setHint(t("Bijv. 3h 15m"));form.addView(n);form.addView(t);names.add(n);times.add(t);}
   int free=getPreferences(0).getInt("builderAvailable",-1),total=getPreferences(0).getInt("builderTotal",-1);
   String counter=free>=0&&total>0?" · Vrije bouwers: "+free+"/"+total:" · Bouwersstatus niet herkend";
-  android.app.AlertDialog dialog=new android.app.AlertDialog.Builder(this).setTitle("Controleer eerste upgrade"+counter).setView(scroll).setPositiveButton("Opslaan",null).setNegativeButton("Annuleren",null).create();
+  android.app.AlertDialog dialog=new android.app.AlertDialog.Builder(this).setTitle("Controleer eerste upgrade"+counter).setView(scroll).setPositiveButton(t("Opslaan"),null).setNegativeButton(t("Annuleren"),null).create();
   dialog.setOnShowListener(showEvent->dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
    String ac=accounts.get(account.getSelectedItemPosition()),cat=categories[category.getSelectedItemPosition()];long now=System.currentTimeMillis();
    ArrayList<JSONObject> replacement=new ArrayList<>();ArrayList<String> invalid=new ArrayList<>();
@@ -936,9 +958,9 @@ public final class MainActivity extends Activity {
     try{JSONObject o=new JSONObject();o.put("id",UUID.randomUUID().toString());o.put("account",ac);o.put("category",cat);o.put("name",name);o.put("finish",now+sec*1000);o.put("scanned",true);replacement.add(o);}catch(Exception ignored){}
    }
    if(!invalid.isEmpty()){
-    new android.app.AlertDialog.Builder(this).setTitle("Scan niet opgeslagen")
+    new android.app.AlertDialog.Builder(this).setTitle(t("Scan niet opgeslagen"))
      .setMessage("Ongeldige timer(s): "+android.text.TextUtils.join(", ",invalid)+". Corrigeer deze rijen en druk opnieuw op Opslaan. Bestaande timers blijven behouden.")
-     .setPositiveButton("OK",null).show();
+     .setPositiveButton(t("OK"),null).show();
     return;
    }
    // Only replace previous screenshot-scanned entries; never destroy manually created timers.
