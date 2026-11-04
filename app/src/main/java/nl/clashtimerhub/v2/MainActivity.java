@@ -593,6 +593,7 @@ public final class MainActivity extends Activity {
   long last=getPreferences(0).getLong("lastSyncAt_"+ac,0);
   if(last>0){TextView synced=label("↻ Gesynchroniseerd: "+finishAt(last),11);synced.setTextColor(0xffbba7d1);detailPanel.addView(synced);}
   if(ac.startsWith("#")){Button link=new Button(this);link.setAllCaps(false);link.setText(t("Koppel deze player tag aan bestaand account"));link.setOnClickListener(v->linkImportedAccount(ac));detailPanel.addView(link);}
+  showAccountHelpers(detailPanel,ac);
   TextView maxTitle=label("✓  MAX STATUS",14);
    maxTitle.setTextColor(0xff8be3ad);detailPanel.addView(maxTitle);
    for(String categoryName:categories){
@@ -616,6 +617,37 @@ public final class MainActivity extends Activity {
    if(list.isEmpty()){TextView none=label("Geen actieve upgrades",11);none.setTextColor(0xffa99bb8);detailPanel.addView(none);}
    else for(JSONObject o:list)addTimerRow(detailPanel,o,true);
   }
+ }
+ private void showAccountHelpers(LinearLayout parent,String account){
+  HelperTracker.Snapshot snap=HelperTracker.forAccount(this,account);
+  TextView heading=label(I18n.english(this)?"🤝  HELPERS":"🤝  HELPERS",14);
+  heading.setTextColor(0xff8be3ad);
+  heading.setTypeface(null,android.graphics.Typeface.BOLD);
+  parent.addView(heading);
+  if(snap==null||snap.items.isEmpty()){
+   TextView empty=label(I18n.english(this)?
+    "No helper information yet. Synchronize a full Clash export.":
+    "Nog geen helpergegevens. Synchroniseer een volledige Clash-export.",12);
+   empty.setTextColor(0xffa99bb8);parent.addView(empty);
+   return;
+  }
+  long now=System.currentTimeMillis();
+  boolean en=I18n.english(this);
+  for(HelperTracker.Helper helper:snap.items){
+   String level=helper.level>0?(en?" · Level ":" · Niveau ")+helper.level:"";
+   String remaining=helper.readyAt<0?(en?"Cooldown unknown":"Cooldown onbekend"):
+      HelperTracker.remaining(helper.readyAt,now,en);
+   String work=helper.workingUntil>now?
+      (en?" · Working ":" · Bezig ")+HelperTracker.remaining(helper.workingUntil,now,en):"";
+   TextView label=label(helper.name(en)+level+"\n"+remaining+work,12);
+   label.setPadding(dp(8),dp(5),dp(8),dp(5));
+   label.setTextColor(helper.readyAt>=0&&helper.readyAt<=now?0xff8be3ad:0xffd4c5e4);
+   parent.addView(label);
+  }
+  String updated=new java.text.SimpleDateFormat("dd-MM HH:mm",java.util.Locale.getDefault())
+   .format(new java.util.Date(snap.importedAt));
+  TextView last=label((en?"Last export: ":"Laatste export: ")+updated,11);
+  last.setTextColor(0xffa99bb8);parent.addView(last);
  }
  private void renderTimelinePreview(LinearLayout parent){
   TextView header=label("◷  TIJDLIJN · ALLE ACCOUNTS",15);header.setTextColor(0xffffd783);parent.addView(header);
@@ -938,6 +970,7 @@ public final class MainActivity extends Activity {
    edit.putInt("bg_"+widgetId,Math.max(0,Math.min(2,entry.optInt("bg",0))));
    edit.putBoolean("lab_"+widgetId,entry.optBoolean("lab",true));
    edit.putBoolean("pet_"+widgetId,entry.optBoolean("pet",true));
+   edit.putBoolean("helpers_"+widgetId,entry.optBoolean("helpers",true));
    edit.putString("account_"+widgetId,entry.optString("account",""));
   }
   edit.apply();
@@ -969,7 +1002,8 @@ public final class MainActivity extends Activity {
      getPreferences(0).edit()
        .putString("playerTags",data.optJSONObject("playerTags")==null?"{}":data.optJSONObject("playerTags").toString())
        .putString("accountNames",data.optJSONObject("accountNames")==null?"{}":data.optJSONObject("accountNames").toString())
-       .putString("maxedCategories",data.optJSONObject("maxedCategories")==null?"{}":data.optJSONObject("maxedCategories").toString()).apply();
+       .putString("maxedCategories",data.optJSONObject("maxedCategories")==null?"{}":data.optJSONObject("maxedCategories").toString())
+       .putString(HelperTracker.KEY,data.optJSONObject("helpersByAccount")==null?"{}":data.optJSONObject("helpersByAccount").toString()).apply();
      restorePreferences(data.optJSONObject("preferences"));
      restoreWidgetSettings(data.optJSONArray("widgets"));
      persist();draw();toast("Back-up hersteld, inclusief beschikbare instellingen");
