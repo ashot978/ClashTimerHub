@@ -69,13 +69,20 @@ public final class MainActivity extends Activity {
   android.graphics.drawable.GradientDrawable d=new android.graphics.drawable.GradientDrawable();
   d.setColor(color);d.setCornerRadius(dp(radius));return d;
  }
+ private android.graphics.drawable.GradientDrawable clashSurface(int fill,int border,int radius){
+  int dark=android.graphics.Color.rgb((int)(Color.red(fill)*.82f),(int)(Color.green(fill)*.82f),(int)(Color.blue(fill)*.82f));
+  android.graphics.drawable.GradientDrawable drawable=new android.graphics.drawable.GradientDrawable(
+   android.graphics.drawable.GradientDrawable.Orientation.TL_BR,new int[]{fill,dark});
+  drawable.setCornerRadius(dp(radius));drawable.setStroke(dp(1),border);
+  return drawable;
+ }
  private TextView label(String s,int size){
   TextView v=new TextView(this);v.setText(s);v.setTextColor(0xfff5f4ff);v.setTextSize(size);
   v.setPadding(dp(12),dp(12),dp(12),dp(12));return v;
  }
  private void button(String title,Runnable run){
   Button b=new Button(this);b.setText(title);b.setAllCaps(false);b.setTextSize(15);
-  b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xff8950c7));b.setTextColor(Color.WHITE);
+  b.setBackground(new android.graphics.drawable.RippleDrawable(android.content.res.ColorStateList.valueOf(0x55ffffff),clashSurface(0xff49315e,0xff76548e,12),null));b.setTextColor(Color.WHITE);
   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,dp(56));lp.setMargins(0,dp(8),0,dp(8));(screenContent!=null?screenContent:root).addView(b,lp);
   b.setOnClickListener(v->run.run());
  }
@@ -92,6 +99,7 @@ public final class MainActivity extends Activity {
 
   TextView heading=label("⚔  CLASH TIMER HUB",24);heading.setTypeface(null,android.graphics.Typeface.BOLD);heading.setTextColor(0xffffd88a);root.addView(heading);
   TextView subtitle=label("COMMAND CENTER / V5",11);subtitle.setTextColor(0xffb5a5ff);root.addView(subtitle);
+  View accent=new View(this);accent.setBackgroundColor(0xffd2a96e);LinearLayout.LayoutParams accentLp=new LinearLayout.LayoutParams(dp(56),dp(2));accentLp.setMargins(dp(12),0,0,dp(8));root.addView(accent,accentLp);
   screenContent=new LinearLayout(this);screenContent.setOrientation(1);root.addView(screenContent);
   LinearLayout nav=new LinearLayout(this);nav.setBackgroundColor(0xff261a36);nav.setPadding(dp(4),dp(20),dp(4),dp(12));shell.addView(nav);
   String[] names={"Dashboard","Tijdlijn","Accounts","Instellingen"};
@@ -99,7 +107,7 @@ public final class MainActivity extends Activity {
    final int tab=i;
    Button button=new Button(this);button.setText(names[i]);button.setAllCaps(false);button.setTextSize(14);button.setTypeface(null,android.graphics.Typeface.BOLD);button.setSingleLine(false);
    button.setTextColor(i==activeTab?0xffffd88a:0xffc6b9d6);
-   button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(i==activeTab?0xff49335f:0xff261a36));
+   button.setBackground(clashSurface(i==activeTab?0xff49335f:0xff261a36,i==activeTab?0xffd8ae69:0xff352742,10));
    button.setOnClickListener(v->{activeTab=tab;draw();});
    nav.addView(button,new LinearLayout.LayoutParams(0,dp(64),1));
   }
@@ -245,17 +253,26 @@ public final class MainActivity extends Activity {
  }
  private void refreshVisibleTimers(){
   if(screenContent==null)return;
-  for(int i=0;i<screenContent.getChildCount();i++){
-   View v=screenContent.getChildAt(i);
-   if(v instanceof LinearLayout){
-    LinearLayout group=(LinearLayout)v;
-    if(group.getTag() instanceof Long){
-     long finish=(Long)group.getTag();
-     if(group.getChildCount()>1&&group.getChildAt(1) instanceof TextView)
-      ((TextView)group.getChildAt(1)).setText(format(Math.max(0,(finish-System.currentTimeMillis()+999)/1000))+"  ·  "+finishAt(finish));
-    }
-   }
+  boolean expired=refreshTimeTree(screenContent,System.currentTimeMillis());
+  if(expired){
+   if(activeTab==0&&detailPanel!=null)renderSelectedDetail();
+   else if(activeTab!=0)draw();
   }
+ }
+ private boolean refreshTimeTree(View view,long now){
+  boolean expired=false;
+  if(view instanceof LinearLayout&&view.getTag() instanceof Long){
+   LinearLayout group=(LinearLayout)view;
+   long finish=(Long)view.getTag();
+   if(group.getChildCount()>1&&group.getChildAt(1) instanceof TextView)
+    ((TextView)group.getChildAt(1)).setText(format(Math.max(0,(finish-now+999)/1000))+"  ·  "+finishAt(finish));
+   if(finish<=now)expired=true;
+  }
+  if(view instanceof android.view.ViewGroup){
+   android.view.ViewGroup group=(android.view.ViewGroup)view;
+   for(int i=0;i<group.getChildCount();i++)expired=refreshTimeTree(group.getChildAt(i),now)||expired;
+  }
+  return expired;
  }
  private String timelineFilter="Alles";
  private String finishAt(long timestamp){
@@ -456,7 +473,7 @@ public final class MainActivity extends Activity {
   String[] metrics={accounts.size()+"\\nACCOUNTS",active+"\\nBOUWERS BEZIG",totalReady+"\\nKLAAR"};
   for(String metric:metrics){
    TextView view=label(metric.replace("\\n","\n"),13);view.setGravity(android.view.Gravity.CENTER);
-   view.setTextColor(0xffffd88a);view.setBackground(shape(0xff292139,12));
+   view.setTextColor(0xffffd88a);view.setBackground(clashSurface(0xff292139,0xff644b76,12));
    LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,dp(70),1);lp.setMargins(dp(2),dp(3),dp(2),dp(3));stats.addView(view,lp);
   }
   LinearLayout gridRow=null;int index=0;
@@ -472,7 +489,7 @@ public final class MainActivity extends Activity {
    int completed=completedCount(ac,now);
    boolean ready=completed>0,urgent=!ready&&soonest!=Long.MAX_VALUE&&soonest-now<=1800000L;
    int color=ready?0xff213a30:urgent?0xff443420:0xff30233e;
-   LinearLayout card=new LinearLayout(this);card.setOrientation(1);card.setPadding(dp(8),dp(6),dp(8),dp(8));card.setBackground(shape(color,14));
+   LinearLayout card=new LinearLayout(this);card.setOrientation(1);card.setPadding(dp(8),dp(6),dp(8),dp(8));card.setBackground(clashSurface(color,ready?0xff4c9b77:urgent?0xffc6a266:0xff57416b,14));
    LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,-2,1);lp.setMargins(dp(2),dp(3),dp(2),dp(3));gridRow.addView(card,lp);
    TextView name=label((ac.equals(selectedAccount)&&foldExpanded?"◆  ":"⚔  ")+ac,15);name.setTypeface(null,android.graphics.Typeface.BOLD);card.addView(name);
    if(ready){
@@ -484,7 +501,7 @@ public final class MainActivity extends Activity {
    if(soonest!=Long.MAX_VALUE){
     TextView end=label(finishAt(soonest),12);end.setTextColor(0xffc9b9df);card.addView(end);
    }
-   TextView detail=label((first==null?"Geen actieve builder":cleanName(first.optString("name")))+"\n"+busy+" bouwers bezig",12);
+   TextView detail=label((first==null?"Geen actieve builder":"⚒  "+cleanName(first.optString("name")))+"\n"+busy+" bouwers bezig",12);
    detail.setTextColor(0xffd4c5e4);card.addView(detail);
    if(ready){
     Button checked=new Button(this);checked.setText("Gecontroleerd");checked.setTextSize(11);checked.setAllCaps(false);
