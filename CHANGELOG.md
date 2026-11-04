@@ -1,5 +1,14 @@
 # ClashTimerHub release notes
 
+## 7.5.3-beta1 — 4 November 2026
+
+### Compact widget finish labels
+- **Tomorrow → Tom:** The next-day finish label is now three letters in English, e.g. `Tom 00:22`.
+- **Morgen → Mrg:** The Dutch equivalent also uses three letters, e.g. `Mrg 00:22`.
+- The **shared column width is recalculated from the abbreviated display string** so the multi-account widget can fit into narrower widths before switching to multiple lines.
+- Today, dates beyond tomorrow, timers, Sync controls, and the widget's other settings are unchanged.
+
+
 ## 7.5.2-beta1 — 4 November 2026
 
 ### Back-up — Google Drive without Google Cloud
