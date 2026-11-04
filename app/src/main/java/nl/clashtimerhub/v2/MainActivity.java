@@ -44,6 +44,7 @@ public final class MainActivity extends Activity {
  @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);setIntent(intent);handleWidgetNavigation(intent);handleSharedJson(intent);}
  private void handleWidgetNavigation(Intent intent){
   if(intent==null)return;
+  if(intent.getBooleanExtra("widgetEnableOverlay",false)&&!getPreferences(0).getBoolean("floatingEnabled",false))toggleFloatingSync();
   String open=intent.getStringExtra("openAccount");
   if(open!=null&&accounts.contains(open)){selectedAccount=open;activeTab=0;draw();}
  }
@@ -221,7 +222,7 @@ public final class MainActivity extends Activity {
  }
  private void showWidgetSettings(){
   android.appwidget.AppWidgetManager manager=android.appwidget.AppWidgetManager.getInstance(this);
-  int[] ids=manager.getAppWidgetIds(new android.content.ComponentName(this,TimerWidget.class));
+  int[] ids=WidgetV7.allIds(this);
   if(ids.length==0){
    new android.app.AlertDialog.Builder(this).setTitle(t("Widget instellen"))
     .setMessage(t("Voeg eerst de Clash Timer Hub-widget toe via je Samsung-startscherm. Tijdens het toevoegen kun je meteen 'Alle accounts tonen' kiezen."))
@@ -230,7 +231,10 @@ public final class MainActivity extends Activity {
   }
   if(ids.length==1){openWidgetSettings(ids[0]);return;}
   String[] options=new String[ids.length];
-  for(int i=0;i<ids.length;i++)options[i]="Widget "+(i+1);
+  for(int i=0;i<ids.length;i++){
+   int kind=WidgetV7.kind(this,ids[i]);
+   options[i]=(kind==WidgetV7.MINI?"Mini":kind==WidgetV7.SINGLE?"Account":"Multi")+" · "+(i+1);
+  }
   new android.app.AlertDialog.Builder(this).setTitle(t("Welke widget wil je instellen?"))
    .setItems(options,(dialog,index)->openWidgetSettings(ids[index]))
    .setNegativeButton(t("Annuleren"),null).show();
@@ -415,6 +419,7 @@ public final class MainActivity extends Activity {
   if(active){
    stopService(service);
    prefs.edit().putBoolean("floatingEnabled",false).apply();
+   TimerWidget.update(this);
    toast("Zwevende plakknop uitgeschakeld");
    return;
   }
@@ -432,6 +437,7 @@ public final class MainActivity extends Activity {
    if(android.os.Build.VERSION.SDK_INT>=26)startForegroundService(service);
    else startService(service);
    prefs.edit().putBoolean("floatingEnabled",true).apply();
+   TimerWidget.update(this);
    toast("Zwevende plakknop ingeschakeld");
   }catch(Exception e){toast("Kan zwevende knop niet starten: "+e.getMessage());}
  }

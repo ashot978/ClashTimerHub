@@ -179,6 +179,11 @@ final class WidgetV7 {
   RemoteViews w=new RemoteViews(ctx.getPackageName(),R.layout.widget_v7_account);
   w.setTextViewText(R.id.v7_single_name,s==null?"Clash Timer Hub":s.account);
   w.setOnClickPendingIntent(R.id.v7_single_settings,settingsClick(ctx,id));
+  if(s==null){
+   timer(w,R.id.v7_single_builder_timer,R.id.v7_single_builder_idle,Long.MAX_VALUE,now);
+   timer(w,R.id.v7_single_lab_timer,R.id.v7_single_lab_idle,Long.MAX_VALUE,now);
+   timer(w,R.id.v7_single_pet_timer,R.id.v7_single_pet_idle,Long.MAX_VALUE,now);
+  }
   if(s!=null){
    w.setTextViewText(R.id.v7_single_builders,s.builderReady+"✓  "+s.builderActive+"⚒");
    w.setTextViewText(R.id.v7_single_lab_count,"⚗ "+s.labActive);

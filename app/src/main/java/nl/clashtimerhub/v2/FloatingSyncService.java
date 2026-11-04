@@ -94,6 +94,8 @@ public final class FloatingSyncService extends Service {
    }
   });
   bubble=view;manager.addView(bubble,params);
+  AppData.prefs(this).edit().putBoolean("floatingEnabled",true).apply();
+  TimerWidget.update(this);
  }
  private void showDropTarget(){
   if(dropTarget!=null||manager==null)return;
@@ -135,6 +137,7 @@ public final class FloatingSyncService extends Service {
   if(shuttingDown)return;
   shuttingDown=true;cancelHold();hideDropTarget();
   AppData.prefs(this).edit().putBoolean("floatingEnabled",false).apply();
+  TimerWidget.update(this);
   Toast.makeText(this,I18n.tr(this,"Zwevende plakknop uitgeschakeld"),Toast.LENGTH_SHORT).show();
   stopSelf();
  }
@@ -211,6 +214,8 @@ public final class FloatingSyncService extends Service {
   if(manager!=null&&bubble!=null){
    try{manager.removeView(bubble);}catch(RuntimeException ignored){}
   }
+  AppData.prefs(this).edit().putBoolean("floatingEnabled",false).apply();
+  TimerWidget.update(this);
   super.onDestroy();
  }
  @Override public IBinder onBind(Intent intent){return null;}

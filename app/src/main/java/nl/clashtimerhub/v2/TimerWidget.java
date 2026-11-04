@@ -10,7 +10,7 @@ import org.json.*;
 import java.util.*;
 
 /** V5 responsive, live-counting home-screen widget. */
-public final class TimerWidget extends AppWidgetProvider {
+public class TimerWidget extends AppWidgetProvider {
  static final String CHANNEL="builder_ready_v1";
  private static final String REFRESH="nl.clashtimerhub.v2.WIDGET_REFRESH";
  private static final int REFRESH_ID=90118;
@@ -81,70 +81,10 @@ public final class TimerWidget extends AppWidgetProvider {
   row.setOnClickPendingIntent(R.id.widget_account_root,click);
   return row;
  }
- static void update(Context context){
-  AppData.migrate(context);
-  AppWidgetManager manager=AppWidgetManager.getInstance(context);
-  int[] ids=manager.getAppWidgetIds(new android.content.ComponentName(context,TimerWidget.class));
-  long now=System.currentTimeMillis();
-  ArrayList<Status> data=states(context,now);
-  android.content.SharedPreferences settings=context.getSharedPreferences("WidgetPreferences",Context.MODE_PRIVATE);
-  for(int widgetId:ids){
-   boolean showAll=settings.getBoolean("all_"+widgetId,true);
-   HashSet<String> chosen=new HashSet<>();
-   try{
-    JSONArray selected=new JSONArray(settings.getString("selected_"+widgetId,"[]"));
-    for(int j=0;j<selected.length();j++)chosen.add(selected.optString(j));
-   }catch(Exception ignored){}
-   ArrayList<Status> visible=new ArrayList<>();
-   int ready=0;
-   for(Status s:data)if(showAll||chosen.contains(s.account)){
-    visible.add(s);ready+=s.ready;
-   }
-   // Samsung resizes widgets in launcher cells; switch layouts on each resize.
-   // Portrait uses the shorter width and taller height, landscape vice versa.
-   android.os.Bundle options=manager.getAppWidgetOptions(widgetId);
-   int widthDp=190,heightDp=240;
-   if(options!=null){
-    boolean landscape=context.getResources().getConfiguration().orientation==
-      android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-    widthDp=options.getInt(landscape?AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH:
-       AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,190);
-    heightDp=options.getInt(landscape?AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT:
-       AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,240);
-    if(widthDp<=0)widthDp=190;
-    if(heightDp<=0)heightDp=240;
-   }
-   // Seven mini rows need about 188dp; extra room shows finishing clock times.
-   boolean showEndTimes=widthDp>=210&&heightDp>=260;
-   boolean narrow=widthDp<195;
-   RemoteViews widget=new RemoteViews(context.getPackageName(),R.layout.builder_widget);
-
-   widget.setTextViewText(R.id.widget_title,narrow?"⚔ TIMERS":"⚔ CLASH TIMER HUB");
-   widget.setViewVisibility(R.id.widget_summary,narrow?View.GONE:View.VISIBLE);
-   if(!narrow)widget.setTextViewText(R.id.widget_summary,I18n.tr(context,visible.size()+" accounts · "+ready+" klaar"));
-   widget.removeAllViews(R.id.widget_rows);
-   if(visible.isEmpty()){
-    RemoteViews placeholder=new RemoteViews(context.getPackageName(),R.layout.widget_empty);
-    widget.addView(R.id.widget_rows,placeholder);
-   }else{
-    // Seven rows are always included. Only row density changes when resized.
-    for(Status s:visible)widget.addView(R.id.widget_rows,makeAccount(context,s,showEndTimes,now));
-   }
-   Intent open=new Intent(context,MainActivity.class);
-   PendingIntent home=PendingIntent.getActivity(context,90119,open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
-   widget.setOnClickPendingIntent(R.id.widget_title,home);
-   Intent configure=new Intent(context,WidgetConfigActivity.class);
-   configure.setAction("nl.clashtimerhub.v2.CONFIG_"+widgetId);
-   configure.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,widgetId);
-   PendingIntent configureButton=PendingIntent.getActivity(context,widgetId,configure,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
-   widget.setOnClickPendingIntent(R.id.widget_settings,configureButton);
-   try{manager.updateAppWidget(widgetId,widget);}
-   catch(RuntimeException e){android.util.Log.e("ClashTimerHub","Widget "+widgetId+" update failed",e);}
-  }
- }
+ static void update(Context context){WidgetV7.updateAll(context);}
  @Override public void onDeleted(Context context,int[] widgetIds){
   android.content.SharedPreferences.Editor editor=context.getSharedPreferences("WidgetPreferences",Context.MODE_PRIVATE).edit();
-  for(int id:widgetIds){editor.remove("all_"+id);editor.remove("selected_"+id);}
+  for(int id:widgetIds){editor.remove("all_"+id);editor.remove("selected_"+id);editor.remove("account_"+id);}
   editor.apply();super.onDeleted(context,widgetIds);
  }
  static String summary(Context context){
@@ -170,7 +110,7 @@ public final class TimerWidget extends AppWidgetProvider {
   long earliest=Long.MAX_VALUE;
   for(int i=0;i<upgrades.length();i++){
    JSONObject o=upgrades.optJSONObject(i);
-   if(o==null||!"Bouwers".equals(o.optString("category")))continue;
+   if(o==null)continue;
    long finish=o.optLong("finish");
    if(finish>now&&finish<earliest)earliest=finish;
   }
