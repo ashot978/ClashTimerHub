@@ -997,7 +997,34 @@ public final class MainActivity extends Activity {
    while((n=stream.read(bytes))!=-1){buffer.write(bytes,0,n);if(buffer.size()>10_000_000)throw new java.io.IOException("Export te groot");}
    importClashData(buffer.toString("UTF-8"));
   }catch(Exception e){toast("Import mislukt: "+e.getMessage());}return;}
-  if(req!=PICK)return;try(InputStream stream=getContentResolver().openInputStream(data.getData())){Bitmap bmp=BitmapFactory.decodeStream(stream);if(bmp!=null)scan(bmp);}catch(Exception e){toast("Foto kon niet worden geopend");}}
+  if(req!=PICK)return;try(InputStream stream=getContentResolver().openInputStream(data.getData())){Bitmap bmp=BitmapFactory.decodeStream(stream);if(bmp!=null)guardedScan(bmp);}catch(Exception e){toast("Foto kon niet worden geopend");}}
+ /** OCR is screenshot-assisted only: reject ambiguous menus unless the user confirms. */
+ private void guardedScan(Bitmap bmp){
+  if(bmp.getWidth()<300||bmp.getHeight()<400){toast("Screenshotformaat niet ondersteund");return;}
+  int cropHeight=Math.max(1,Math.min(bmp.getHeight(),(int)(bmp.getHeight()*.32)));
+  Bitmap heading=Bitmap.createBitmap(bmp,0,0,bmp.getWidth(),cropHeight);
+  com.google.mlkit.vision.text.TextRecognizer recognizer=TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
+  recognizer.process(InputImage.fromBitmap(heading,0))
+   .addOnSuccessListener(result->{
+    String title=result.getText().toLowerCase(java.util.Locale.ROOT);
+    heading.recycle();recognizer.close();
+    if(title.contains("upgrade")||title.contains("upgrades")||title.contains("bouw")||
+       title.contains("builder")||title.contains("laboratory")||title.contains("laboratorium")||
+       title.contains("pets")||title.contains("troops")||title.contains("research")){
+     scan(bmp);
+    }else{
+     new android.app.AlertDialog.Builder(this).setTitle(t("Clash-menu niet herkend"))
+      .setMessage(t("De scanner kan het upgrade-menu niet betrouwbaar herkennen. Controleer of het juiste Clash-menu zichtbaar is. Scan alleen verder als dit klopt."))
+      .setPositiveButton(t("Toch scannen"),(d,w)->scan(bmp))
+      .setNegativeButton(t("Annuleren"),null).show();
+    }
+   }).addOnFailureListener(e->{
+    heading.recycle();recognizer.close();
+    new android.app.AlertDialog.Builder(this).setTitle(t("Menudetectie mislukt"))
+     .setMessage(t("Kan het Clash-menu niet herkennen. Probeer een scherpere screenshot."))
+     .setPositiveButton(t("OK"),null).show();
+   });
+ }
  private void scan(Bitmap bmp){
   // Only the FIRST active upgrade and the builder availability counter matter.
   // The bottom-right builder badge (0/7 in the supplied screenshot) is below the list.
