@@ -73,7 +73,7 @@ public final class MainActivity extends Activity {
  private void chooseLanguage(){
   String[] languages={"🇬🇧  English","🇳🇱  Nederlands"};
   int selected=I18n.english(this)?0:1;
-  new android.app.AlertDialog.Builder(this).setTitle(t("Taal / Language"))
+  new android.app.AlertDialog.Builder(this).setTitle(t("Taal"))
    .setSingleChoiceItems(languages,selected,(dialog,choice)->{
     I18n.choose(this,choice==0?"en":"nl");
     dialog.dismiss();
@@ -194,8 +194,8 @@ public final class MainActivity extends Activity {
  }
  private void showSettingsScreen(){
   screenContent.addView(label("INSTELLINGEN",20));
-  LinearLayout language=settingsSection("🌐  TAAL / LANGUAGE","Choose your preferred language / Kies je taal");
-  settingsItem(language,I18n.flag(this),"Taal / Language",I18n.flag(this)+"  "+I18n.label(this),()->chooseLanguage());
+  LinearLayout language=settingsSection("🌐  TAAL","Kies je voorkeurstaal");
+  settingsItem(language,I18n.flag(this),"Taal",I18n.flag(this)+"  "+I18n.label(this),()->chooseLanguage());
   LinearLayout sync=settingsSection("↻  SYNCHRONISATIE","Accounts bijwerken zonder Clash te verlaten");
   settingsItem(sync,"⚔","Zwevende plakknop",getPreferences(0).getBoolean("floatingEnabled",false)?"Actief · tik om uit te schakelen":"Uit · tik om in te schakelen",()->{toggleFloatingSync();draw();});
   settingsItem(sync,"▤","Synchroniseer vanaf klembord","Importeer een gekopieerde Clash-export",()->importClipboard());
