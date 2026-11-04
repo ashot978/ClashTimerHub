@@ -103,7 +103,7 @@ public final class MainActivity extends Activity {
   root=new LinearLayout(this);root.setOrientation(1);root.setPadding(dp(12),dp(22),dp(12),dp(64));scroll.addView(root);
 
   TextView heading=label("⚔  CLASH TIMER HUB",24);heading.setTypeface(null,android.graphics.Typeface.BOLD);heading.setTextColor(0xffffd88a);root.addView(heading);
-  TextView subtitle=label("COMMAND CENTER / V5",11);subtitle.setTextColor(0xffb5a5ff);root.addView(subtitle);
+  TextView subtitle=label("COMMAND CENTER / V6",11);subtitle.setTextColor(0xffb5a5ff);root.addView(subtitle);
   View accent=new View(this);accent.setBackgroundColor(0xffd2a96e);LinearLayout.LayoutParams accentLp=new LinearLayout.LayoutParams(dp(56),dp(2));accentLp.setMargins(dp(12),0,0,dp(8));root.addView(accent,accentLp);
   screenContent=new LinearLayout(this);screenContent.setOrientation(1);root.addView(screenContent);
   LinearLayout nav=new LinearLayout(this);nav.setBackgroundColor(0xff261a36);nav.setPadding(dp(4),dp(20),dp(4),dp(12));shell.addView(nav);
