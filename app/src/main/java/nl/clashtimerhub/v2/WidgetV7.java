@@ -95,6 +95,12 @@ final class WidgetV7 {
    rv.setChronometerCountDown(chrono,true);
   }else rv.setTextViewText(idle,"—");
  }
+ private static void showMax(RemoteViews view,Context ctx,Status status,String category,int idleId,long next){
+  if(next==Long.MAX_VALUE&&AppData.isMaxed(ctx,status.account,category)){
+   view.setTextViewText(idleId,"✓");
+   view.setTextColor(idleId,0xff8BE3AD);
+  }
+ }
  private static PendingIntent accountClick(Context ctx,String account,int id){
   Intent intent=new Intent(ctx,MainActivity.class);
   intent.setAction("nl.clashtimerhub.v2.OPEN_WIDGET_ACCOUNT."+id+"."+account);
@@ -123,6 +129,9 @@ final class WidgetV7 {
    timer(row,R.id.v7_wide_lab_timer,R.id.v7_wide_lab_idle,s.labNext,now);
    timer(row,R.id.v7_wide_pet_timer,R.id.v7_wide_pet_idle,s.petNext,now);
    timer(row,R.id.v7_wide_builder_timer,R.id.v7_wide_builder_idle,s.builderNext,now);
+   showMax(row,ctx,s,"Laboratorium",R.id.v7_wide_lab_idle,s.labNext);
+   showMax(row,ctx,s,"Pets",R.id.v7_wide_pet_idle,s.petNext);
+   showMax(row,ctx,s,"Bouwers",R.id.v7_wide_builder_idle,s.builderNext);
    row.setTextViewText(R.id.v7_wide_finish,finish(ctx,s.builderNext,true));
    row.setOnClickPendingIntent(R.id.widget_account_root,accountClick(ctx,s.account,id));
    return row;
@@ -133,7 +142,11 @@ final class WidgetV7 {
   row.setViewVisibility(R.id.widget_ready,s.builderReady>0?View.VISIBLE:View.GONE);
   if(s.builderReady>0)row.setTextViewText(R.id.widget_ready,"●"+s.builderReady);
   timer(row,R.id.widget_timer,R.id.widget_idle,s.builderNext,now);
-  if(medium)row.setTextViewText(R.id.widget_subtitle,"⚗ "+s.labActive+"  🐾 "+s.petActive+"  ·  "+finish(ctx,s.builderNext,true));
+  if(medium){
+   String lab=s.labActive>0?String.valueOf(s.labActive):AppData.isMaxed(ctx,s.account,"Laboratorium")?"✓":"0";
+   String pets=s.petActive>0?String.valueOf(s.petActive):AppData.isMaxed(ctx,s.account,"Pets")?"✓":"0";
+   row.setTextViewText(R.id.widget_subtitle,"⚗ "+lab+"  🐾 "+pets+"  ·  "+finish(ctx,s.builderNext,true));
+  }
   row.setOnClickPendingIntent(R.id.widget_account_root,accountClick(ctx,s.account,id));
   return row;
  }
@@ -222,6 +235,9 @@ final class WidgetV7 {
    timer(w,R.id.v7_single_builder_timer,R.id.v7_single_builder_idle,s.builderNext,now);
    timer(w,R.id.v7_single_lab_timer,R.id.v7_single_lab_idle,s.labNext,now);
    timer(w,R.id.v7_single_pet_timer,R.id.v7_single_pet_idle,s.petNext,now);
+   showMax(w,ctx,s,"Bouwers",R.id.v7_single_builder_idle,s.builderNext);
+   showMax(w,ctx,s,"Laboratorium",R.id.v7_single_lab_idle,s.labNext);
+   showMax(w,ctx,s,"Pets",R.id.v7_single_pet_idle,s.petNext);
    w.setTextViewText(R.id.v7_single_builder_finish,finish(ctx,s.builderNext,true));
    w.setTextViewText(R.id.v7_single_lab_finish,finish(ctx,s.labNext,true));
    w.setTextViewText(R.id.v7_single_pet_finish,finish(ctx,s.petNext,true));
