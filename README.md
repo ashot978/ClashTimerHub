@@ -1,45 +1,29 @@
-# Clash Timer Hub — Android (prototype)
+# Clash Timer Hub V5 — Samsung Fold / Android
 
-Een Android-widget voor zeven Clash of Clans-accounts, met per account de eerstvolgende timer voor bouwers, laboratorium en pets.
+Een eigen Clash of Clans timerdashboard voor meerdere accounts, met één-tik-synchronisatie, actieve builders en een schaalbare homescreenwidget.
 
-## Status
-- Android-broncode is geüpload als gecomprimeerd bronarchief in `source/chunk01.b64` t/m `chunk06.b64`.
-- Het workflowbestand `.github/workflows/build-apk.yml` reconstrueert de volledige Android-projectstructuur, controleert de SHA-256-checksum en bouwt een debug-APK.
-- Een APK is pas beschikbaar nadat **Build Android test APK** groen is.
-- De scanner en timerwidget zijn nog niet op een echte Samsung getest.
+## Wat werkt in V5
+- **Zwevende sync-knop:** kopieer in Clash of Clans via **Settings → Data Export → Copy** en tik één keer op het paarse zwaardje. Geen appwisseling of bevestiging. De knop wordt kort groen bij een succesvolle import of rood bij een fout.
+- **Veilige accountkoppeling:** player tag heeft voorrang; anders wordt een bestaande accountnaam alleen gebruikt wanneer deze nog geen andere player tag heeft. Onbekende tags blijven afzonderlijk totdat je ze koppelt via **Accounts**.
+- **Slimme importmelding:** aantal actieve, nieuwe, voltooide en gewijzigde upgrades.
+- **Synchronisatie tussen schermen:** nieuwe data wordt opgeslagen in SharedPreferences, waarna de app de data herlaadt en de homescreenwidget direct wordt bijgewerkt.
+- **V5 widget:** vergroot of verklein de widget; hij wisselt tussen compacte accountregels en uitgebreide kaarten met upgrade en eindtijd. Wanneer de launcher het ondersteunt, telt de chronometer continu af zonder periodieke app-polling. Tik op een account om de details in de app te openen.
+- **Fold:** bij een breed scherm toont Dashboard de accounts links en de upgrades van het geselecteerde account rechts. Op het smalle scherm blijft de compacte dashboardweergave bestaan.
+- **Statuskleuren:** groen voor klaar, goud voor bijna klaar en paars voor actief. Er zijn geen voortgangsbalken.
 
-## APK downloaden (als de workflow geslaagd is)
-Open het tabblad [Actions](https://github.com/ashot978/ClashTimerHub/actions), selecteer **Build Android test APK** en kies de geslaagde run. Download het artifact **ClashTimerHub-debug-apk** (ZIP), pak het uit op je telefoon en open `app-debug.apk` om te installeren.
+## Installeren
+1. Ga naar [GitHub Actions](https://github.com/ashot978/ClashTimerHub/actions).
+2. Open de nieuwste succesvolle **Build Clash Timer Hub V5**.
+3. Download het artifact **ClashTimerHubV5-debug-apk**, pak het uit en installeer `app-debug.apk` over de bestaande app.
+4. **Verwijder de bestaande app niet**: dan verdwijnen lokale accounts en timers.
 
-## Broncode lokaal uitpakken
-```bash
-cat source/chunk*.b64 | base64 --decode > clashtimerhub-sources.tar.xz
-tar -xJf clashtimerhub-sources.tar.xz
-```
-Het archief bevat de volledige Java-, Android-resource- en Gradle-projectbestanden. Deze archiefmethode wordt alleen gebruikt omdat de aangesloten GitHub-uploader geen directe binaire ZIP-upload ondersteunt.
+Deze build behoudt de bestaande app-id en verwacht dezelfde Android-debug-ondertekeningssleutel. Als de signing-cache ontbreekt, stopt de build bewust in plaats van een APK te maken die niet over de huidige app kan worden geïnstalleerd.
 
-## Werking
-Selecteer een van zeven accounts en Bouwers/Laboratorium/Pets. Geef toestemming voor een korte Android-schermdeelsessie, bekijk de timer in het spel en bevestig de gevonden OCR-timer in de app. Er worden geen spelhandelingen uitgevoerd en geen Supercell-inloggegevens gevraagd.
+## Widget toevoegen
+Houd je startscherm ingedrukt → **Widgets** → **Clash Timer Hub**. Vergroot de widget om meer accounts te tonen. Een heel kleine widget kan niet alle zeven tegelijk tonen; hij geeft dan aan hoeveel accounts verborgen zijn.
 
-**Let op:** dit is een experimentele versie. OCR kan timers missen of verwarren; de app vraagt daarom om bevestiging voor het opslaan.
+## Timer- en alarmmeldingen
+Er zijn twee verschillende tests onder Instellingen: **Testmelding versturen** controleert het notificatierecht; **Alarmtest over 1 minuut** controleert of een ingepland alarm afgaat. Zonder toestemming voor exacte alarmen kan Android echte meldingen later afleveren. Controleer op Samsung ook batterijbeperkingen en de instellingen voor exacte alarmen.
 
-## Experimentele scanbediening (in ontwikkeling)
-
-De Android-bronpatch bevat een zwevende knop **Scan nu**. Geef in Android
-toestemming voor **Weergeven over andere apps**, start de schermscan vanuit de
-app en open het gewenste upgrademenu in Clash. Tik kort op de zwevende knop om
-de scan te activeren.
-
-**Scangebied aanpassen:** houd de zwevende knop langer dan 0,7 seconde
-ingedrukt, kies een screenshot van het geopende Clash-upgrademenu, sleep een
-rechthoek rond de builderstand en de eerste actieve upgrade en tik op
-**Scangebied opslaan**. De selectie wordt per categorie als relatieve
-coördinaten bewaard. Met **Standaardgebied herstellen** kun je terug.
-
-De OCR-parser kan vrije builders herkennen uit een teller `0/6` t/m `6/6`
-of `0/7` t/m `7/7`. De widgetweergave van **builders vrij** is nog niet
-volledig geïntegreerd en deze functionaliteit is nog niet op een echte
-Samsung gevalideerd. Controleer daarom altijd het OCR-resultaat voordat je
-het opslaat.
-
-Voor een nieuwe APK: [Build Android test APK](https://github.com/ashot978/ClashTimerHub/actions/workflows/build-apk.yml).
+## Ontwikkelstatus
+V5 is een beta. Elke codepush start een debug-APK-build op `main`. Controleer of de GitHub Actions-run groen is; sourcecode alleen bewijst niet dat de APK op elk toestel werkt.
