@@ -23,6 +23,11 @@ final class UpdateInstaller {
   new Thread(()->{
    try {
     verify(activity,apk,expectedBuild,expectedSha256);
+    // Save only a VERIFIED APK for an alternative Android installer retry.
+    AppData.prefs(activity).edit()
+     .putString("lastVerifiedApk",apk.getAbsolutePath())
+     .putLong("lastVerifiedBuild",expectedBuild)
+     .putString("lastVerifiedHash",expectedSha256==null?"":expectedSha256).apply();
     if(!activity.getPackageManager().canRequestPackageInstalls()){
      activity.runOnUiThread(()->new android.app.AlertDialog.Builder(activity)
       .setTitle("Toestemming voor app-updates")
@@ -71,6 +76,30 @@ final class UpdateInstaller {
   },"ClashTimerHub-install-update").start();
  }
 
+ /** Fallback to Android's native installer UI when the session installer is rejected.
+  * Verify again; never pass an unknown APK or skip the signature/version check. */
+ static void installWithAndroidInstaller(MainActivity activity,File apk,long build,String sha256){
+  new Thread(()->{
+   try{
+    verify(activity,apk,build,sha256);
+    if(!activity.getPackageManager().canRequestPackageInstalls())
+     throw new java.io.IOException("Sta eerst Apps uit deze bron toestaan in Android-instellingen toe.");
+    Uri uri=androidx.core.content.FileProvider.getUriForFile(
+     activity,activity.getPackageName()+".backups",apk);
+    Intent intent=new Intent(Intent.ACTION_VIEW);
+    intent.setDataAndType(uri,"application/vnd.android.package-archive");
+    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+    activity.runOnUiThread(()->{
+     try{activity.startActivity(intent);}
+     catch(Exception e){activity.showUpdateInstallError(
+      "Android-installatieprogramma kan niet openen: "+e.getMessage());}
+    });
+   }catch(Exception error){
+    activity.showUpdateInstallError(error.getMessage()==null?
+      "APK kon niet veilig worden gecontroleerd":error.getMessage());
+   }
+  },"ClashTimerHub-system-installer").start();
+ }
  private static void verify(MainActivity context,File file,long expectedBuild,String digest)throws Exception{
   if(file==null||!file.isFile()||file.length()<1024*1024)
    throw new java.io.IOException("Download is onvolledig of geen APK. Download opnieuw.");
