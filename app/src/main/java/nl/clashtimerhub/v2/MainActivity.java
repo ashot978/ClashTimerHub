@@ -40,7 +40,7 @@ public final class MainActivity extends Activity {
  @Override protected void onResume(){super.onResume();getPreferences(0).registerOnSharedPreferenceChangeListener(syncWatcher);refreshExternalImport();ticker.removeCallbacks(tick);ticker.post(tick);}
  @Override protected void onPause(){getPreferences(0).unregisterOnSharedPreferenceChangeListener(syncWatcher);ticker.removeCallbacks(tick);super.onPause();}
  private static final Pattern TIME=Pattern.compile("(?i)(?:(\\d+)\\s*d\\s*)?(?:(\\d+)\\s*h\\s*)?(?:(\\d+)\\s*m\\s*)?(?:(\\d+)\\s*s\\s*)?");
- @Override public void onCreate(Bundle b){super.onCreate(b);load();draw();if(android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},55);TimerWidget.schedule(this);handleWidgetNavigation(getIntent());handleSharedJson(getIntent());}
+ @Override public void onCreate(Bundle b){super.onCreate(b);AppData.migrate(this);load();draw();if(android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},55);TimerWidget.schedule(this);handleWidgetNavigation(getIntent());handleSharedJson(getIntent());}
  @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);setIntent(intent);handleWidgetNavigation(intent);handleSharedJson(intent);}
  private void handleWidgetNavigation(Intent intent){
   if(intent==null)return;
