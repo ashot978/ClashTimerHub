@@ -1,5 +1,22 @@
 # ClashTimerHub release notes
 
+## 7.4.7-beta1 — 4 November 2026
+
+### Widget settings editor
+- Fixed the widget configuration screen overlapping Android's status and navigation bars, particularly on Samsung One UI with edge-to-edge layouts.
+- Added a fixed header naming the widget type and ID, a scrollable settings area, and an always-visible Save widget button.
+- Existing widget instances retain their own account selection, ordering and appearance settings.
+- The multi-account widget has account selection, manual ordering, sorting, text size, lab/pet visibility and background controls.
+- Individual account widgets have account, text size, lab/pet visibility and background settings.
+- Mini widgets have account, text size and background settings.
+- Sync widgets have a background setting and an explanation of their app-wide Sync behavior.
+- The Settings widget chooser now identifies each widget by its type, chosen account and widget ID.
+- Existing widget preferences and timer data are preserved.
+
+### Verification
+- Android APK is checked by GitHub Actions. UI interactions and layout still need testing on Samsung One UI.
+
+
 ## 7.4.6-beta1 — 4 November 2026
 
 ### New
