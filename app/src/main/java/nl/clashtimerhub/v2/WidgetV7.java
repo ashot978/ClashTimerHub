@@ -214,14 +214,11 @@ final class WidgetV7 {
   // A one-cell widget has room for its header and a timer, not the sync footer.
   int rows=Math.max(1,ordered.size());
   int mode;
-  if(width>=510)mode=height<44+rows*24?3:2;
-  // Samsung One UI reports roughly 225-269dp for three home-screen cells.
-  // Keep the original single-line six-column design at that width; using
-  // the medium mode here moved checks into an unstyled subtitle.
-  else if(width>=290)mode=3; // Same text size; optimized fixed-width columns.
-  else if(width>=150)mode=4; // Reflow to two lines when a single line would clip.
-  else mode=0;
-  int rowHeight=mode==4?36:mode==3?19:mode==2?24:mode==1?34:19;
+  // Never shrink lettering to fit: choose a two-line row when wide fields cannot fit.
+  if(width>=620)mode=height<44+rows*24?3:2;
+  else if(width>=440)mode=3;
+  else mode=4;
+  int rowHeight=mode==4?38:mode==3?21:24;
   boolean showSync=height>=44+rowHeight;
   int available=Math.max(0,height-24-(showSync?20:0));
   int count=Math.min(ordered.size(),Math.max(1,available/rowHeight));
