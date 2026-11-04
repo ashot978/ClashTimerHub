@@ -7,14 +7,14 @@
   android:textSize="11sp" android:textColor="#FFFFFF" android:textStyle="bold" android:singleLine="true" android:ellipsize="end"/>
  <TextView android:id="@+id/v7_wide_builders" android:layout_width="65dp" android:layout_height="wrap_content"
   android:textSize="10sp" android:textColor="#8BE3AD" android:gravity="center" android:singleLine="true"/>
- <LinearLayout android:layout_width="77dp" android:layout_height="wrap_content" android:gravity="center">
+ <LinearLayout android:id="@+id/v7_wide_lab_group" android:layout_width="77dp" android:layout_height="wrap_content" android:gravity="center">
   <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="⚗ " android:textSize="10sp" android:textColor="#D6BCEA"/>
   <Chronometer android:id="@+id/v7_wide_lab_timer" android:layout_width="wrap_content" android:layout_height="wrap_content"
    android:textSize="10sp" android:textColor="#D6BCEA" android:singleLine="true"/>
   <TextView android:id="@+id/v7_wide_lab_idle" android:layout_width="wrap_content" android:layout_height="wrap_content"
    android:text="—" android:textSize="10sp" android:textColor="#BCA7D5" android:visibility="gone"/>
  </LinearLayout>
- <LinearLayout android:layout_width="77dp" android:layout_height="wrap_content" android:gravity="center">
+ <LinearLayout android:id="@+id/v7_wide_pet_group" android:layout_width="77dp" android:layout_height="wrap_content" android:gravity="center">
   <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🐾 " android:textSize="10sp" android:textColor="#D6BCEA"/>
   <Chronometer android:id="@+id/v7_wide_pet_timer" android:layout_width="wrap_content" android:layout_height="wrap_content"
    android:textSize="10sp" android:textColor="#D6BCEA" android:singleLine="true"/>
