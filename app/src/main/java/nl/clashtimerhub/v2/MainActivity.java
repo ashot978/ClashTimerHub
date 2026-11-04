@@ -335,7 +335,7 @@ public final class MainActivity extends Activity {
   final String[] filters={"Alles","Bouwers","Laboratorium","Pets"};
   LinearLayout filterRow=new LinearLayout(this);screenContent.addView(filterRow);
   for(String filter:filters){
-   Button b=new Button(this);b.setText(filter);b.setTextSize(10);b.setAllCaps(false);
+   Button b=new Button(this);b.setText(t(filter));b.setTextSize(10);b.setAllCaps(false);
    b.setOnClickListener(v->{timelineFilter=filter;draw();});
    b.setTextColor(filter.equals(timelineFilter)?0xffffd88a:0xffd5c9e2);
    filterRow.addView(b,new LinearLayout.LayoutParams(0,dp(48),1));
@@ -382,14 +382,15 @@ public final class MainActivity extends Activity {
  }
  private String timelineFilter="Alles";
  private String finishAt(long timestamp){
-  java.text.SimpleDateFormat fmt=new java.text.SimpleDateFormat("HH:mm",java.util.Locale.forLanguageTag("nl-NL"));
+  java.util.Locale displayLocale=I18n.english(this)?java.util.Locale.UK:java.util.Locale.forLanguageTag("nl-NL");
+  java.text.SimpleDateFormat fmt=new java.text.SimpleDateFormat("HH:mm",displayLocale);
   java.util.Calendar now=java.util.Calendar.getInstance(),finish=java.util.Calendar.getInstance();finish.setTimeInMillis(timestamp);
   boolean today=now.get(java.util.Calendar.YEAR)==finish.get(java.util.Calendar.YEAR)&&now.get(java.util.Calendar.DAY_OF_YEAR)==finish.get(java.util.Calendar.DAY_OF_YEAR);
   now.add(java.util.Calendar.DAY_OF_YEAR,1);
   boolean tomorrow=now.get(java.util.Calendar.YEAR)==finish.get(java.util.Calendar.YEAR)&&now.get(java.util.Calendar.DAY_OF_YEAR)==finish.get(java.util.Calendar.DAY_OF_YEAR);
-  if(today)return "Vandaag om "+fmt.format(new java.util.Date(timestamp));
-  if(tomorrow)return "Morgen om "+fmt.format(new java.util.Date(timestamp));
-  return new java.text.SimpleDateFormat("EEE d MMM · HH:mm",java.util.Locale.forLanguageTag("nl-NL")).format(new java.util.Date(timestamp));
+  if(today)return t("Vandaag om ")+fmt.format(new java.util.Date(timestamp));
+  if(tomorrow)return t("Morgen om ")+fmt.format(new java.util.Date(timestamp));
+  return new java.text.SimpleDateFormat("EEE d MMM · HH:mm",displayLocale).format(new java.util.Date(timestamp));
  }
  private void addTimerRow(LinearLayout parent,JSONObject o,boolean editable){
   long finish=o.optLong("finish"),remain=Math.max(0,(finish-System.currentTimeMillis()+999)/1000);
@@ -968,5 +969,5 @@ public final class MainActivity extends Activity {
    upgrades.addAll(replacement);persist();showTimers();toast(replacement.size()+" timers opgeslagen");dialog.dismiss();
   }));dialog.show();
  }
- private void toast(String s){Toast.makeText(this,s,Toast.LENGTH_LONG).show();}
+ private void toast(String s){Toast.makeText(this,t(s),Toast.LENGTH_LONG).show();}
 }
