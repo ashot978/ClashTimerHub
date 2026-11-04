@@ -71,6 +71,7 @@ public final class MainActivity extends Activity {
  }
  private void persist(){getPreferences(0).edit().putString("accounts",new JSONArray(accounts).toString()).putString("upgrades",new JSONArray(upgrades).toString()).apply();lastLoadedSnapshot=snapshot();TimerWidget.schedule(this);}
  private String t(String dutch){return I18n.tr(this,dutch);}
+ private String displayAccount(String key){return AppData.displayName(this,key);}
  private void chooseLanguage(){
   String[] languages={"🇬🇧  English","🇳🇱  Nederlands"};
   int selected=I18n.english(this)?0:1;
@@ -111,7 +112,12 @@ public final class MainActivity extends Activity {
   foldExpanded=getResources().getConfiguration().screenWidthDp>=600;
   detailPanel=null;
   getWindow().setStatusBarColor(0xff0e1020);getWindow().setNavigationBarColor(0xff0e1020);
-  LinearLayout shell=new LinearLayout(this);shell.setOrientation(1);shell.setBackgroundColor(0xff160f25);setContentView(shell);
+  LinearLayout shell=new LinearLayout(this);shell.setOrientation(1);shell.setBackgroundColor(0xff160f25);
+  if(android.os.Build.VERSION.SDK_INT>=35)shell.setOnApplyWindowInsetsListener((v,insets)->{
+   android.graphics.Insets bars=insets.getInsets(android.view.WindowInsets.Type.systemBars());
+   v.setPadding(bars.left,bars.top,bars.right,bars.bottom);return insets;
+  });
+  setContentView(shell);
   ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);
   root=new LinearLayout(this);root.setOrientation(1);root.setPadding(dp(12),dp(22),dp(12),dp(64));scroll.addView(root);
 
@@ -216,9 +222,36 @@ public final class MainActivity extends Activity {
   });
   LinearLayout widget=settingsSection("▦  HOMESCREENWIDGET","Toon standaard al je accounts");
   settingsItem(widget,"⚙","Widget instellen","Alle accounts of een eigen selectie",()->showWidgetSettings());
+  LinearLayout players=settingsSection("♙  ACCOUNTS","Geef je accounts herkenbare namen");
+  settingsItem(players,"✎","Accountnamen aanpassen","Verander de naam zonder de player tag te wijzigen",()->renameAccount());
+  LinearLayout releases=settingsSection("↓  APP-UPDATES","Nieuwe versies via GitHub");
+  settingsItem(releases,"↓","Updates openen","Ga naar de nieuwste Android-build",()->openUpdates());
   LinearLayout backups=settingsSection("▣  BACK-UP","Je opgeslagen accounts veilig bewaren");
   settingsItem(backups,"▣","Back-up kopiëren","Kopieer je gegevens naar het klembord",()->copyBackup());
   settingsItem(backups,"↶","Back-up herstellen","Herstel een gekopieerde back-up",()->restoreBackupClipboard());
+ }
+ private void renameAccount(){
+  if(accounts.isEmpty()){toast("Geen accounts beschikbaar");return;}
+  String[] labels=new String[accounts.size()];
+  for(int i=0;i<labels.length;i++)labels[i]=displayAccount(accounts.get(i))+" · "+accounts.get(i);
+  new android.app.AlertDialog.Builder(this).setTitle(t("Account kiezen")).setItems(labels,(dialog,index)->{
+   String key=accounts.get(index);
+   EditText edit=new EditText(this);edit.setSingleLine(true);edit.setText(displayAccount(key));edit.selectAll();
+   LinearLayout frame=new LinearLayout(this);frame.setPadding(dp(16),0,dp(16),0);frame.addView(edit);
+   new android.app.AlertDialog.Builder(this).setTitle(t("Naam wijzigen"))
+    .setMessage(t("De player tag en timers veranderen niet."))
+    .setView(frame).setPositiveButton(t("Opslaan"),(d,w)->{
+     String display=edit.getText().toString().trim();
+     if(display.isEmpty()){toast("Naam mag niet leeg zijn");return;}
+     AppData.saveAccountName(this,key,display);TimerWidget.update(this);draw();
+    }).setNegativeButton(t("Annuleren"),null).show();
+  }).setNegativeButton(t("Annuleren"),null).show();
+ }
+ private void openUpdates(){
+  new android.app.AlertDialog.Builder(this).setTitle(t("Nieuwe versie installeren"))
+   .setMessage(t("GitHub Actions opent in je browser. Open de nieuwste succesvolle build, download de APK en installeer over de bestaande app. Verwijder de app niet."))
+   .setPositiveButton(t("Open GitHub"),(d,w)->startActivity(new Intent(Intent.ACTION_VIEW,android.net.Uri.parse("https://github.com/ashot978/ClashTimerHub/actions/workflows/build-apk.yml"))))
+   .setNegativeButton(t("Annuleren"),null).show();
  }
  private void showWidgetSettings(){
   android.appwidget.AppWidgetManager manager=android.appwidget.AppWidgetManager.getInstance(this);
@@ -251,7 +284,7 @@ public final class MainActivity extends Activity {
   String ac=selectedAccount;
   Button back=new Button(this);back.setAllCaps(false);back.setText(t("‹  Terug naar alle accounts"));back.setTextSize(13);
   back.setOnClickListener(v->{selectedAccount="";activeTab=0;draw();});detailPanel.addView(back);
-  TextView title=label("⚔  "+ac,20);title.setTextColor(0xffffd783);
+  TextView title=label("⚔  "+displayAccount(ac),20);title.setTextColor(0xffffd783);
   title.setTypeface(null,android.graphics.Typeface.BOLD);detailPanel.addView(title);
   int ready=completedCount(ac,System.currentTimeMillis());
   if(ready>0){
@@ -285,7 +318,7 @@ public final class MainActivity extends Activity {
    JSONObject o=pending.get(i);
    long finish=o.optLong("finish");
    String name=cleanName(o.optString("name")),who=o.optString("account");
-   TextView row=label(finishAt(finish)+"  ·  "+who+"\n"+name,12);
+   TextView row=label(finishAt(finish)+"  ·  "+displayAccount(who)+"\n"+name,12);
    row.setTextColor(0xfff1debd);row.setBackground(clashSurface(0xff2e2340,0xff53416a,10));
    LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(0,dp(2),0,dp(2));parent.addView(row,lp);
    row.setOnClickListener(v->{selectedAccount=who;activeTab=0;draw();});
@@ -299,7 +332,7 @@ public final class MainActivity extends Activity {
   if(!accounts.contains(selectedAccount))selectedAccount=accounts.get(0);
   LinearLayout chips=new LinearLayout(this);chips.setOrientation(1);screenContent.addView(chips);
   for(String ac:accounts){
-   Button choice=new Button(this);choice.setText((ac.equals(selectedAccount)?"● ":"○ ")+ac);choice.setAllCaps(false);
+   Button choice=new Button(this);choice.setText((ac.equals(selectedAccount)?"● ":"○ ")+displayAccount(ac));choice.setAllCaps(false);
    choice.setOnClickListener(v->{selectedAccount=ac;draw();});chips.addView(choice);
   }
   if(selectedAccount.startsWith("#")){
@@ -344,12 +377,16 @@ public final class MainActivity extends Activity {
  private void showTimeline(){
   screenContent.addView(label("TIJDLIJN · ALLE ACCOUNTS",19));
   final String[] filters={"Alles","Bouwers","Laboratorium","Pets"};
-  LinearLayout filterRow=new LinearLayout(this);screenContent.addView(filterRow);
-  for(String filter:filters){
+  LinearLayout filterColumn=new LinearLayout(this);filterColumn.setOrientation(1);screenContent.addView(filterColumn);
+  boolean narrow=getResources().getConfiguration().screenWidthDp<420;
+  LinearLayout filterRow=null;
+  for(int index=0;index<filters.length;index++){
+   if(index%(narrow?2:4)==0){filterRow=new LinearLayout(this);filterRow.setOrientation(0);filterColumn.addView(filterRow,new LinearLayout.LayoutParams(-1,dp(48)));}
+   String filter=filters[index];
    Button b=new Button(this);b.setText(t(filter));b.setTextSize(10);b.setAllCaps(false);
    b.setOnClickListener(v->{timelineFilter=filter;draw();});
    b.setTextColor(filter.equals(timelineFilter)?0xffffd88a:0xffd5c9e2);
-   filterRow.addView(b,new LinearLayout.LayoutParams(0,dp(48),1));
+   filterRow.addView(b,new LinearLayout.LayoutParams(0,dp(44),1));
   }
   ArrayList<JSONObject> list=new ArrayList<>();
   for(JSONObject o:upgrades)if(o.optLong("finish")>System.currentTimeMillis()&&("Alles".equals(timelineFilter)||timelineFilter.equals(o.optString("category"))))list.add(o);
@@ -407,7 +444,7 @@ public final class MainActivity extends Activity {
   long finish=o.optLong("finish"),remain=Math.max(0,(finish-System.currentTimeMillis()+999)/1000);
   LinearLayout card=new LinearLayout(this);card.setOrientation(1);card.setPadding(dp(10),dp(5),dp(10),dp(5));card.setBackground(shape(remain<=1800?0xff46351f:0xff30243e,12));card.setTag(finish);
   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(dp(2),dp(3),dp(2),dp(3));parent.addView(card,lp);
-  card.addView(label((editable?"":o.optString("account")+" · ")+cleanName(o.optString("name")),14));
+  card.addView(label((editable?"":displayAccount(o.optString("account"))+" · ")+cleanName(o.optString("name")),14));
   TextView time=label(format(remain)+"  ·  "+finishAt(finish),13);time.setTextColor(0xffffd88a);card.addView(time);
   if(editable)card.setOnClickListener(v->editTimer(o));
   else card.setOnClickListener(v->{selectedAccount=o.optString("account");activeTab=0;draw();});
@@ -488,6 +525,7 @@ public final class MainActivity extends Activity {
    JSONObject data=new JSONObject();data.put("format","clash-timer-hub-backup-v1");
    data.put("accounts",new JSONArray(accounts));data.put("upgrades",new JSONArray(upgrades));
    data.put("playerTags",new JSONObject(getPreferences(0).getString("playerTags","{}")));
+   data.put("accountNames",new JSONObject(getPreferences(0).getString("accountNames","{}")));
    android.content.ClipboardManager manager=(android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
    if(manager==null){toast("Klembord niet beschikbaar");return;}
    manager.setPrimaryClip(android.content.ClipData.newPlainText("Clash Timer Hub back-up",data.toString()));
@@ -499,6 +537,7 @@ public final class MainActivity extends Activity {
    JSONObject data=new JSONObject();data.put("format","clash-timer-hub-backup-v1");
    data.put("accounts",new JSONArray(accounts));data.put("upgrades",new JSONArray(upgrades));
    data.put("playerTags",new JSONObject(getPreferences(0).getString("playerTags","{}")));
+   data.put("accountNames",new JSONObject(getPreferences(0).getString("accountNames","{}")));
    Intent send=new Intent(Intent.ACTION_SEND);send.setType("application/json");
    send.putExtra(Intent.EXTRA_TEXT,data.toString(2));
    startActivity(Intent.createChooser(send,"Deel Clash Timer Hub back-up"));
@@ -527,7 +566,9 @@ public final class MainActivity extends Activity {
     .setMessage(t("Dit vervangt alle bestaande accounts en timers door "+names.size()+" accounts en "+timers.size()+" timers."))
     .setPositiveButton(t("Herstellen"),(d,w)->{
      accounts.clear();accounts.addAll(names);upgrades.clear();upgrades.addAll(timers);
-     getPreferences(0).edit().putString("playerTags",data.optJSONObject("playerTags")==null?"{}":data.optJSONObject("playerTags").toString()).apply();
+     getPreferences(0).edit()
+       .putString("playerTags",data.optJSONObject("playerTags")==null?"{}":data.optJSONObject("playerTags").toString())
+       .putString("accountNames",data.optJSONObject("accountNames")==null?"{}":data.optJSONObject("accountNames").toString()).apply();
      persist();draw();toast("Back-up hersteld");
     }).setNegativeButton(t("Annuleren"),null).show();
   }catch(Exception e){toast("Ongeldige back-up: "+e.getMessage());}
@@ -625,10 +666,10 @@ public final class MainActivity extends Activity {
    LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
    card.setPadding(dp(8),dp(6),dp(8),dp(6));
    card.setBackground(clashSurface(color,ready?0xff4c9b77:urgent?0xffc6a266:0xff57416b,14));
-   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,dp(218),1f);
+   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,dp(178),1f);
    lp.setMargins(dp(3),dp(4),dp(3),dp(4));gridRow.addView(card,lp);
 
-   TextView name=label((ac.equals(selectedAccount)&&foldExpanded?"◆  ":"⚔  ")+ac,15);
+   TextView name=label((ac.equals(selectedAccount)&&foldExpanded?"◆  ":"⚔  ")+displayAccount(ac),15);
    name.setTypeface(null,android.graphics.Typeface.BOLD);
    name.setGravity(android.view.Gravity.CENTER_VERTICAL);name.setSingleLine(true);
    name.setEllipsize(android.text.TextUtils.TruncateAt.END);name.setPadding(dp(6),0,dp(3),0);
@@ -667,8 +708,6 @@ public final class MainActivity extends Activity {
     checked.setPadding(dp(4),0,dp(4),0);checked.setMinHeight(0);checked.setMinimumHeight(0);
     checked.setOnClickListener(v->acknowledgeAccount(ac));
     card.addView(checked,new LinearLayout.LayoutParams(-1,dp(42)));
-   }else{
-    View spacer=new View(this);card.addView(spacer,new LinearLayout.LayoutParams(-1,dp(42)));
    }
    card.setOnClickListener(v->{selectedAccount=ac.equals(selectedAccount)?"":ac;activeTab=0;draw();});
   }
@@ -709,7 +748,7 @@ public final class MainActivity extends Activity {
     if(!ac.equals(o.optString("account"))||!"Bouwers".equals(o.optString("category")))continue;
     long finish=o.optLong("finish");if(finish<soonest){soonest=finish;earliest=o;}
    }
-   TextView line=label(ac+"  ·  "+(earliest==null?"Geen builder bekend":cleanName(earliest.optString("name"))+"  ·  "+(soonest<=now?"Gereed":format((soonest-now+999)/1000))),16);
+   TextView line=label(displayAccount(ac)+"  ·  "+(earliest==null?"Geen builder bekend":cleanName(earliest.optString("name"))+"  ·  "+(soonest<=now?"Gereed":format((soonest-now+999)/1000))),16);
    line.setBackground(shape(0xff30243e,12));list.addView(line);
   }
   ScrollView scroll=new ScrollView(this);scroll.addView(list);
@@ -845,7 +884,7 @@ public final class MainActivity extends Activity {
     else if("Pets".equals(type))pets++;
    }
    String next=soonest==Long.MAX_VALUE?"Geen actieve builder":cleanName(name)+" · "+format((soonest-now+999)/1000);
-   TextView line=label(ac+"\n"+next+"\n"+builders+" bouwers bezig · "+lab+" lab · "+pets+" pets",15);
+   TextView line=label(displayAccount(ac)+"\n"+next+"\n"+builders+" bouwers bezig · "+lab+" lab · "+pets+" pets",15);
    line.setBackground(shape(0xff30243e,12));
    LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(0,dp(4),0,dp(4));list.addView(line,lp);
   }
