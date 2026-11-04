@@ -81,45 +81,52 @@ public final class TimerWidget extends AppWidgetProvider {
   return row;
  }
  static void update(Context context){
+  AppData.migrate(context);
   AppWidgetManager manager=AppWidgetManager.getInstance(context);
   int[] ids=manager.getAppWidgetIds(new android.content.ComponentName(context,TimerWidget.class));
   long now=System.currentTimeMillis();
   ArrayList<Status> data=states(context,now);
-  int totalReady=0;for(Status s:data)totalReady+=s.ready;
+  android.content.SharedPreferences settings=context.getSharedPreferences("WidgetPreferences",Context.MODE_PRIVATE);
   for(int widgetId:ids){
-   android.os.Bundle options=manager.getAppWidgetOptions(widgetId);
-   if(options==null)options=new android.os.Bundle();
-   boolean landscape=context.getResources().getConfiguration().orientation==android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-   int width=options.getInt(landscape?AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH:AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,250);
-   int height=options.getInt(landscape?AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT:AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,180);
-   if(width<=0)width=250;if(height<=0)height=180;
-   boolean wide=width>=420;
-   boolean expanded=height>=205;
-   int rowHeight=expanded?56:39;
-   int displayRows=Math.max(1,(height-50)/rowHeight);
-   int slots=Math.min(data.size(),Math.max(1,displayRows*(wide?2:1)));
+   boolean showAll=settings.getBoolean("all_"+widgetId,true);
+   HashSet<String> chosen=new HashSet<>();
+   try{
+    JSONArray selected=new JSONArray(settings.getString("selected_"+widgetId,"[]"));
+    for(int j=0;j<selected.length();j++)chosen.add(selected.optString(j));
+   }catch(Exception ignored){}
+   ArrayList<Status> visible=new ArrayList<>();
+   int ready=0;
+   for(Status s:data)if(showAll||chosen.contains(s.account)){
+    visible.add(s);ready+=s.ready;
+   }
    RemoteViews widget=new RemoteViews(context.getPackageName(),R.layout.builder_widget);
    widget.setTextViewText(R.id.widget_title,"⚔ CLASH TIMER HUB");
-   widget.setTextViewText(R.id.widget_summary,data.size()+" accounts · "+totalReady+" klaar");
+   widget.setTextViewText(R.id.widget_summary,visible.size()+" accounts · "+ready+" klaar");
    widget.removeAllViews(R.id.widget_rows);
-   for(int i=0;i<slots;){
-    if(wide){
-     RemoteViews pair=new RemoteViews(context.getPackageName(),R.layout.widget_pair);
-     pair.addView(R.id.widget_left,makeAccount(context,data.get(i++),expanded,now));
-     if(i<slots)pair.addView(R.id.widget_right,makeAccount(context,data.get(i++),expanded,now));
-     widget.addView(R.id.widget_rows,pair);
-    }else widget.addView(R.id.widget_rows,makeAccount(context,data.get(i++),expanded,now));
+   if(visible.isEmpty()){
+    RemoteViews placeholder=new RemoteViews(context.getPackageName(),R.layout.widget_empty);
+    widget.addView(R.id.widget_rows,placeholder);
+   }else{
+    // Fixed layout: never crop accounts based on width/height. The widget's
+    // minimum height is sized for seven compact rows.
+    for(Status s:visible)widget.addView(R.id.widget_rows,makeAccount(context,s,false,now));
    }
-   int hidden=Math.max(0,data.size()-slots);
-   widget.setViewVisibility(R.id.widget_more,hidden>0?View.VISIBLE:View.GONE);
-   if(hidden>0)widget.setTextViewText(R.id.widget_more,"+"+hidden+" accounts · vergroot voor meer");
-   Intent home=new Intent(context,MainActivity.class);
-   PendingIntent open=PendingIntent.getActivity(context,90119,home,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
-   widget.setOnClickPendingIntent(R.id.widget_title,open);
-   widget.setOnClickPendingIntent(R.id.widget_more,open);
+   Intent open=new Intent(context,MainActivity.class);
+   PendingIntent home=PendingIntent.getActivity(context,90119,open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+   widget.setOnClickPendingIntent(R.id.widget_title,home);
+   Intent configure=new Intent(context,WidgetConfigActivity.class);
+   configure.setAction("nl.clashtimerhub.v2.CONFIG_"+widgetId);
+   configure.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,widgetId);
+   PendingIntent configureButton=PendingIntent.getActivity(context,widgetId,configure,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+   widget.setOnClickPendingIntent(R.id.widget_settings,configureButton);
    try{manager.updateAppWidget(widgetId,widget);}
    catch(RuntimeException e){android.util.Log.e("ClashTimerHub","Widget "+widgetId+" update failed",e);}
   }
+ }
+ @Override public void onDeleted(Context context,int[] widgetIds){
+  android.content.SharedPreferences.Editor editor=context.getSharedPreferences("WidgetPreferences",Context.MODE_PRIVATE).edit();
+  for(int id:widgetIds){editor.remove("all_"+id);editor.remove("selected_"+id);}
+  editor.apply();super.onDeleted(context,widgetIds);
  }
  static String summary(Context context){
   ArrayList<Status> s=states(context,System.currentTimeMillis());
