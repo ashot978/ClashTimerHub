@@ -23,7 +23,8 @@ public final class TimerWidget extends AppWidgetProvider {
   Status(String name){account=name;}
  }
  private static ArrayList<Status> states(Context context,long now){
-  android.content.SharedPreferences prefs=context.getSharedPreferences("MainActivity",Context.MODE_PRIVATE);
+  AppData.migrate(context);
+  android.content.SharedPreferences prefs=AppData.prefs(context);
   ArrayList<Status> result=new ArrayList<>();
   try{
    JSONArray accounts=new JSONArray(prefs.getString("accounts","[]"));
@@ -152,7 +153,7 @@ public final class TimerWidget extends AppWidgetProvider {
   }
  }
  static void schedule(Context context){
-  android.content.SharedPreferences prefs=context.getSharedPreferences("MainActivity",Context.MODE_PRIVATE);
+  android.content.SharedPreferences prefs=AppData.prefs(context);
   try{
    JSONArray upgrades=new JSONArray(prefs.getString("upgrades","[]"));
    long now=System.currentTimeMillis();
