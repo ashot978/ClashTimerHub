@@ -17,7 +17,8 @@ public final class QuickSyncImporter {
   JSONObject player=json.optJSONObject("player");
   String tag=json.optString("tag",json.optString("playerTag",player==null?"":player.optString("tag",""))).trim().toUpperCase(Locale.ROOT);
   if(tag.isEmpty())throw new IllegalArgumentException("Player tag ontbreekt: importeer via de app");
-  SharedPreferences prefs=context.getSharedPreferences("MainActivity",Context.MODE_PRIVATE);
+  AppData.migrate(context);
+  SharedPreferences prefs=AppData.prefs(context);
   JSONArray oldAccounts=new JSONArray(prefs.getString("accounts","[]"));
   JSONArray oldUpgrades=new JSONArray(prefs.getString("upgrades","[]"));
   JSONObject tags=new JSONObject(prefs.getString("playerTags","{}"));
