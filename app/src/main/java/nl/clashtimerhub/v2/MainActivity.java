@@ -673,30 +673,100 @@ public final class MainActivity extends Activity {
     i.putExtra(android.provider.Settings.EXTRA_APP_PACKAGE,getPackageName());startActivity(i);
    }).setNegativeButton(t("Annuleren"),null).show();
  }
+ private JSONObject backupPayload()throws JSONException{
+  JSONObject data=new JSONObject();data.put("format","clash-timer-hub-backup-v1");
+  data.put("accounts",new JSONArray(accounts));data.put("upgrades",new JSONArray(upgrades));
+  android.content.SharedPreferences p=getPreferences(0);
+  data.put("playerTags",new JSONObject(p.getString("playerTags","{}")));
+  data.put("accountNames",new JSONObject(p.getString("accountNames","{}")));
+  data.put("maxedCategories",new JSONObject(p.getString("maxedCategories","{}")));
+  // Optional additions keep older backup-v1 files compatible.
+  JSONObject preferences=new JSONObject();
+  preferences.put("language",I18n.code(this));
+  preferences.put("timerStart",p.getInt("timerStart",70));
+  preferences.put("timerEnd",p.getInt("timerEnd",94));
+  preferences.put("notifyEnabled",p.getBoolean("notifyEnabled",true));
+  preferences.put("notifyOnFinish",p.getBoolean("notifyOnFinish",true));
+  preferences.put("notifyLeadMinutes",p.getInt("notifyLeadMinutes",15));
+  data.put("preferences",preferences);
+  JSONArray widgets=new JSONArray();
+  android.content.SharedPreferences wp=getSharedPreferences("WidgetPreferences",MODE_PRIVATE);
+  HashMap<Integer,Integer> sequence=new HashMap<>();
+  for(int widgetId:WidgetV7.allIds(this)){
+   int type=WidgetV7.kind(this,widgetId);
+   int index=sequence.getOrDefault(type,0);sequence.put(type,index+1);
+   JSONObject entry=new JSONObject();
+   entry.put("type",type).put("index",index);
+   entry.put("all",wp.getBoolean("all_"+widgetId,true));
+   entry.put("selected",new JSONArray(wp.getString("selected_"+widgetId,"[]")));
+   entry.put("order",new JSONArray(wp.getString("order_"+widgetId,"[]")));
+   entry.put("sort",wp.getInt("sort_"+widgetId,0));
+   entry.put("size",wp.getInt("size_"+widgetId,1));
+   entry.put("lab",wp.getBoolean("lab_"+widgetId,true));
+   entry.put("pet",wp.getBoolean("pet_"+widgetId,true));
+   entry.put("bg",wp.getInt("bg_"+widgetId,0));
+   entry.put("account",wp.getString("account_"+widgetId,""));
+   widgets.put(entry);
+  }
+  data.put("widgets",widgets);
+  return data;
+ }
  private void copyBackup(){
   try{
-   JSONObject data=new JSONObject();data.put("format","clash-timer-hub-backup-v1");
-   data.put("accounts",new JSONArray(accounts));data.put("upgrades",new JSONArray(upgrades));
-   data.put("playerTags",new JSONObject(getPreferences(0).getString("playerTags","{}")));
-   data.put("accountNames",new JSONObject(getPreferences(0).getString("accountNames","{}")));
-   data.put("maxedCategories",new JSONObject(getPreferences(0).getString("maxedCategories","{}")));
+   JSONObject data=backupPayload();
    android.content.ClipboardManager manager=(android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
    if(manager==null){toast("Klembord niet beschikbaar");return;}
    manager.setPrimaryClip(android.content.ClipData.newPlainText("Clash Timer Hub back-up",data.toString()));
-   toast("Back-up van "+accounts.size()+" accounts gekopieerd");
+   toast("Back-up van "+accounts.size()+" accounts en instellingen gekopieerd");
   }catch(Exception e){toast("Back-up kopiëren mislukt");}
  }
  private void backup(){
   try{
-   JSONObject data=new JSONObject();data.put("format","clash-timer-hub-backup-v1");
-   data.put("accounts",new JSONArray(accounts));data.put("upgrades",new JSONArray(upgrades));
-   data.put("playerTags",new JSONObject(getPreferences(0).getString("playerTags","{}")));
-   data.put("accountNames",new JSONObject(getPreferences(0).getString("accountNames","{}")));
-   data.put("maxedCategories",new JSONObject(getPreferences(0).getString("maxedCategories","{}")));
+   JSONObject data=backupPayload();
    Intent send=new Intent(Intent.ACTION_SEND);send.setType("application/json");
    send.putExtra(Intent.EXTRA_TEXT,data.toString(2));
    startActivity(Intent.createChooser(send,"Deel Clash Timer Hub back-up"));
   }catch(Exception e){toast("Back-up maken mislukt");}
+ }
+ private void restorePreferences(JSONObject preferences){
+  if(preferences==null)return; // Old backups retain the current device's settings.
+  android.content.SharedPreferences.Editor edit=getPreferences(0).edit();
+  String language=preferences.optString("language",I18n.code(this));
+  if("en".equals(language)||"nl".equals(language))edit.putString("language",language);
+  int start=preferences.optInt("timerStart",70),end=preferences.optInt("timerEnd",94);
+  if(start>=0&&start<=96&&end>=start+4&&end<=100){
+   edit.putInt("timerStart",start).putInt("timerEnd",end);
+  }
+  edit.putBoolean("notifyEnabled",preferences.optBoolean("notifyEnabled",true));
+  edit.putBoolean("notifyOnFinish",preferences.optBoolean("notifyOnFinish",true));
+  edit.putInt("notifyLeadMinutes",Math.max(0,Math.min(10080,preferences.optInt("notifyLeadMinutes",15))));
+  edit.apply();
+ }
+ private void restoreWidgetSettings(JSONArray widgets){
+  if(widgets==null)return;
+  android.content.SharedPreferences.Editor edit=getSharedPreferences("WidgetPreferences",MODE_PRIVATE).edit();
+  HashMap<Integer,Integer> sequence=new HashMap<>();
+  for(int widgetId:WidgetV7.allIds(this)){
+   int type=WidgetV7.kind(this,widgetId);
+   int index=sequence.getOrDefault(type,0);sequence.put(type,index+1);
+   JSONObject entry=null;
+   for(int i=0;i<widgets.length();i++){
+    JSONObject candidate=widgets.optJSONObject(i);
+    if(candidate!=null&&candidate.optInt("type",-1)==type&&candidate.optInt("index",-1)==index){entry=candidate;break;}
+   }
+   if(entry==null)continue;
+   edit.putBoolean("all_"+widgetId,entry.optBoolean("all",true));
+   edit.putString("selected_"+widgetId,entry.optJSONArray("selected")==null?"[]":entry.optJSONArray("selected").toString());
+   edit.putString("order_"+widgetId,entry.optJSONArray("order")==null?"[]":entry.optJSONArray("order").toString());
+   edit.putInt("sort_"+widgetId,Math.max(0,Math.min(2,entry.optInt("sort",0))));
+   edit.putInt("size_"+widgetId,Math.max(0,Math.min(2,entry.optInt("size",1))));
+   edit.putInt("bg_"+widgetId,Math.max(0,Math.min(2,entry.optInt("bg",0))));
+   edit.putBoolean("lab_"+widgetId,entry.optBoolean("lab",true));
+   edit.putBoolean("pet_"+widgetId,entry.optBoolean("pet",true));
+   edit.putString("account_"+widgetId,entry.optString("account",""));
+  }
+  edit.apply();
+  TimerWidget.update(this);
  }
  private void restoreBackupClipboard(){
   android.content.ClipboardManager manager=(android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
@@ -725,7 +795,9 @@ public final class MainActivity extends Activity {
        .putString("playerTags",data.optJSONObject("playerTags")==null?"{}":data.optJSONObject("playerTags").toString())
        .putString("accountNames",data.optJSONObject("accountNames")==null?"{}":data.optJSONObject("accountNames").toString())
        .putString("maxedCategories",data.optJSONObject("maxedCategories")==null?"{}":data.optJSONObject("maxedCategories").toString()).apply();
-     persist();draw();toast("Back-up hersteld");
+     restorePreferences(data.optJSONObject("preferences"));
+     restoreWidgetSettings(data.optJSONArray("widgets"));
+     persist();draw();toast("Back-up hersteld, inclusief beschikbare instellingen");
     }).setNegativeButton(t("Annuleren"),null).show();
   }catch(Exception e){toast("Ongeldige back-up: "+e.getMessage());}
  }
