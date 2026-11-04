@@ -1,5 +1,22 @@
 # ClashTimerHub release notes
 
+## 7.5.7-beta1 — 4 November 2026
+
+### Helper Tracker — automatisch bij volledige Clash Sync
+- Lees `helpers` uit de volledige Clash-village JSON per gekoppelde player tag.
+- Bewaar helper-ID, level, tijdstip van de export en beschikbare `helper_cooldown`-tijden.
+- De accountdetailpagina toont iedere beschikbare helper en bijbehorend level, beschikbare cooldown of expliciet 'onbekend' als de export geen timer bevat.
+- Helpernamen: Builder's Apprentice / Bouwleerling, Lab Assistant / Labassistent en Alchemist. Onbekende IDs blijven zichtbaar met hun ID, zonder een naam te gokken.
+- De multi-accountwidget krijgt onder accounts met helperdata een compacte statusregel, bijvoorbeeld `🤝 1/3 · 4h15`. De helperregels kunnen per widget worden uitgezet via het tandwiel.
+- De widget berekent de benodigde extra hoogte per account en toont op kleinere formaten het aantal rijen dat werkelijk past.
+- Helpergegevens en de widgetvoorkeur worden opgenomen in JSON-back-ups; oude back-ups blijven herstelbaar.
+- Helpers ontbreken in sommige exports. Dan blijven bestaande helpergegevens bewaard en komen er geen fictieve helper-timers bij.
+- Er worden geen potionvoorraden afgeleid en bestaande bouw-/lab-/pettimers worden niet aangepast. Er is geen apart JSON-inspectorscherm.
+
+### Testen
+- Controleer op het toestel of de exports `helpers` en `helper_cooldown` bevatten en of de One UI-widget alle gewenste accounts toont bij de gekozen hoogte.
+
+
 ## 7.5.6-beta1 — 4 November 2026
 
 ### Unieke back-upbestandsnamen
