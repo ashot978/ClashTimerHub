@@ -87,6 +87,7 @@ public final class TimerWidget extends AppWidgetProvider {
   int totalReady=0;for(Status s:data)totalReady+=s.ready;
   for(int widgetId:ids){
    android.os.Bundle options=manager.getAppWidgetOptions(widgetId);
+   if(options==null)options=new android.os.Bundle();
    boolean landscape=context.getResources().getConfiguration().orientation==android.content.res.Configuration.ORIENTATION_LANDSCAPE;
    int width=options.getInt(landscape?AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH:AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,250);
    int height=options.getInt(landscape?AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT:AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,180);
@@ -115,7 +116,8 @@ public final class TimerWidget extends AppWidgetProvider {
    PendingIntent open=PendingIntent.getActivity(context,90119,home,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
    widget.setOnClickPendingIntent(R.id.widget_title,open);
    widget.setOnClickPendingIntent(R.id.widget_more,open);
-   manager.updateAppWidget(widgetId,widget);
+   try{manager.updateAppWidget(widgetId,widget);}
+   catch(RuntimeException e){android.util.Log.e("ClashTimerHub","Widget "+widgetId+" update failed",e);}
   }
  }
  static String summary(Context context){
