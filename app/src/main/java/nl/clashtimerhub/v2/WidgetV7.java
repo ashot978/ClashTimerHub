@@ -346,6 +346,7 @@ final class WidgetV7 {
    I18n.english(ctx)?(active?"Tap to turn off":"Tap to turn on"):(active?"Tik om uit te zetten":"Tik om aan te zetten"));
   view.setInt(R.id.v7_sync_symbol,"setBackgroundResource",active?R.drawable.widget_sync_ring_on:R.drawable.widget_sync_ring_off);
   view.setOnClickPendingIntent(R.id.v7_sync_root,syncClick(ctx,id));
+  view.setOnClickPendingIntent(R.id.v7_sync_settings,settingsClick(ctx,id));
   return view;
  }
  private static RemoteViews single(Context ctx,int id,Status s,long now){
