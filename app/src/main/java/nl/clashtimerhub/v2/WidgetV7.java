@@ -276,30 +276,23 @@ final class WidgetV7 {
   else if(width>=columns.twoLine())mode=4;
   else if(width>=columns.threeLine())mode=5;
   else mode=6;
+  // No header: reclaim its vertical space for the accounts.
+  // The full-width Sync control and gear share a single 28dp bottom row.
   int rowHeight=mode==2?24:mode==4?42:mode==5?62:102;
-  boolean showSync=height>=44+rowHeight;
-  int available=Math.max(0,height-24-(showSync?20:0));
+  int reservedFooter=28,frame=8;
+  int available=Math.max(0,height-reservedFooter-frame);
   int count=Math.min(ordered.size(),Math.max(1,available/rowHeight));
-  int hidden=ordered.size()-count;
   RemoteViews w=new RemoteViews(ctx.getPackageName(),R.layout.widget_v7_multi);
   w.setInt(R.id.v7_multi_root,"setBackgroundResource",background==1?R.drawable.widget_background_dark:
     background==2?R.drawable.widget_background_transparent:R.drawable.widget_background);
-  boolean narrow=width<230;
-  int ready=0;for(Status s:ordered)ready+=s.builderReady;
-  w.setTextViewText(R.id.v7_multi_title,narrow?"TIMERS":"CLASH TIMER HUB");
-  // No decorative crossed swords and no top-right account / ready counts.
-  w.setViewVisibility(R.id.v7_multi_summary,View.GONE);
   w.removeAllViews(R.id.v7_multi_rows);
   if(ordered.isEmpty())w.addView(R.id.v7_multi_rows,new RemoteViews(ctx.getPackageName(),R.layout.widget_empty));
-  else for(int i=0;i<count;i++)w.addView(R.id.v7_multi_rows,multiRow(ctx,ordered.get(i),mode,now,id,showLab,showPet,fontSize,background,columns));
-  w.setViewVisibility(R.id.v7_multi_sync,showSync?View.VISIBLE:View.GONE);
-  w.setInt(R.id.v7_multi_sync,"setBackgroundResource",rowTheme(background));
+  else for(int i=0;i<count;i++)w.addView(R.id.v7_multi_rows,
+    multiRow(ctx,ordered.get(i),mode,now,id,showLab,showPet,fontSize,background,columns));
   boolean active=AppData.prefs(ctx).getBoolean("floatingEnabled",false);
   w.setTextViewText(R.id.v7_multi_sync,I18n.english(ctx)?("Sync "+(active?"ON":"OFF")):("Sync "+(active?"AAN":"UIT")));
   w.setOnClickPendingIntent(R.id.v7_multi_sync,syncClick(ctx,id));
   w.setOnClickPendingIntent(R.id.v7_multi_settings,settingsClick(ctx,id));
-  Intent launch=new Intent(ctx,MainActivity.class);
-  w.setOnClickPendingIntent(R.id.v7_multi_title,PendingIntent.getActivity(ctx,140000+id,launch,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE));
   return w;
  }
  private static int backgroundFor(int style){
