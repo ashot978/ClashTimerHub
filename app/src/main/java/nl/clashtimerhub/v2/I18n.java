@@ -7,6 +7,15 @@ final class I18n {
  private static final LinkedHashMap<String,String> EN=new LinkedHashMap<>();
  static{
   LinkedHashMap<String,String> p=EN;
+  p.put("Onbekende speler:","Unknown player:");
+  p.put("aan account","to account");
+  p.put("Koppel","Link");
+  p.put("bouwers","builders");
+  p.put("Builder beschikbaar","Builder available");
+  p.put("Tijd, bijvoorbeeld","Time, for example");
+  p.put("Ongeldige timer(s):","Invalid timer(s):");
+  p.put("geïmporteerd voor","imported for");
+  p.put("Overzicht","Overview");
   p.put("Je ziet altijd alle geselecteerde accounts in één lijst. Standaard tonen we ze allemaal.","All selected accounts appear in one list. By default, all accounts are shown.");
   p.put("Kies je voorkeurstaal","Choose your preferred language");
   p.put("Taal","Language");
