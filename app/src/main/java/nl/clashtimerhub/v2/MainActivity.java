@@ -863,86 +863,18 @@ public final class MainActivity extends Activity {
   }catch(Exception e){toast("Synchroniseren mislukt: "+e.getMessage());}
  }
  private void importClashData(String input){
+  // All import paths use the same atomic, player-tag-scoped parser as the floating sync.
+  // Never fall back to a selected account if the source identity cannot be verified.
   try{
-   int start=input.indexOf('{'),end=input.lastIndexOf('}');
-   if(start<0||end<=start)throw new JSONException("Geen JSON gevonden");
-   JSONObject json=new JSONObject(input.substring(start,end+1));
-   if(!json.has("buildings")&&!json.has("heroes")&&!json.has("units"))throw new JSONException("Geen Clash-export");
-   String ac=account!=null&&account.getSelectedItem()!=null?account.getSelectedItem().toString():"";
-   JSONObject player=json.optJSONObject("player");
-   String tag=json.optString("tag",json.optString("playerTag",player==null?"":player.optString("tag",""))).trim().toUpperCase(java.util.Locale.ROOT);
-   JSONObject tags=new JSONObject(getPreferences(0).getString("playerTags","{}"));
-   String playerName=json.optString("name",player==null?"":player.optString("name","")).trim();
-   if(ac.isEmpty()&&!tag.isEmpty()&&!playerName.isEmpty())ac=playerName;
-   String linked=tags.optString(ac,"");
-   if(!tag.isEmpty()){
-    String matched=null;
-    for(String candidate:accounts)if(tag.equalsIgnoreCase(tags.optString(candidate,""))){matched=candidate;break;}
-    if(matched!=null){
-     ac=matched;
-    }else if(false){
-     final String payload=input,detected=tag;
-     new android.app.AlertDialog.Builder(this).setTitle(t("Onbekende speler: "+tag))
-      .setMessage(t("Deze player tag hoort niet bij "+ac+". Kies het juiste account om verkeerd overschrijven te voorkomen."))
-      .setItems(accounts.toArray(new String[0]),(d,which)->{
-       String chosen=accounts.get(which);
-       String existing=tags.optString(chosen,"");
-       if(!existing.isEmpty()&&!existing.equalsIgnoreCase(detected)){
-        toast("Dit account is al gekoppeld aan "+existing);return;
-       }
-       account.setSelection(which);
-       importClashData(payload);
-      }).setNegativeButton(t("Annuleren"),null).show();
-     return;
-    }
-   }
-   if(tag.isEmpty()&&ac.isEmpty()){if(playerName.isEmpty()){toast("Export bevat geen spelernaam of player tag. Voeg eerst een account toe.");return;}ac=playerName;}
-   if(!tag.isEmpty()&&!tags.optString(ac,"").equalsIgnoreCase(tag)){
-    String base=playerName.isEmpty()?tag:playerName;
-    String candidate=base;int suffix=2;
-    while(accounts.contains(candidate)){candidate=base+" ("+suffix+")";suffix++;}
-    ac=candidate;
-   }
-   if(!accounts.contains(ac))accounts.add(ac);
-   long now=System.currentTimeMillis();
-   long timestamp=json.optLong("timestamp",now/1000)*1000L;
-   // Timestamp is the moment at which the exported remaining seconds were measured.
-   if(timestamp>now+3600000||timestamp<now-30L*86400000L)timestamp=now;
-   ArrayList<JSONObject> parsed=new ArrayList<>();
-   String[] sections={"buildings","heroes","units","spells","pets","traps"};
-   for(String section:sections){
-    JSONArray arr=json.optJSONArray(section);if(arr==null)continue;
-    for(int i=0;i<arr.length();i++){
-     JSONObject entry=arr.optJSONObject(i);if(entry==null)continue;
-     long id=entry.optLong("data",-1);if(id<0)continue;
-     String cat="pets".equals(section)?"Pets":("units".equals(section)||"spells".equals(section))?"Laboratorium":"Bouwers";
-     JSONArray types=entry.optJSONArray("types");
-     if(types!=null)for(int t=0;t<types.length();t++){
-      JSONObject type=types.optJSONObject(t);if(type==null)continue;
-      JSONArray modules=type.optJSONArray("modules");if(modules==null)continue;
-      for(int m=0;m<modules.length();m++){
-       JSONObject module=modules.optJSONObject(m);if(module==null)continue;
-       long moduleId=module.optLong("data",-1);
-       if(moduleId>=0)addExportTimer(parsed,ac,cat,moduleId,module.optLong("timer"),timestamp,m);
-      }
-     }
-     JSONArray timers=entry.optJSONArray("timers");
-     if(timers!=null){
-      for(int j=0;j<timers.length();j++){
-       Object obj=timers.opt(j);long sec=obj instanceof JSONObject?((JSONObject)obj).optLong("timer"):timers.optLong(j);
-       addExportTimer(parsed,ac,cat,id,sec,timestamp,j);
-      }
-     }else addExportTimer(parsed,ac,cat,id,entry.optLong("timer"),timestamp,0);
-    }
-   }
-   // An empty valid snapshot is still a successful account refresh.
-   // Preserve manual timers and other accounts. Only replace earlier imports.
-   for(int i=upgrades.size()-1;i>=0;i--){
-    JSONObject old=upgrades.get(i);
-    if(ac.equals(old.optString("account"))&&old.optBoolean("exported",false))upgrades.remove(i);
-   }
-   upgrades.addAll(parsed);getPreferences(0).edit().putLong("ack_"+ac,System.currentTimeMillis()).apply();if(!tag.isEmpty()){tags.put(ac,tag);getPreferences(0).edit().putString("playerTags",tags.toString()).apply();}persist();selectedAccount=ac;draw();toast(parsed.size()+" upgrades geïmporteerd voor "+ac);
-  }catch(Exception e){toast("Ongeldige Clash-export: "+e.getMessage());}
+   String result=QuickSyncImporter.importJson(this,input);
+   refreshExternalImport();
+   toast(result);
+  }catch(Exception e){
+   new android.app.AlertDialog.Builder(this).setTitle(t("Synchronisatie mislukt"))
+    .setMessage(t(e.getMessage()==null?"Controleer de Clash-export":e.getMessage())+
+     "\\n\\nBestaande accounttimers zijn niet overschreven.")
+    .setPositiveButton(t("OK"),null).show();
+  }
  }
  private void addExportTimer(ArrayList<JSONObject> out,String ac,String cat,long id,long sec,long ts,int index)throws JSONException{
   if(sec<=0)return;
