@@ -165,6 +165,7 @@ final class WidgetV7 {
   int rows=Math.max(1,visible.size());
   int mode;
   if(width>=510)mode=height<44+rows*24?3:2;
+  else if(width>=270)mode=3; // Preserve all six columns, including lab, pets and finish, at 3 home-screen cells.
   else if(width>=225&&height>=44+rows*34)mode=1;
   else mode=0;
   int rowHeight=mode==3?16:mode==2?24:mode==1?34:19;
