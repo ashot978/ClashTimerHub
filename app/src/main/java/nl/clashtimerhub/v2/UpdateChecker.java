@@ -55,12 +55,13 @@ final class UpdateChecker {
   long build=Long.parseLong(tag.substring(6));
   if(build<1||build>1000000000L)throw new java.io.IOException("Ongeldig buildnummer");
   JSONArray assets=release.optJSONArray("assets");
-  String apk="";
+  String apk="",sha256="";
   if(assets!=null)for(int i=0;i<assets.length();i++){
    JSONObject asset=assets.optJSONObject(i);
    if(asset==null)continue;
    if("ClashTimerHub.apk".equals(asset.optString("name"))){
     apk=asset.optString("browser_download_url","");
+    sha256=asset.optString("digest","");
     break;
    }
   }
@@ -69,7 +70,7 @@ final class UpdateChecker {
   JSONObject normalized=new JSONObject();
   normalized.put("build",build).put("versionCode",1000+build)
    .put("version",release.optString("name","Build #"+build))
-   .put("apkUrl",apk).put("notes",release.optString("body",""));
+   .put("apkUrl",apk).put("sha256",sha256).put("notes",release.optString("body",""));
   return normalized;
  }
  static void check(Context ctx,Result result){
