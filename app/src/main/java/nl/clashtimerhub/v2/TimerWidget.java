@@ -63,7 +63,7 @@ public final class TimerWidget extends AppWidgetProvider {
   RemoteViews row=new RemoteViews(context.getPackageName(),expanded?R.layout.widget_account_expanded:R.layout.widget_account_compact);
   row.setTextViewText(R.id.widget_account_name,s.account);
   row.setViewVisibility(R.id.widget_ready,s.ready>0?View.VISIBLE:View.GONE);
-  if(s.ready>0)row.setTextViewText(R.id.widget_ready,"● "+s.ready+" klaar");
+  if(s.ready>0)row.setTextViewText(R.id.widget_ready,"●"+s.ready);
   boolean active=s.next!=Long.MAX_VALUE;
   row.setViewVisibility(R.id.widget_timer,active?View.VISIBLE:View.GONE);
   row.setViewVisibility(R.id.widget_idle,active?View.GONE:View.VISIBLE);
@@ -71,7 +71,7 @@ public final class TimerWidget extends AppWidgetProvider {
    row.setChronometer(R.id.widget_timer,SystemClock.elapsedRealtime()+Math.max(0,s.next-now),null,true);
    row.setChronometerCountDown(R.id.widget_timer,true);
   }else row.setTextViewText(R.id.widget_idle,s.ready>0?"GEREED":"—");
-  if(expanded)row.setTextViewText(R.id.widget_subtitle,active?s.name+" · "+endAt(s.next):"Geen actieve builder");
+  row.setTextViewText(R.id.widget_subtitle,active?(expanded?s.name+" · ":"Klaar ")+endAt(s.next):s.ready>0?"Builder beschikbaar":"Geen actieve builder");
   Intent open=new Intent(context,MainActivity.class);
   open.setAction("nl.clashtimerhub.v2.OPEN_ACCOUNT."+s.account);
   open.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
