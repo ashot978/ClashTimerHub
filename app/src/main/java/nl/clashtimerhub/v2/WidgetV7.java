@@ -147,22 +147,28 @@ final class WidgetV7 {
    height=opts.getInt(landscape?AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT:AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,240);
    if(width<=0)width=190;if(height<=0)height=240;
   }
-  // Samsung's launcher may allocate far less vertical space than the initial widget
-  // preview. Always keep all account rows; use the dense wide layout when short.
+  // Use dense rows when needed, then fit as many accounts as the launcher allows.
+  // A one-cell widget has room for its header and a timer, not the sync footer.
   int rows=Math.max(1,visible.size());
   int mode;
-  if(width>=510)mode=height<38+rows*24?3:2;
-  else if(width>=225&&height>=38+rows*34)mode=1;
+  if(width>=510)mode=height<44+rows*24?3:2;
+  else if(width>=225&&height>=44+rows*34)mode=1;
   else mode=0;
+  int rowHeight=mode==3?16:mode==2?24:mode==1?34:19;
+  boolean showSync=height>=44+rowHeight;
+  int available=Math.max(0,height-24-(showSync?20:0));
+  int count=Math.min(visible.size(),Math.max(1,available/rowHeight));
+  int hidden=visible.size()-count;
   RemoteViews w=new RemoteViews(ctx.getPackageName(),R.layout.widget_v7_multi);
   boolean narrow=width<230;
   int ready=0;for(Status s:visible)ready+=s.builderReady;
-  w.setTextViewText(R.id.v7_multi_title,narrow?"⚔ TIMERS":"⚔ CLASH TIMER HUB");
+  w.setTextViewText(R.id.v7_multi_title,narrow?("⚔ TIMERS"+(hidden>0?" +"+hidden:"")):"⚔ CLASH TIMER HUB");
   w.setViewVisibility(R.id.v7_multi_summary,narrow?View.GONE:View.VISIBLE);
-  w.setTextViewText(R.id.v7_multi_summary,visible.size()+" · "+ready+"✓");
+  w.setTextViewText(R.id.v7_multi_summary,(hidden>0?count+"/"+visible.size():String.valueOf(visible.size()))+" · "+ready+"✓");
   w.removeAllViews(R.id.v7_multi_rows);
   if(visible.isEmpty())w.addView(R.id.v7_multi_rows,new RemoteViews(ctx.getPackageName(),R.layout.widget_empty));
-  else for(Status s:visible)w.addView(R.id.v7_multi_rows,multiRow(ctx,s,mode,now,id));
+  else for(int i=0;i<count;i++)w.addView(R.id.v7_multi_rows,multiRow(ctx,visible.get(i),mode,now,id));
+  w.setViewVisibility(R.id.v7_multi_sync,showSync?View.VISIBLE:View.GONE);
   boolean active=AppData.prefs(ctx).getBoolean("floatingEnabled",false);
   w.setTextViewText(R.id.v7_multi_sync,I18n.english(ctx)?("⚔ Sync "+(active?"ON":"OFF")):("⚔ Sync "+(active?"AAN":"UIT")));
   w.setOnClickPendingIntent(R.id.v7_multi_sync,syncClick(ctx,id));
