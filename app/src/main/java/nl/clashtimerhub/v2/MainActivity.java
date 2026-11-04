@@ -30,6 +30,63 @@ public final class MainActivity extends Activity {
  private Bitmap lastScanBitmap;
  private PermissionWizard permissionWizard;
  private GoogleDriveUi googleDriveUi;
+ private boolean updateDownloadListening=false;
+ private final android.content.BroadcastReceiver updateDownloadListener=new android.content.BroadcastReceiver(){
+  @Override public void onReceive(Context context,Intent intent){
+   if(intent!=null&&android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(intent.getAction())
+      &&intent.getLongExtra(android.app.DownloadManager.EXTRA_DOWNLOAD_ID,-1)
+        ==getPreferences(0).getLong("activeUpdateDownloadId",-2)){
+    processPendingUpdateDownload();
+   }
+  }
+ };
+ private void startListeningForUpdateDownload(){
+  if(updateDownloadListening)return;
+  android.content.IntentFilter filter=new android.content.IntentFilter(android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+  if(android.os.Build.VERSION.SDK_INT>=33)
+   registerReceiver(updateDownloadListener,filter,Context.RECEIVER_EXPORTED);
+  else registerReceiver(updateDownloadListener,filter);
+  updateDownloadListening=true;
+ }
+ private void stopListeningForUpdateDownload(){
+  if(!updateDownloadListening)return;
+  try{unregisterReceiver(updateDownloadListener);}catch(Exception ignored){}
+  updateDownloadListening=false;
+ }
+ private void clearPendingUpdateDownload(){
+  getPreferences(0).edit().remove("activeUpdateDownloadId")
+   .remove("activeUpdateDownloadBuild").remove("activeUpdateDownloadHash")
+   .remove("activeUpdateDownloadPath").apply();
+ }
+ private void processPendingUpdateDownload(){
+  long id=getPreferences(0).getLong("activeUpdateDownloadId",-1);
+  if(id<=0)return;
+  android.app.DownloadManager manager=(android.app.DownloadManager)getSystemService(DOWNLOAD_SERVICE);
+  if(manager==null)return;
+  try(android.database.Cursor cursor=manager.query(new android.app.DownloadManager.Query().setFilterById(id))){
+   if(cursor==null||!cursor.moveToFirst()){clearPendingUpdateDownload();showUpdateInstallError(
+    "Android heeft de download niet meer. Controleer je downloads en probeer opnieuw.");return;}
+   int status=cursor.getInt(cursor.getColumnIndexOrThrow(android.app.DownloadManager.COLUMN_STATUS));
+   if(status==android.app.DownloadManager.STATUS_PENDING||
+      status==android.app.DownloadManager.STATUS_RUNNING||
+      status==android.app.DownloadManager.STATUS_PAUSED)return;
+   long build=getPreferences(0).getLong("activeUpdateDownloadBuild",0);
+   String hash=getPreferences(0).getString("activeUpdateDownloadHash","");
+   String path=getPreferences(0).getString("activeUpdateDownloadPath","");
+   if(status!=android.app.DownloadManager.STATUS_SUCCESSFUL){
+    int reason=cursor.getInt(cursor.getColumnIndexOrThrow(android.app.DownloadManager.COLUMN_REASON));
+    clearPendingUpdateDownload();
+    showUpdateInstallError("Download mislukt (Android-code "+reason+"). Controleer netwerk en vrije opslagruimte.");
+    return;
+   }
+   clearPendingUpdateDownload();
+   UpdateInstaller.install(this,new java.io.File(path),build,hash);
+  }catch(Exception e){
+   clearPendingUpdateDownload();
+   showUpdateInstallError("Kan de APK-download niet controleren: "+e.getMessage());
+  }
+ }
+
  private final android.os.Handler ticker=new android.os.Handler(android.os.Looper.getMainLooper());
  private String lastLoadedSnapshot="";
  private boolean foldExpanded=false;
@@ -45,13 +102,12 @@ public final class MainActivity extends Activity {
   if(permissionWizard!=null)permissionWizard.onResume();
   getPreferences(0).registerOnSharedPreferenceChangeListener(syncWatcher);
   refreshExternalImport();ticker.removeCallbacks(tick);ticker.post(tick);
+  startListeningForUpdateDownload();
+  processPendingUpdateDownload();
   String priorError=getPreferences(0).getString("lastInstallError","");
   if(!priorError.isEmpty()){
    getPreferences(0).edit().remove("lastInstallError").apply();
-   new android.app.AlertDialog.Builder(this)
-    .setTitle(t("Update niet geïnstalleerd"))
-    .setMessage(priorError+"\n\nJe huidige app en gegevens zijn behouden.")
-    .setPositiveButton(t("OK"),null).show();
+   showUpdateInstallError(priorError);
   }
   String pending=getPreferences(0).getString("pendingVerifiedApk","");
   if(!pending.isEmpty()&&getPackageManager().canRequestPackageInstalls()){
@@ -64,7 +120,7 @@ public final class MainActivity extends Activity {
   long last=getPreferences(0).getLong("lastUpdateCheck",0);
   if(System.currentTimeMillis()-last>6L*3600000L)checkUpdates(true);
  }
- @Override protected void onPause(){getPreferences(0).unregisterOnSharedPreferenceChangeListener(syncWatcher);ticker.removeCallbacks(tick);super.onPause();}
+ @Override protected void onPause(){stopListeningForUpdateDownload();getPreferences(0).unregisterOnSharedPreferenceChangeListener(syncWatcher);ticker.removeCallbacks(tick);super.onPause();}
  private static final Pattern TIME=Pattern.compile("(?i)(?:(\\d+)\\s*d\\s*)?(?:(\\d+)\\s*h\\s*)?(?:(\\d+)\\s*m\\s*)?(?:(\\d+)\\s*s\\s*)?");
  @Override public void onCreate(Bundle b){
   super.onCreate(b);
@@ -417,36 +473,33 @@ public final class MainActivity extends Activity {
    if(!UpdateChecker.validHttps(apkUrl))throw new IllegalArgumentException("Ongeldige APK-link");
    android.app.DownloadManager manager=(android.app.DownloadManager)getSystemService(DOWNLOAD_SERVICE);
    if(manager==null)throw new IllegalStateException("Downloadmanager niet beschikbaar");
-   String filename="ClashTimerHub-"+build+".apk";
+   if(getPreferences(0).getLong("activeUpdateDownloadId",-1)>0){
+    processPendingUpdateDownload();
+    if(getPreferences(0).getLong("activeUpdateDownloadId",-1)>0){
+     toast("Er is al een update-download bezig. Deze wordt automatisch opgepakt.");
+     return;
+    }
+   }
    java.io.File folder=getExternalFilesDir(android.os.Environment.DIRECTORY_DOWNLOADS);
    if(folder==null)throw new java.io.IOException("Downloadmap is niet beschikbaar");
+   String filename="ClashTimerHub-"+build+".apk";
    java.io.File file=new java.io.File(folder,filename);
    if(file.exists()&&!file.delete())throw new java.io.IOException("Oude APK kon niet worden vervangen");
+   getPreferences(0).edit().remove("lastVerifiedApk").remove("lastVerifiedBuild")
+    .remove("lastVerifiedHash").apply();
    android.app.DownloadManager.Request request=new android.app.DownloadManager.Request(android.net.Uri.parse(apkUrl));
    request.setTitle("ClashTimerHub build #"+build);
-   request.setDescription("Veilige APK-download");
+   request.setDescription("APK veilig downloaden en controleren");
    request.setMimeType("application/vnd.android.package-archive");
    request.setNotificationVisibility(android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
    request.setDestinationInExternalFilesDir(this,android.os.Environment.DIRECTORY_DOWNLOADS,filename);
    long id=manager.enqueue(request);
-   android.content.BroadcastReceiver receiver=new android.content.BroadcastReceiver(){
-    @Override public void onReceive(Context context,Intent intent){
-     if(intent==null||intent.getLongExtra(android.app.DownloadManager.EXTRA_DOWNLOAD_ID,-1)!=id)return;
-     try{unregisterReceiver(this);}catch(Exception ignored){}
-     android.app.DownloadManager.Query query=new android.app.DownloadManager.Query().setFilterById(id);
-     try(android.database.Cursor cursor=manager.query(query)){
-      if(cursor==null||!cursor.moveToFirst()||
-        cursor.getInt(cursor.getColumnIndexOrThrow(android.app.DownloadManager.COLUMN_STATUS))!=android.app.DownloadManager.STATUS_SUCCESSFUL){
-       showUpdateInstallError("De download is mislukt of onvolledig. Probeer opnieuw.");return;
-      }
-     }catch(Exception e){showUpdateInstallError("Kon de download niet controleren: "+e.getMessage());return;}
-     UpdateInstaller.install(MainActivity.this,file,build,sha256);
-    }
-   };
-   if(android.os.Build.VERSION.SDK_INT>=33)
-    registerReceiver(receiver,new android.content.IntentFilter(android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE),Context.RECEIVER_EXPORTED);
-   else registerReceiver(receiver,new android.content.IntentFilter(android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-   toast("APK downloaden en controleren. Android vraagt bevestiging voor de installatie.");
+   getPreferences(0).edit().putLong("activeUpdateDownloadId",id)
+    .putLong("activeUpdateDownloadBuild",build)
+    .putString("activeUpdateDownloadHash",sha256==null?"":sha256)
+    .putString("activeUpdateDownloadPath",file.getAbsolutePath()).apply();
+   startListeningForUpdateDownload();
+   toast("APK wordt gedownload. Bij terugkeer naar de app wordt de installatie hervat.");
   }catch(Exception e){showUpdateInstallError("Download starten mislukt: "+e.getMessage());}
  }
  private void openUpdates(){
