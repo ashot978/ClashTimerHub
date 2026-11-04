@@ -1,5 +1,19 @@
 # ClashTimerHub release notes
 
+## 7.4.3-beta1 — 4 November 2026
+
+### Fixed
+- **Compact account names:** Account-name cells now use only their required width (up to a reasonable maximum); builder status and timers follow immediately instead of leaving a large gap after the username.
+- **Never abbreviate countdowns:** Allocated timer widths are preserved. The laboratory, pet, builder countdown and finish time are displayed in full rather than clipped with `...`.
+- **Responsive layout:** The widget uses one line per account when wide enough, two lines on medium widths, and three or five lines on narrow launcher widths instead of shrinking timer fonts.
+- **Readability:** The active font-size preference remains in effect while resizing.
+- **Preserved behavior:** Existing accounts, countdowns, MAX checkmarks, widget sorting and transparency settings are not changed.
+
+### Known limitation
+- The amount of information that fits within a fixed widget height depends on available screen space. Make the widget taller on narrow layouts to show all seven accounts.
+- Android widget dimensions are launcher-controlled; exact appearance still requires validation on Samsung One UI.
+
+
 ## 7.4.2-beta1 — 4 November 2026
 
 ### Fixed
