@@ -28,6 +28,7 @@ public final class MainActivity extends Activity {
  private final ArrayList<JSONObject> pending=new ArrayList<>();
  private static final int PICK=12,IMPORT=13,RESTORE=14;
  private Bitmap lastScanBitmap;
+ private PermissionWizard permissionWizard;
  private final android.os.Handler ticker=new android.os.Handler(android.os.Looper.getMainLooper());
  private String lastLoadedSnapshot="";
  private boolean foldExpanded=false;
@@ -40,6 +41,7 @@ public final class MainActivity extends Activity {
  private final Runnable tick=new Runnable(){public void run(){if(activeTab==0&&dashboard!=null){refreshDashboardClocks();refreshVisibleTimers();}else if(activeTab==1||activeTab==2)refreshVisibleTimers();ticker.postDelayed(this,1000);}};
  @Override protected void onResume(){
   super.onResume();
+  if(permissionWizard!=null)permissionWizard.onResume();
   getPreferences(0).registerOnSharedPreferenceChangeListener(syncWatcher);
   refreshExternalImport();ticker.removeCallbacks(tick);ticker.post(tick);
   String priorError=getPreferences(0).getString("lastInstallError","");
@@ -63,7 +65,25 @@ public final class MainActivity extends Activity {
  }
  @Override protected void onPause(){getPreferences(0).unregisterOnSharedPreferenceChangeListener(syncWatcher);ticker.removeCallbacks(tick);super.onPause();}
  private static final Pattern TIME=Pattern.compile("(?i)(?:(\\d+)\\s*d\\s*)?(?:(\\d+)\\s*h\\s*)?(?:(\\d+)\\s*m\\s*)?(?:(\\d+)\\s*s\\s*)?");
- @Override public void onCreate(Bundle b){super.onCreate(b);AppData.migrate(this);load();draw();if(android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},55);TimerWidget.schedule(this);handleWidgetNavigation(getIntent());handleSharedJson(getIntent());}
+ @Override public void onCreate(Bundle b){
+  super.onCreate(b);
+  AppData.migrate(this);load();
+  permissionWizard=new PermissionWizard(this);
+  draw();
+  TimerWidget.schedule(this);
+  handleWidgetNavigation(getIntent());
+  handleSharedJson(getIntent());
+  // Display after the activity is visible, not during an external JSON import.
+  if(b==null&&getIntent()!=null&&!Intent.ACTION_SEND.equals(getIntent().getAction()))
+   getWindow().getDecorView().post(()->{
+    if(permissionWizard!=null&&!isFinishing()&&!isDestroyed())
+     permissionWizard.start(false);
+   });
+ }
+ @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults){
+  super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+  if(permissionWizard!=null)permissionWizard.onRequestPermissionsResult(requestCode);
+ }
  @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);setIntent(intent);handleWidgetNavigation(intent);handleSharedJson(intent);}
  private void handleWidgetNavigation(Intent intent){
   if(intent==null)return;
@@ -238,6 +258,9 @@ public final class MainActivity extends Activity {
   settingsItem(sync,"▤","Synchroniseer vanaf klembord","Importeer een gekopieerde Clash-export",()->importClipboard());
   LinearLayout notifications=settingsSection("♧  MELDINGEN","Upgrade-alarmen en tests");
   settingsItem(notifications,"♧","Meldingen instellen","Gereedmelding en waarschuwingen",()->notificationSettings());
+  settingsItem(notifications,"✓","Toestemmingen controleren",
+   PermissionWizard.grantedCount(this)+"/4 actief · meldingen, zwevende knop, alarmen en app-updates",
+   ()->{if(permissionWizard==null)permissionWizard=new PermissionWizard(this);permissionWizard.start(true);});
   settingsItem(notifications,"✓","Testmelding","Controleer of notificaties aankomen",()->sendTestNotification());
   settingsItem(notifications,"◷","Alarmtest over 1 minuut","Controleer of Android een alarm uitvoert",()->{
    String status=TimerWidget.scheduleDiagnostic(this);
