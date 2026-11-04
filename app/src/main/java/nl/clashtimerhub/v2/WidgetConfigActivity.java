@@ -17,6 +17,8 @@ public final class WidgetConfigActivity extends Activity {
  private Spinner accountPicker,sortPicker,sizePicker,backgroundPicker;
  private CheckBox labCheck,petCheck;
  private ArrayList<String> accounts=new ArrayList<>();
+ private final ArrayList<String> manualOrder=new ArrayList<>();
+ private LinearLayout orderRows;
  private int kind=WidgetV7.MULTI;
  @Override public void onCreate(Bundle state){
   super.onCreate(state);setResult(RESULT_CANCELED);
@@ -54,8 +56,20 @@ public final class WidgetConfigActivity extends Activity {
     for(int j=0;j<arr.length();j++)chosen.add(arr.optString(j));}catch(Exception ignored){}
    for(String name:accounts){
     CheckBox box=new CheckBox(this);box.setText(AppData.displayName(this,name));box.setTextColor(Color.WHITE);
-    box.setChecked(showAll||chosen.contains(name));boxes.put(name,box);root.addView(box);
+    box.setChecked(showAll||chosen.contains(name));boxes.put(name,box);manualOrder.add(name);
    }
+   try{
+    JSONArray savedOrder=new JSONArray(prefs.getString("order_"+widgetId,"[]"));
+    ArrayList<String> stored=new ArrayList<>();
+    for(int i=0;i<savedOrder.length();i++){
+     String key=savedOrder.optString(i);
+     if(manualOrder.contains(key)&&!stored.contains(key))stored.add(key);
+    }
+    for(String key:manualOrder)if(!stored.contains(key))stored.add(key);
+    manualOrder.clear();manualOrder.addAll(stored);
+   }catch(Exception ignored){}
+   orderRows=new LinearLayout(this);orderRows.setOrientation(1);root.addView(orderRows);
+   renderOrderRows();
    all.setChecked(showAll);custom.setChecked(!showAll);
    Runnable toggle=()->{for(CheckBox box:boxes.values())box.setEnabled(custom.isChecked());};
    mode.setOnCheckedChangeListener((g,id)->toggle.run());toggle.run();
@@ -105,7 +119,7 @@ public final class WidgetConfigActivity extends Activity {
      Toast.makeText(this,I18n.english(this)?"Select at least one account":"Selecteer minstens één account",Toast.LENGTH_LONG).show();return;
     }
     editor.putBoolean("all_"+widgetId,all.isChecked()).putString("selected_"+widgetId,selected.toString());
-    editor.putInt("sort_"+widgetId,sortPicker.getSelectedItemPosition());
+    editor.putInt("sort_"+widgetId,sortPicker.getSelectedItemPosition()).putString("order_"+widgetId,new JSONArray(manualOrder).toString());
     editor.putInt("size_"+widgetId,sizePicker.getSelectedItemPosition());
     editor.putBoolean("lab_"+widgetId,labCheck.isChecked());
     editor.putBoolean("pet_"+widgetId,petCheck.isChecked());
@@ -115,6 +129,28 @@ public final class WidgetConfigActivity extends Activity {
    Intent result=new Intent();result.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,widgetId);
    setResult(RESULT_OK,result);finish();
   });
+ }
+ private void renderOrderRows(){
+  if(orderRows==null)return;
+  orderRows.removeAllViews();
+  for(int i=0;i<manualOrder.size();i++){
+   final int index=i;
+   String key=manualOrder.get(i);
+   LinearLayout line=new LinearLayout(this);line.setOrientation(0);line.setGravity(android.view.Gravity.CENTER_VERTICAL);
+   CheckBox box=boxes.get(key);
+   line.addView(box,new LinearLayout.LayoutParams(0,dp(44),1));
+   Button up=new Button(this);up.setText("↑");up.setTextSize(15);up.setAllCaps(false);
+   up.setEnabled(index>0);up.setOnClickListener(v->{
+    Collections.swap(manualOrder,index,index-1);renderOrderRows();
+   });
+   line.addView(up,new LinearLayout.LayoutParams(dp(42),dp(44)));
+   Button down=new Button(this);down.setText("↓");down.setTextSize(15);down.setAllCaps(false);
+   down.setEnabled(index<manualOrder.size()-1);down.setOnClickListener(v->{
+    Collections.swap(manualOrder,index,index+1);renderOrderRows();
+   });
+   line.addView(down,new LinearLayout.LayoutParams(dp(42),dp(44)));
+   orderRows.addView(line);
+  }
  }
  private ArrayList<String> displayLabels(){
   ArrayList<String> labels=new ArrayList<>();
