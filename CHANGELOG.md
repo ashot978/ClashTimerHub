@@ -1,5 +1,20 @@
 # ClashTimerHub release notes
 
+## 7.4.6-beta1 — 4 November 2026
+
+### New
+- **One guided permission setup:** On first normal app launch, ClashTimerHub offers one clear step at a time for notifications, display-over-other-apps, exact alarms and installation of APK updates.
+- **Return and continue:** After granting a special Android permission in system Settings, return to ClashTimerHub and the wizard proceeds to the next step.
+- **Check existing permissions:** Already-granted steps are skipped, and the wizard shows the number of active permissions.
+- **Consent and control:** Every permission has Skip and Later options. Settings > Permissions check lets users open the flow again at any time.
+- **No repeated startup prompts:** Once completed, skipped or postponed, the wizard will not appear automatically on every launch.
+
+### Important
+- Android does not allow all four permissions to be granted by a single tap. Each system confirmation remains the user's choice.
+- The overlay Sync button remains opt-in; granting its permission does not enable it.
+- Permissions are specific to the Android device and are not granted by backup/restore. Existing accounts and timers are unchanged.
+
+
 ## 7.4.5-beta1 — 4 November 2026
 
 ### Widget polish
