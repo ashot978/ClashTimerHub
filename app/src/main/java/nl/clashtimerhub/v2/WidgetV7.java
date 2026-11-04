@@ -302,8 +302,24 @@ final class WidgetV7 {
   w.setOnClickPendingIntent(R.id.v7_multi_title,PendingIntent.getActivity(ctx,140000+id,launch,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE));
   return w;
  }
+ private static int backgroundFor(int style){
+  return style==2?R.drawable.widget_background_transparent:
+   style==1?R.drawable.widget_background_dark:R.drawable.widget_background;
+ }
+ private static android.content.SharedPreferences widgetPrefs(Context ctx){
+  return ctx.getSharedPreferences("WidgetPreferences",Context.MODE_PRIVATE);
+ }
+ private static float textBoost(Context ctx,int id){
+  int size=widgetPrefs(ctx).getInt("size_"+id,1);
+  return size==2?1f:size==0?-1f:0f;
+ }
  private static RemoteViews mini(Context ctx,int id,Status s,long now){
   RemoteViews view=new RemoteViews(ctx.getPackageName(),R.layout.widget_v7_mini);
+  view.setInt(R.id.v7_mini_root,"setBackgroundResource",backgroundFor(widgetPrefs(ctx).getInt("bg_"+id,0)));
+  float boost=textBoost(ctx,id);
+  view.setTextViewTextSize(R.id.v7_mini_title,android.util.TypedValue.COMPLEX_UNIT_SP,10f+boost);
+  view.setTextViewTextSize(R.id.v7_mini_timer,android.util.TypedValue.COMPLEX_UNIT_SP,16f+boost);
+  view.setTextViewTextSize(R.id.v7_mini_idle,android.util.TypedValue.COMPLEX_UNIT_SP,16f+boost);
   view.setTextViewText(R.id.v7_mini_title,s==null?"Clash":AppData.displayName(ctx,s.account));
   if(s==null){
    timer(view,R.id.v7_mini_timer,R.id.v7_mini_idle,Long.MAX_VALUE,now);
@@ -322,6 +338,7 @@ final class WidgetV7 {
  }
  private static RemoteViews sync(Context ctx,int id){
   RemoteViews view=new RemoteViews(ctx.getPackageName(),R.layout.widget_v7_sync);
+  view.setInt(R.id.v7_sync_root,"setBackgroundResource",backgroundFor(widgetPrefs(ctx).getInt("bg_"+id,0)));
   boolean active=AppData.prefs(ctx).getBoolean("floatingEnabled",false);
   view.setTextViewText(R.id.v7_sync_status,active?"SYNC ON":"SYNC OFF");
   view.setTextColor(R.id.v7_sync_status,active?0xff8BE3AD:0xffCBB5D9);
@@ -333,6 +350,17 @@ final class WidgetV7 {
  }
  private static RemoteViews single(Context ctx,int id,Status s,long now){
   RemoteViews w=new RemoteViews(ctx.getPackageName(),R.layout.widget_v7_account);
+  android.content.SharedPreferences config=widgetPrefs(ctx);
+  int bg=config.getInt("bg_"+id,0);
+  float boost=textBoost(ctx,id);
+  w.setInt(R.id.v7_single_root,"setBackgroundResource",backgroundFor(bg));
+  w.setInt(R.id.v7_single_sync,"setBackgroundResource",rowTheme(bg));
+  w.setViewVisibility(R.id.v7_single_lab_row,config.getBoolean("lab_"+id,true)?View.VISIBLE:View.GONE);
+  w.setViewVisibility(R.id.v7_single_pet_row,config.getBoolean("pet_"+id,true)?View.VISIBLE:View.GONE);
+  w.setTextViewTextSize(R.id.v7_single_name,android.util.TypedValue.COMPLEX_UNIT_SP,13f+boost);
+  for(int timerId:new int[]{R.id.v7_single_builder_timer,R.id.v7_single_lab_timer,R.id.v7_single_pet_timer,
+    R.id.v7_single_builder_idle,R.id.v7_single_lab_idle,R.id.v7_single_pet_idle})
+    w.setTextViewTextSize(timerId,android.util.TypedValue.COMPLEX_UNIT_SP,12f+boost);
   w.setTextViewText(R.id.v7_single_name,s==null?"Clash Timer Hub":AppData.displayName(ctx,s.account));
   w.setOnClickPendingIntent(R.id.v7_single_settings,settingsClick(ctx,id));
   if(s==null){
