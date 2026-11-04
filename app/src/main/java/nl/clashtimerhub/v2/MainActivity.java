@@ -295,7 +295,20 @@ public final class MainActivity extends Activity {
   long last=getPreferences(0).getLong("lastSyncAt_"+ac,0);
   if(last>0){TextView synced=label("↻ Gesynchroniseerd: "+finishAt(last),11);synced.setTextColor(0xffbba7d1);detailPanel.addView(synced);}
   if(ac.startsWith("#")){Button link=new Button(this);link.setAllCaps(false);link.setText(t("Koppel deze player tag aan bestaand account"));link.setOnClickListener(v->linkImportedAccount(ac));detailPanel.addView(link);}
-  renderTimelinePreview(detailPanel);
+  TextView maxTitle=label("✓  MAX STATUS",14);
+   maxTitle.setTextColor(0xff8be3ad);detailPanel.addView(maxTitle);
+   for(String categoryName:categories){
+    CheckBox box=new CheckBox(this);
+    box.setText(t(categoryName)+" MAX");
+    box.setTextColor(0xff8be3ad);
+    box.setChecked(AppData.isMaxed(this,ac,categoryName));
+    detailPanel.addView(box);
+    box.setOnCheckedChangeListener((button,checked)->{
+     AppData.setMaxed(this,ac,categoryName,checked);
+     TimerWidget.update(this);renderDashboard();
+    });
+   }
+   renderTimelinePreview(detailPanel);
   for(String cat:categories){
    TextView section=label(("Bouwers".equals(cat)?"⚒  ":"Laboratorium".equals(cat)?"⚗  ":"🐾  ")+cat.toUpperCase(java.util.Locale.ROOT),14);
    section.setTextColor(0xffd9b8ff);section.setTypeface(null,android.graphics.Typeface.BOLD);detailPanel.addView(section);
@@ -370,6 +383,7 @@ public final class MainActivity extends Activity {
      for(JSONObject o:upgrades)if(source.equals(o.optString("account")))o.put("account",target);
      accounts.remove(source);tags.remove(source);tags.put(target,source);
      getPreferences(0).edit().putString("playerTags",tags.toString()).apply();
+     AppData.mergeMaxedAccount(this,source,target);
      selectedAccount=target;persist();draw();toast(source+" gekoppeld aan "+target);
     }catch(Exception e){toast("Koppelen mislukt: "+e.getMessage());}
    }).setNegativeButton(t("Annuleren"),null).show();
@@ -526,6 +540,7 @@ public final class MainActivity extends Activity {
    data.put("accounts",new JSONArray(accounts));data.put("upgrades",new JSONArray(upgrades));
    data.put("playerTags",new JSONObject(getPreferences(0).getString("playerTags","{}")));
    data.put("accountNames",new JSONObject(getPreferences(0).getString("accountNames","{}")));
+   data.put("maxedCategories",new JSONObject(getPreferences(0).getString("maxedCategories","{}")));
    android.content.ClipboardManager manager=(android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
    if(manager==null){toast("Klembord niet beschikbaar");return;}
    manager.setPrimaryClip(android.content.ClipData.newPlainText("Clash Timer Hub back-up",data.toString()));
@@ -538,6 +553,7 @@ public final class MainActivity extends Activity {
    data.put("accounts",new JSONArray(accounts));data.put("upgrades",new JSONArray(upgrades));
    data.put("playerTags",new JSONObject(getPreferences(0).getString("playerTags","{}")));
    data.put("accountNames",new JSONObject(getPreferences(0).getString("accountNames","{}")));
+   data.put("maxedCategories",new JSONObject(getPreferences(0).getString("maxedCategories","{}")));
    Intent send=new Intent(Intent.ACTION_SEND);send.setType("application/json");
    send.putExtra(Intent.EXTRA_TEXT,data.toString(2));
    startActivity(Intent.createChooser(send,"Deel Clash Timer Hub back-up"));
@@ -568,7 +584,8 @@ public final class MainActivity extends Activity {
      accounts.clear();accounts.addAll(names);upgrades.clear();upgrades.addAll(timers);
      getPreferences(0).edit()
        .putString("playerTags",data.optJSONObject("playerTags")==null?"{}":data.optJSONObject("playerTags").toString())
-       .putString("accountNames",data.optJSONObject("accountNames")==null?"{}":data.optJSONObject("accountNames").toString()).apply();
+       .putString("accountNames",data.optJSONObject("accountNames")==null?"{}":data.optJSONObject("accountNames").toString())
+       .putString("maxedCategories",data.optJSONObject("maxedCategories")==null?"{}":data.optJSONObject("maxedCategories").toString()).apply();
      persist();draw();toast("Back-up hersteld");
     }).setNegativeButton(t("Annuleren"),null).show();
   }catch(Exception e){toast("Ongeldige back-up: "+e.getMessage());}
@@ -701,7 +718,9 @@ public final class MainActivity extends Activity {
      if("Laboratorium".equals(upgrade.optString("category")))lab++;
      else if("Pets".equals(upgrade.optString("category")))pets++;
     }
-    TextView detail=label(itemName+"\n"+busy+" bouwers · ⚗ "+lab+" lab · 🐾 "+pets+" pets",12);
+    String labLabel=lab>0?lab+" lab":AppData.isMaxed(this,ac,"Laboratorium")?"✓ lab MAX":"0 lab";
+    String petLabel=pets>0?pets+" pets":AppData.isMaxed(this,ac,"Pets")?"✓ pets MAX":"0 pets";
+    TextView detail=label(itemName+"\n"+busy+" bouwers · ⚗ "+labLabel+" · 🐾 "+petLabel,12);
    detail.setTextColor(0xffd4c5e4);detail.setMaxLines(2);
    detail.setEllipsize(android.text.TextUtils.TruncateAt.END);
    detail.setGravity(android.view.Gravity.TOP);detail.setPadding(dp(6),dp(3),dp(3),0);
