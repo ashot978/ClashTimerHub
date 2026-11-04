@@ -213,6 +213,7 @@ final class I18n {
   p.put("bouwers bezig","builders busy");
   p.put("Nieuw account","New account");
   p.put("INSTELLINGEN","SETTINGS");
+  p.put("Instellingen","Settings");
   p.put("Laboratorium","Laboratory");
   p.put("LABORATORIUM","LABORATORY");
   p.put("Testmelding","Test notification");
