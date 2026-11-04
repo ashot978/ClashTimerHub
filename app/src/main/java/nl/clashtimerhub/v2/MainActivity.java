@@ -229,11 +229,18 @@ public final class MainActivity extends Activity {
   currentBuild.setTextColor(0xff8be3ad);
   currentBuild.setPadding(dp(12),dp(8),dp(12),dp(4));
   releases.addView(currentBuild);
-  TextView latestBuild=label("Nieuwste build: nog niet automatisch beschikbaar (private GitHub-repository)",12);
+  long known=getPreferences(0).getLong("latestFeedBuild",0);
+  TextView latestBuild=label(known>0?"Nieuwste bekende build: #"+known:"Nieuwste build: nog niet gecontroleerd",12);
   latestBuild.setTextColor(0xffbba7d1);
   latestBuild.setPadding(dp(12),dp(2),dp(12),dp(8));
   releases.addView(latestBuild);
-  settingsItem(releases,"↓","Bekijk nieuwste GitHub-build","Controleer de laatste geslaagde build in je browser",()->openUpdates());
+  settingsItem(releases,"↻","Controleer op updates","Vergelijk met de nieuwste gepubliceerde APK",()->checkUpdates(false));
+  settingsItem(releases,"⚙","Updatefeed instellen","Openbare HTTPS-versiebron voor een private GitHub-repository",()->configureUpdateFeed());
+  settingsItem(releases,"↓","GitHub-builds bekijken","Open de builds in je browser",()->openUpdates());
+  if(!getPreferences(0).getString("updateFeedUrl","").isEmpty()){
+   long last=getPreferences(0).getLong("lastUpdateCheck",0);
+   if(System.currentTimeMillis()-last>6L*3600000L)checkUpdates(true);
+  }
   LinearLayout backups=settingsSection("▣  BACK-UP","Je opgeslagen accounts veilig bewaren");
   settingsItem(backups,"▣","Back-up kopiëren","Kopieer je gegevens naar het klembord",()->copyBackup());
   settingsItem(backups,"↶","Back-up herstellen","Herstel een gekopieerde back-up",()->restoreBackupClipboard());
@@ -265,6 +272,51 @@ public final class MainActivity extends Activity {
   }catch(Exception e){
    return "Geïnstalleerde build niet beschikbaar";
   }
+ }
+ private void configureUpdateFeed(){
+  EditText url=new EditText(this);url.setSingleLine(true);
+  url.setHint("https://example.com/latest.json");
+  url.setText(getPreferences(0).getString("updateFeedUrl",""));
+  LinearLayout wrapper=new LinearLayout(this);wrapper.setPadding(dp(16),dp(8),dp(16),dp(8));wrapper.addView(url);
+  new android.app.AlertDialog.Builder(this)
+   .setTitle(t("Updatefeed instellen"))
+   .setMessage(t("Vul een openbare HTTPS-link naar latest.json in. GitHub Actions in een private repository is niet anoniem toegankelijk."))
+   .setView(wrapper).setPositiveButton(t("Opslaan"),(d,w)->{
+    String input=url.getText().toString().trim();
+    if(!input.isEmpty()&&!UpdateChecker.validHttps(input)){toast("Gebruik een HTTPS-link");return;}
+    getPreferences(0).edit().putString("updateFeedUrl",input).remove("latestFeedBuild").remove("lastUpdateCheck").apply();
+    draw();if(!input.isEmpty())checkUpdates(false);
+   }).setNegativeButton(t("Annuleren"),null).show();
+ }
+ private void checkUpdates(boolean silent){
+  UpdateChecker.check(this,(data,error)->{
+   if(isFinishing()||isDestroyed())return;
+   if(error!=null){
+    if(!silent)new android.app.AlertDialog.Builder(this).setTitle(t("Updatecontrole"))
+     .setMessage(error+"\\nDe repository blijft privé; de updatefeed moet apart openbaar gepubliceerd worden.")
+     .setPositiveButton(t("OK"),null).show();
+    return;
+   }
+   long versionCode=data.optLong("versionCode",0);
+   long build=data.optLong("build",versionCode>=1000?versionCode-1000:versionCode);
+   long current=UpdateChecker.installedVersionCode(this);
+   getPreferences(0).edit().putLong("latestFeedBuild",build)
+    .putLong("lastUpdateCheck",System.currentTimeMillis()).apply();
+   boolean newer=versionCode>current;
+   if(!newer&&silent)return;
+   String notes=data.optString("notes","");
+   String message="Geïnstalleerd: #"+(current>=1000?current-1000:current)+
+    "\\nNieuwste build: #"+build+(newer?"\\n\\nNieuwe update beschikbaar!":"\\n\\nJe hebt de nieuwste versie.")+
+    (notes.isEmpty()?"":"\\n\\n"+notes);
+   android.app.AlertDialog.Builder dialog=new android.app.AlertDialog.Builder(this).setTitle(t("App-updates"))
+    .setMessage(message).setNegativeButton(t("Sluiten"),null);
+   if(newer)dialog.setPositiveButton(t("Download APK"),(d,w)->{
+    String apk=data.optString("apkUrl","");
+    if(UpdateChecker.validHttps(apk))startActivity(new Intent(Intent.ACTION_VIEW,android.net.Uri.parse(apk)));
+   });
+   dialog.show();
+   if(activeTab==3)draw();
+  });
  }
  private void openUpdates(){
   new android.app.AlertDialog.Builder(this).setTitle(t("Nieuwe versie installeren"))
