@@ -2,165 +2,319 @@ package nl.clashtimerhub.v2;
 
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
-import android.content.*;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.widget.*;
 import org.json.JSONArray;
 import java.util.*;
 
-/** Each widget instance has its own account selection. */
+/** Configure each widget ID independently; scrollable controls with a fixed save bar. */
 public final class WidgetConfigActivity extends Activity {
- private int widgetId=AppWidgetManager.INVALID_APPWIDGET_ID;
+ private static final int BG=0xff171025;
+ private static final int GOLD=0xffffd783;
+ private static final int MUTED=0xffcdbbdc;
+ private int widgetId=AppWidgetManager.INVALID_APPWIDGET_ID,kind=WidgetV7.MULTI;
  private final LinkedHashMap<String,CheckBox> boxes=new LinkedHashMap<>();
+ private final ArrayList<String> accounts=new ArrayList<>(),manualOrder=new ArrayList<>();
  private RadioButton all,custom;
  private Spinner accountPicker,sortPicker,sizePicker,backgroundPicker;
  private CheckBox labCheck,petCheck;
- private ArrayList<String> accounts=new ArrayList<>();
- private final ArrayList<String> manualOrder=new ArrayList<>();
  private LinearLayout orderRows;
- private int kind=WidgetV7.MULTI;
+ private SharedPreferences prefs;
+ private boolean en;
+
+ private String tr(String nl,String english){return en?english:nl;}
  @Override public void onCreate(Bundle state){
-  super.onCreate(state);setResult(RESULT_CANCELED);
-  AppData.migrate(this);
+  super.onCreate(state);
+  setResult(RESULT_CANCELED);
   widgetId=getIntent().getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,AppWidgetManager.INVALID_APPWIDGET_ID);
   if(widgetId==AppWidgetManager.INVALID_APPWIDGET_ID){finish();return;}
+  AppData.migrate(this);
   kind=WidgetV7.kind(this,widgetId);
-  if(kind==WidgetV7.SYNC){
-   new android.app.AlertDialog.Builder(this)
-    .setTitle("⚔ Sync")
-    .setMessage(I18n.english(this)?"Tap the Sync widget on your home screen to turn the floating sync button on or off.":"Tik op de Sync-widget op je startscherm om de zwevende sync-knop aan of uit te zetten.")
-    .setPositiveButton("OK",(d,w)->{setResult(RESULT_OK,new Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,widgetId));finish();})
-    .setOnCancelListener(d->finish()).show();
+  en=I18n.english(this);
+  prefs=getSharedPreferences("WidgetPreferences",MODE_PRIVATE);
+  try{
+   JSONArray saved=new JSONArray(AppData.prefs(this).getString("accounts","[]"));
+   for(int i=0;i<saved.length();i++){
+    String account=saved.optString(i,"");
+    if(!account.isEmpty()&&!accounts.contains(account))accounts.add(account);
+   }
+  }catch(Exception e){android.util.Log.e("ClashTimerHub","Widget accounts unavailable",e);}
+  getWindow().setStatusBarColor(BG);
+  getWindow().setNavigationBarColor(BG);
+  getWindow().getDecorView().setSystemUiVisibility(0);
+  render();
+ }
+
+ private void render(){
+  LinearLayout outer=new LinearLayout(this);
+  outer.setOrientation(LinearLayout.VERTICAL);
+  outer.setBackgroundColor(BG);
+  outer.setLayoutParams(new ViewGroup.LayoutParams(-1,-1));
+  if(Build.VERSION.SDK_INT>=30){
+   outer.setOnApplyWindowInsetsListener((v,insets)->{
+    android.graphics.Insets bars=insets.getInsets(
+     WindowInsets.Type.systemBars()|WindowInsets.Type.displayCutout());
+    v.setPadding(bars.left,bars.top,bars.right,bars.bottom);
+    return insets;
+   });
+  }else outer.setFitsSystemWindows(true);
+  setContentView(outer);
+  if(Build.VERSION.SDK_INT>=30)outer.requestApplyInsets();
+
+  LinearLayout header=new LinearLayout(this);
+  header.setOrientation(LinearLayout.VERTICAL);
+  header.setPadding(dp(18),dp(10),dp(18),dp(9));
+  header.setBackgroundColor(0xff21162e);
+  TextView title=label(tr("Widget instellen","Configure widget"),21,GOLD);
+  title.setTypeface(null,android.graphics.Typeface.BOLD);
+  title.setPadding(0,0,0,dp(2));
+  header.addView(title);
+  String type=kind==WidgetV7.SYNC?tr("Sync-knop","Sync button"):
+   kind==WidgetV7.MINI?tr("Miniwidget","Mini widget"):
+   kind==WidgetV7.SINGLE?tr("Accountwidget","Account widget"):
+   tr("Multi-accountwidget","Multi-account widget");
+  TextView subtitle=label(type+"  •  "+tr("Widget ","Widget ")+widgetId,13,MUTED);
+  subtitle.setPadding(0,0,0,0);header.addView(subtitle);
+  outer.addView(header,new LinearLayout.LayoutParams(-1,-2));
+
+  ScrollView scroll=new ScrollView(this);
+  scroll.setFillViewport(false);
+  scroll.setClipToPadding(false);
+  LinearLayout content=new LinearLayout(this);
+  content.setOrientation(LinearLayout.VERTICAL);
+  content.setPadding(dp(18),dp(12),dp(18),dp(24));
+  scroll.addView(content,new ScrollView.LayoutParams(-1,-2));
+  outer.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
+
+  if(kind==WidgetV7.MULTI)buildMulti(content);
+  else if(kind==WidgetV7.SINGLE||kind==WidgetV7.MINI)buildAccount(content);
+  else{
+   section(content,tr("Zwevende synchronisatie","Floating synchronization"),
+    tr("Deze widget schakelt de algemene zwevende Sync-knop in of uit. De status geldt voor de hele app.",
+       "This widget toggles the app-wide floating Sync button. Its state is shared by all widgets."));
+  }
+  buildAppearance(content);
+
+  LinearLayout footer=new LinearLayout(this);
+  footer.setOrientation(LinearLayout.VERTICAL);
+  footer.setPadding(dp(16),dp(8),dp(16),dp(10));
+  footer.setBackgroundColor(0xff21162e);
+  Button save=new Button(this);
+  save.setAllCaps(false);
+  save.setText(tr("✓ Widget opslaan","✓ Save widget"));
+  save.setTextSize(16);
+  save.setTextColor(Color.WHITE);
+  save.setBackgroundTintList(ColorStateList.valueOf(0xff7652a3));
+  save.setMinHeight(dp(48));
+  footer.addView(save,new LinearLayout.LayoutParams(-1,dp(52)));
+  outer.addView(footer,new LinearLayout.LayoutParams(-1,-2));
+  save.setOnClickListener(v->saveWidget());
+ }
+
+ private void section(LinearLayout parent,String title,String details){
+  TextView heading=label(title,17,GOLD);
+  heading.setTypeface(null,android.graphics.Typeface.BOLD);
+  heading.setPadding(0,dp(13),0,dp(5));
+  parent.addView(heading);
+  if(details!=null&&!details.isEmpty()){
+   TextView sub=label(details,13,MUTED);
+   sub.setPadding(0,0,0,dp(8));
+   parent.addView(sub);
+  }
+ }
+
+ private void buildMulti(LinearLayout parent){
+  section(parent,tr("Accounts","Accounts"),
+   tr("Kies de accounts voor deze widget. Iedere widget bewaart zijn eigen selectie.",
+      "Choose accounts for this widget. Each widget keeps its own selection."));
+  if(accounts.isEmpty()){
+   parent.addView(label(tr("Synchroniseer eerst een account in de app.",
+     "Sync an account in the app first."),14,MUTED));
    return;
   }
-  android.content.SharedPreferences prefs=getSharedPreferences("WidgetPreferences",MODE_PRIVATE);
-  getWindow().setStatusBarColor(0xff171025);getWindow().setNavigationBarColor(0xff171025);
-  ScrollView scroll=new ScrollView(this);
-  LinearLayout root=new LinearLayout(this);root.setOrientation(1);root.setPadding(dp(20),dp(24),dp(20),dp(28));
-  root.setBackgroundColor(0xff171025);scroll.addView(root);setContentView(scroll);
-  root.addView(label(kind==WidgetV7.MINI?"⚒ Mini Widget":kind==WidgetV7.SINGLE?"⚔ Account Widget":"⚔ Multi-account Widget",23,0xffffd783));
+  RadioGroup mode=new RadioGroup(this);
+  mode.setOrientation(RadioGroup.VERTICAL);
+  all=new RadioButton(this);
+  all.setText(tr("Alle accounts","All accounts"));all.setTextColor(Color.WHITE);
+  custom=new RadioButton(this);
+  custom.setText(tr("Geselecteerde accounts","Selected accounts"));custom.setTextColor(Color.WHITE);
+  mode.addView(all);mode.addView(custom);parent.addView(mode);
+  boolean showAll=prefs.getBoolean("all_"+widgetId,true);
+  Set<String> chosen=new HashSet<>();
   try{
-   JSONArray arr=new JSONArray(AppData.prefs(this).getString("accounts","[]"));
-   for(int i=0;i<arr.length();i++){String name=arr.optString(i,"");if(!name.isEmpty())accounts.add(name);}
-  }catch(Exception e){android.util.Log.e("ClashTimerHub","Widget config could not load accounts",e);}
-  if(accounts.isEmpty())root.addView(label("No accounts yet. Sync your Clash data in the app first.",13,0xffd6bdce));
-  else if(kind==WidgetV7.MULTI){
-   root.addView(label(I18n.english(this)?"Select the accounts this widget should show.":"Selecteer de accounts die deze widget moet tonen.",14,0xffcdbbdc));
-   RadioGroup mode=new RadioGroup(this);root.addView(mode);
-   all=new RadioButton(this);all.setText(I18n.english(this)?"All accounts":"Alle accounts");all.setTextColor(Color.WHITE);mode.addView(all);
-   custom=new RadioButton(this);custom.setText(I18n.english(this)?"Selected accounts":"Geselecteerde accounts");custom.setTextColor(Color.WHITE);mode.addView(custom);
-   boolean showAll=prefs.getBoolean("all_"+widgetId,true);
-   Set<String> chosen=new HashSet<>();
-   try{JSONArray arr=new JSONArray(prefs.getString("selected_"+widgetId,"[]"));
-    for(int j=0;j<arr.length();j++)chosen.add(arr.optString(j));}catch(Exception ignored){}
-   for(String name:accounts){
-    CheckBox box=new CheckBox(this);box.setText(AppData.displayName(this,name));box.setTextColor(Color.WHITE);
-    box.setChecked(showAll||chosen.contains(name));boxes.put(name,box);manualOrder.add(name);
+   JSONArray arr=new JSONArray(prefs.getString("selected_"+widgetId,"[]"));
+   for(int i=0;i<arr.length();i++)chosen.add(arr.optString(i));
+  }catch(Exception ignored){}
+  for(String name:accounts){
+   CheckBox box=new CheckBox(this);
+   box.setText(AppData.displayName(this,name));
+   box.setTextColor(Color.WHITE);
+   box.setChecked(showAll||chosen.contains(name));
+   boxes.put(name,box);manualOrder.add(name);
+  }
+  try{
+   JSONArray arr=new JSONArray(prefs.getString("order_"+widgetId,"[]"));
+   ArrayList<String> sorted=new ArrayList<>();
+   for(int i=0;i<arr.length();i++){
+    String value=arr.optString(i);
+    if(manualOrder.contains(value)&&!sorted.contains(value))sorted.add(value);
    }
-   try{
-    JSONArray savedOrder=new JSONArray(prefs.getString("order_"+widgetId,"[]"));
-    ArrayList<String> stored=new ArrayList<>();
-    for(int i=0;i<savedOrder.length();i++){
-     String key=savedOrder.optString(i);
-     if(manualOrder.contains(key)&&!stored.contains(key))stored.add(key);
-    }
-    for(String key:manualOrder)if(!stored.contains(key))stored.add(key);
-    manualOrder.clear();manualOrder.addAll(stored);
-   }catch(Exception ignored){}
-   orderRows=new LinearLayout(this);orderRows.setOrientation(1);root.addView(orderRows);
-   renderOrderRows();
-   all.setChecked(showAll);custom.setChecked(!showAll);
-   Runnable toggle=()->{for(CheckBox box:boxes.values())box.setEnabled(custom.isChecked());};
-   mode.setOnCheckedChangeListener((g,id)->toggle.run());toggle.run();
-  }else{
-   root.addView(label(I18n.english(this)?"Choose one account for this widget.":"Kies één account voor deze widget.",14,0xffcdbbdc));
-   accountPicker=new Spinner(this);
-   ArrayAdapter<String> adapter=new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,displayLabels());
-   accountPicker.setAdapter(adapter);
-   String saved=prefs.getString("account_"+widgetId,"");
-   int chosen=accounts.indexOf(saved);
-   accountPicker.setSelection(Math.max(0,chosen));root.addView(accountPicker);
-  }
-  if(kind==WidgetV7.MULTI){
-   boolean en=I18n.english(this);
-   root.addView(label(en?"WIDGET STUDIO":"WIDGET STUDIO",18,0xffffd783));
-   root.addView(label(en?"Account order":"Accountvolgorde",14,0xffcdbbdc));
-   sortPicker=new Spinner(this);
-   sortPicker.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,
-    en?new String[]{"Next builder","Account name","Manual account order"}:new String[]{"Volgende bouwer","Accountnaam","Eigen accountvolgorde"}));
-   sortPicker.setSelection(Math.max(0,Math.min(2,prefs.getInt("sort_"+widgetId,0))));root.addView(sortPicker);
-   root.addView(label(en?"Text size":"Tekstgrootte",14,0xffcdbbdc));
-   sizePicker=new Spinner(this);
-   sizePicker.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,
-    new String[]{"Small / Klein","Normal / Normaal","Large / Groot"}));
-   sizePicker.setSelection(Math.max(0,Math.min(2,prefs.getInt("size_"+widgetId,1))));root.addView(sizePicker);
-   labCheck=new CheckBox(this);labCheck.setText(en?"Show laboratory":"Laboratorium tonen");
-   labCheck.setTextColor(Color.WHITE);labCheck.setChecked(prefs.getBoolean("lab_"+widgetId,true));root.addView(labCheck);
-   petCheck=new CheckBox(this);petCheck.setText(en?"Show pets":"Pets tonen");
-   petCheck.setTextColor(Color.WHITE);petCheck.setChecked(prefs.getBoolean("pet_"+widgetId,true));root.addView(petCheck);
-   root.addView(label(en?"Background":"Achtergrond",14,0xffcdbbdc));
-   backgroundPicker=new Spinner(this);
-   backgroundPicker.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,
-    en?new String[]{"Original purple","Dark","Transparent"}:new String[]{"Origineel paars","Donker","Transparant"}));
-   backgroundPicker.setSelection(Math.max(0,Math.min(2,prefs.getInt("bg_"+widgetId,0))));root.addView(backgroundPicker);
-  }
-  Button save=new Button(this);
-  save.setText(I18n.english(this)?"✓ Save widget":"✓ Widget opslaan");save.setAllCaps(false);
-  save.setTextColor(Color.WHITE);save.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xff7652a3));
-  root.addView(save);
-  save.setOnClickListener(v->{
-   if(accounts.isEmpty()){Toast.makeText(this,I18n.english(this)?"Sync an account first":"Synchroniseer eerst een account",Toast.LENGTH_LONG).show();return;}
-   android.content.SharedPreferences.Editor editor=prefs.edit();
-   if(kind==WidgetV7.MULTI){
-    JSONArray selected=new JSONArray();
-    for(Map.Entry<String,CheckBox> entry:boxes.entrySet())if(entry.getValue().isChecked())selected.put(entry.getKey());
-    if(custom.isChecked()&&selected.length()==0){
-     Toast.makeText(this,I18n.english(this)?"Select at least one account":"Selecteer minstens één account",Toast.LENGTH_LONG).show();return;
-    }
-    editor.putBoolean("all_"+widgetId,all.isChecked()).putString("selected_"+widgetId,selected.toString());
-    editor.putInt("sort_"+widgetId,sortPicker.getSelectedItemPosition()).putString("order_"+widgetId,new JSONArray(manualOrder).toString());
-    editor.putInt("size_"+widgetId,sizePicker.getSelectedItemPosition());
-    editor.putBoolean("lab_"+widgetId,labCheck.isChecked());
-    editor.putBoolean("pet_"+widgetId,petCheck.isChecked());
-    editor.putInt("bg_"+widgetId,backgroundPicker.getSelectedItemPosition());
-   }else editor.putString("account_"+widgetId,accounts.get(accountPicker.getSelectedItemPosition()));
-   editor.apply();TimerWidget.update(this);
-   Intent result=new Intent();result.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,widgetId);
-   setResult(RESULT_OK,result);finish();
-  });
+   for(String key:manualOrder)if(!sorted.contains(key))sorted.add(key);
+   manualOrder.clear();manualOrder.addAll(sorted);
+  }catch(Exception ignored){}
+  all.setChecked(showAll);custom.setChecked(!showAll);
+  mode.setOnCheckedChangeListener((group,checked)->updateSelection());
+  parent.addView(label(tr("Gebruik pijlen om de eigen accountvolgorde te wijzigen.",
+   "Use the arrows to change your custom account order."),12,MUTED));
+  orderRows=new LinearLayout(this);
+  orderRows.setOrientation(LinearLayout.VERTICAL);
+  parent.addView(orderRows);
+  renderOrderRows();
+  updateSelection();
  }
+
  private void renderOrderRows(){
   if(orderRows==null)return;
   orderRows.removeAllViews();
   for(int i=0;i<manualOrder.size();i++){
-   final int index=i;
-   String key=manualOrder.get(i);
-   LinearLayout line=new LinearLayout(this);line.setOrientation(0);line.setGravity(android.view.Gravity.CENTER_VERTICAL);
-   CheckBox box=boxes.get(key);
-   if(box.getParent() instanceof android.view.ViewGroup)((android.view.ViewGroup)box.getParent()).removeView(box);
-   line.addView(box,new LinearLayout.LayoutParams(0,dp(44),1));
-   Button up=new Button(this);up.setText("↑");up.setTextSize(15);up.setAllCaps(false);
-   up.setEnabled(index>0);up.setOnClickListener(v->{
-    Collections.swap(manualOrder,index,index-1);renderOrderRows();
-   });
-   line.addView(up,new LinearLayout.LayoutParams(dp(42),dp(44)));
-   Button down=new Button(this);down.setText("↓");down.setTextSize(15);down.setAllCaps(false);
-   down.setEnabled(index<manualOrder.size()-1);down.setOnClickListener(v->{
-    Collections.swap(manualOrder,index,index+1);renderOrderRows();
-   });
-   line.addView(down,new LinearLayout.LayoutParams(dp(42),dp(44)));
-   orderRows.addView(line);
+   int index=i;String name=manualOrder.get(i);
+   LinearLayout row=new LinearLayout(this);
+   row.setOrientation(LinearLayout.HORIZONTAL);
+   row.setGravity(Gravity.CENTER_VERTICAL);
+   CheckBox box=boxes.get(name);
+   if(box.getParent() instanceof ViewGroup)((ViewGroup)box.getParent()).removeView(box);
+   row.addView(box,new LinearLayout.LayoutParams(0,dp(46),1));
+   Button up=new Button(this),down=new Button(this);
+   up.setText("↑");down.setText("↓");
+   up.setAllCaps(false);down.setAllCaps(false);
+   up.setTextSize(16);down.setTextSize(16);
+   up.setEnabled(index>0);down.setEnabled(index<manualOrder.size()-1);
+   up.setOnClickListener(v->{Collections.swap(manualOrder,index,index-1);renderOrderRows();});
+   down.setOnClickListener(v->{Collections.swap(manualOrder,index,index+1);renderOrderRows();});
+   row.addView(up,new LinearLayout.LayoutParams(dp(48),dp(46)));
+   row.addView(down,new LinearLayout.LayoutParams(dp(48),dp(46)));
+   orderRows.addView(row);
   }
+  updateSelection();
  }
- private ArrayList<String> displayLabels(){
-  ArrayList<String> labels=new ArrayList<>();
-  for(String account:accounts)labels.add(AppData.displayName(this,account));
-  return labels;
+ private void updateSelection(){
+  if(all==null||custom==null)return;
+  boolean editable=custom.isChecked();
+  for(CheckBox box:boxes.values())box.setEnabled(editable);
+ }
+
+ private void buildAccount(LinearLayout parent){
+  section(parent,tr("Account kiezen","Choose account"),
+   tr("Dit account geldt alleen voor deze widget.","This account is selected only for this widget."));
+  if(accounts.isEmpty()){
+   parent.addView(label(tr("Synchroniseer eerst een account in de app.",
+    "Sync an account in the app first."),14,MUTED));
+   return;
+  }
+  accountPicker=picker(new String[0]);
+  ArrayList<String> names=new ArrayList<>();
+  for(String account:accounts)names.add(AppData.displayName(this,account));
+  accountPicker.setAdapter(new ArrayAdapter<String>(this,
+   android.R.layout.simple_spinner_dropdown_item,names));
+  int saved=accounts.indexOf(prefs.getString("account_"+widgetId,""));
+  accountPicker.setSelection(Math.max(0,saved));
+  parent.addView(accountPicker,new LinearLayout.LayoutParams(-1,dp(52)));
+ }
+
+ private void buildAppearance(LinearLayout parent){
+  section(parent,tr("Weergave","Appearance"),
+   tr("Deze instellingen beïnvloeden alleen deze widget.","These settings affect only this widget."));
+  if(kind==WidgetV7.MULTI){
+   addField(parent,tr("Accountvolgorde","Account order"));
+   sortPicker=picker(en?new String[]{"Next builder","Account name","Custom order"}:
+    new String[]{"Volgende bouwer","Accountnaam","Eigen volgorde"});
+   sortPicker.setSelection(clamp(prefs.getInt("sort_"+widgetId,0),0,2));
+   parent.addView(sortPicker,new LinearLayout.LayoutParams(-1,dp(52)));
+  }
+  if(kind!=WidgetV7.SYNC){
+   addField(parent,tr("Tekstgrootte","Text size"));
+   sizePicker=picker(en?new String[]{"Small","Normal","Comfort"}:
+    new String[]{"Klein","Normaal","Comfort"});
+   sizePicker.setSelection(clamp(prefs.getInt("size_"+widgetId,1),0,2));
+   parent.addView(sizePicker,new LinearLayout.LayoutParams(-1,dp(52)));
+  }
+  if(kind==WidgetV7.MULTI||kind==WidgetV7.SINGLE){
+   labCheck=new CheckBox(this);
+   labCheck.setText(tr("Laboratorium tonen","Show laboratory"));
+   labCheck.setTextColor(Color.WHITE);
+   labCheck.setChecked(prefs.getBoolean("lab_"+widgetId,true));
+   parent.addView(labCheck);
+   petCheck=new CheckBox(this);
+   petCheck.setText(tr("Pets tonen","Show pets"));
+   petCheck.setTextColor(Color.WHITE);
+   petCheck.setChecked(prefs.getBoolean("pet_"+widgetId,true));
+   parent.addView(petCheck);
+  }
+  addField(parent,tr("Achtergrond","Background"));
+  backgroundPicker=picker(en?new String[]{"Classic purple","Dark","Transparent"}:
+   new String[]{"Klassiek paars","Donker","Transparant"});
+  backgroundPicker.setSelection(clamp(prefs.getInt("bg_"+widgetId,0),0,2));
+  parent.addView(backgroundPicker,new LinearLayout.LayoutParams(-1,dp(52)));
+ }
+
+ private void addField(LinearLayout parent,String name){
+  TextView text=label(name,14,MUTED);
+  text.setPadding(0,dp(10),0,dp(3));
+  parent.addView(text);
+ }
+ private Spinner picker(String[] items){
+  Spinner spinner=new Spinner(this);
+  if(items.length>0)spinner.setAdapter(new ArrayAdapter<String>(this,
+   android.R.layout.simple_spinner_dropdown_item,items));
+  return spinner;
+ }
+ private int clamp(int value,int min,int max){return Math.max(min,Math.min(max,value));}
+
+ private void saveWidget(){
+  if(kind!=WidgetV7.SYNC&&accounts.isEmpty()){
+   Toast.makeText(this,tr("Synchroniseer eerst een account","Sync an account first"),Toast.LENGTH_LONG).show();
+   return;
+  }
+  SharedPreferences.Editor edit=prefs.edit();
+  if(kind==WidgetV7.MULTI){
+   JSONArray selected=new JSONArray();
+   for(Map.Entry<String,CheckBox> entry:boxes.entrySet())
+    if(entry.getValue().isChecked())selected.put(entry.getKey());
+   if(custom.isChecked()&&selected.length()==0){
+    Toast.makeText(this,tr("Selecteer minstens één account","Select at least one account"),Toast.LENGTH_LONG).show();
+    return;
+   }
+   edit.putBoolean("all_"+widgetId,all.isChecked())
+    .putString("selected_"+widgetId,selected.toString())
+    .putString("order_"+widgetId,new JSONArray(manualOrder).toString())
+    .putInt("sort_"+widgetId,sortPicker.getSelectedItemPosition());
+  }else if(kind==WidgetV7.SINGLE||kind==WidgetV7.MINI){
+   edit.putString("account_"+widgetId,accounts.get(accountPicker.getSelectedItemPosition()));
+  }
+  if(sizePicker!=null)edit.putInt("size_"+widgetId,sizePicker.getSelectedItemPosition());
+  if(backgroundPicker!=null)edit.putInt("bg_"+widgetId,backgroundPicker.getSelectedItemPosition());
+  if(labCheck!=null)edit.putBoolean("lab_"+widgetId,labCheck.isChecked());
+  if(petCheck!=null)edit.putBoolean("pet_"+widgetId,petCheck.isChecked());
+  edit.apply();
+  TimerWidget.update(this);
+  Intent result=new Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,widgetId);
+  setResult(RESULT_OK,result);
+  finish();
  }
  private TextView label(String value,int size,int color){
-  TextView t=new TextView(this);t.setText(value);t.setTextSize(size);t.setTextColor(color);
-  t.setPadding(0,dp(8),0,dp(8));return t;
+  TextView text=new TextView(this);
+  text.setText(value);text.setTextSize(size);text.setTextColor(color);
+  return text;
  }
- private int dp(int n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
+ private int dp(int value){return (int)(value*getResources().getDisplayMetrics().density+.5f);}
 }
