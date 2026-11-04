@@ -342,6 +342,8 @@ public final class MainActivity extends Activity {
   releases.addView(latestBuild);
   settingsItem(releases,"↻","Controleer op updates","Vergelijk met de nieuwste gepubliceerde APK",()->checkUpdates(false));
   settingsItem(releases,"↓","GitHub-builds bekijken","Open de builds in je browser",()->openUpdates());
+  settingsItem(releases,"ⓘ","Update-diagnose",
+   "Bekijk installatiecontrole, downloadstatus en laatste fout",()->showUpdateDiagnostics());
   LinearLayout backups=settingsSection("▣  BACK-UP","Je opgeslagen accounts veilig bewaren");
   settingsItem(backups,"▣","Back-up kopiëren","Accounts, timers, taal, meldingen en widgetinstellingen",()->copyBackup());
   settingsItem(backups,"↶","Back-up herstellen","Herstel timers en opgeslagen voorkeuren",()->restoreBackupClipboard());
@@ -462,10 +464,19 @@ public final class MainActivity extends Activity {
  void showUpdateInstallError(String reason){
   runOnUiThread(()->{
    if(isFinishing()||isDestroyed())return;
-   new android.app.AlertDialog.Builder(this)
+   String path=getPreferences(0).getString("lastVerifiedApk","");
+   long build=getPreferences(0).getLong("lastVerifiedBuild",0);
+   String sha=getPreferences(0).getString("lastVerifiedHash","");
+   java.io.File apk=path.isEmpty()?null:new java.io.File(path);
+   boolean fallback=apk!=null&&apk.isFile()&&apk.length()>1024*1024;
+   android.app.AlertDialog.Builder dialog=new android.app.AlertDialog.Builder(this)
     .setTitle(t("Update niet geïnstalleerd"))
     .setMessage(reason+"\n\nDe bestaande installatie is niet gewijzigd. Verwijder de app niet.")
-    .setPositiveButton(t("OK"),null).show();
+    .setPositiveButton(t("OK"),null);
+   if(fallback)dialog.setNeutralButton(
+    I18n.english(this)?"Try Android installer":"Via Android installeren",
+    (d,w)->UpdateInstaller.installWithAndroidInstaller(this,apk,build,sha));
+   dialog.show();
   });
  }
  private void downloadUpdate(String apkUrl,long build,String sha256){
@@ -501,6 +512,30 @@ public final class MainActivity extends Activity {
    startListeningForUpdateDownload();
    toast("APK wordt gedownload. Bij terugkeer naar de app wordt de installatie hervat.");
   }catch(Exception e){showUpdateInstallError("Download starten mislukt: "+e.getMessage());}
+ }
+ private void showUpdateDiagnostics(){
+  long installed=UpdateChecker.installedVersionCode(this);
+  long latest=getPreferences(0).getLong("latestFeedBuild",0);
+  long pending=getPreferences(0).getLong("activeUpdateDownloadId",-1);
+  String lastError=getPreferences(0).getString("lastInstallError","");
+  String verified=getPreferences(0).getString("lastVerifiedApk","");
+  boolean permitted=getPackageManager().canRequestPackageInstalls();
+  String text="Geïnstalleerde build: "+(installed>=1000?"#"+(installed-1000):String.valueOf(installed))+
+   "\nNieuwste gepubliceerde build: "+(latest>0?"#"+latest:"niet gecontroleerd")+
+   "\nAPK-installatietoestemming: "+(permitted?"toegestaan":"ontbreekt")+
+   "\nDownload: "+(pending>0?"bezig (#"+pending+")":"geen actieve download")+
+   "\nGeverifieerde APK: "+(!verified.isEmpty()&&new java.io.File(verified).isFile()?"beschikbaar":"geen")+
+   "\nLaatste fout: "+(lastError.isEmpty()?"geen opgeslagen fout":lastError);
+  android.app.AlertDialog.Builder dialog=new android.app.AlertDialog.Builder(this)
+   .setTitle("APK update-diagnose").setMessage(text).setPositiveButton("Sluiten",null);
+  if(!verified.isEmpty()&&new java.io.File(verified).isFile()){
+   java.io.File file=new java.io.File(verified);
+   long build=getPreferences(0).getLong("lastVerifiedBuild",0);
+   String hash=getPreferences(0).getString("lastVerifiedHash","");
+   dialog.setNeutralButton("Via Android installeren",
+    (d,w)->UpdateInstaller.installWithAndroidInstaller(this,file,build,hash));
+  }
+  dialog.show();
  }
  private void openUpdates(){
   new android.app.AlertDialog.Builder(this).setTitle(t("Nieuwe versie installeren"))
