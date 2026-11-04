@@ -126,16 +126,23 @@ public final class MainActivity extends Activity {
   TextView subtitle=label("COMMAND CENTER / V6",11);subtitle.setTextColor(0xffb5a5ff);root.addView(subtitle);
   View accent=new View(this);accent.setBackgroundColor(0xffd2a96e);LinearLayout.LayoutParams accentLp=new LinearLayout.LayoutParams(dp(56),dp(2));accentLp.setMargins(dp(12),0,0,dp(8));root.addView(accent,accentLp);
   screenContent=new LinearLayout(this);screenContent.setOrientation(1);root.addView(screenContent);
-  LinearLayout nav=new LinearLayout(this);nav.setBackgroundColor(0xff261a36);nav.setPadding(dp(4),dp(20),dp(4),dp(12));shell.addView(nav);
+  LinearLayout nav=new LinearLayout(this);nav.setOrientation(LinearLayout.HORIZONTAL);
+  nav.setBackgroundColor(0xff261a36);nav.setPadding(dp(6),dp(8),dp(6),dp(8));
+  shell.addView(nav,new LinearLayout.LayoutParams(-1,dp(72)));
   String[] names={"Overzicht","Tijdlijn","Instellingen"};
   int[] navTabs={0,1,3};
   for(int i=0;i<names.length;i++){
    final int tab=navTabs[i];
-   Button button=new Button(this);button.setText(t(names[i]));button.setAllCaps(false);button.setTextSize(14);button.setTypeface(null,android.graphics.Typeface.BOLD);button.setSingleLine(false);
+   Button button=new Button(this);button.setText(t(names[i]));button.setAllCaps(false);
+   button.setTextSize(14);button.setTypeface(null,android.graphics.Typeface.BOLD);
+   button.setSingleLine(true);button.setEllipsize(android.text.TextUtils.TruncateAt.END);
+   button.setGravity(android.view.Gravity.CENTER);
+   button.setPadding(dp(2),0,dp(2),0);button.setMinHeight(0);button.setMinimumHeight(0);
    button.setTextColor(tab==activeTab?0xffffd88a:0xffc6b9d6);
    button.setBackground(clashSurface(tab==activeTab?0xff49335f:0xff261a36,tab==activeTab?0xffd8ae69:0xff352742,10));
    button.setOnClickListener(v->{activeTab=tab;draw();});
-   nav.addView(button,new LinearLayout.LayoutParams(0,dp(64),1));
+   LinearLayout.LayoutParams tabParams=new LinearLayout.LayoutParams(0,-1,1f);
+   tabParams.setMargins(dp(3),0,dp(3),0);nav.addView(button,tabParams);
   }
   shell.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
   if(activeTab==0){
@@ -592,7 +599,10 @@ public final class MainActivity extends Activity {
   LinearLayout gridRow=null;int index=0;
   int columns=foldExpanded&&!selectedAccount.isEmpty()?1:2;
   for(String ac:ordered){
-   if(index%columns==0){gridRow=new LinearLayout(this);dashboard.addView(gridRow);}
+   if(index%columns==0){
+    gridRow=new LinearLayout(this);gridRow.setOrientation(LinearLayout.HORIZONTAL);
+    gridRow.setGravity(android.view.Gravity.TOP);dashboard.addView(gridRow);
+   }
    index++;
    long soonest=nextBuilder(ac,now);
    JSONObject first=null;int busy=0;
@@ -602,23 +612,53 @@ public final class MainActivity extends Activity {
    int completed=completedCount(ac,now);
    boolean ready=completed>0,urgent=!ready&&soonest!=Long.MAX_VALUE&&soonest-now<=1800000L;
    int color=ready?0xff213a30:urgent?0xff443420:0xff30233e;
-   LinearLayout card=new LinearLayout(this);card.setOrientation(1);card.setPadding(dp(8),dp(6),dp(8),dp(8));card.setBackground(clashSurface(color,ready?0xff4c9b77:urgent?0xffc6a266:0xff57416b,14));
-   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,-2,1);lp.setMargins(dp(2),dp(3),dp(2),dp(3));gridRow.addView(card,lp);
-   TextView name=label((ac.equals(selectedAccount)&&foldExpanded?"◆  ":"⚔  ")+ac,15);name.setTypeface(null,android.graphics.Typeface.BOLD);card.addView(name);
-   if(ready){
-    TextView done=label(completed+" BOUWER"+(completed==1?"":"S")+" KLAAR",14);done.setTextColor(0xff8be3ad);done.setTypeface(null,android.graphics.Typeface.BOLD);card.addView(done);
-   }
+   LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
+   card.setPadding(dp(8),dp(6),dp(8),dp(6));
+   card.setBackground(clashSurface(color,ready?0xff4c9b77:urgent?0xffc6a266:0xff57416b,14));
+   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,dp(218),1f);
+   lp.setMargins(dp(3),dp(4),dp(3),dp(4));gridRow.addView(card,lp);
+
+   TextView name=label((ac.equals(selectedAccount)&&foldExpanded?"◆  ":"⚔  ")+ac,15);
+   name.setTypeface(null,android.graphics.Typeface.BOLD);
+   name.setGravity(android.view.Gravity.CENTER_VERTICAL);name.setSingleLine(true);
+   name.setEllipsize(android.text.TextUtils.TruncateAt.END);name.setPadding(dp(6),0,dp(3),0);
+   card.addView(name,new LinearLayout.LayoutParams(-1,dp(34)));
+
+   String statusText=ready?(I18n.english(this)?completed+" BUILDERS READY":completed+" BOUWERS KLAAR"):"";
+   TextView status=label(statusText,10);status.setTextColor(0xff8be3ad);
+   status.setSingleLine(true);status.setEllipsize(android.text.TextUtils.TruncateAt.END);
+   status.setGravity(android.view.Gravity.CENTER_VERTICAL);status.setPadding(dp(6),0,0,0);
+   card.addView(status,new LinearLayout.LayoutParams(-1,dp(18)));
+
    TextView timer=label(soonest==Long.MAX_VALUE?"Geen actieve builder":format(Math.max(0,(soonest-now+999)/1000)),18);
-   timer.setTextColor(ready?0xff8be3ad:0xffffd783);timer.setTypeface(null,android.graphics.Typeface.BOLD);card.addView(timer);
+   timer.setTextColor(ready?0xff8be3ad:0xffffd783);
+   timer.setTypeface(null,android.graphics.Typeface.BOLD);timer.setGravity(android.view.Gravity.CENTER_VERTICAL);
+   timer.setSingleLine(true);timer.setEllipsize(android.text.TextUtils.TruncateAt.END);
+   timer.setPadding(dp(6),0,dp(3),0);
+   card.addView(timer,new LinearLayout.LayoutParams(-1,dp(36)));
    if(soonest!=Long.MAX_VALUE){dashboardClocks.add(timer);dashboardFinishes.add(soonest);}
-   if(soonest!=Long.MAX_VALUE){
-    TextView end=label(finishAt(soonest),12);end.setTextColor(0xffc9b9df);card.addView(end);
-   }
-   TextView detail=label((first==null?"Geen actieve builder":"⚒  "+cleanName(first.optString("name")))+"\n"+busy+" bouwers bezig",12);
-   detail.setTextColor(0xffd4c5e4);card.addView(detail);
+
+   TextView end=label(soonest==Long.MAX_VALUE?"":finishAt(soonest),12);
+   end.setTextColor(0xffc9b9df);end.setSingleLine(true);
+   end.setEllipsize(android.text.TextUtils.TruncateAt.END);
+   end.setGravity(android.view.Gravity.CENTER_VERTICAL);end.setPadding(dp(6),0,dp(3),0);
+   card.addView(end,new LinearLayout.LayoutParams(-1,dp(26)));
+
+   String itemName=first==null?"Geen actieve builder":"⚒  "+cleanName(first.optString("name"));
+   TextView detail=label(itemName+"\n"+busy+" bouwers bezig",12);
+   detail.setTextColor(0xffd4c5e4);detail.setMaxLines(2);
+   detail.setEllipsize(android.text.TextUtils.TruncateAt.END);
+   detail.setGravity(android.view.Gravity.TOP);detail.setPadding(dp(6),dp(3),dp(3),0);
+   card.addView(detail,new LinearLayout.LayoutParams(-1,dp(48)));
+
    if(ready){
-    Button checked=new Button(this);checked.setText(t("Gecontroleerd"));checked.setTextSize(11);checked.setAllCaps(false);
-    checked.setOnClickListener(v->acknowledgeAccount(ac));card.addView(checked);
+    Button checked=new Button(this);checked.setText(t("Gecontroleerd"));
+    checked.setTextSize(11);checked.setAllCaps(false);
+    checked.setPadding(dp(4),0,dp(4),0);checked.setMinHeight(0);checked.setMinimumHeight(0);
+    checked.setOnClickListener(v->acknowledgeAccount(ac));
+    card.addView(checked,new LinearLayout.LayoutParams(-1,dp(42)));
+   }else{
+    View spacer=new View(this);card.addView(spacer,new LinearLayout.LayoutParams(-1,dp(42)));
    }
    card.setOnClickListener(v->{selectedAccount=ac.equals(selectedAccount)?"":ac;activeTab=0;draw();});
   }
