@@ -118,7 +118,7 @@ final class WidgetV7 {
  private static RemoteViews multiRow(Context ctx,Status s,int mode,long now,int id){
   if(mode==2||mode==3){
    RemoteViews row=new RemoteViews(ctx.getPackageName(),mode==3?R.layout.widget_v7_wide_row_dense:R.layout.widget_v7_wide_row);
-   row.setTextViewText(R.id.v7_wide_name,s.account);
+   row.setTextViewText(R.id.v7_wide_name,AppData.displayName(ctx,s.account));
    row.setTextViewText(R.id.v7_wide_builders,s.builderReady+"✓ "+s.builderActive+"⚒");
    timer(row,R.id.v7_wide_lab_timer,R.id.v7_wide_lab_idle,s.labNext,now);
    timer(row,R.id.v7_wide_pet_timer,R.id.v7_wide_pet_idle,s.petNext,now);
@@ -129,11 +129,11 @@ final class WidgetV7 {
   }
   boolean medium=mode==1;
   RemoteViews row=new RemoteViews(ctx.getPackageName(),medium?R.layout.widget_account_compact:R.layout.widget_account_mini);
-  row.setTextViewText(R.id.widget_account_name,s.account);
+  row.setTextViewText(R.id.widget_account_name,AppData.displayName(ctx,s.account));
   row.setViewVisibility(R.id.widget_ready,s.builderReady>0?View.VISIBLE:View.GONE);
   if(s.builderReady>0)row.setTextViewText(R.id.widget_ready,"●"+s.builderReady);
   timer(row,R.id.widget_timer,R.id.widget_idle,s.builderNext,now);
-  if(medium)row.setTextViewText(R.id.widget_subtitle,finish(ctx,s.builderNext,false));
+  if(medium)row.setTextViewText(R.id.widget_subtitle,"⚗ "+s.labActive+"  🐾 "+s.petActive+"  ·  "+finish(ctx,s.builderNext,true));
   row.setOnClickPendingIntent(R.id.widget_account_root,accountClick(ctx,s.account,id));
   return row;
  }
@@ -179,7 +179,7 @@ final class WidgetV7 {
  }
  private static RemoteViews mini(Context ctx,int id,Status s,long now){
   RemoteViews view=new RemoteViews(ctx.getPackageName(),R.layout.widget_v7_mini);
-  view.setTextViewText(R.id.v7_mini_title,s==null?"Clash":s.account);
+  view.setTextViewText(R.id.v7_mini_title,s==null?"Clash":AppData.displayName(ctx,s.account));
   if(s==null){
    timer(view,R.id.v7_mini_timer,R.id.v7_mini_idle,Long.MAX_VALUE,now);
    view.setTextViewText(R.id.v7_mini_finish,"");
@@ -208,7 +208,7 @@ final class WidgetV7 {
  }
  private static RemoteViews single(Context ctx,int id,Status s,long now){
   RemoteViews w=new RemoteViews(ctx.getPackageName(),R.layout.widget_v7_account);
-  w.setTextViewText(R.id.v7_single_name,s==null?"Clash Timer Hub":s.account);
+  w.setTextViewText(R.id.v7_single_name,s==null?"Clash Timer Hub":AppData.displayName(ctx,s.account));
   w.setOnClickPendingIntent(R.id.v7_single_settings,settingsClick(ctx,id));
   if(s==null){
    timer(w,R.id.v7_single_builder_timer,R.id.v7_single_builder_idle,Long.MAX_VALUE,now);
