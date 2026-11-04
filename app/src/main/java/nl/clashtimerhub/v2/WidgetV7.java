@@ -207,7 +207,11 @@ final class WidgetV7 {
    row.setTextViewText(R.id.v7_wide_builders,s.builderReady+"✓ "+s.builderActive+"⚒");
    String helperText=showHelpersForRow(ctx,id)?HelperTracker.compact(ctx,s.account,now):"";
    row.setTextViewText(R.id.v7_wide_helpers,helperText);
-   row.setViewVisibility(R.id.v7_wide_helpers,helperText.isEmpty()?View.GONE:View.VISIBLE);
+   // Reserve the same helper-column width in every row; empty accounts
+   // must not shift laboratory/pet/finish columns to the left.
+   row.setViewVisibility(R.id.v7_wide_helpers,
+    !showHelpersForRow(ctx,id)?View.GONE:
+     helperText.isEmpty()?View.INVISIBLE:View.VISIBLE);
    timer(row,R.id.v7_wide_lab_timer,R.id.v7_wide_lab_idle,s.labNext,now);
    timer(row,R.id.v7_wide_pet_timer,R.id.v7_wide_pet_idle,s.petNext,now);
    timer(row,R.id.v7_wide_builder_timer,R.id.v7_wide_builder_idle,s.builderNext,now);
