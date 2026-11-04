@@ -230,7 +230,9 @@ public final class MainActivity extends Activity {
   currentBuild.setPadding(dp(12),dp(8),dp(12),dp(4));
   releases.addView(currentBuild);
   long known=getPreferences(0).getLong("latestFeedBuild",0);
-  TextView latestBuild=label(known>0?"Nieuwste bekende build: #"+known:"Nieuwste build: nog niet gecontroleerd",12);
+  long installedCode=UpdateChecker.installedVersionCode(this);
+  long installedBuild=installedCode>=1000?installedCode-1000:installedCode;
+  TextView latestBuild=label(known>0?"Nieuwste bekende build: #"+known+(known>installedBuild?" · UPDATE BESCHIKBAAR":" · Up-to-date"):"Nieuwste build: nog niet gecontroleerd",12);
   latestBuild.setTextColor(0xffbba7d1);
   latestBuild.setPadding(dp(12),dp(2),dp(12),dp(8));
   releases.addView(latestBuild);
