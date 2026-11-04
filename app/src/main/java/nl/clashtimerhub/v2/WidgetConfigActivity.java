@@ -27,7 +27,7 @@ public final class WidgetConfigActivity extends Activity {
  private final ArrayList<String> accounts=new ArrayList<>(),manualOrder=new ArrayList<>();
  private RadioButton all,custom;
  private Spinner accountPicker,sortPicker,sizePicker,backgroundPicker;
- private CheckBox labCheck,petCheck;
+ private CheckBox labCheck,petCheck,helpersCheck;
  private LinearLayout orderRows;
  private SharedPreferences prefs;
  private boolean en;
@@ -259,6 +259,13 @@ public final class WidgetConfigActivity extends Activity {
    petCheck.setTextColor(Color.WHITE);
    petCheck.setChecked(prefs.getBoolean("pet_"+widgetId,true));
    parent.addView(petCheck);
+   if(kind==WidgetV7.MULTI){
+    helpersCheck=new CheckBox(this);
+    helpersCheck.setText(tr("Helpers tonen onder elk account","Show helpers below each account"));
+    helpersCheck.setTextColor(Color.WHITE);
+    helpersCheck.setChecked(prefs.getBoolean("helpers_"+widgetId,true));
+    parent.addView(helpersCheck);
+   }
   }
   addField(parent,tr("Achtergrond","Background"));
   backgroundPicker=picker(en?new String[]{"Classic purple","Dark","Transparent"}:
@@ -305,6 +312,7 @@ public final class WidgetConfigActivity extends Activity {
   if(backgroundPicker!=null)edit.putInt("bg_"+widgetId,backgroundPicker.getSelectedItemPosition());
   if(labCheck!=null)edit.putBoolean("lab_"+widgetId,labCheck.isChecked());
   if(petCheck!=null)edit.putBoolean("pet_"+widgetId,petCheck.isChecked());
+  if(helpersCheck!=null)edit.putBoolean("helpers_"+widgetId,helpersCheck.isChecked());
   edit.apply();
   TimerWidget.update(this);
   Intent result=new Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,widgetId);
