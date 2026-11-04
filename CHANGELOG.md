@@ -1,5 +1,15 @@
 # ClashTimerHub release notes
 
+## 7.5.6-beta1 — 4 November 2026
+
+### Unieke back-upbestandsnamen
+- Exports krijgen standaard de lokale datum, tijd en milliseconden: `ClashTimerHub-backup-YYYY-MM-DD_HH-mm-ss-SSS.json`.
+- Dit geldt zowel voor **Opslaan in Google Drive** (via Delen) als **Opslaan als bestand**.
+- Ook meerdere back-ups op dezelfde dag (zelfs binnen een seconde) zijn zo aan de naam te onderscheiden.
+- JSON-indeling en import blijven ongewijzigd; bestaande account- en timergegevens blijven behouden.
+- Google Drive upload via Delen vervangt nog steeds geen bestaand bestand automatisch.
+
+
 ## 7.5.5-beta1 — 4 November 2026
 
 ### Back-up — datum in bestandsnaam
