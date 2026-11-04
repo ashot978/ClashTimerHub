@@ -149,9 +149,9 @@ public final class QuickSyncImporter {
    else if("Pets".equals(cat))pets++;
   }
   String status=AppData.displayName(context,account)+" ✓ "+parsed.length()+" timers (⚒ "+builders+" · ⚗ "+laboratory+" · 🐾 "+pets+")";
-  if(previous.isEmpty())status+="\\nEerste volledige synchronisatie";
-  else if(differences==0)status+="\\nGeen verschillen met vorige sync";
-  else status+="\\nWijzigingen sinds vorige sync gevonden";
+  if(previous.isEmpty())status+="\nEerste volledige synchronisatie";
+  else if(differences==0)status+="\nGeen verschillen met vorige sync";
+  else status+="\nWijzigingen sinds vorige sync gevonden";
   long revision=prefs.getLong("syncRevision",0L)+1L;
   SharedPreferences.Editor editor=prefs.edit().putString("accounts",new JSONArray(accounts).toString())
    .putString("upgrades",merged.toString()).putString("playerTags",tags.toString())
