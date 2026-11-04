@@ -7,6 +7,15 @@ final class I18n {
  private static final LinkedHashMap<String,String> EN=new LinkedHashMap<>();
  static{
   LinkedHashMap<String,String> p=EN;
+  p.put("Je ziet altijd alle geselecteerde accounts in één lijst. Standaard tonen we ze allemaal.","All selected accounts appear in one list. By default, all accounts are shown.");
+  p.put("Kies je voorkeurstaal","Choose your preferred language");
+  p.put("Taal","Language");
+  p.put("TAAL","LANGUAGE");
+  p.put("Geen actieve bouwers","No active builders");
+  p.put("Ongeldige timer","Invalid timer");
+  p.put("Uitgeschakeld","Disabled");
+  p.put("Geen instellingen gevonden","No settings found");
+  p.put("Snel synchroniseren","Quick sync");
   p.put("Tik: sync · Sleep naar X of houd ingedrukt: uitschakelen","Tap: sync · Drag to X or hold to turn off");
   p.put("Synchroniseer een account met de zwevende knop.","Sync an account using the floating button.");
   p.put("Klik hier om de taal te wijzigen","Tap here to change language");
