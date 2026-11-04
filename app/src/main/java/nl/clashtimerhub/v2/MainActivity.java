@@ -312,7 +312,7 @@ public final class MainActivity extends Activity {
   ArrayList<String> targets=new ArrayList<>();
   for(String ac:accounts)if(!ac.equals(source))targets.add(ac);
   if(targets.isEmpty()){toast("Geen ander account om te koppelen");return;}
-  new android.app.AlertDialog.Builder(this).setTitle("Koppel "+source+" aan account")
+  new android.app.AlertDialog.Builder(this).setTitle(t("Koppel "+source+" aan account"))
    .setItems(targets.toArray(new String[0]),(d,which)->{
     String target=targets.get(which);
     try{
@@ -511,7 +511,7 @@ public final class MainActivity extends Activity {
    for(int i=0;i<a.length();i++){String n=a.getString(i).trim();if(n.isEmpty()||names.contains(n))throw new JSONException("Ongeldig account");names.add(n);}
    for(int i=0;i<u.length();i++){JSONObject o=u.getJSONObject(i);if(!names.contains(o.optString("account"))||o.optLong("finish")<=0)throw new JSONException("Ongeldige timer");timers.add(o);}
    new android.app.AlertDialog.Builder(this).setTitle(t("Back-up herstellen?"))
-    .setMessage("Dit vervangt alle bestaande accounts en timers door "+names.size()+" accounts en "+timers.size()+" timers.")
+    .setMessage(t("Dit vervangt alle bestaande accounts en timers door "+names.size()+" accounts en "+timers.size()+" timers."))
     .setPositiveButton(t("Herstellen"),(d,w)->{
      accounts.clear();accounts.addAll(names);upgrades.clear();upgrades.addAll(timers);
      getPreferences(0).edit().putString("playerTags",data.optJSONObject("playerTags")==null?"{}":data.optJSONObject("playerTags").toString()).apply();
@@ -544,11 +544,11 @@ public final class MainActivity extends Activity {
   SeekBar start=new SeekBar(this),end=new SeekBar(this);start.setMax(90);end.setMax(100);
   start.setProgress(vals[0]);end.setProgress(vals[1]);
   start.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener(){
-   public void onProgressChanged(SeekBar bar,int progress,boolean user){vals[0]=progress;a.setText("Timer begint: "+progress+"%");}
+   public void onProgressChanged(SeekBar bar,int progress,boolean user){vals[0]=progress;a.setText(t("Timer begint: "+progress+"%"));}
    public void onStartTrackingTouch(SeekBar bar){}public void onStopTrackingTouch(SeekBar bar){}
   });
   end.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener(){
-   public void onProgressChanged(SeekBar bar,int progress,boolean user){vals[1]=progress;b.setText("Timer eindigt: "+progress+"%");}
+   public void onProgressChanged(SeekBar bar,int progress,boolean user){vals[1]=progress;b.setText(t("Timer eindigt: "+progress+"%"));}
    public void onStartTrackingTouch(SeekBar bar){}public void onStopTrackingTouch(SeekBar bar){}
   });
   form.addView(a);form.addView(start);form.addView(b);form.addView(end);
@@ -698,8 +698,8 @@ public final class MainActivity extends Activity {
      ac=matched;
     }else if(false){
      final String payload=input,detected=tag;
-     new android.app.AlertDialog.Builder(this).setTitle("Onbekende speler: "+tag)
-      .setMessage("Deze player tag hoort niet bij "+ac+". Kies het juiste account om verkeerd overschrijven te voorkomen.")
+     new android.app.AlertDialog.Builder(this).setTitle(t("Onbekende speler: "+tag))
+      .setMessage(t("Deze player tag hoort niet bij "+ac+". Kies het juiste account om verkeerd overschrijven te voorkomen."))
       .setItems(accounts.toArray(new String[0]),(d,which)->{
        String chosen=accounts.get(which);
        String existing=tags.optString(chosen,"");
@@ -960,7 +960,7 @@ public final class MainActivity extends Activity {
    }
    if(!invalid.isEmpty()){
     new android.app.AlertDialog.Builder(this).setTitle(t("Scan niet opgeslagen"))
-     .setMessage("Ongeldige timer(s): "+android.text.TextUtils.join(", ",invalid)+". Corrigeer deze rijen en druk opnieuw op Opslaan. Bestaande timers blijven behouden.")
+     .setMessage(t("Ongeldige timer(s): "+android.text.TextUtils.join(", ",invalid)+". Corrigeer deze rijen en druk opnieuw op Opslaan. Bestaande timers blijven behouden."))
      .setPositiveButton(t("OK"),null).show();
     return;
    }
