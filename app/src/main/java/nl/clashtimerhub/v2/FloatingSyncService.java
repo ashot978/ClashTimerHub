@@ -20,6 +20,8 @@ public final class FloatingSyncService extends Service {
  private WindowManager.LayoutParams dropParams;
  private final Handler holdHandler=new Handler(Looper.getMainLooper());
  private Runnable holdAction;
+ private View feedback;
+ private Runnable feedbackDismiss;
  private boolean shuttingDown=false;
  private int dp(int n){return (int)(n*getResources().getDisplayMetrics().density+0.5f);}
  private void cancelHold(){
@@ -145,11 +147,50 @@ public final class FloatingSyncService extends Service {
    CharSequence value=clip.getItemAt(0).coerceToText(this);
    String result=QuickSyncImporter.importJson(this,value==null?"":value.toString());
    flashBubble(true);
-   Toast.makeText(this,result,Toast.LENGTH_LONG).show();
+   showFeedback(result,true);
   }catch(Exception e){
    flashBubble(false);
-   Toast.makeText(this,"Niet geplakt: "+e.getMessage(),Toast.LENGTH_LONG).show();
+   showFeedback("Synchronisatie mislukt\n"+e.getMessage(),false);
   }
+ }
+ private void showFeedback(String message,boolean success){
+  clearFeedback();
+  if(manager==null||params==null){
+   Toast.makeText(this,message,Toast.LENGTH_LONG).show();return;
+  }
+  TextView banner=new TextView(this);
+  banner.setText(message);banner.setTextColor(Color.WHITE);banner.setTextSize(14);
+  banner.setTypeface(null,android.graphics.Typeface.BOLD);
+  banner.setGravity(Gravity.CENTER_VERTICAL);banner.setPadding(dp(14),dp(8),dp(14),dp(8));
+  GradientDrawable bg=new GradientDrawable();
+  bg.setColor(success?0xff235540:0xff783245);
+  bg.setStroke(dp(1),success?0xff65d4a5:0xffef859c);
+  bg.setCornerRadius(dp(14));banner.setBackground(bg);
+  android.util.DisplayMetrics m=getResources().getDisplayMetrics();
+  int width=Math.min(dp(260),m.widthPixels-dp(20));
+  WindowManager.LayoutParams popup=new WindowManager.LayoutParams(width,WindowManager.LayoutParams.WRAP_CONTENT,
+   params.type,WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
+   WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE|
+   WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,PixelFormat.TRANSLUCENT);
+  popup.gravity=Gravity.TOP|Gravity.START;
+  popup.x=Math.max(dp(8),Math.min(m.widthPixels-width-dp(8),params.x+params.width/2-width/2));
+  popup.y=params.y+params.height+dp(9);
+  if(popup.y>m.heightPixels-dp(110))popup.y=Math.max(dp(8),params.y-dp(95));
+  try{
+   manager.addView(banner,popup);feedback=banner;
+   feedbackDismiss=this::clearFeedback;
+   holdHandler.postDelayed(feedbackDismiss,2800);
+  }catch(RuntimeException e){
+   Toast.makeText(this,message,Toast.LENGTH_LONG).show();
+  }
+ }
+ private void clearFeedback(){
+  if(feedbackDismiss!=null)holdHandler.removeCallbacks(feedbackDismiss);
+  feedbackDismiss=null;
+  if(feedback!=null&&manager!=null){
+   try{manager.removeView(feedback);}catch(RuntimeException ignored){}
+  }
+  feedback=null;
  }
  private void flashBubble(boolean success){
   if(!(bubble instanceof TextView))return;
@@ -166,7 +207,7 @@ public final class FloatingSyncService extends Service {
  }
  @Override public int onStartCommand(Intent intent,int flags,int startId){return START_STICKY;}
  @Override public void onDestroy(){
-  cancelHold();hideDropTarget();
+  cancelHold();hideDropTarget();clearFeedback();
   if(manager!=null&&bubble!=null){
    try{manager.removeView(bubble);}catch(RuntimeException ignored){}
   }
