@@ -224,8 +224,16 @@ public final class MainActivity extends Activity {
   settingsItem(widget,"⚙","Widget instellen","Alle accounts of een eigen selectie",()->showWidgetSettings());
   LinearLayout players=settingsSection("♙  ACCOUNTS","Geef je accounts herkenbare namen");
   settingsItem(players,"✎","Accountnamen aanpassen","Verander de naam zonder de player tag te wijzigen",()->renameAccount());
-  LinearLayout releases=settingsSection("↓  APP-UPDATES","Nieuwe versies via GitHub");
-  settingsItem(releases,"↓","Updates openen","Ga naar de nieuwste Android-build",()->openUpdates());
+  LinearLayout releases=settingsSection("↓  APP-UPDATES","Versie en GitHub-builds");
+  TextView currentBuild=label(installedBuildDescription(),13);
+  currentBuild.setTextColor(0xff8be3ad);
+  currentBuild.setPadding(dp(12),dp(8),dp(12),dp(4));
+  releases.addView(currentBuild);
+  TextView latestBuild=label("Nieuwste build: nog niet automatisch beschikbaar (private GitHub-repository)",12);
+  latestBuild.setTextColor(0xffbba7d1);
+  latestBuild.setPadding(dp(12),dp(2),dp(12),dp(8));
+  releases.addView(latestBuild);
+  settingsItem(releases,"↓","Bekijk nieuwste GitHub-build","Controleer de laatste geslaagde build in je browser",()->openUpdates());
   LinearLayout backups=settingsSection("▣  BACK-UP","Je opgeslagen accounts veilig bewaren");
   settingsItem(backups,"▣","Back-up kopiëren","Kopieer je gegevens naar het klembord",()->copyBackup());
   settingsItem(backups,"↶","Back-up herstellen","Herstel een gekopieerde back-up",()->restoreBackupClipboard());
@@ -246,6 +254,17 @@ public final class MainActivity extends Activity {
      AppData.saveAccountName(this,key,display);TimerWidget.update(this);draw();
     }).setNegativeButton(t("Annuleren"),null).show();
   }).setNegativeButton(t("Annuleren"),null).show();
+ }
+ /** The APK has GitHub run_number + 1000 as its Android versionCode. */
+ private String installedBuildDescription(){
+  try{
+   android.content.pm.PackageInfo info=getPackageManager().getPackageInfo(getPackageName(),0);
+   long code=android.os.Build.VERSION.SDK_INT>=28?info.getLongVersionCode():info.versionCode;
+   String name=info.versionName==null?"Onbekende versie":info.versionName;
+   return "Geïnstalleerd: "+name+(code>=1001?" · build #"+(code-1000):" · versiecode "+code);
+  }catch(Exception e){
+   return "Geïnstalleerde build niet beschikbaar";
+  }
  }
  private void openUpdates(){
   new android.app.AlertDialog.Builder(this).setTitle(t("Nieuwe versie installeren"))
