@@ -29,7 +29,7 @@ final class HelperTracker {
    if(id==93000001L)return en?"Lab Assistant":"Labassistent";
    // Keep the ID in labels for newer/unknown helpers, rather than
    // incorrectly identifying a helper if Supercell changes game data.
-   if(id==93000002L)return en?"Helper #3":"Helper #3";
+   if(id==93000002L)return en?"Alchemist":"Alchemist";
    if(id==93000003L)return en?"Helper #4":"Helper #4";
    return "Helper "+id;
   }
@@ -39,7 +39,7 @@ final class HelperTracker {
   final List<Helper> items;
   Snapshot(long at,List<Helper> values){importedAt=at;items=values;}
   int ready(long now){
-   int n=0;for(Helper h:items)if(h.readyAt<=now)n++;return n;
+   int n=0;for(Helper h:items)if(h.readyAt>=0&&h.readyAt<=now)n++;return n;
   }
   long soonest(long now){
    long next=Long.MAX_VALUE;
@@ -56,21 +56,21 @@ final class HelperTracker {
   if(original.length()>30)throw new JSONException("Te veel helpers in export");
   JSONArray normalized=new JSONArray();
   JSONObject boosts=export.optJSONObject("boosts");
-  long global=boosts==null?-1:boosts.optLong("helper_cooldown",-1);
+  long global=export.has("helper_cooldown")?export.optLong("helper_cooldown",-1):
+   boosts==null?-1:boosts.optLong("helper_cooldown",-1);
   for(int i=0;i<original.length();i++){
    JSONObject source=original.optJSONObject(i);
    if(source==null)continue;
    long id=source.optLong("data",-1);
    if(id<0)continue;
    int level=Math.max(0,Math.min(100,source.optInt("lvl",0)));
-   long cd=source.has("helper_cooldown")?source.optLong("helper_cooldown",0):
-    source.has("timer")?source.optLong("timer",0):Math.max(0,global);
+   long cd=source.has("helper_cooldown")?source.optLong("helper_cooldown",0):global;
    // A snapshot is authoritative only as of the export time, not a live game connection.
-   cd=Math.max(0,Math.min(MAX_COOLDOWN_SECONDS,cd));
+   if(cd>=0)cd=Math.min(MAX_COOLDOWN_SECONDS,cd);
    long work=Math.max(0,Math.min(86400,source.optLong("helper_timer",0)));
    normalized.put(new JSONObject()
     .put("id",id).put("level",level)
-    .put("readyAt",timestamp+cd*1000L)
+    .put("readyAt",cd<0?-1L:timestamp+cd*1000L)
     .put("workingUntil",timestamp+work*1000L));
   }
   JSONObject all=new JSONObject(prefs.getString(KEY,"{}"));
@@ -102,6 +102,7 @@ final class HelperTracker {
   int available=snapshot.ready(now);
   int total=snapshot.items.size();
   long next=snapshot.soonest(now);
+  if(available==0&&next==Long.MAX_VALUE)return "🤝 "+total+" helpers";
   if(next==Long.MAX_VALUE)return "🤝 "+available+"/"+total+" ✓";
   long mins=Math.max(1,(next-now+59999)/60000);
   String remain=mins>=60?(mins/60)+"h"+String.format(java.util.Locale.ROOT,"%02d",mins%60):
