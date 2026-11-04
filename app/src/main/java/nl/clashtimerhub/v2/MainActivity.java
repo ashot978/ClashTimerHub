@@ -29,10 +29,14 @@ public final class MainActivity extends Activity {
  private Bitmap lastScanBitmap;
  private final android.os.Handler ticker=new android.os.Handler(android.os.Looper.getMainLooper());
  private String lastLoadedSnapshot="";
+ private boolean foldExpanded=false;
+ private LinearLayout detailPanel;
+ private final ArrayList<TextView> dashboardClocks=new ArrayList<>();
+ private final ArrayList<Long> dashboardFinishes=new ArrayList<>();
  private final android.content.SharedPreferences.OnSharedPreferenceChangeListener syncWatcher=(prefs,key)->{
   if("syncRevision".equals(key))ticker.post(()->refreshExternalImport());
  };
- private final Runnable tick=new Runnable(){public void run(){if(activeTab==0&&dashboard!=null)renderDashboard();else if(activeTab==1||activeTab==2)refreshVisibleTimers();ticker.postDelayed(this,1000);}};
+ private final Runnable tick=new Runnable(){public void run(){if(activeTab==0&&dashboard!=null){refreshDashboardClocks();refreshVisibleTimers();}else if(activeTab==1||activeTab==2)refreshVisibleTimers();ticker.postDelayed(this,1000);}};
  @Override protected void onResume(){super.onResume();getPreferences(0).registerOnSharedPreferenceChangeListener(syncWatcher);refreshExternalImport();ticker.removeCallbacks(tick);ticker.post(tick);}
  @Override protected void onPause(){getPreferences(0).unregisterOnSharedPreferenceChangeListener(syncWatcher);ticker.removeCallbacks(tick);super.onPause();}
  private static final Pattern TIME=Pattern.compile("(?i)(?:(\\d+)\\s*d\\s*)?(?:(\\d+)\\s*h\\s*)?(?:(\\d+)\\s*m\\s*)?(?:(\\d+)\\s*s\\s*)?");
@@ -79,13 +83,15 @@ public final class MainActivity extends Activity {
  private LinearLayout screenContent;
  private String selectedAccount="";
  private void draw(){
+  foldExpanded=getResources().getConfiguration().screenWidthDp>=600;
+  detailPanel=null;
   getWindow().setStatusBarColor(0xff0e1020);getWindow().setNavigationBarColor(0xff0e1020);
   LinearLayout shell=new LinearLayout(this);shell.setOrientation(1);shell.setBackgroundColor(0xff160f25);setContentView(shell);
   ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);
   root=new LinearLayout(this);root.setOrientation(1);root.setPadding(dp(12),dp(22),dp(12),dp(64));scroll.addView(root);
 
   TextView heading=label("⚔  CLASH TIMER HUB",24);heading.setTypeface(null,android.graphics.Typeface.BOLD);heading.setTextColor(0xffffd88a);root.addView(heading);
-  TextView subtitle=label("COMMAND CENTER / V4",11);subtitle.setTextColor(0xffb5a5ff);root.addView(subtitle);
+  TextView subtitle=label("COMMAND CENTER / V5",11);subtitle.setTextColor(0xffb5a5ff);root.addView(subtitle);
   screenContent=new LinearLayout(this);screenContent.setOrientation(1);root.addView(screenContent);
   LinearLayout nav=new LinearLayout(this);nav.setBackgroundColor(0xff261a36);nav.setPadding(dp(4),dp(20),dp(4),dp(12));shell.addView(nav);
   String[] names={"Dashboard","Tijdlijn","Accounts","Instellingen"};
@@ -99,9 +105,24 @@ public final class MainActivity extends Activity {
   }
   shell.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
   if(activeTab==0){
-   screenContent.addView(label("ALLE ACCOUNTS · EERSTVOLGENDE BOUWER",17));
-   dashboard=new LinearLayout(this);dashboard.setOrientation(1);screenContent.addView(dashboard);
-   renderDashboard();
+   if(foldExpanded){
+    LinearLayout columns=new LinearLayout(this);columns.setOrientation(0);screenContent.addView(columns);
+    LinearLayout left=new LinearLayout(this);left.setOrientation(1);
+    LinearLayout right=new LinearLayout(this);right.setOrientation(1);
+    LinearLayout.LayoutParams leftParams=new LinearLayout.LayoutParams(0,-2,46);
+    LinearLayout.LayoutParams rightParams=new LinearLayout.LayoutParams(0,-2,54);rightParams.setMargins(dp(10),0,0,0);
+    columns.addView(left,leftParams);columns.addView(right,rightParams);
+    left.addView(label("⚒  ACCOUNTS",16));
+    dashboard=new LinearLayout(this);dashboard.setOrientation(1);left.addView(dashboard);
+    detailPanel=new LinearLayout(this);detailPanel.setOrientation(1);detailPanel.setPadding(dp(8),dp(8),dp(8),dp(8));
+    detailPanel.setBackground(shape(0xff261c35,16));right.addView(detailPanel);
+    if(!accounts.contains(selectedAccount)&&!accounts.isEmpty())selectedAccount=accounts.get(0);
+    renderDashboard();renderSelectedDetail();
+   }else{
+    screenContent.addView(label("ALLE ACCOUNTS · EERSTVOLGENDE BOUWER",17));
+    dashboard=new LinearLayout(this);dashboard.setOrientation(1);screenContent.addView(dashboard);
+    renderDashboard();
+   }
   }else if(activeTab==1){
    dashboard=null;showTimeline();
   }else if(activeTab==2){
@@ -121,6 +142,31 @@ public final class MainActivity extends Activity {
   button("Back-up delen",()->backup());
   button("📋 Back-up herstellen vanaf klembord",()->restoreBackupClipboard());
 
+ }
+ private void renderSelectedDetail(){
+  if(detailPanel==null)return;
+  detailPanel.removeAllViews();
+  if(accounts.isEmpty()){detailPanel.addView(label("Synchroniseer een account met de zwevende knop.",14));return;}
+  String ac=selectedAccount;
+  TextView title=label("⚔  "+ac,20);title.setTextColor(0xffffd783);
+  title.setTypeface(null,android.graphics.Typeface.BOLD);detailPanel.addView(title);
+  int ready=completedCount(ac,System.currentTimeMillis());
+  if(ready>0){
+   TextView done=label("✓  "+ready+" builders klaar",14);done.setTextColor(0xff8be3ad);detailPanel.addView(done);
+   Button checked=new Button(this);checked.setText("Markeer als gecontroleerd");checked.setTextSize(12);checked.setAllCaps(false);
+   checked.setOnClickListener(v->{acknowledgeAccount(ac);renderSelectedDetail();});detailPanel.addView(checked);
+  }
+  long last=getPreferences(0).getLong("lastSyncAt_"+ac,0);
+  if(last>0){TextView synced=label("↻ Gesynchroniseerd: "+finishAt(last),11);synced.setTextColor(0xffbba7d1);detailPanel.addView(synced);}
+  for(String cat:categories){
+   TextView section=label(("Bouwers".equals(cat)?"⚒  ":"Laboratorium".equals(cat)?"⚗  ":"🐾  ")+cat.toUpperCase(java.util.Locale.ROOT),14);
+   section.setTextColor(0xffd9b8ff);section.setTypeface(null,android.graphics.Typeface.BOLD);detailPanel.addView(section);
+   ArrayList<JSONObject> list=new ArrayList<>();
+   for(JSONObject o:upgrades)if(ac.equals(o.optString("account"))&&cat.equals(o.optString("category"))&&o.optLong("finish")>System.currentTimeMillis())list.add(o);
+   Collections.sort(list,(a,b)->Long.compare(a.optLong("finish"),b.optLong("finish")));
+   if(list.isEmpty()){TextView none=label("Geen actieve upgrades",11);none.setTextColor(0xffa99bb8);detailPanel.addView(none);}
+   else for(JSONObject o:list)addTimerRow(detailPanel,o,true);
+  }
  }
  private void showAccountScreen(){
   screenContent.addView(label("ACCOUNTS · ALLE UPGRADES",19));
@@ -185,6 +231,17 @@ public final class MainActivity extends Activity {
   Collections.sort(list,(x,y)->Long.compare(x.optLong("finish"),y.optLong("finish")));
   if(list.isEmpty())screenContent.addView(label("Geen actieve upgrades voor dit filter.",14));
   for(JSONObject o:list)addTimerRow(screenContent,o,false);
+ }
+ private void refreshDashboardClocks(){
+  long now=System.currentTimeMillis();
+  boolean finished=false;
+  for(int i=0;i<dashboardClocks.size();i++){
+   long end=dashboardFinishes.get(i);
+   TextView view=dashboardClocks.get(i);
+   if(end<=now){finished=true;break;}
+   view.setText(format(Math.max(0,(end-now+999)/1000)));
+  }
+  if(finished){renderDashboard();if(detailPanel!=null)renderSelectedDetail();}
  }
  private void refreshVisibleTimers(){
   if(screenContent==null)return;
@@ -380,7 +437,7 @@ public final class MainActivity extends Activity {
  }
  private void renderDashboard(){
   if(dashboard==null)return;
-  dashboard.removeAllViews();
+  dashboard.removeAllViews();dashboardClocks.clear();dashboardFinishes.clear();
   long now=System.currentTimeMillis();
   ArrayList<String> ordered=new ArrayList<>(accounts);
   Collections.sort(ordered,(a,b)->{
@@ -391,6 +448,10 @@ public final class MainActivity extends Activity {
   int active=0,totalReady=0;
   for(JSONObject o:upgrades)if("Bouwers".equals(o.optString("category"))&&o.optLong("finish")>now)active++;
   for(String ac:accounts)totalReady+=completedCount(ac,now);
+  String last=getPreferences(0).getString("lastSyncSummary","");
+  if(!last.isEmpty()){
+   TextView recent=label("↻  "+last,11);recent.setTextColor(0xffbba7d1);dashboard.addView(recent);
+  }
   LinearLayout stats=new LinearLayout(this);dashboard.addView(stats);
   String[] metrics={accounts.size()+"\\nACCOUNTS",active+"\\nBOUWERS BEZIG",totalReady+"\\nKLAAR"};
   for(String metric:metrics){
@@ -399,8 +460,9 @@ public final class MainActivity extends Activity {
    LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,dp(70),1);lp.setMargins(dp(2),dp(3),dp(2),dp(3));stats.addView(view,lp);
   }
   LinearLayout gridRow=null;int index=0;
+  int columns=foldExpanded?1:2;
   for(String ac:ordered){
-   if(index%2==0){gridRow=new LinearLayout(this);dashboard.addView(gridRow);}
+   if(index%columns==0){gridRow=new LinearLayout(this);dashboard.addView(gridRow);}
    index++;
    long soonest=nextBuilder(ac,now);
    JSONObject first=null;int busy=0;
@@ -412,12 +474,13 @@ public final class MainActivity extends Activity {
    int color=ready?0xff213a30:urgent?0xff443420:0xff30233e;
    LinearLayout card=new LinearLayout(this);card.setOrientation(1);card.setPadding(dp(8),dp(6),dp(8),dp(8));card.setBackground(shape(color,14));
    LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,-2,1);lp.setMargins(dp(2),dp(3),dp(2),dp(3));gridRow.addView(card,lp);
-   TextView name=label(ac,15);name.setTypeface(null,android.graphics.Typeface.BOLD);card.addView(name);
+   TextView name=label((ac.equals(selectedAccount)&&foldExpanded?"◆  ":"⚔  ")+ac,15);name.setTypeface(null,android.graphics.Typeface.BOLD);card.addView(name);
    if(ready){
     TextView done=label(completed+" BOUWER"+(completed==1?"":"S")+" KLAAR",14);done.setTextColor(0xff8be3ad);done.setTypeface(null,android.graphics.Typeface.BOLD);card.addView(done);
    }
    TextView timer=label(soonest==Long.MAX_VALUE?"Geen actieve builder":format(Math.max(0,(soonest-now+999)/1000)),18);
    timer.setTextColor(ready?0xff8be3ad:0xffffd783);timer.setTypeface(null,android.graphics.Typeface.BOLD);card.addView(timer);
+   if(soonest!=Long.MAX_VALUE){dashboardClocks.add(timer);dashboardFinishes.add(soonest);}
    if(soonest!=Long.MAX_VALUE){
     TextView end=label(finishAt(soonest),12);end.setTextColor(0xffc9b9df);card.addView(end);
    }
@@ -427,7 +490,7 @@ public final class MainActivity extends Activity {
     Button checked=new Button(this);checked.setText("Gecontroleerd");checked.setTextSize(11);checked.setAllCaps(false);
     checked.setOnClickListener(v->acknowledgeAccount(ac));card.addView(checked);
    }
-   card.setOnClickListener(v->{selectedAccount=ac;activeTab=2;draw();});
+   card.setOnClickListener(v->{selectedAccount=ac;if(foldExpanded&&activeTab==0){renderSelectedDetail();renderDashboard();}else{activeTab=2;draw();}});
   }
  }
  private int completedCount(String ac,long now){
