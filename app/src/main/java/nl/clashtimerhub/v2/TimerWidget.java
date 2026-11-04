@@ -128,7 +128,7 @@ public final class TimerWidget extends AppWidgetProvider {
   }return b.toString();
  }
  @Override public void onUpdate(Context context,AppWidgetManager manager,int[] ids){update(context);}
- @Override public void onAppWidgetOptionsChanged(Context context,AppWidgetManager manager,int id){super.onAppWidgetOptionsChanged(context,manager,id);update(context);}
+ @Override public void onAppWidgetOptionsChanged(Context context,AppWidgetManager manager,int id,android.os.Bundle options){super.onAppWidgetOptionsChanged(context,manager,id,options);update(context);}
  @Override public void onReceive(Context context,Intent intent){
   super.onReceive(context,intent);
   if(intent==null)return;
