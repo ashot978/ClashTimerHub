@@ -125,8 +125,8 @@ final class WidgetV7 {
  /** Exact per-widget column widths, computed once from the longest value in each
   * column across EVERY visible account. No per-row shifting or abbreviated timers. */
  private static final class Columns {
-  float name=0,builders=0,lab=0,pet=0,next=0,finish=0;
-  float singleLine(){return name+builders+lab+pet+next+finish+12f;}
+  float name=0,builders=0,helpers=0,lab=0,pet=0,next=0,finish=0;
+  float singleLine(){return name+builders+helpers+lab+pet+next+finish+12f;}
   float twoLine(){return Math.max(name+builders+next,lab+pet+finish)+12f;}
   float threeLine(){return Math.max(name+builders,Math.max(lab+pet,next+finish))+12f;}
   float fiveLine(){return Math.max(name+builders,Math.max(lab,Math.max(pet,Math.max(next,finish))))+12f;}
@@ -150,6 +150,8 @@ final class WidgetV7 {
   for(Status item:values){
    c.name=Math.max(c.name,textDp(ctx,AppData.displayName(ctx,item.account),11f+boost,true)+3f);
    c.builders=Math.max(c.builders,textDp(ctx,item.builderReady+"✓ "+item.builderActive+"⚒",10f,false)+4f);
+   String helper=HelperTracker.compact(ctx,item.account,now);
+   c.helpers=Math.max(c.helpers,helper.isEmpty()?0f:textDp(ctx,helper,10f,false)+6f);
    String lab=remainingForColumn(item.labNext,now);
    String pet=remainingForColumn(item.petNext,now);
    c.lab=Math.max(c.lab,textDp(ctx,"🧙 "+lab,10f,false)+6f);
@@ -166,11 +168,15 @@ final class WidgetV7 {
  private static void alignColumns(RemoteViews row,Columns c){
   setColumnWidth(row,R.id.v7_wide_name,c.name);
   setColumnWidth(row,R.id.v7_wide_builders,c.builders);
+  setColumnWidth(row,R.id.v7_wide_helpers,c.helpers);
   setColumnWidth(row,R.id.v7_wide_lab_group,c.lab);
   setColumnWidth(row,R.id.v7_wide_pet_group,c.pet);
   setColumnWidth(row,R.id.v7_wide_builder_timer,c.next);
   setColumnWidth(row,R.id.v7_wide_builder_idle,c.next);
   setColumnWidth(row,R.id.v7_wide_finish,c.finish);
+ }
+ private static boolean showHelpersForRow(Context ctx,int id){
+  return ctx.getSharedPreferences("WidgetPreferences",Context.MODE_PRIVATE).getBoolean("helpers_"+id,true);
  }
  private static RemoteViews multiRow(Context ctx,Status s,int mode,long now,int id,boolean showLab,boolean showPet,int size,int background,Columns columns){
   if(mode>=2&&mode<=6){
@@ -195,10 +201,13 @@ final class WidgetV7 {
    row.setTextViewTextSize(R.id.v7_wide_builder_timer,android.util.TypedValue.COMPLEX_UNIT_SP,mainBase+mainBoost);
    row.setTextViewTextSize(R.id.v7_wide_builder_idle,android.util.TypedValue.COMPLEX_UNIT_SP,mainBase+mainBoost);
    for(int textId:new int[]{R.id.v7_wide_builders,R.id.v7_wide_lab_timer,R.id.v7_wide_lab_idle,
-    R.id.v7_wide_pet_timer,R.id.v7_wide_pet_idle,R.id.v7_wide_finish})
+    R.id.v7_wide_pet_timer,R.id.v7_wide_pet_idle,R.id.v7_wide_finish,R.id.v7_wide_helpers})
      row.setTextViewTextSize(textId,android.util.TypedValue.COMPLEX_UNIT_SP,small);
 
    row.setTextViewText(R.id.v7_wide_builders,s.builderReady+"✓ "+s.builderActive+"⚒");
+   String helperText=showHelpersForRow(ctx,id)?HelperTracker.compact(ctx,s.account,now):"";
+   row.setTextViewText(R.id.v7_wide_helpers,helperText);
+   row.setViewVisibility(R.id.v7_wide_helpers,helperText.isEmpty()?View.GONE:View.VISIBLE);
    timer(row,R.id.v7_wide_lab_timer,R.id.v7_wide_lab_idle,s.labNext,now);
    timer(row,R.id.v7_wide_pet_timer,R.id.v7_wide_pet_idle,s.petNext,now);
    timer(row,R.id.v7_wide_builder_timer,R.id.v7_wide_builder_idle,s.builderNext,now);
@@ -265,47 +274,21 @@ final class WidgetV7 {
    height=opts.getInt(landscape?AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT:AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,240);
    if(width<=0)width=190;if(height<=0)height=240;
   }
-  // Fixed-width timer cells cannot be sacrificed to a flexible account-name column.
-  // Reflow rather than scale the timer text or show ellipses as the widget narrows.
-  // Pixel/dp option width can differ by launcher; thresholds include breathing room.
-  int rows=Math.max(1,ordered.size());
-  int mode;
+  // The full overview is always one horizontal line per account.
+  // Extra helper data increases REQUIRED WIDTH, never row height.
   Columns columns=sharedColumns(ctx,ordered,now,fontSize);
-  // Choose the most compact row layout that fits the full shared column widths.
-  // Values use the widest account in each column, so EVERY row has the same starts.
-  if(width>=columns.singleLine())mode=2;
-  else if(width>=columns.twoLine())mode=4;
-  else if(width>=columns.threeLine())mode=5;
-  else mode=6;
-  // No header: reclaim its vertical space for the accounts.
-  // The full-width Sync control and gear share a single 28dp bottom row.
-  int rowHeight=mode==2?24:mode==4?42:mode==5?62:102;
-  int reservedFooter=28,frame=8;
+  int mode=2;
+  int rowHeight=24,reservedFooter=28,frame=8;
   int available=Math.max(0,height-reservedFooter-frame);
-  int count=0,consumed=0;
-  for(Status item:ordered){
-   int helperExtra=showHelpers&&!HelperTracker.compact(ctx,item.account,now).isEmpty()?16:0;
-   if(count>0&&consumed+rowHeight+helperExtra>available)break;
-   consumed+=rowHeight+helperExtra;
-   count++;
-  }
+  int count=Math.min(ordered.size(),Math.max(1,available/rowHeight));
   RemoteViews w=new RemoteViews(ctx.getPackageName(),R.layout.widget_v7_multi);
   w.setInt(R.id.v7_multi_root,"setBackgroundResource",background==1?R.drawable.widget_background_dark:
     background==2?R.drawable.widget_background_transparent:R.drawable.widget_background);
   w.removeAllViews(R.id.v7_multi_rows);
   if(ordered.isEmpty())w.addView(R.id.v7_multi_rows,new RemoteViews(ctx.getPackageName(),R.layout.widget_empty));
-  else for(int i=0;i<count;i++){
-   Status item=ordered.get(i);
-   w.addView(R.id.v7_multi_rows,
-    multiRow(ctx,item,mode,now,id,showLab,showPet,fontSize,background,columns));
-   String helpers=showHelpers?HelperTracker.compact(ctx,item.account,now):"";
-   if(!helpers.isEmpty()){
-    RemoteViews line=new RemoteViews(ctx.getPackageName(),R.layout.widget_v7_helper_line);
-    line.setTextViewText(R.id.v7_helper_line_text,helpers);
-    line.setOnClickPendingIntent(R.id.v7_helper_line_root,accountClick(ctx,item.account,id));
-    w.addView(R.id.v7_multi_rows,line);
-   }
-  }
+  else for(int i=0;i<count;i++)
+   w.addView(R.id.v7_multi_rows,multiRow(ctx,ordered.get(i),mode,now,id,
+    showLab,showPet,fontSize,background,columns));
   boolean active=AppData.prefs(ctx).getBoolean("floatingEnabled",false);
   w.setTextViewText(R.id.v7_multi_sync,I18n.english(ctx)?("Sync "+(active?"ON":"OFF")):("Sync "+(active?"AAN":"UIT")));
   w.setOnClickPendingIntent(R.id.v7_multi_sync,syncClick(ctx,id));
