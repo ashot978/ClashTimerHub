@@ -1,5 +1,22 @@
 # ClashTimerHub release notes
 
+## 7.5.1-beta1 — 4 November 2026
+
+### Native Google Drive backups
+- **Google account authorization:** Connect ClashTimerHub to My Drive through Google Identity Services (limited `drive.file` access; no full-Drive permissions or access to your Google password).
+- **Visible JSON file:** Create `ClashTimerHub-backup.json` directly in My Drive using the Google Drive API. No Android Downloads folder, no Storage Access Framework location picker.
+- **Replace previous file:** Select the already active backup or choose another app-accessible JSON file and overwrite it in My Drive after confirmation.
+- **Restore from Drive:** View eligible backup files in a list, choose one, download and validate its JSON, then confirm restoration of timers and account settings.
+- **Optional automatic updates:** Select a backup as the auto-sync target; after successful Clash sync, refresh that file when Google authorization can be renewed without user interaction.
+- **Disconnect:** Revoke granted Drive authorization, clear local selected-file references, leave the Drive files intact.
+- **Safety:** The existing local / clipboard backup format and data remain unchanged; no Drive file is overwritten without user confirmation except the specifically selected automatic backup destination.
+
+### Required one-time Google Cloud setup
+- Enable Google Drive API, configure OAuth consent, and register an **Android OAuth client** with package `nl.clashtimerhub.app` and the SHA-1 certificate fingerprint of the actual GitHub APK signing key.
+- Without this registration, the Google authorization screen can refuse the connection even if Android APK compilation succeeds.
+- The limited `drive.file` permission can list files created or explicitly authorized for this app; unrelated existing Drive files cannot be browsed automatically. You can still restore from existing backups made by ClashTimerHub once accessible.
+
+
 ## 7.5.0-beta1 — 4 November 2026
 
 ### Google Drive backup manager
