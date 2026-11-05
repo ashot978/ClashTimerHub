@@ -617,7 +617,6 @@ public final class MainActivity extends Activity {
      TimerWidget.update(this);renderDashboard();
     });
    }
-   renderTimelinePreview(detailPanel);
   for(String cat:categories){
    TextView section=label(("Bouwers".equals(cat)?"⚒  ":"Laboratorium".equals(cat)?"⚗  ":"🐾  ")+cat.toUpperCase(java.util.Locale.ROOT),14);
    section.setTextColor(0xffd9b8ff);section.setTypeface(null,android.graphics.Typeface.BOLD);detailPanel.addView(section);
@@ -625,7 +624,7 @@ public final class MainActivity extends Activity {
    for(JSONObject o:upgrades)if(ac.equals(o.optString("account"))&&cat.equals(o.optString("category"))&&o.optLong("finish")>System.currentTimeMillis())list.add(o);
    Collections.sort(list,(a,b)->Long.compare(a.optLong("finish"),b.optLong("finish")));
    if(list.isEmpty()){TextView none=label("Geen actieve upgrades",11);none.setTextColor(0xffa99bb8);detailPanel.addView(none);}
-   else for(JSONObject o:list)addTimerRow(detailPanel,o,true);
+   else for(JSONObject o:list)addTimerRow(detailPanel,o,true,true);
   }
  }
  private void showAccountHelpers(LinearLayout parent,String account){
@@ -796,10 +795,21 @@ public final class MainActivity extends Activity {
   return new java.text.SimpleDateFormat("EEE d MMM · HH:mm",displayLocale).format(new java.util.Date(timestamp));
  }
  private void addTimerRow(LinearLayout parent,JSONObject o,boolean editable){
+  addTimerRow(parent,o,editable,false);
+ }
+ private void addTimerRow(LinearLayout parent,JSONObject o,boolean editable,boolean showUpgradeIcon){
   long finish=o.optLong("finish"),remain=Math.max(0,(finish-System.currentTimeMillis()+999)/1000);
   LinearLayout card=new LinearLayout(this);card.setOrientation(1);card.setPadding(dp(10),dp(5),dp(10),dp(5));card.setBackground(shape(remain<=1800?0xff46351f:0xff30243e,12));card.setTag(finish);
   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(dp(2),dp(3),dp(2),dp(3));parent.addView(card,lp);
-  card.addView(label((editable?"":displayAccount(o.optString("account"))+" · ")+cleanName(o.optString("name")),14));
+  String upgradeName=cleanName(o.optString("name"));
+  if(showUpgradeIcon){
+   LinearLayout heading=new LinearLayout(this);heading.setOrientation(0);
+   heading.setGravity(android.view.Gravity.CENTER_VERTICAL);
+   heading.addView(UpgradeIcons.view(this,o),new LinearLayout.LayoutParams(dp(38),dp(38)));
+   TextView name=label(upgradeName,14);
+   LinearLayout.LayoutParams nameParams=new LinearLayout.LayoutParams(0,-2,1f);nameParams.setMargins(dp(8),0,0,0);
+   heading.addView(name,nameParams);card.addView(heading);
+  }else card.addView(label((editable?"":displayAccount(o.optString("account"))+" · ")+upgradeName,14));
   TextView time=label(format(remain)+"  ·  "+finishAt(finish),13);time.setTextColor(0xffffd88a);card.addView(time);
   if(editable)card.setOnClickListener(v->editTimer(o));
   else card.setOnClickListener(v->{selectedAccount=o.optString("account");activeTab=0;draw();});
