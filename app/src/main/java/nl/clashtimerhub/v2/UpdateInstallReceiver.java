@@ -60,6 +60,6 @@ public final class UpdateInstallReceiver extends BroadcastReceiver {
   Log.e("ClashTimerHub","APK install: "+message);
   context.getSharedPreferences(MainActivity.class.getName(),Context.MODE_PRIVATE)
    .edit().putString("lastInstallError",message).apply();
-  android.widget.Toast.makeText(context,"ClashTimerHub: "+message,android.widget.Toast.LENGTH_LONG).show();
+  android.widget.Toast.makeText(context,"ClashTimerHub: "+I18n.tr(context,message),android.widget.Toast.LENGTH_LONG).show();
  }
 }
