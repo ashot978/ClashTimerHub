@@ -1,5 +1,19 @@
 # ClashTimerHub release notes
 
+## Duidelijke upgrade-iconen — 5 november 2026
+
+### NL
+- Vervang verouderde wizard- en laboratoriumsymbolen door het duidelijke 🧪-icoon in Overview, accountdetails en de oorspronkelijke widgets.
+- Maak de statussen voor bouwers, Lab en Pets op accountkaarten korter, zodat ze minder snel afbreken.
+- Laat bij volledig geüpgradede Lab- of Pet-onderdelen een vinkje zien in plaats van het lange MAX-label.
+- Bestaande accounts, upgradegegevens, timerberekeningen en vier widgets blijven behouden.
+
+### EN
+- Replace old wizard and laboratory symbols with a clear 🧪 icon in Overview, account details and the original widgets.
+- Shorten the Builders, Lab and Pets statuses on account cards to reduce clipping.
+- Show a check mark instead of the long MAX label for fully upgraded Lab or Pets.
+- Preserve existing accounts, upgrade data, timer calculations and the four original widgets.
+
 ## Compacte instellingen — 5 November 2026
 
 ### NL
