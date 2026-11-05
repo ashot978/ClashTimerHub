@@ -104,6 +104,7 @@ public final class MainActivity extends Activity {
   refreshExternalImport();ticker.removeCallbacks(tick);ticker.post(tick);
   startListeningForUpdateDownload();
   processPendingUpdateDownload();
+  showSuccessfulUpdateIfPending();
   String priorError=getPreferences(0).getString("lastInstallError","");
   if(!priorError.isEmpty()){
    getPreferences(0).edit().remove("lastInstallError").apply();
@@ -119,6 +120,23 @@ public final class MainActivity extends Activity {
   }
   long last=getPreferences(0).getLong("lastUpdateCheck",0);
   if(System.currentTimeMillis()-last>6L*3600000L)checkUpdates(true);
+ }
+ /** Shown once on the first launch after Android reports a successful package replacement. */
+ private void showSuccessfulUpdateIfPending(){
+  android.content.SharedPreferences prefs=getPreferences(0);
+  long buildCode=prefs.getLong("pendingSuccessfulUpdateVersionCode",0);
+  long installed=UpdateChecker.installedVersionCode(this);
+  if(buildCode<=1000||installed<buildCode)return;
+  prefs.edit().remove("pendingSuccessfulUpdateVersionCode").apply();
+  getWindow().getDecorView().post(()->{
+   if(isFinishing()||isDestroyed())return;
+   String label=installed>=1001?"#"+(installed-1000):String.valueOf(installed);
+   new android.app.AlertDialog.Builder(this)
+    .setTitle(t("Update succesvol geïnstalleerd"))
+    .setMessage(t("Clash Timer Hub is bijgewerkt naar build ")+label+
+     ".\n\n"+t("Je accounts, timers en instellingen zijn behouden."))
+    .setPositiveButton(t("OK"),null).show();
+  });
  }
  @Override protected void onPause(){stopListeningForUpdateDownload();getPreferences(0).unregisterOnSharedPreferenceChangeListener(syncWatcher);ticker.removeCallbacks(tick);super.onPause();}
  private static final Pattern TIME=Pattern.compile("(?i)(?:(\\d+)\\s*d\\s*)?(?:(\\d+)\\s*h\\s*)?(?:(\\d+)\\s*m\\s*)?(?:(\\d+)\\s*s\\s*)?");
@@ -145,6 +163,9 @@ public final class MainActivity extends Activity {
  @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);setIntent(intent);handleWidgetNavigation(intent);handleSharedJson(intent);}
  private void handleWidgetNavigation(Intent intent){
   if(intent==null)return;
+  if(intent.getBooleanExtra("openSettings",false)){
+   activeTab=3;selectedAccount="";draw();return;
+  }
   if(intent.getBooleanExtra("widgetEnableOverlay",false)&&!getPreferences(0).getBoolean("floatingEnabled",false))toggleFloatingSync();
   String open=intent.getStringExtra("openAccount");
   if(open!=null&&accounts.contains(open)){selectedAccount=open;activeTab=0;draw();}
