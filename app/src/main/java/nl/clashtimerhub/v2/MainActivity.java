@@ -682,7 +682,7 @@ public final class MainActivity extends Activity {
     });
    }
   for(String cat:categories){
-   TextView section=label(("Bouwers".equals(cat)?"⚒  ":"Laboratorium".equals(cat)?"⚗  ":"🐾  ")+cat.toUpperCase(java.util.Locale.ROOT),14);
+   TextView section=label(("Bouwers".equals(cat)?"⚒  ":"Laboratorium".equals(cat)?"🧪  ":"🐾  ")+cat.toUpperCase(java.util.Locale.ROOT),14);
    section.setTextColor(0xffd9b8ff);section.setTypeface(null,android.graphics.Typeface.BOLD);detailPanel.addView(section);
    ArrayList<JSONObject> list=new ArrayList<>();
    for(JSONObject o:upgrades)if(ac.equals(o.optString("account"))&&cat.equals(o.optString("category"))&&o.optLong("finish")>System.currentTimeMillis())list.add(o);
@@ -1207,9 +1207,9 @@ public final class MainActivity extends Activity {
      if("Laboratorium".equals(upgrade.optString("category")))lab++;
      else if("Pets".equals(upgrade.optString("category")))pets++;
     }
-    String labLabel=lab>0?lab+" lab":AppData.isMaxed(this,ac,"Laboratorium")?"✓ lab MAX":"0 lab";
-    String petLabel=pets>0?pets+" pets":AppData.isMaxed(this,ac,"Pets")?"✓ pets MAX":"0 pets";
-    TextView detail=label(itemName+"\n"+busy+" bouwers · ⚗ "+labLabel+" · 🐾 "+petLabel,12);
+    String labLabel=lab>0?String.valueOf(lab):AppData.isMaxed(this,ac,"Laboratorium")?"✓":"—";
+    String petLabel=pets>0?String.valueOf(pets):AppData.isMaxed(this,ac,"Pets")?"✓":"—";
+    TextView detail=label(itemName+"\n⚒ "+busy+" · 🧪 "+labLabel+" · 🐾 "+petLabel,12);
    detail.setTextColor(0xffd4c5e4);detail.setMaxLines(2);
    detail.setEllipsize(android.text.TextUtils.TruncateAt.END);
    detail.setGravity(android.view.Gravity.TOP);detail.setPadding(dp(6),dp(3),dp(3),0);
