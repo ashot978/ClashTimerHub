@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ android:id="@+id/studio_compact_root" android:layout_width="match_parent"
+ android:layout_height="22dp" android:orientation="horizontal"
+ android:gravity="center_vertical" android:paddingStart="4dp" android:paddingEnd="4dp">
+ <TextView android:id="@+id/studio_compact_name" android:layout_width="82dp"
+  android:layout_height="match_parent" android:gravity="center_vertical"
+  android:singleLine="true" android:ellipsize="end" android:textColor="#FFD783"
+  android:textSize="11sp" android:textStyle="bold" android:includeFontPadding="false"/>
+ <LinearLayout android:id="@+id/studio_compact_fields" android:layout_width="0dp"
+  android:layout_weight="1" android:layout_height="match_parent"
+  android:orientation="horizontal" android:gravity="center_vertical"/>
+</LinearLayout>
