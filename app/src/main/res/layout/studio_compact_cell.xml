@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
- android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent">
+ android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent"
+ android:paddingStart="4dp" android:paddingEnd="3dp">
  <TextView android:id="@+id/studio_compact_value" android:layout_width="match_parent"
   android:layout_height="match_parent" android:gravity="center_vertical"
   android:singleLine="true" android:ellipsize="end" android:includeFontPadding="false"
