@@ -22,10 +22,11 @@ public final class StudioEditorActivity extends Activity {
  private int id=AppWidgetManager.INVALID_APPWIDGET_ID;
  private boolean en;
  private LinearLayout body,accountsBox,fieldsBox,previewBox;
- private CheckBox allAccounts,labels,shortNames;
- private Spinner columns,sort;
- private SeekBar fontSize,spacing;
- private TextView fontLabel,spaceLabel;
+ private LinearLayout outer,footerBar;
+ private CheckBox allAccounts,labels,shortNames,showFooter,showGear,separators;
+ private Spinner columns,sort,layoutMode;
+ private SeekBar fontSize,spacing,bgOpacity,cardOpacity;
+ private TextView fontLabel,spaceLabel,bgOpacityLabel,cardOpacityLabel;
  private EditText bg,card,textColor,accent;
  private String tr(String nl,String english){return en?english:nl;}
  private int dp(int d){return Math.round(d*getResources().getDisplayMetrics().density);}
@@ -65,10 +66,25 @@ public final class StudioEditorActivity extends Activity {
   fieldOrder.addAll(prior);
   for(String f:KEYS){if(!fieldOrder.contains(f))fieldOrder.add(f);enabled.put(f,prior.contains(f));}
   getWindow().setStatusBarColor(BACK);getWindow().setNavigationBarColor(BACK);
-  ScrollView scroll=new ScrollView(this);
+  outer=new LinearLayout(this);outer.setOrientation(LinearLayout.VERTICAL);outer.setBackgroundColor(BACK);
+  ScrollView scroll=new ScrollView(this);scroll.setFillViewport(false);scroll.setClipToPadding(false);
   body=new LinearLayout(this);body.setOrientation(1);body.setBackgroundColor(BACK);
-  body.setPadding(dp(16),dp(20),dp(16),dp(22));
-  scroll.addView(body);setContentView(scroll);
+  body.setPadding(dp(16),dp(20),dp(16),dp(30));
+  scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
+  outer.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
+  footerBar=new LinearLayout(this);footerBar.setOrientation(LinearLayout.VERTICAL);
+  footerBar.setBackgroundColor(0xff261936);footerBar.setPadding(dp(14),dp(6),dp(14),dp(8));
+  outer.addView(footerBar,new LinearLayout.LayoutParams(-1,-2));
+  setContentView(outer);
+  if(android.os.Build.VERSION.SDK_INT>=30){
+   outer.setOnApplyWindowInsetsListener((v,insets)->{
+    android.graphics.Insets bars=insets.getInsets(
+     android.view.WindowInsets.Type.systemBars()|android.view.WindowInsets.Type.displayCutout());
+    v.setPadding(bars.left,bars.top,bars.right,bars.bottom);
+    return insets;
+   });
+   outer.requestApplyWindowInsets();
+  }else outer.setFitsSystemWindows(true);
   title("WIDGET STUDIO",22);
   note(tr("Ontwerp deze widget zelf. Alle keuzes gelden alleen voor deze widget.",
    "Design this widget yourself. Choices only affect this widget."));
@@ -86,6 +102,12 @@ public final class StudioEditorActivity extends Activity {
    "Choose which details appear and reorder fields with the arrows."));
   fieldsBox=new LinearLayout(this);fieldsBox.setOrientation(1);body.addView(fieldsBox);renderFields();
   section(tr("Indeling","Layout"));
+  note(tr("Weergavestijl","Display style"));
+  layoutMode=picker(new String[]{tr("Compacte tabel (klassiek)","Compact table (classic)"),
+   tr("Extra compacte tabel","Extra dense table"),tr("Kaarten","Cards")});
+  int mode=prefs.getInt("layout_"+id,1);
+  layoutMode.setSelection(mode==0?2:mode==2?1:0);
+  body.addView(layoutMode,new LinearLayout.LayoutParams(-1,dp(48)));
   columns=picker(new String[]{tr("Automatisch","Automatic"),tr("1 kolom","1 column"),tr("2 kolommen","2 columns"),tr("3 kolommen","3 columns")});
   columns.setSelection(Math.max(0,Math.min(3,prefs.getInt("cols_"+id,0))));
   field(tr("Aantal kolommen","Columns"),columns);
@@ -94,39 +116,62 @@ public final class StudioEditorActivity extends Activity {
   field(tr("Sorteervolgorde","Sort order"),sort);
   labels=check(tr("Veldnamen tonen","Show field labels"),prefs.getBoolean("labels_"+id,true),body);
   shortNames=check(tr("Lange accountnamen inkorten","Shorten long account names"),prefs.getBoolean("short_"+id,false),body);
+  showFooter=check(tr("Voettekst tonen","Show footer"),prefs.getBoolean("footer_"+id,true),body);
+  showGear=check(tr("Tandwiel tonen","Show settings gear"),prefs.getBoolean("gear_"+id,true),body);
+  separators=check(tr("Afwisselende rijachtergronden","Alternating row backgrounds"),prefs.getBoolean("separators_"+id,true),body);
   fontLabel=note("");fontSize=new SeekBar(this);fontSize.setMax(8);
   fontSize.setProgress(Math.max(0,Math.min(8,prefs.getInt("font_"+id,12)-10)));body.addView(fontSize);
   spaceLabel=note("");spacing=new SeekBar(this);spacing.setMax(10);
   spacing.setProgress(Math.max(0,Math.min(10,prefs.getInt("space_"+id,3))));body.addView(spacing);
-  section(tr("Kleuren","Colors"));
-  note(tr("Gebruik kleuren in het formaat #RRGGBB. Kies een thema of pas iedere kleur apart aan.",
-   "Use colors in #RRGGBB format. Choose a theme or customize every color."));
+  section(tr("Snelle stijlkeuzes","Quick styles"));
+  note(tr("Kies eerst een stijl. Pas daarna onderdelen, kleuren en doorzichtigheid zelf aan.",
+   "Pick a style first, then customize fields, colors and transparency."));
   LinearLayout presets=new LinearLayout(this);presets.setOrientation(LinearLayout.HORIZONTAL);body.addView(presets);
-  preset(presets,tr("Paars","Purple"),"#241832","#38284A","#FFFFFF","#FFD783");
-  preset(presets,tr("Donker","Dark"),"#131313","#262626","#FFFFFF","#8BE3AD");
-  preset(presets,tr("Licht","Light"),"#F1ECF7","#FFFFFF","#241832","#6840A0");
+  preset(presets,tr("Classic","Classic"),"#241832","#38284A","#FFFFFF","#FFD783",0,82,62);
+  preset(presets,tr("Glas","Glass"),"#241832","#38284A","#FFFFFF","#FFD783",0,55,34);
+  preset(presets,tr("Transparant","Transparent"),"#241832","#38284A","#FFFFFF","#FFD783",0,0,0);
+  LinearLayout additional=new LinearLayout(this);additional.setOrientation(LinearLayout.HORIZONTAL);body.addView(additional);
+  preset(additional,tr("Donker","Dark"),"#131313","#262626","#FFFFFF","#8BE3AD",0,92,72);
+  preset(additional,tr("Kaarten","Cards"),"#131313","#262626","#FFFFFF","#8BE3AD",2,95,100);
+  section(tr("Kleuren en transparantie","Colors and transparency"));
+  note(tr("Gebruik #RRGGBB en stel de zichtbaarheid apart in.","Use #RRGGBB and adjust opacity separately."));
   bg=colorInput(tr("Achtergrond","Background"),"bg_",StudioWidget.hex(StudioWidget.DEF_BG));
   card=colorInput(tr("Kaarten","Cards"),"card_",StudioWidget.hex(StudioWidget.DEF_CARD));
   textColor=colorInput(tr("Tekst","Text"),"text_",StudioWidget.hex(StudioWidget.DEF_TEXT));
   accent=colorInput(tr("Accent / accountnaam","Accent / account name"),"accent_",StudioWidget.hex(StudioWidget.DEF_ACCENT));
+  bgOpacityLabel=note("");bgOpacity=new SeekBar(this);bgOpacity.setMax(100);
+  bgOpacity.setProgress(prefs.getInt("bgOpacity_"+id,90));body.addView(bgOpacity);
+  cardOpacityLabel=note("");cardOpacity=new SeekBar(this);cardOpacity.setMax(100);
+  cardOpacity.setProgress(prefs.getInt("cardOpacity_"+id,76));body.addView(cardOpacity);
   Button update=button(tr("Voorbeeld verversen","Refresh preview"),()->preview());
-  Button save=button(tr("✓ Ontwerp opslaan","✓ Save design"),()->save());
-  save.setBackgroundTintList(ColorStateList.valueOf(0xff7652a3));
+  Button save=new Button(this);save.setText(tr("✓ Ontwerp opslaan","✓ Save design"));
+  save.setAllCaps(false);save.setBackgroundTintList(ColorStateList.valueOf(0xff7652a3));
+  footerBar.addView(save,new LinearLayout.LayoutParams(-1,dp(51)));
+  save.setOnClickListener(v->save());
   columns.setOnItemSelectedListener(spinListener());sort.setOnItemSelectedListener(spinListener());
+  layoutMode.setOnItemSelectedListener(spinListener());
   labels.setOnCheckedChangeListener((v,on)->preview());
   shortNames.setOnCheckedChangeListener((v,on)->preview());
+  showFooter.setOnCheckedChangeListener((v,on)->preview());
+  showGear.setOnCheckedChangeListener((v,on)->preview());
+  separators.setOnCheckedChangeListener((v,on)->preview());
   SeekBar.OnSeekBarChangeListener seek=new SeekBar.OnSeekBarChangeListener(){
    public void onProgressChanged(SeekBar s,int n,boolean from){
     fontLabel.setText(tr("Tekstgrootte: ","Text size: ")+(10+fontSize.getProgress())+" sp");
     spaceLabel.setText(tr("Rijafstand: ","Spacing: ")+spacing.getProgress()+" dp");
+    bgOpacityLabel.setText(tr("Achtergrond transparantie: ","Background opacity: ")+bgOpacity.getProgress()+"%");
+    cardOpacityLabel.setText(tr("Rij- of kaartzichtbaarheid: ","Row/card opacity: ")+cardOpacity.getProgress()+"%");
     preview();
    }
    public void onStartTrackingTouch(SeekBar s){}
    public void onStopTrackingTouch(SeekBar s){}
   };
   fontSize.setOnSeekBarChangeListener(seek);spacing.setOnSeekBarChangeListener(seek);
+  bgOpacity.setOnSeekBarChangeListener(seek);cardOpacity.setOnSeekBarChangeListener(seek);
   fontLabel.setText(tr("Tekstgrootte: ","Text size: ")+(10+fontSize.getProgress())+" sp");
   spaceLabel.setText(tr("Rijafstand: ","Spacing: ")+spacing.getProgress()+" dp");
+  bgOpacityLabel.setText(tr("Achtergrond transparantie: ","Background opacity: ")+bgOpacity.getProgress()+"%");
+  cardOpacityLabel.setText(tr("Rij- of kaartzichtbaarheid: ","Row/card opacity: ")+cardOpacity.getProgress()+"%");
   preview();
  }
  private AdapterView.OnItemSelectedListener spinListener(){
@@ -171,10 +216,17 @@ public final class StudioEditorActivity extends Activity {
   });
   return e;
  }
- private void preset(LinearLayout row,String label,String background,String cards,String text,String highlight){
+ private void preset(LinearLayout row,String label,String background,String cards,String text,String highlight,
+  int layout,int backgroundPercent,int cardPercent){
   Button b=new Button(this);b.setText(label);b.setAllCaps(false);b.setTextSize(11);
   row.addView(b,new LinearLayout.LayoutParams(0,dp(42),1));
-  b.setOnClickListener(v->{bg.setText(background);card.setText(cards);textColor.setText(text);accent.setText(highlight);preview();});
+  b.setOnClickListener(v->{
+   bg.setText(background);card.setText(cards);textColor.setText(text);accent.setText(highlight);
+   layoutMode.setSelection(layout==0?2:layout==2?1:0);
+   bgOpacity.setProgress(backgroundPercent);cardOpacity.setProgress(cardPercent);
+   if(layout!=0)labels.setChecked(false);
+   preview();
+  });
  }
  private void renderAccounts(){
   if(accountsBox==null)return;
