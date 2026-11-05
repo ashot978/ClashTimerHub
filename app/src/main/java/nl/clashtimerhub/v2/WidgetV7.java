@@ -154,7 +154,7 @@ final class WidgetV7 {
    c.helpers=Math.max(c.helpers,helper.isEmpty()?0f:textDp(ctx,helper,10f,false)+6f);
    String lab=remainingForColumn(item.labNext,now);
    String pet=remainingForColumn(item.petNext,now);
-   c.lab=Math.max(c.lab,textDp(ctx,"🕵️ "+lab,10f,false)+6f);
+   c.lab=Math.max(c.lab,textDp(ctx,"🧙 "+lab,10f,false)+6f);
    c.pet=Math.max(c.pet,textDp(ctx,"🐾 "+pet,10f,false)+6f);
    c.next=Math.max(c.next,textDp(ctx,remainingForColumn(item.builderNext,now),11f+boost,false)+6f);
    c.finish=Math.max(c.finish,textDp(ctx,finish(ctx,item.builderNext,true),10f,false)+5f);
@@ -234,7 +234,7 @@ final class WidgetV7 {
    String lab=s.labActive>0?String.valueOf(s.labActive):AppData.isMaxed(ctx,s.account,"Laboratorium")?"✓":"0";
    String pets=s.petActive>0?String.valueOf(s.petActive):AppData.isMaxed(ctx,s.account,"Pets")?"✓":"0";
    // In case a smaller launcher does use this fallback, tint only the MAX marks green.
-   android.text.SpannableStringBuilder subtitle=new android.text.SpannableStringBuilder("🕵️ ");
+   android.text.SpannableStringBuilder subtitle=new android.text.SpannableStringBuilder("🧙 ");
    int labStart=subtitle.length();subtitle.append(lab);
    if("✓".equals(lab))subtitle.setSpan(new android.text.style.ForegroundColorSpan(0xff8BE3AD),labStart,subtitle.length(),android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
    subtitle.append("  🐾 ");int petStart=subtitle.length();subtitle.append(pets);
@@ -242,7 +242,7 @@ final class WidgetV7 {
    subtitle.append("  ·  ").append(finish(ctx,s.builderNext,true));
    if(!showLab&&!showPet)subtitle=new android.text.SpannableStringBuilder(finish(ctx,s.builderNext,true));
    else if(!showLab)subtitle=new android.text.SpannableStringBuilder("🐾 "+pets+" · "+finish(ctx,s.builderNext,true));
-   else if(!showPet)subtitle=new android.text.SpannableStringBuilder("🕵️ "+lab+" · "+finish(ctx,s.builderNext,true));
+   else if(!showPet)subtitle=new android.text.SpannableStringBuilder("🧙 "+lab+" · "+finish(ctx,s.builderNext,true));
    row.setTextViewText(R.id.widget_subtitle,subtitle);
   }
   row.setOnClickPendingIntent(R.id.widget_account_root,accountClick(ctx,s.account,id));
@@ -376,7 +376,7 @@ final class WidgetV7 {
   }
   if(s!=null){
    w.setTextViewText(R.id.v7_single_builders,s.builderReady+"✓  "+s.builderActive+"⚒");
-   w.setTextViewText(R.id.v7_single_lab_count,"🕵️ "+s.labActive);
+   w.setTextViewText(R.id.v7_single_lab_count,"🧙 "+s.labActive);
    w.setTextViewText(R.id.v7_single_pet_count,"🐾 "+s.petActive);
    timer(w,R.id.v7_single_builder_timer,R.id.v7_single_builder_idle,s.builderNext,now);
    timer(w,R.id.v7_single_lab_timer,R.id.v7_single_lab_idle,s.labNext,now);
