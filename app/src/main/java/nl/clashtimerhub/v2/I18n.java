@@ -456,6 +456,9 @@ final class I18n {
   p.put("Open Clash More Settings · Data Export → Copy","Open Clash More Settings · Data Export → Copy");
   p.put("Open Clash manually: Profile → Settings → More Settings","Open Clash manually: Profile → Settings → More Settings");
   p.put("Tik eenmaal om te synchroniseren; dubbel tik voor Clash More Settings.","Tap once to sync; double tap for Clash More Settings.");
+  p.put("Clash-instellingen openen · Data Export → Copy","Open Clash settings · Data Export → Copy");
+  p.put("Open Clash zelf: Profiel → Instellingen → Meer instellingen","Open Clash manually: Profile → Settings → More Settings");
+  p.put("Actief · tik = sync · dubbel tik = export","On · tap = sync · double tap = export");
   ORDERED.addAll(EN.entrySet());
   ORDERED.sort((a,b)->Integer.compare(b.getKey().length(),a.getKey().length()));
  }
