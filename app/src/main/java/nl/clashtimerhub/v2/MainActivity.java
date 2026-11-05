@@ -364,7 +364,7 @@ public final class MainActivity extends Activity {
   LinearLayout language=settingsSection(left,"🌐  TAAL","Kies je voorkeurstaal");
   settingsItem(language,I18n.flag(this),"Taal",I18n.flag(this)+"  "+I18n.label(this),()->chooseLanguage());
   LinearLayout sync=settingsSection(left,"↻  SYNCHRONISATIE","Accounts bijwerken zonder Clash te verlaten");
-  settingsItem(sync,"⚔","Zwevende plakknop",getPreferences(0).getBoolean("floatingEnabled",false)?"Actief · tik om uit te schakelen":"Uit · tik om in te schakelen",()->{toggleFloatingSync();draw();});
+  settingsItem(sync,"⚔","Zwevende plakknop",getPreferences(0).getBoolean("floatingEnabled",false)?"Actief · tik = sync · dubbel tik = export":"Uit · tik om in te schakelen",()->{toggleFloatingSync();draw();});
   settingsItem(sync,"▤","Synchroniseer vanaf klembord","Importeer een gekopieerde Clash-export",()->importClipboard());
   LinearLayout notifications=settingsSection(left,"♧  MELDINGEN","Upgrade-alarmen en tests");
   settingsItem(notifications,"♧","Meldingen instellen","Gereedmelding en waarschuwingen",()->notificationSettings());

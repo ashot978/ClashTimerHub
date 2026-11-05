@@ -20,10 +20,17 @@ public final class FloatingSyncService extends Service {
  private WindowManager.LayoutParams dropParams;
  private final Handler holdHandler=new Handler(Looper.getMainLooper());
  private Runnable holdAction;
+ private Runnable pendingTap;
+ private long previousTapAt;
+ private static final long DOUBLE_TAP_WINDOW_MS=350L;
  private View feedback;
  private Runnable feedbackDismiss;
  private boolean shuttingDown=false;
  private int dp(int n){return (int)(n*getResources().getDisplayMetrics().density+0.5f);}
+ private void cancelTap(){
+  if(pendingTap!=null)holdHandler.removeCallbacks(pendingTap);
+  pendingTap=null;
+ }
  private void cancelHold(){
   if(holdAction!=null){holdHandler.removeCallbacks(holdAction);holdAction=null;}
  }
@@ -37,7 +44,7 @@ public final class FloatingSyncService extends Service {
   Intent open=new Intent(this,MainActivity.class);
   PendingIntent pi=PendingIntent.getActivity(this,12,open,PendingIntent.FLAG_IMMUTABLE|PendingIntent.FLAG_UPDATE_CURRENT);
   Notification.Builder nb=Build.VERSION.SDK_INT>=26?new Notification.Builder(this,"floating_sync"):new Notification.Builder(this);
-  nb.setSmallIcon(android.R.drawable.ic_menu_upload).setContentTitle("Clash Timer Hub").setContentText(I18n.tr(this,"Tik: sync · Sleep naar X of houd ingedrukt: uitschakelen")).setContentIntent(pi).setOngoing(true);
+  nb.setSmallIcon(android.R.drawable.ic_menu_upload).setContentTitle("Clash Timer Hub").setContentText(I18n.tr(this,"Tik: sync · Dubbel tik: export · Sleep: verplaatsen")).setContentIntent(pi).setOngoing(true);
   if(Build.VERSION.SDK_INT>=29)startForeground(CHANNEL_ID,nb.build(),android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
   else startForeground(CHANNEL_ID,nb.build());
   manager=(WindowManager)getSystemService(WINDOW_SERVICE);
@@ -67,7 +74,7 @@ public final class FloatingSyncService extends Service {
      case MotionEvent.ACTION_MOVE:
       int dx=(int)(e.getRawX()-startX),dy=(int)(e.getRawY()-startY);
       if(Math.abs(dx)>dp(10)||Math.abs(dy)>dp(10)){
-       if(!moved){moved=true;cancelHold();showDropTarget();}
+       if(!moved){moved=true;cancelHold();cancelTap();showDropTarget();}
       }
       if(moved&&!shuttingDown){
        android.util.DisplayMetrics metrics=getResources().getDisplayMetrics();
@@ -85,7 +92,7 @@ public final class FloatingSyncService extends Service {
        hideDropTarget();
        if(discard)disableBubble();
        else AppData.prefs(FloatingSyncService.this).edit().putInt("floatingX",params.x).putInt("floatingY",params.y).apply();
-      }else pasteNow();
+      }else handleTap();
       return true;
      case MotionEvent.ACTION_CANCEL:
       cancelHold();hideDropTarget();return true;
@@ -96,6 +103,40 @@ public final class FloatingSyncService extends Service {
   bubble=view;manager.addView(bubble,params);
   AppData.prefs(this).edit().putBoolean("floatingEnabled",true).apply();
   TimerWidget.update(this);
+ }
+ private void handleTap(){
+  long now=SystemClock.uptimeMillis();
+  if(pendingTap!=null&&now-previousTapAt<=DOUBLE_TAP_WINDOW_MS){
+   cancelTap();
+   previousTapAt=0;
+   openExportSettings();
+   return;
+  }
+  cancelTap();
+  previousTapAt=now;
+  pendingTap=()->{
+   pendingTap=null;
+   previousTapAt=0;
+   if(!shuttingDown)pasteNow();
+  };
+  holdHandler.postDelayed(pendingTap,DOUBLE_TAP_WINDOW_MS);
+ }
+ /** The game handles this public Clash of Clans deep link if installed and supported.
+  * It never reads or changes game memory. If the game ignores the action,
+  * the user can still export manually. */
+ private void openExportSettings(){
+  try{
+   android.net.Uri uri=android.net.Uri.parse("https://link.clashofclans.com/en?action=OpenMoreSettings");
+   Intent intent=new Intent(Intent.ACTION_VIEW,uri);
+   intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+   // Prefer Clash itself to avoid routing the app link through an unrelated browser.
+   intent.setPackage("com.supercell.clashofclans");
+   if(intent.resolveActivity(getPackageManager())==null)intent.setPackage(null);
+   startActivity(intent);
+   showFeedback(I18n.tr(this,"Clash-instellingen openen · Data Export → Copy"),true);
+  }catch(Exception error){
+   showFeedback(I18n.tr(this,"Open Clash zelf: Profiel → Instellingen → Meer instellingen"),false);
+  }
  }
  private void showDropTarget(){
   if(dropTarget!=null||manager==null)return;
@@ -135,7 +176,7 @@ public final class FloatingSyncService extends Service {
  }
  private void disableBubble(){
   if(shuttingDown)return;
-  shuttingDown=true;cancelHold();hideDropTarget();
+  shuttingDown=true;cancelHold();cancelTap();hideDropTarget();
   AppData.prefs(this).edit().putBoolean("floatingEnabled",false).apply();
   TimerWidget.update(this);
   Toast.makeText(this,I18n.tr(this,"Zwevende plakknop uitgeschakeld"),Toast.LENGTH_SHORT).show();
@@ -236,7 +277,7 @@ public final class FloatingSyncService extends Service {
  }
  @Override public int onStartCommand(Intent intent,int flags,int startId){return START_STICKY;}
  @Override public void onDestroy(){
-  cancelHold();hideDropTarget();clearFeedback();
+  cancelHold();cancelTap();hideDropTarget();clearFeedback();
   if(manager!=null&&bubble!=null){
    try{manager.removeView(bubble);}catch(RuntimeException ignored){}
   }

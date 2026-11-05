@@ -1,5 +1,21 @@
 # ClashTimerHub release notes
 
+## Sneller exporteren vanuit Clash — 5 november 2026
+
+### NL
+- Dubbel tik op de zwevende sync-knop om Clash of Clans direct naar Meer instellingen te laten navigeren, als het spel de deeplink ondersteunt.
+- Eén tik blijft de bestaande JSON-import uitvoeren; lang indrukken en verslepen blijven werken.
+- De instructie bij de zwevende knop is bijgewerkt.
+- Bij onvoldoende deeplinkondersteuning verschijnt een instructie om de export handmatig te openen.
+- Er worden geen screenshots, AI-modellen of extra toestemmingen gebruikt.
+
+### EN
+- Double tap the floating sync button to ask Clash of Clans to open More Settings directly when the game supports the deep link.
+- Single tap still imports the copied JSON; long press and dragging continue to work.
+- Updated the floating button's instructions.
+- If the game does not support the deep link, manual export instructions are shown.
+- No screenshots, AI models or additional permissions are involved.
+
 ## Laboratory-icoon volgens gebruikersvoorkeur — 5 november 2026
 
 ### NL
