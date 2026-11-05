@@ -119,16 +119,16 @@ public final class StudioWidget extends AppWidgetProvider {
  }
  static String fieldValue(Context ctx,Status s,String key,long now){
   switch(key){
-   case "builders":return s.ready+"✓  "+s.active+"⚒";
+   case "builders":return s.ready+"/"+(s.ready+s.active)+" ✓";
    case "next":return duration(s.builder,now);
-   case "lab":return s.lab==Long.MAX_VALUE?(AppData.isMaxed(ctx,s.key,"Laboratorium")?"MAX":"—"):duration(s.lab,now);
-   case "pets":return s.pet==Long.MAX_VALUE?(AppData.isMaxed(ctx,s.key,"Pets")?"MAX":"—"):duration(s.pet,now);
+   case "lab":return s.lab==Long.MAX_VALUE?(AppData.isMaxed(ctx,s.key,"Laboratorium")?"✓":"—"):duration(s.lab,now);
+   case "pets":return s.pet==Long.MAX_VALUE?(AppData.isMaxed(ctx,s.key,"Pets")?"✓":"—"):duration(s.pet,now);
    case "helpers":{
     String value=HelperTracker.compact(ctx,s.key,now);
-    return value.isEmpty()?"—":value;
+    return value.isEmpty()?"—":value.replace("🤝 ","").replace("🤝","");
    }
    case "finish":return s.builder==Long.MAX_VALUE?"—":
-    new java.text.SimpleDateFormat("dd MMM HH:mm",I18n.english(ctx)?Locale.UK:new Locale("nl","NL")).format(new Date(s.builder));
+    new java.text.SimpleDateFormat("dd/MM HH:mm",Locale.ROOT).format(new Date(s.builder));
    default:return "—";
   }
  }
@@ -219,7 +219,7 @@ public final class StudioWidget extends AppWidgetProvider {
      }else{
       cell.setViewVisibility(R.id.studio_compact_countdown,View.GONE);
       String value=fieldValue(ctx,s,field,now);
-      if(labels&&layout==1)value=field.equals("builders")?"⚒ "+value:field.equals("lab")?"⚗ "+value:field.equals("pets")?"🐾 "+value:value;
+      // Clean numeric table: no decorative emoji or labels in compact columns.
       cell.setTextViewText(R.id.studio_compact_value,value);
      }
      row.addView(R.id.studio_compact_fields,cell);
