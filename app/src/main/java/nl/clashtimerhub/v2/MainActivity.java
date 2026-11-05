@@ -461,26 +461,42 @@ public final class MainActivity extends Activity {
    if(activeTab==3&&!silent)draw();
   });
  }
- /** Convert GitHub release Markdown into a short, readable Android dialog. */
+ /** Show release features only in the selected language. */
  private String cleanReleaseNotes(String input){
-  if(input==null||input.isEmpty())return "";
+  boolean english=I18n.english(this);
+  String fallback=english?"See the full list of changes on GitHub.":"Bekijk de volledige wijzigingen op GitHub.";
+  if(input==null||input.trim().isEmpty())return fallback;
   String raw=input.replace("\\n","\n");
   String[] lines=raw.split("\n");
-  StringBuilder out=new StringBuilder();
+  int chosen=english?2:1;
+  int section=0;
+  boolean bilingual=false;
+  StringBuilder result=new StringBuilder();
   int bullets=0;
   for(String original:lines){
    String line=original.trim();
-   if(line.startsWith("### Safety")||line.startsWith("### Important")||
-      line.startsWith("### Verification"))break;
-   if(line.isEmpty()||line.startsWith("#"))continue;
-   line=line.replace("**","").replace("`","").replaceAll("^[\\-*]\\s*","");
-   if(line.startsWith("Build #")||line.startsWith("Android versionCode"))continue;
-   if(line.length()>160)line=line.substring(0,157)+"…";
-   if(out.length()>0)out.append('\n');
-   out.append("• ").append(line);
-   if(++bullets>=5)break;
+   String heading=line.toLowerCase(java.util.Locale.ROOT);
+   if(heading.startsWith("### ")){
+    if(heading.equals("### nl")||heading.equals("### nederlands")||heading.equals("### dutch")){
+     section=1;bilingual=true;
+    }else if(heading.equals("### en")||heading.equals("### english")||heading.equals("### engels")){
+     section=2;bilingual=true;
+    }else section=0;
+    continue;
+   }
+   if(line.startsWith("## ")){
+    if(bilingual)break;
+    continue;
+   }
+   if(section!=chosen||!(line.startsWith("- ")||line.startsWith("* ")))continue;
+   String content=line.substring(2).replace("**","").trim();
+   if(content.isEmpty())continue;
+   if(content.length()>175)content=content.substring(0,172)+"…";
+   if(result.length()>0)result.append('\n');
+   result.append("• ").append(content);
+   if(++bullets>=6)break;
   }
-  return out.toString();
+  return bilingual&&result.length()>0?result.toString():fallback;
  }
  void showUpdateInstallError(String reason){
   runOnUiThread(()->{
