@@ -104,6 +104,7 @@ public final class MainActivity extends Activity {
   refreshExternalImport();ticker.removeCallbacks(tick);ticker.post(tick);
   startListeningForUpdateDownload();
   processPendingUpdateDownload();
+  showSuccessfulUpdateIfPending();
   String priorError=getPreferences(0).getString("lastInstallError","");
   if(!priorError.isEmpty()){
    getPreferences(0).edit().remove("lastInstallError").apply();
@@ -119,6 +120,23 @@ public final class MainActivity extends Activity {
   }
   long last=getPreferences(0).getLong("lastUpdateCheck",0);
   if(System.currentTimeMillis()-last>6L*3600000L)checkUpdates(true);
+ }
+ /** Shown once on the first launch after Android reports a successful package replacement. */
+ private void showSuccessfulUpdateIfPending(){
+  android.content.SharedPreferences prefs=getPreferences(0);
+  long buildCode=prefs.getLong("pendingSuccessfulUpdateVersionCode",0);
+  long installed=UpdateChecker.installedVersionCode(this);
+  if(buildCode<=1000||installed<buildCode)return;
+  prefs.edit().remove("pendingSuccessfulUpdateVersionCode").apply();
+  getWindow().getDecorView().post(()->{
+   if(isFinishing()||isDestroyed())return;
+   String label=installed>=1001?"#"+(installed-1000):String.valueOf(installed);
+   new android.app.AlertDialog.Builder(this)
+    .setTitle(t("Update succesvol geïnstalleerd"))
+    .setMessage(t("Clash Timer Hub is bijgewerkt naar build ")+label+
+     ".\n\n"+t("Je accounts, timers en instellingen zijn behouden."))
+    .setPositiveButton(t("OK"),null).show();
+  });
  }
  @Override protected void onPause(){stopListeningForUpdateDownload();getPreferences(0).unregisterOnSharedPreferenceChangeListener(syncWatcher);ticker.removeCallbacks(tick);super.onPause();}
  private static final Pattern TIME=Pattern.compile("(?i)(?:(\\d+)\\s*d\\s*)?(?:(\\d+)\\s*h\\s*)?(?:(\\d+)\\s*m\\s*)?(?:(\\d+)\\s*s\\s*)?");
@@ -145,6 +163,9 @@ public final class MainActivity extends Activity {
  @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);setIntent(intent);handleWidgetNavigation(intent);handleSharedJson(intent);}
  private void handleWidgetNavigation(Intent intent){
   if(intent==null)return;
+  if(intent.getBooleanExtra("openSettings",false)){
+   activeTab=3;selectedAccount="";draw();return;
+  }
   if(intent.getBooleanExtra("widgetEnableOverlay",false)&&!getPreferences(0).getBoolean("floatingEnabled",false))toggleFloatingSync();
   String open=intent.getStringExtra("openAccount");
   if(open!=null&&accounts.contains(open)){selectedAccount=open;activeTab=0;draw();}
@@ -440,26 +461,42 @@ public final class MainActivity extends Activity {
    if(activeTab==3&&!silent)draw();
   });
  }
- /** Convert GitHub release Markdown into a short, readable Android dialog. */
+ /** Show release features only in the selected language. */
  private String cleanReleaseNotes(String input){
-  if(input==null||input.isEmpty())return "";
+  boolean english=I18n.english(this);
+  String fallback=english?"See the full list of changes on GitHub.":"Bekijk de volledige wijzigingen op GitHub.";
+  if(input==null||input.trim().isEmpty())return fallback;
   String raw=input.replace("\\n","\n");
   String[] lines=raw.split("\n");
-  StringBuilder out=new StringBuilder();
+  int chosen=english?2:1;
+  int section=0;
+  boolean bilingual=false;
+  StringBuilder result=new StringBuilder();
   int bullets=0;
   for(String original:lines){
    String line=original.trim();
-   if(line.startsWith("### Safety")||line.startsWith("### Important")||
-      line.startsWith("### Verification"))break;
-   if(line.isEmpty()||line.startsWith("#"))continue;
-   line=line.replace("**","").replace("`","").replaceAll("^[\\-*]\\s*","");
-   if(line.startsWith("Build #")||line.startsWith("Android versionCode"))continue;
-   if(line.length()>160)line=line.substring(0,157)+"…";
-   if(out.length()>0)out.append('\n');
-   out.append("• ").append(line);
-   if(++bullets>=5)break;
+   String heading=line.toLowerCase(java.util.Locale.ROOT);
+   if(heading.startsWith("### ")){
+    if(heading.equals("### nl")||heading.equals("### nederlands")||heading.equals("### dutch")){
+     section=1;bilingual=true;
+    }else if(heading.equals("### en")||heading.equals("### english")||heading.equals("### engels")){
+     section=2;bilingual=true;
+    }else section=0;
+    continue;
+   }
+   if(line.startsWith("## ")){
+    if(bilingual)break;
+    continue;
+   }
+   if(section!=chosen||!(line.startsWith("- ")||line.startsWith("* ")))continue;
+   String content=line.substring(2).replace("**","").trim();
+   if(content.isEmpty())continue;
+   if(content.length()>175)content=content.substring(0,172)+"…";
+   if(result.length()>0)result.append('\n');
+   result.append("• ").append(content);
+   if(++bullets>=6)break;
   }
-  return out.toString();
+  return bilingual&&result.length()>0?result.toString():fallback;
  }
  void showUpdateInstallError(String reason){
   runOnUiThread(()->{
@@ -545,10 +582,7 @@ public final class MainActivity extends Activity {
  }
  private void showWidgetSettings(){
   android.appwidget.AppWidgetManager manager=android.appwidget.AppWidgetManager.getInstance(this);
-  int[] originalIds=WidgetV7.allIds(this),studioIds=StudioWidget.ids(this);
-  int[] ids=java.util.Arrays.copyOf(originalIds,originalIds.length+studioIds.length);
-  System.arraycopy(studioIds,0,ids,originalIds.length,studioIds.length);
-  java.util.HashSet<Integer> studioSet=new java.util.HashSet<>();for(int studioId:studioIds)studioSet.add(studioId);
+  int[] ids=WidgetV7.allIds(this);
   if(ids.length==0){
    new android.app.AlertDialog.Builder(this).setTitle(t("Widget instellen"))
     .setMessage(t("Voeg eerst de Clash Timer Hub-widget toe via je Samsung-startscherm. Tijdens het toevoegen kun je meteen 'Alle accounts tonen' kiezen."))
@@ -559,11 +593,11 @@ public final class MainActivity extends Activity {
   String[] options=new String[ids.length];
   android.content.SharedPreferences widgetPreferences=getSharedPreferences("WidgetPreferences",MODE_PRIVATE);
   for(int i=0;i<ids.length;i++){
-   int widgetId=ids[i],kind=studioSet.contains(widgetId)?-1:WidgetV7.kind(this,widgetId);
-   String type=kind==-1?"Widget Studio":kind==WidgetV7.SYNC?"Sync":
+   int widgetId=ids[i],kind=WidgetV7.kind(this,widgetId);
+   String type=kind==WidgetV7.SYNC?"Sync":
     kind==WidgetV7.MINI?"Mini":kind==WidgetV7.SINGLE?"Account":"Multi-account";
    String account=widgetPreferences.getString("account_"+widgetId,"");
-   String details=kind==-1?"Custom design":kind==WidgetV7.SYNC?"Floating Sync":
+   String details=kind==WidgetV7.SYNC?"Floating Sync":
     kind==WidgetV7.MULTI?(widgetPreferences.getBoolean("all_"+widgetId,true)?
      "Alle accounts":"Accountselectie"):
      (account.isEmpty()?"Niet ingesteld":AppData.displayName(this,account));
@@ -574,11 +608,6 @@ public final class MainActivity extends Activity {
    .setNegativeButton(t("Annuleren"),null).show();
  }
  private void openWidgetSettings(int id){
-  for(int studioId:StudioWidget.ids(this))if(id==studioId){
-   Intent editor=new Intent(this,StudioEditorActivity.class);
-   editor.putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_ID,id);
-   startActivity(editor);return;
-  }
   Intent intent=new Intent(this,WidgetConfigActivity.class);
   intent.putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_ID,id);
   startActivity(intent);
@@ -1038,7 +1067,6 @@ public final class MainActivity extends Activity {
          data.optJSONObject("alchemistAvailableByAccount").toString()).apply();
      restorePreferences(data.optJSONObject("preferences"));
      restoreWidgetSettings(data.optJSONArray("widgets"));
-     StudioWidget.restoreSettings(this,data.optJSONArray("studioWidgets"));
      persist();draw();toast("Back-up hersteld, inclusief beschikbare instellingen");
     }).setNegativeButton(t("Annuleren"),null).show();
   }catch(Exception e){toast("Ongeldige back-up: "+e.getMessage());}

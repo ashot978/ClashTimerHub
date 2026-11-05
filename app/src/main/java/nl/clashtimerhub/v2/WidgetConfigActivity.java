@@ -55,6 +55,19 @@ public final class WidgetConfigActivity extends Activity {
   render();
  }
 
+ private boolean isNewWidgetSetup(){
+  return AppWidgetManager.ACTION_APPWIDGET_CONFIGURE.equals(getIntent().getAction());
+ }
+ /** Settings gear and in-app editor always return to app Settings, not the launcher. */
+ @Override public void onBackPressed(){
+  if(isNewWidgetSetup()){super.onBackPressed();return;}
+  Intent open=new Intent(this,MainActivity.class);
+  open.setAction("nl.clashtimerhub.v2.OPEN_SETTINGS_FROM_WIDGET");
+  open.putExtra("openSettings",true);
+  open.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
+  startActivity(open);
+  finish();
+ }
  private void render(){
   LinearLayout outer=new LinearLayout(this);
   outer.setOrientation(LinearLayout.VERTICAL);

@@ -447,6 +447,10 @@ final class I18n {
   p.put("Geen Drive-bestand gekozen","No Drive file chosen");
   p.put("Geen account om te hernoemen","No account to rename");
   p.put("nooit geïnstalleerd","never installed");
+  p.put("Update succesvol geïnstalleerd","Update installed successfully");
+  p.put("Clash Timer Hub is bijgewerkt naar build ","Clash Timer Hub has been updated to build ");
+  p.put("Je accounts, timers en instellingen zijn behouden.","Your accounts, timers and settings have been preserved.");
+  p.put("Bekijk de volledige wijzigingen op GitHub.","See the full list of changes on GitHub.");
   ORDERED.addAll(EN.entrySet());
   ORDERED.sort((a,b)->Integer.compare(b.getKey().length(),a.getKey().length()));
  }
