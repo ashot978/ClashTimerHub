@@ -16,6 +16,7 @@
 <service android:name=".FloatingSyncService" android:exported="false" android:foregroundServiceType="specialUse"><property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="User enabled floating clipboard import shortcut"/></service>
 <activity android:name=".WidgetConfigActivity" android:exported="true" android:theme="@android:style/Theme.Material.NoActionBar"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/></intent-filter></activity>
 <activity android:name=".QuickImportActivity" android:exported="false" android:theme="@android:style/Theme.Material.Dialog"/>
+<activity android:name=".SmartSyncLabActivity" android:exported="false" android:theme="@android:style/Theme.Material.NoActionBar"/>
 <receiver android:name=".UpdateInstallReceiver" android:exported="false"/>
 <receiver android:name=".BuilderAlarm" android:exported="false"/>
 <receiver android:name=".AlarmRestoreReceiver" android:exported="false">
