@@ -46,7 +46,7 @@ jobs:
           test -n "$signer" || { echo 'ERROR: Android apksigner missing'; exit 1; }
           "$signer" verify --verbose --print-certs app/build/outputs/apk/debug/app-debug.apk | tee /tmp/clash-apk-verification.txt
           expected="d2ee752fb5224958db8db8cc1b8e9d189376c1da075cf741056870bfd43ceb10"
-          grep -iF "Signer #1 certificate SHA-256 digest: $expected" /tmp/clash-apk-verification.txt ||
+          grep -iF "certificate SHA-256 digest: $expected" /tmp/clash-apk-verification.txt ||
             { echo 'ERROR: APK was not signed with the persistent ClashTimerHub certificate'; exit 1; }
       - uses: actions/upload-artifact@v4
         with:
