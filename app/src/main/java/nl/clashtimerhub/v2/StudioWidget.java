@@ -35,7 +35,9 @@ public final class StudioWidget extends AppWidgetProvider {
  static ArrayList<String> fieldOrder(SharedPreferences p,int id){
   ArrayList<String> out=new ArrayList<>();
   try{
-   JSONArray a=new JSONArray(p.getString("fields_"+id,"[\\"builders\\",\\"next\\",\\"lab\\",\\"pets\\"]"));
+   JSONArray a; String raw=p.getString("fields_"+id,null);
+   if(raw==null){a=new JSONArray();for(String f:DEFAULT_FIELDS)a.put(f);}
+   else a=new JSONArray(raw);
    for(int i=0;i<a.length();i++){
     String key=a.optString(i);
     if(Arrays.asList(FIELDS).contains(key)&&!out.contains(key))out.add(key);
