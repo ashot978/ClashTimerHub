@@ -212,6 +212,58 @@ public final class StudioWidget extends AppWidgetProvider {
   root.setOnClickPendingIntent(R.id.studio_settings,openSettings(ctx,id));
   return root;
  }
+ static JSONArray backupSettings(Context ctx){
+  JSONArray result=new JSONArray();
+  SharedPreferences p=preferences(ctx);
+  int[] ids=ids(ctx);
+  for(int i=0;i<ids.length;i++){
+   int id=ids[i];
+   JSONObject entry=new JSONObject();
+   try{
+    entry.put("index",i);
+    entry.put("all",p.getBoolean("all_"+id,true));
+    entry.put("selected",new JSONArray(p.getString("selected_"+id,"[]")));
+    entry.put("order",new JSONArray(p.getString("order_"+id,"[]")));
+    entry.put("fields",new JSONArray(fieldOrder(p,id)));
+    entry.put("cols",p.getInt("cols_"+id,0));
+    entry.put("sort",p.getInt("sort_"+id,0));
+    entry.put("font",p.getInt("font_"+id,12));
+    entry.put("space",p.getInt("space_"+id,3));
+    entry.put("labels",p.getBoolean("labels_"+id,true));
+    entry.put("short",p.getBoolean("short_"+id,false));
+    for(String key:new String[]{"bg","card","text","accent"})
+     entry.put(key,p.getString(key+"_"+id,hex(key.equals("bg")?DEF_BG:key.equals("card")?DEF_CARD:key.equals("text")?DEF_TEXT:DEF_ACCENT)));
+    result.put(entry);
+   }catch(Exception ex){android.util.Log.w("ClashTimerHub","Studio backup item failed",ex);}
+  }
+  return result;
+ }
+ static void restoreSettings(Context ctx,JSONArray entries){
+  if(entries==null)return;
+  SharedPreferences.Editor e=preferences(ctx).edit();
+  int[] ids=ids(ctx);
+  for(int i=0;i<entries.length();i++){
+   JSONObject item=entries.optJSONObject(i);if(item==null)continue;
+   int ordinal=item.optInt("index",-1);if(ordinal<0||ordinal>=ids.length)continue;
+   int id=ids[ordinal];
+   e.putBoolean("all_"+id,item.optBoolean("all",true));
+   e.putString("selected_"+id,item.optJSONArray("selected")==null?"[]":item.optJSONArray("selected").toString());
+   e.putString("order_"+id,item.optJSONArray("order")==null?"[]":item.optJSONArray("order").toString());
+   JSONArray fields=item.optJSONArray("fields");
+   if(fields!=null&&fields.length()>0)e.putString("fields_"+id,fields.toString());
+   e.putInt("cols_"+id,Math.max(0,Math.min(3,item.optInt("cols",0))));
+   e.putInt("sort_"+id,Math.max(0,Math.min(2,item.optInt("sort",0))));
+   e.putInt("font_"+id,Math.max(10,Math.min(18,item.optInt("font",12))));
+   e.putInt("space_"+id,Math.max(0,Math.min(10,item.optInt("space",3))));
+   e.putBoolean("labels_"+id,item.optBoolean("labels",true));
+   e.putBoolean("short_"+id,item.optBoolean("short",false));
+   for(String key:new String[]{"bg","card","text","accent"}){
+    String value=item.optString(key,"");
+    if(value.matches("#[0-9A-Fa-f]{6}"))e.putString(key+"_"+id,value);
+   }
+  }
+  e.apply();updateAll(ctx);
+ }
  static void updateAll(Context ctx){
   AppWidgetManager m=AppWidgetManager.getInstance(ctx);
   ArrayList<Status> all=read(ctx);
