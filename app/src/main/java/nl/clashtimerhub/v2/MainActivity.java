@@ -545,7 +545,10 @@ public final class MainActivity extends Activity {
  }
  private void showWidgetSettings(){
   android.appwidget.AppWidgetManager manager=android.appwidget.AppWidgetManager.getInstance(this);
-  int[] ids=WidgetV7.allIds(this);
+  int[] originalIds=WidgetV7.allIds(this),studioIds=StudioWidget.ids(this);
+  int[] ids=java.util.Arrays.copyOf(originalIds,originalIds.length+studioIds.length);
+  System.arraycopy(studioIds,0,ids,originalIds.length,studioIds.length);
+  java.util.HashSet<Integer> studioSet=new java.util.HashSet<>();for(int studioId:studioIds)studioSet.add(studioId);
   if(ids.length==0){
    new android.app.AlertDialog.Builder(this).setTitle(t("Widget instellen"))
     .setMessage(t("Voeg eerst de Clash Timer Hub-widget toe via je Samsung-startscherm. Tijdens het toevoegen kun je meteen 'Alle accounts tonen' kiezen."))
@@ -556,11 +559,11 @@ public final class MainActivity extends Activity {
   String[] options=new String[ids.length];
   android.content.SharedPreferences widgetPreferences=getSharedPreferences("WidgetPreferences",MODE_PRIVATE);
   for(int i=0;i<ids.length;i++){
-   int widgetId=ids[i],kind=WidgetV7.kind(this,widgetId);
-   String type=kind==WidgetV7.SYNC?"Sync":
+   int widgetId=ids[i],kind=studioSet.contains(widgetId)?-1:WidgetV7.kind(this,widgetId);
+   String type=kind==-1?"Widget Studio":kind==WidgetV7.SYNC?"Sync":
     kind==WidgetV7.MINI?"Mini":kind==WidgetV7.SINGLE?"Account":"Multi-account";
    String account=widgetPreferences.getString("account_"+widgetId,"");
-   String details=kind==WidgetV7.SYNC?"Floating Sync":
+   String details=kind==-1?"Custom design":kind==WidgetV7.SYNC?"Floating Sync":
     kind==WidgetV7.MULTI?(widgetPreferences.getBoolean("all_"+widgetId,true)?
      "Alle accounts":"Accountselectie"):
      (account.isEmpty()?"Niet ingesteld":AppData.displayName(this,account));
@@ -571,6 +574,11 @@ public final class MainActivity extends Activity {
    .setNegativeButton(t("Annuleren"),null).show();
  }
  private void openWidgetSettings(int id){
+  for(int studioId:StudioWidget.ids(this))if(id==studioId){
+   Intent editor=new Intent(this,StudioEditorActivity.class);
+   editor.putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_ID,id);
+   startActivity(editor);return;
+  }
   Intent intent=new Intent(this,WidgetConfigActivity.class);
   intent.putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_ID,id);
   startActivity(intent);
@@ -1030,6 +1038,7 @@ public final class MainActivity extends Activity {
          data.optJSONObject("alchemistAvailableByAccount").toString()).apply();
      restorePreferences(data.optJSONObject("preferences"));
      restoreWidgetSettings(data.optJSONArray("widgets"));
+     StudioWidget.restoreSettings(this,data.optJSONArray("studioWidgets"));
      persist();draw();toast("Back-up hersteld, inclusief beschikbare instellingen");
     }).setNegativeButton(t("Annuleren"),null).show();
   }catch(Exception e){toast("Ongeldige back-up: "+e.getMessage());}
