@@ -297,6 +297,12 @@ public final class StudioEditorActivity extends Activity {
   ArrayList<StudioWidget.Status> accounts=previewAccounts();
   long now=System.currentTimeMillis();
   int selectedMode=layoutMode.getSelectedItemPosition();
+  if(selectedMode!=2){
+   android.os.Bundle widgetOptions=AppWidgetManager.getInstance(this).getAppWidgetOptions(id);
+   int availableWidth=widgetOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
+    Math.round(getResources().getDisplayMetrics().widthPixels/getResources().getDisplayMetrics().density)-40);
+   fields=StudioWidget.compactFieldsForWidth(fields,availableWidth,font);
+  }
   int limit=Math.min(7,accounts.size());
   if(selectedMode!=2){
    for(int i=0;i<limit;i++){
@@ -312,17 +318,13 @@ public final class StudioEditorActivity extends Activity {
     String shown=a.name;
     if(shortNames.isChecked()&&shown.length()>13)shown=shown.substring(0,12)+"…";
     name.setText(shown);
-    line.addView(name,new LinearLayout.LayoutParams(dp(78),-2));
+    line.addView(name,new LinearLayout.LayoutParams(dp(104),-2));
     for(String key:fields){
      TextView value=new TextView(this);value.setTextColor(ink);
      value.setTextSize(Math.max(8,font-2));value.setSingleLine(true);
      value.setEllipsize(android.text.TextUtils.TruncateAt.END);
      String content=StudioWidget.fieldValue(this,a,key,now);
-     if(selectedMode==0&&labels.isChecked()){
-      if(key.equals("builders"))content="⚒ "+content;
-      if(key.equals("lab"))content="⚗ "+content;
-      if(key.equals("pets"))content="🐾 "+content;
-     }
+     // Compact Studio rows use quiet text-only statuses.
      value.setText(content);
      line.addView(value,new LinearLayout.LayoutParams(0,-2,1));
     }

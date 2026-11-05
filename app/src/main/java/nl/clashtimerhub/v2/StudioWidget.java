@@ -121,14 +121,14 @@ public final class StudioWidget extends AppWidgetProvider {
   switch(key){
    case "builders":return s.ready+"✓  "+s.active+"⚒";
    case "next":return duration(s.builder,now);
-   case "lab":return s.lab==Long.MAX_VALUE?(AppData.isMaxed(ctx,s.key,"Laboratorium")?"MAX":"—"):duration(s.lab,now);
-   case "pets":return s.pet==Long.MAX_VALUE?(AppData.isMaxed(ctx,s.key,"Pets")?"MAX":"—"):duration(s.pet,now);
+   case "lab":return s.lab==Long.MAX_VALUE?(AppData.isMaxed(ctx,s.key,"Laboratorium")?"✓":"—"):duration(s.lab,now);
+   case "pets":return s.pet==Long.MAX_VALUE?(AppData.isMaxed(ctx,s.key,"Pets")?"✓":"—"):duration(s.pet,now);
    case "helpers":{
     String value=HelperTracker.compact(ctx,s.key,now);
-    return value.isEmpty()?"—":value;
+    return value.isEmpty()?"—":value.replace("🤝 ","").replace("🤝","");
    }
    case "finish":return s.builder==Long.MAX_VALUE?"—":
-    new java.text.SimpleDateFormat("dd MMM HH:mm",I18n.english(ctx)?Locale.UK:new Locale("nl","NL")).format(new Date(s.builder));
+    new java.text.SimpleDateFormat("dd/MM HH:mm",Locale.ROOT).format(new Date(s.builder));
    default:return "—";
   }
  }
@@ -155,6 +155,33 @@ public final class StudioWidget extends AppWidgetProvider {
   int h=opts==null?240:opts.getInt(portrait?AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT:AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,240);
   return h>0?h:240;
  }
+ /** Keep account names and complete values readable. On narrow widgets omit low-priority
+  * columns rather than clipping the right edge or cramming values together. */
+ static ArrayList<String> compactFieldsForWidth(ArrayList<String> chosen,int width,int size){
+  ArrayList<String> shown=new ArrayList<>(chosen);
+  int available=Math.max(0,width-114);
+  while(shown.size()>1&&compactRequiredWidth(shown,size)>available){
+   String drop=null;
+   for(String candidate:new String[]{"finish","helpers","pets","lab","next","builders"})
+    if(shown.contains(candidate)){drop=candidate;break;}
+   if(drop==null)break;
+   shown.remove(drop);
+  }
+  return shown;
+ }
+ private static int compactRequiredWidth(List<String> fields,int size){
+  int extra=Math.max(0,size-10)*4,total=0;
+  for(String field:fields){
+   switch(field){
+    case "builders":total+=62+extra;break;
+    case "next":case "lab":case "pets":total+=72+extra;break;
+    case "helpers":total+=103+extra;break;
+    case "finish":total+=93+extra;break;
+    default:total+=70+extra;
+   }
+  }
+  return total;
+ }
  static RemoteViews build(Context ctx,int id,ArrayList<Status> available){
   SharedPreferences p=preferences(ctx);
   ArrayList<Status> list=filterSort(ctx,id,available);
@@ -179,6 +206,7 @@ public final class StudioWidget extends AppWidgetProvider {
   boolean separators=p.getBoolean("separators_"+id,true);
   int layout=p.getInt("layout_"+id,1);
   boolean compact=layout==1||layout==2;
+  if(compact)fields=compactFieldsForWidth(fields,width,size);
   int estimatedRow=compact?Math.max(17,size+8)+space:(size+6)*(fields.size()+1)+space*2+7;
   int availableH=Math.max(0,height-(footer?36:8));
   int rows=Math.max(1,availableH/Math.max(20,estimatedRow));
@@ -205,7 +233,9 @@ public final class StudioWidget extends AppWidgetProvider {
     row.setTextViewTextSize(R.id.studio_compact_name,android.util.TypedValue.COMPLEX_UNIT_SP,Math.max(9,size-1));
     row.removeAllViews(R.id.studio_compact_fields);
     for(String field:fields){
-     RemoteViews cell=new RemoteViews(ctx.getPackageName(),R.layout.studio_compact_cell);
+     int cellLayout=field.equals("helpers")?R.layout.studio_compact_cell_xwide:
+      field.equals("finish")?R.layout.studio_compact_cell_wide:R.layout.studio_compact_cell;
+     RemoteViews cell=new RemoteViews(ctx.getPackageName(),cellLayout);
      cell.setTextColor(R.id.studio_compact_value,ink);
      cell.setTextColor(R.id.studio_compact_countdown,ink);
      cell.setTextViewTextSize(R.id.studio_compact_value,android.util.TypedValue.COMPLEX_UNIT_SP,Math.max(8,size-2));
@@ -219,7 +249,7 @@ public final class StudioWidget extends AppWidgetProvider {
      }else{
       cell.setViewVisibility(R.id.studio_compact_countdown,View.GONE);
       String value=fieldValue(ctx,s,field,now);
-      if(labels&&layout==1)value=field.equals("builders")?"⚒ "+value:field.equals("lab")?"⚗ "+value:field.equals("pets")?"🐾 "+value:value;
+      // Clean numeric table: no decorative emoji or labels in compact columns.
       cell.setTextViewText(R.id.studio_compact_value,value);
      }
      row.addView(R.id.studio_compact_fields,cell);
