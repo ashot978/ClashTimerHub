@@ -31,9 +31,9 @@ final class UpdateInstaller {
      .putString("lastVerifiedHash",expectedSha256==null?"":expectedSha256).apply();
     if(!activity.getPackageManager().canRequestPackageInstalls()){
      activity.runOnUiThread(()->new android.app.AlertDialog.Builder(activity)
-      .setTitle("Toestemming voor app-updates")
-      .setMessage("Sta 'Apps uit deze bron toestaan' toe voor Clash Timer Hub. Je APK is gecontroleerd; je bestaande gegevens blijven behouden.")
-      .setPositiveButton("Toestaan",(d,w)->{
+      .setTitle(I18n.tr(activity,"Toestemming voor app-updates"))
+      .setMessage(I18n.tr(activity,"Sta 'Apps uit deze bron toestaan' toe voor Clash Timer Hub. Je APK is gecontroleerd; je bestaande gegevens blijven behouden."))
+      .setPositiveButton(I18n.tr(activity,"Toestaan"),(d,w)->{
        try{
         AppData.prefs(activity).edit()
          .putString("pendingVerifiedApk",apk.getAbsolutePath())
@@ -43,7 +43,7 @@ final class UpdateInstaller {
          Uri.parse("package:"+activity.getPackageName()));
         activity.startActivity(settings);
        }catch(Exception e){activity.showUpdateInstallError("Kan installatietoestemming niet openen: "+e.getMessage());}
-      }).setNegativeButton("Later",null).show());
+      }).setNegativeButton(I18n.tr(activity,"Later"),null).show());
      return;
     }
     PackageManager pm=activity.getPackageManager();
