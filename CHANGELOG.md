@@ -1,5 +1,15 @@
 # ClashTimerHub release notes
 
+## Laboratory-icoon volgens gebruikersvoorkeur — 5 november 2026
+
+### NL
+- Gebruik opnieuw het gekozen detective-icoon 🕵️ voor Laboratory in de app en alle oorspronkelijke widgets.
+- Behoud de compacte statusregels en overige verbeteringen van de vorige build.
+
+### EN
+- Use the chosen detective icon 🕵️ for Laboratory in the app and all original widgets.
+- Keep the compact status labels and other improvements from the previous build.
+
 ## Duidelijke upgrade-iconen — 5 november 2026
 
 ### NL
