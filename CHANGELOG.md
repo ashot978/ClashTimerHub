@@ -1,5 +1,21 @@
 # ClashTimerHub release notes
 
+## Testrelease automatische updatecontrole — 5 november 2026
+
+### NL
+- Deze testrelease bevat geen nieuwe appfunctionaliteit ten opzichte van build #474.
+- Publicatie van een hoger buildnummer maakt het mogelijk om de automatische melding in build #474 op een telefoon te testen.
+- Start build #474 opnieuw: de app moet build #475 aanbieden, zonder handmatig naar Instellingen te gaan.
+- Kies 'Later', verlaat de app en open haar opnieuw om te controleren of de melding opnieuw verschijnt.
+- Installeer daarna via de melding en controleer de succesbevestiging en het behoud van accounts en timers.
+
+### EN
+- This is a test release with no additional application features compared with build #474.
+- The higher published build number enables real-device testing of the update prompt in build #474.
+- Reopen build #474: it should offer build #475 without manually visiting Settings.
+- Tap 'Later', leave the app and reopen it to verify the prompt returns on the next foreground visit.
+- Install from the prompt and verify the success confirmation and preservation of accounts and timers.
+
 ## Betrouwbaardere automatische app-updates — 5 november 2026
 
 ### NL
