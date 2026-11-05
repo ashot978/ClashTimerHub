@@ -83,7 +83,7 @@ public final class StudioEditorActivity extends Activity {
     v.setPadding(bars.left,bars.top,bars.right,bars.bottom);
     return insets;
    });
-   outer.requestApplyWindowInsets();
+   outer.requestApplyInsets();
   }else outer.setFitsSystemWindows(true);
   title("WIDGET STUDIO",22);
   note(tr("Ontwerp deze widget zelf. Alle keuzes gelden alleen voor deze widget.",
