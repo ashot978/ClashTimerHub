@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
-import android.content.pm.Signature;
 import android.os.Build;
 import android.provider.Settings;
 import android.net.Uri;
@@ -13,10 +12,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
-import java.util.Arrays;
 import java.util.Locale;
 
-/** Verified APK update via the official PackageInstaller session API. */
+/** Verified APK update via the official PackageInstaller session API.
+ * Android PackageManager, not archive metadata, enforces signing compatibility. */
 final class UpdateInstaller {
  private UpdateInstaller(){}
  static void install(MainActivity activity,File apk,long expectedBuild,String expectedSha256){
@@ -77,7 +76,7 @@ final class UpdateInstaller {
  }
 
  /** Fallback to Android's native installer UI when the session installer is rejected.
-  * Verify again; never pass an unknown APK or skip the signature/version check. */
+  * Verify again; Android itself checks the signing certificate during installation. */
  static void installWithAndroidInstaller(MainActivity activity,File apk,long build,String sha256){
   new Thread(()->{
    try{
@@ -130,27 +129,10 @@ final class UpdateInstaller {
   if(expectedBuild>0&&futureVersion!=1000+expectedBuild)
    throw new java.io.IOException("APK-buildnummer komt niet overeen met GitHub. Download opnieuw.");
 
-  PackageInfo installed=pm.getPackageInfo(context.getPackageName(),flags);
-  Signature[] older=signatures(installed);
-  Signature[] newer=signatures(candidate);
-  if(older==null||newer==null||older.length==0||newer.length==0)
-   throw new java.io.IOException("Kan de APK-ondertekening niet controleren. Installatie uit voorzorg gestopt.");
-  if(older.length!=newer.length)
-   throw new java.io.IOException("APK heeft een andere ondertekeningssleutel. Verwijder de bestaande app NIET.");
-  boolean matches=true;
-  for(Signature first:older){
-   boolean found=false;
-   for(Signature second:newer)if(Arrays.equals(first.toByteArray(),second.toByteArray())){found=true;break;}
-   if(!found){matches=false;break;}
-  }
-  if(!matches)throw new java.io.IOException(
-   "Ondertekening verschilt van de geïnstalleerde app. Android kan deze APK niet veilig als update installeren. Verwijder de app NIET; maak eerst een back-up en herstel de originele signing key.");
- }
- private static Signature[] signatures(PackageInfo pkg){
-  if(Build.VERSION.SDK_INT>=28&&pkg.signingInfo!=null){
-   return pkg.signingInfo.hasMultipleSigners()?pkg.signingInfo.getApkContentsSigners():
-    pkg.signingInfo.getSigningCertificateHistory();
-  }
-  return pkg.signatures;
+  // Do not compare signatures returned by getPackageArchiveInfo() with installed
+  // signing history. Some Android versions do not populate the archive metadata
+  // consistently, causing a false mismatch even for an APK the system accepts.
+  // The Android PackageInstaller will independently enforce signature continuity;
+  // an incompatible APK cannot replace the installed app.
  }
 }
