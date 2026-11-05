@@ -24,6 +24,10 @@ final class UpdateInstaller {
   new Thread(()->{
    try {
     verify(activity,apk,expectedBuild,expectedSha256);
+    // Arm the success confirmation before Android replaces our process.
+    // Old installed versions cannot show it until the expected APK is present.
+    if(expectedBuild>0)AppData.prefs(activity).edit()
+     .putLong("pendingSuccessfulUpdateVersionCode",1000L+expectedBuild).apply();
     // Save only a VERIFIED APK for an alternative Android installer retry.
     AppData.prefs(activity).edit()
      .putString("lastVerifiedApk",apk.getAbsolutePath())
@@ -83,6 +87,8 @@ final class UpdateInstaller {
   new Thread(()->{
    try{
     verify(activity,apk,build,sha256);
+    if(build>0)AppData.prefs(activity).edit()
+     .putLong("pendingSuccessfulUpdateVersionCode",1000L+build).apply();
     if(!activity.getPackageManager().canRequestPackageInstalls())
      throw new java.io.IOException("Sta eerst Apps uit deze bron toestaan in Android-instellingen toe.");
     Uri uri=androidx.core.content.FileProvider.getUriForFile(

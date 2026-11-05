@@ -1,5 +1,23 @@
 # ClashTimerHub release notes
 
+## Betrouwbaardere automatische app-updates — 5 november 2026
+
+### NL
+- Controleer bij ieder nieuw bezoek aan de app op GitHub-updates; de wachttijd van zes uur vervalt.
+- Na 'Later' kan een nieuwere build bij de volgende appstart opnieuw worden aangeboden, zonder herhaalde meldingen in dezelfde sessie.
+- Een handmatige controle tijdens een lopende automatische controle geeft alsnog een expliciete uitkomst.
+- Voorkom gelijktijdige updatevensters, en onderbreek geen actieve download, installatie of toestemmingswizard.
+- Toon na een geslaagde update de bevestiging met het geïnstalleerde buildnummer, ook als Android de app tijdens installatie vervangt.
+- Updates blijven optioneel: APK-controles, bestaande ondertekening, accounts en Android-installatiebevestiging blijven behouden.
+
+### EN
+- Check GitHub for app updates at each new foreground visit, without the old six-hour delay.
+- After 'Later', offer a newer build again at the next app launch, without repeated prompts in the same visit.
+- An explicit check while an automatic request is running still shows a result.
+- Prevent duplicate prompts and do not interrupt an ongoing download, installation or permission wizard.
+- Show the installed build confirmation after a successful update, even if Android replaces the app process.
+- Updates stay optional: APK verification, signing, accounts and Android installation confirmation remain unchanged.
+
 ## Sneller exporteren vanuit Clash — 5 november 2026
 
 ### NL

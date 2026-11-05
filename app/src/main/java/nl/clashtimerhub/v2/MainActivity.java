@@ -31,6 +31,14 @@ public final class MainActivity extends Activity {
  private PermissionWizard permissionWizard;
  private GoogleDriveUi googleDriveUi;
  private boolean updateDownloadListening=false;
+ // One automatic check per foreground visit, with no six-hour delay or
+ // persistent suppression after the user taps Later.
+ private boolean autoUpdateCheckedInForeground=false;
+ private boolean updatePromptShownInForeground=false;
+ private boolean updateActivityVisible=false;
+ private boolean updateCheckInProgress=false;
+ private boolean manualUpdateCheckRequested=false;
+ private android.app.AlertDialog updateDialog;
  private final android.content.BroadcastReceiver updateDownloadListener=new android.content.BroadcastReceiver(){
   @Override public void onReceive(Context context,Intent intent){
    if(intent!=null&&android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(intent.getAction())
@@ -97,11 +105,19 @@ public final class MainActivity extends Activity {
   if("syncRevision".equals(key))ticker.post(()->refreshExternalImport());
  };
  private final Runnable tick=new Runnable(){public void run(){if(activeTab==0&&dashboard!=null){refreshDashboardClocks();refreshVisibleTimers();}else if(activeTab==1||activeTab==2)refreshVisibleTimers();ticker.postDelayed(this,1000);}};
+ @Override protected void onStart(){
+  super.onStart();
+  updateActivityVisible=true;
+  autoUpdateCheckedInForeground=false;
+  updatePromptShownInForeground=false;
+ }
  @Override protected void onResume(){
   super.onResume();
   if(permissionWizard!=null)permissionWizard.onResume();
   getPreferences(0).registerOnSharedPreferenceChangeListener(syncWatcher);
   refreshExternalImport();ticker.removeCallbacks(tick);ticker.post(tick);
+  // An installer already in progress must not compete with a new update prompt.
+  boolean hadActiveDownload=getPreferences(0).getLong("activeUpdateDownloadId",-1)>0;
   startListeningForUpdateDownload();
   processPendingUpdateDownload();
   showSuccessfulUpdateIfPending();
@@ -118,8 +134,13 @@ public final class MainActivity extends Activity {
     .remove("pendingVerifiedSha256").apply();
    UpdateInstaller.install(this,new java.io.File(pending),build,hash);
   }
-  long last=getPreferences(0).getLong("lastUpdateCheck",0);
-  if(System.currentTimeMillis()-last>6L*3600000L)checkUpdates(true);
+  if(!autoUpdateCheckedInForeground){
+   autoUpdateCheckedInForeground=true;
+   if(!hadActiveDownload&&pending.isEmpty()
+      &&getPreferences(0).getLong("activeUpdateDownloadId",-1)<=0
+      &&(permissionWizard==null||!permissionWizard.isRunning()))
+    checkUpdates(true);
+  }
  }
  /** Shown once on the first launch after Android reports a successful package replacement. */
  private void showSuccessfulUpdateIfPending(){
@@ -139,6 +160,12 @@ public final class MainActivity extends Activity {
   });
  }
  @Override protected void onPause(){stopListeningForUpdateDownload();getPreferences(0).unregisterOnSharedPreferenceChangeListener(syncWatcher);ticker.removeCallbacks(tick);super.onPause();}
+ @Override protected void onStop(){
+  updateActivityVisible=false;
+  // Avoid leaving a stale update prompt on screen across foreground visits.
+  if(updateDialog!=null){updateDialog.dismiss();updateDialog=null;}
+  super.onStop();
+ }
  private static final Pattern TIME=Pattern.compile("(?i)(?:(\\d+)\\s*d\\s*)?(?:(\\d+)\\s*h\\s*)?(?:(\\d+)\\s*m\\s*)?(?:(\\d+)\\s*s\\s*)?");
  @Override public void onCreate(Bundle b){
   super.onCreate(b);
@@ -448,10 +475,18 @@ public final class MainActivity extends Activity {
    }).setNegativeButton(t("Annuleren"),null).show();
  }
  private void checkUpdates(boolean silent){
+  // A manual tap during an automatic request upgrades the pending result to
+  // an explicit response instead of starting two competing network requests.
+  if(!silent)manualUpdateCheckRequested=true;
+  if(updateCheckInProgress)return;
+  updateCheckInProgress=true;
   UpdateChecker.check(this,(data,error)->{
+   updateCheckInProgress=false;
+   boolean automatic=!manualUpdateCheckRequested;
+   manualUpdateCheckRequested=false;
    if(isFinishing()||isDestroyed())return;
    if(error!=null){
-    if(!silent)new android.app.AlertDialog.Builder(this).setTitle(t("Updatecontrole"))
+    if(!automatic)new android.app.AlertDialog.Builder(this).setTitle(t("Updatecontrole"))
      .setMessage(t(error)+"\n"+t("Controleer of GitHub de nieuwste APK als Release heeft gepubliceerd."))
      .setPositiveButton(t("OK"),null).show();
     return;
@@ -462,10 +497,16 @@ public final class MainActivity extends Activity {
    getPreferences(0).edit().putLong("latestFeedBuild",build)
     .putLong("lastUpdateCheck",System.currentTimeMillis()).apply();
    boolean newer=versionCode>current;
-   if(silent){
-    if(!newer||getPreferences(0).getLong("lastNotifiedVersionCode",0)>=versionCode)return;
-    getPreferences(0).edit().putLong("lastNotifiedVersionCode",versionCode).apply();
+   if(automatic){
+    // Offer a deferred update again on the NEXT app visit, not repeatedly
+    // during one visit. Never interrupt onboarding or an APK installation.
+    if(!newer||!updateActivityVisible||updatePromptShownInForeground
+       ||(permissionWizard!=null&&permissionWizard.isRunning())
+       ||getPreferences(0).getLong("activeUpdateDownloadId",-1)>0
+       ||!getPreferences(0).getString("pendingVerifiedApk","").isEmpty())return;
+    updatePromptShownInForeground=true;
    }
+   if(updateDialog!=null&&updateDialog.isShowing())updateDialog.dismiss();
    StringBuilder message=new StringBuilder();
    boolean english=I18n.english(this);
    message.append(english?"Installed build: #":"Geïnstalleerde build: #")
@@ -484,8 +525,11 @@ public final class MainActivity extends Activity {
     String apk=data.optString("apkUrl","");
     if(UpdateChecker.validHttps(apk))downloadUpdate(apk,build,data.optString("sha256",""));
    });
-   dialog.show();
-   if(activeTab==3&&!silent)draw();
+   android.app.AlertDialog shown=dialog.create();
+   updateDialog=shown;
+   shown.setOnDismissListener(d->{if(updateDialog==shown)updateDialog=null;});
+   shown.show();
+   if(activeTab==3&&!automatic)draw();
   });
  }
  /** Show release features only in the selected language. */
