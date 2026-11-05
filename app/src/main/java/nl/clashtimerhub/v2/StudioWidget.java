@@ -1,0 +1,228 @@
+package nl.clashtimerhub.v2;
+
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProvider;
+import android.content.*;
+import android.os.Bundle;
+import android.os.SystemClock;
+import android.graphics.Color;
+import android.view.View;
+import android.widget.RemoteViews;
+import org.json.*;
+import java.util.*;
+
+/** Independent customizable fifth widget. Never alters existing V7 widget rendering. */
+public final class StudioWidget extends AppWidgetProvider {
+ static final String PREFS="WidgetStudioPreferences";
+ static final String[] FIELDS={"builders","next","lab","pets","helpers","finish"};
+ static final String[] DEFAULT_FIELDS={"builders","next","lab","pets"};
+ static final int DEF_BG=0xff241832,DEF_CARD=0xff38284a,DEF_TEXT=0xffffffff,DEF_ACCENT=0xffffd783;
+ static final class Status {
+  String key,name;
+  int active,ready;
+  long builder=Long.MAX_VALUE,lab=Long.MAX_VALUE,pet=Long.MAX_VALUE;
+  Status(String key,String name){this.key=key;this.name=name;}
+ }
+ static SharedPreferences preferences(Context c){return c.getSharedPreferences(PREFS,Context.MODE_PRIVATE);}
+ static int[] ids(Context ctx){
+  return AppWidgetManager.getInstance(ctx).getAppWidgetIds(new ComponentName(ctx,StudioWidget.class));
+ }
+ static int color(String text,int fallback){
+  try{return Color.parseColor(text);}catch(Exception e){return fallback;}
+ }
+ static String hex(int value){return String.format(Locale.ROOT,"#%06X",value&0xffffff);}
+ static ArrayList<String> fieldOrder(SharedPreferences p,int id){
+  ArrayList<String> out=new ArrayList<>();
+  try{
+   JSONArray a=new JSONArray(p.getString("fields_"+id,"[\\"builders\\",\\"next\\",\\"lab\\",\\"pets\\"]"));
+   for(int i=0;i<a.length();i++){
+    String key=a.optString(i);
+    if(Arrays.asList(FIELDS).contains(key)&&!out.contains(key))out.add(key);
+   }
+  }catch(Exception ignored){}
+  if(out.isEmpty())out.add("next");
+  return out;
+ }
+ static ArrayList<Status> read(Context ctx){
+  AppData.migrate(ctx);
+  SharedPreferences p=AppData.prefs(ctx);
+  LinkedHashMap<String,Status> map=new LinkedHashMap<>();
+  try{
+   JSONArray accounts=new JSONArray(p.getString("accounts","[]"));
+   for(int i=0;i<accounts.length();i++){
+    String key=accounts.optString(i,"");
+    if(!key.isEmpty())map.put(key,new Status(key,AppData.displayName(ctx,key)));
+   }
+   long now=System.currentTimeMillis();
+   JSONArray upgrades=new JSONArray(p.getString("upgrades","[]"));
+   for(int i=0;i<upgrades.length();i++){
+    JSONObject u=upgrades.optJSONObject(i);if(u==null)continue;
+    Status s=map.get(u.optString("account"));if(s==null)continue;
+    long finish=u.optLong("finish");String cat=u.optString("category");
+    if("Bouwers".equals(cat)){
+     if(finish>now){s.active++;s.builder=Math.min(s.builder,finish);}
+     else if(finish>p.getLong("ack_"+s.key,0))s.ready++;
+    }else if("Laboratorium".equals(cat)&&finish>now)s.lab=Math.min(s.lab,finish);
+    else if("Pets".equals(cat)&&finish>now)s.pet=Math.min(s.pet,finish);
+   }
+  }catch(Exception ex){android.util.Log.w("ClashTimerHub","Studio data error",ex);}
+  return new ArrayList<>(map.values());
+ }
+ static ArrayList<Status> filterSort(Context ctx,int id,ArrayList<Status> input){
+  SharedPreferences p=preferences(ctx);
+  ArrayList<Status> out=new ArrayList<>();
+  Set<String> chosen=new HashSet<>();
+  try{
+   JSONArray a=new JSONArray(p.getString("selected_"+id,"[]"));
+   for(int i=0;i<a.length();i++)chosen.add(a.optString(i));
+  }catch(Exception ignored){}
+  boolean all=p.getBoolean("all_"+id,true);
+  for(Status s:input)if(all||chosen.contains(s.key))out.add(s);
+  int sort=p.getInt("sort_"+id,0);
+  if(sort==1)Collections.sort(out,(a,b)->a.name.compareToIgnoreCase(b.name));
+  else if(sort==2)Collections.sort(out,(a,b)->Long.compare(a.builder,b.builder));
+  else {
+   HashMap<String,Integer> order=new HashMap<>();
+   try{
+    JSONArray a=new JSONArray(p.getString("order_"+id,"[]"));
+    for(int i=0;i<a.length();i++)order.put(a.optString(i),i);
+   }catch(Exception ignored){}
+   Collections.sort(out,(a,b)->Integer.compare(order.getOrDefault(a.key,999),order.getOrDefault(b.key,999)));
+  }
+  return out;
+ }
+ static String duration(long finish,long now){
+  if(finish==Long.MAX_VALUE)return "—";
+  long s=Math.max(0,(finish-now+999)/1000L),d=s/86400,h=s%86400/3600,m=s%3600/60;
+  return (d>0?d+"d ":"")+(h>0?h+"h ":"")+m+"m";
+ }
+ static String fieldLabel(Context ctx,String key){
+  boolean en=I18n.english(ctx);
+  switch(key){
+   case "builders":return en?"Builders":"Bouwers";
+   case "next":return en?"Next":"Volgende";
+   case "lab":return "Lab";
+   case "pets":return "Pets";
+   case "helpers":return "Helpers";
+   case "finish":return en?"Finish":"Klaar";
+   default:return key;
+  }
+ }
+ static String fieldValue(Context ctx,Status s,String key,long now){
+  switch(key){
+   case "builders":return s.ready+"✓  "+s.active+"⚒";
+   case "next":return duration(s.builder,now);
+   case "lab":return s.lab==Long.MAX_VALUE?(AppData.isMaxed(ctx,s.key,"Laboratorium")?"MAX":"—"):duration(s.lab,now);
+   case "pets":return s.pet==Long.MAX_VALUE?(AppData.isMaxed(ctx,s.key,"Pets")?"MAX":"—"):duration(s.pet,now);
+   case "helpers":{
+    String value=HelperTracker.compact(ctx,s.key,now);
+    return value.isEmpty()?"—":value;
+   }
+   case "finish":return s.builder==Long.MAX_VALUE?"—":
+    new java.text.SimpleDateFormat("dd MMM HH:mm",I18n.english(ctx)?Locale.UK:new Locale("nl","NL")).format(new Date(s.builder));
+   default:return "—";
+  }
+ }
+ private static PendingIntent openAccount(Context ctx,String account,int id){
+  Intent intent=new Intent(ctx,MainActivity.class);
+  intent.setAction("nl.clashtimerhub.v2.STUDIO_ACCOUNT."+id+"."+account);
+  intent.putExtra("openAccount",account);
+  intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
+  return PendingIntent.getActivity(ctx,Math.abs((id+"#"+account).hashCode()),intent,
+   PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+ }
+ private static PendingIntent openSettings(Context ctx,int id){
+  Intent i=new Intent(ctx,StudioEditorActivity.class);
+  i.setAction("nl.clashtimerhub.v2.STUDIO_SETTINGS."+id);
+  i.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,id);
+  return PendingIntent.getActivity(ctx,700000+id,i,
+   PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+ }
+ private static int dpWidth(Bundle opts,boolean portrait){
+  int w=opts==null?310:opts.getInt(portrait?AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH:AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH,310);
+  return w>0?w:310;
+ }
+ private static int dpHeight(Bundle opts,boolean portrait){
+  int h=opts==null?240:opts.getInt(portrait?AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT:AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,240);
+  return h>0?h:240;
+ }
+ static RemoteViews build(Context ctx,int id,ArrayList<Status> available){
+  SharedPreferences p=preferences(ctx);
+  ArrayList<Status> list=filterSort(ctx,id,available);
+  AppWidgetManager manager=AppWidgetManager.getInstance(ctx);
+  Bundle options=manager.getAppWidgetOptions(id);
+  boolean portrait=ctx.getResources().getConfiguration().orientation!=android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+  int width=dpWidth(options,portrait),height=dpHeight(options,portrait);
+  int size=Math.max(10,Math.min(18,p.getInt("font_"+id,12)));
+  int space=Math.max(0,Math.min(10,p.getInt("space_"+id,3)));
+  int requested=Math.max(0,Math.min(3,p.getInt("cols_"+id,0)));
+  int cols=requested==0?(width>=570?3:width>=360?2:1):requested;
+  cols=Math.max(1,Math.min(cols,Math.max(1,width/145)));
+  ArrayList<String> fields=fieldOrder(p,id);
+  int bg=color(p.getString("bg_"+id,hex(DEF_BG)),DEF_BG);
+  int card=color(p.getString("card_"+id,hex(DEF_CARD)),DEF_CARD);
+  int ink=color(p.getString("text_"+id,hex(DEF_TEXT)),DEF_TEXT);
+  int accent=color(p.getString("accent_"+id,hex(DEF_ACCENT)),DEF_ACCENT);
+  boolean labels=p.getBoolean("labels_"+id,true);
+  boolean shortNames=p.getBoolean("short_"+id,false);
+  int estimatedRow=(size+6)*(fields.size()+1)+space*2+7;
+  int availableH=Math.max(0,height-42);
+  int rows=Math.max(1,availableH/Math.max(20,estimatedRow));
+  int capacity=Math.min(list.size(),Math.min(35,rows*cols));
+  RemoteViews root=new RemoteViews(ctx.getPackageName(),R.layout.studio_widget);
+  root.setInt(R.id.studio_root,"setBackgroundColor",bg);
+  for(int i:new int[]{R.id.studio_column_1,R.id.studio_column_2,R.id.studio_column_3})root.removeAllViews(i);
+  root.setViewVisibility(R.id.studio_column_2,cols>=2?View.VISIBLE:View.GONE);
+  root.setViewVisibility(R.id.studio_column_3,cols>=3?View.VISIBLE:View.GONE);
+  int[] columns={R.id.studio_column_1,R.id.studio_column_2,R.id.studio_column_3};
+  long now=System.currentTimeMillis();
+  for(int i=0;i<capacity;i++){
+   Status s=list.get(i);
+   RemoteViews cardView=new RemoteViews(ctx.getPackageName(),R.layout.studio_card);
+   cardView.setInt(R.id.studio_card_root,"setBackgroundColor",card);
+   cardView.setViewPadding(R.id.studio_card_root,6,space+2,6,space+2);
+   String shown=s.name;
+   if(shortNames&&shown.length()>13)shown=shown.substring(0,12)+"…";
+   cardView.setTextViewText(R.id.studio_card_name,shown);
+   cardView.setTextColor(R.id.studio_card_name,accent);
+   cardView.setTextViewTextSize(R.id.studio_card_name,android.util.TypedValue.COMPLEX_UNIT_SP,size+1);
+   cardView.removeAllViews(R.id.studio_card_fields);
+   for(String field:fields){
+    RemoteViews line=new RemoteViews(ctx.getPackageName(),R.layout.studio_field);
+    String text=(labels?fieldLabel(ctx,field)+": ":"")+fieldValue(ctx,s,field,now);
+    line.setTextViewText(R.id.studio_field_text,text);
+    line.setTextColor(R.id.studio_field_text,ink);
+    line.setTextViewTextSize(R.id.studio_field_text,android.util.TypedValue.COMPLEX_UNIT_SP,size);
+    cardView.addView(R.id.studio_card_fields,line);
+   }
+   cardView.setOnClickPendingIntent(R.id.studio_card_root,openAccount(ctx,s.key,id));
+   root.addView(columns[i%cols],cardView);
+  }
+  if(capacity==0){
+   RemoteViews empty=new RemoteViews(ctx.getPackageName(),R.layout.studio_field);
+   empty.setTextViewText(R.id.studio_field_text,I18n.english(ctx)?"No accounts selected":"Geen accounts geselecteerd");
+   empty.setTextColor(R.id.studio_field_text,ink);
+   root.addView(R.id.studio_column_1,empty);
+  }
+  root.setTextViewText(R.id.studio_footer,(capacity<list.size()?capacity+"/"+list.size()+"  ·  +"+(list.size()-capacity):capacity+" "+(I18n.english(ctx)?"accounts":"accounts")));
+  root.setTextColor(R.id.studio_footer,ink);
+  root.setOnClickPendingIntent(R.id.studio_settings,openSettings(ctx,id));
+  return root;
+ }
+ static void updateAll(Context ctx){
+  AppWidgetManager m=AppWidgetManager.getInstance(ctx);
+  ArrayList<Status> all=read(ctx);
+  for(int id:ids(ctx)){
+   try{m.updateAppWidget(id,build(ctx,id,all));}
+   catch(Exception e){android.util.Log.e("ClashTimerHub","Studio widget render failed "+id,e);}
+  }
+ }
+ @Override public void onUpdate(Context c,AppWidgetManager m,int[] ids){updateAll(c);}
+ @Override public void onAppWidgetOptionsChanged(Context c,AppWidgetManager m,int id,Bundle opts){updateAll(c);}
+ @Override public void onDeleted(Context c,int[] ids){
+  SharedPreferences.Editor e=preferences(c).edit();
+  for(int id:ids)for(String prefix:new String[]{"fields_","selected_","all_","order_","sort_","cols_","font_","space_","bg_","card_","text_","accent_","labels_","short_"})e.remove(prefix+id);
+  e.apply();super.onDeleted(c,ids);
+ }
+}
