@@ -15,7 +15,8 @@ import java.security.MessageDigest;
 import java.util.Locale;
 
 /** Verified APK update via the official PackageInstaller session API.
- * Android PackageManager, not archive metadata, enforces signing compatibility. */
+ * Android PackageManager, not archive metadata, enforces signing compatibility.
+ * Build #456: no behavioral changes, used to verify upgrade from build #455. */
 final class UpdateInstaller {
  private UpdateInstaller(){}
  static void install(MainActivity activity,File apk,long expectedBuild,String expectedSha256){
