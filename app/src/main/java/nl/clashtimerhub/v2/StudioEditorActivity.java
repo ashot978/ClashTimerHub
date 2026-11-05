@@ -224,7 +224,13 @@ public final class StudioEditorActivity extends Activity {
    bg.setText(background);card.setText(cards);textColor.setText(text);accent.setText(highlight);
    layoutMode.setSelection(layout);
    bgOpacity.setProgress(backgroundPercent);cardOpacity.setProgress(cardPercent);
-   if(layout!=0)labels.setChecked(false);
+   if(layout!=2){
+    labels.setChecked(false);
+    for(String field:KEYS)enabled.put(field,true);
+    renderFields();
+    fontSize.setProgress(0);spacing.setProgress(1);
+    columns.setSelection(0);
+   }
    preview();
   });
  }
