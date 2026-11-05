@@ -1,5 +1,19 @@
 # ClashTimerHub release notes
 
+## Compacte instellingen — 5 November 2026
+
+### NL
+- De instellingenpagina is compacter: kleinere kaarten en rijen, minder witruimte en geen overbodige dubbele koptekst.
+- Op brede schermen en de uitgeklapte Fold verschijnen de instellingen in twee overzichtelijke kolommen.
+- De dubbele back-upactie 'Opslaan als bestand' is verwijderd. 'Opslaan in Google Drive' blijft beschikbaar om een JSON-bestand te delen.
+- Back-ups kopiëren, herstellen en importeren blijven ongewijzigd.
+
+### EN
+- The Settings screen is more compact, with smaller cards and rows, less wasted space and no redundant large header.
+- On wider screens and the unfolded Fold, Settings now uses two organized columns.
+- Removed the redundant 'Save as file' backup option. 'Save to Google Drive' remains available to share a JSON file.
+- Copy, restore and import backup features remain unchanged.
+
 ## Widgetbeheer en update-feedback — 5 November 2026
 
 ### NL

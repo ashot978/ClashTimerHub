@@ -451,6 +451,7 @@ final class I18n {
   p.put("Clash Timer Hub is bijgewerkt naar build ","Clash Timer Hub has been updated to build ");
   p.put("Je accounts, timers en instellingen zijn behouden.","Your accounts, timers and settings have been preserved.");
   p.put("Bekijk de volledige wijzigingen op GitHub.","See the full list of changes on GitHub.");
+  p.put("Deel handmatig een JSON-back-up met Google Drive","Share a JSON backup manually with Google Drive");
   ORDERED.addAll(EN.entrySet());
   ORDERED.sort((a,b)->Integer.compare(b.getKey().length(),a.getKey().length()));
  }

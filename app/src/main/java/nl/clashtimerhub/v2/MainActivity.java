@@ -26,7 +26,7 @@ public final class MainActivity extends Activity {
  private final ArrayList<String> accounts=new ArrayList<>();
  private final ArrayList<JSONObject> upgrades=new ArrayList<>();
  private final ArrayList<JSONObject> pending=new ArrayList<>();
- private static final int PICK=12,IMPORT=13,RESTORE=14,BACKUP_SAVE=76;
+ private static final int PICK=12,IMPORT=13,RESTORE=14;
  private Bitmap lastScanBitmap;
  private PermissionWizard permissionWizard;
  private GoogleDriveUi googleDriveUi;
@@ -241,8 +241,9 @@ public final class MainActivity extends Activity {
   });
   setContentView(shell);
   ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);
-  root=new LinearLayout(this);root.setOrientation(1);root.setPadding(dp(12),dp(22),dp(12),dp(64));scroll.addView(root);
+  root=new LinearLayout(this);root.setOrientation(1);root.setPadding(dp(12),dp(activeTab==3?9:22),dp(12),dp(activeTab==3?20:64));scroll.addView(root);
 
+  if(activeTab!=3){
   LinearLayout headingRow=new LinearLayout(this);headingRow.setOrientation(0);headingRow.setGravity(android.view.Gravity.CENTER_VERTICAL);
   root.addView(headingRow,new LinearLayout.LayoutParams(-1,-2));
   TextView heading=label("⚔  CLASH TIMER HUB",24);heading.setTypeface(null,android.graphics.Typeface.BOLD);heading.setTextColor(0xffffd88a);
@@ -254,6 +255,7 @@ public final class MainActivity extends Activity {
   headingRow.addView(languageButton,langParams);languageButton.setOnClickListener(v->chooseLanguage());
   TextView subtitle=label("COMMAND CENTER / V7",11);subtitle.setTextColor(0xffb5a5ff);root.addView(subtitle);
   View accent=new View(this);accent.setBackgroundColor(0xffd2a96e);LinearLayout.LayoutParams accentLp=new LinearLayout.LayoutParams(dp(56),dp(2));accentLp.setMargins(dp(12),0,0,dp(8));root.addView(accent,accentLp);
+  }
   screenContent=new LinearLayout(this);screenContent.setOrientation(1);root.addView(screenContent);
   LinearLayout nav=new LinearLayout(this);nav.setOrientation(LinearLayout.HORIZONTAL);
   nav.setBackgroundColor(0xff261a36);nav.setPadding(dp(6),dp(8),dp(6),dp(8));
@@ -307,35 +309,64 @@ public final class MainActivity extends Activity {
    dashboard=null;showSettingsScreen();
   }
  }
- private LinearLayout settingsSection(String title,String subtitle){
-  TextView header=label(title,16);header.setTypeface(null,android.graphics.Typeface.BOLD);header.setTextColor(0xffffd783);screenContent.addView(header);
-  if(!subtitle.isEmpty()){TextView sub=label(subtitle,12);sub.setTextColor(0xffb6a9c8);screenContent.addView(sub);}
-  LinearLayout card=new LinearLayout(this);card.setOrientation(1);card.setPadding(dp(6),dp(5),dp(6),dp(5));
-  card.setBackground(clashSurface(0xff2c203b,0xff654875,14));
-  LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(dp(2),dp(3),dp(2),dp(12));screenContent.addView(card,lp);
+ private LinearLayout settingsSection(LinearLayout parent,String title,String subtitle){
+  LinearLayout card=new LinearLayout(this);card.setOrientation(1);
+  card.setPadding(dp(5),dp(3),dp(5),dp(4));
+  card.setBackground(clashSurface(0xff2c203b,0xff654875,12));
+  LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);
+  lp.setMargins(dp(2),0,dp(2),dp(9));parent.addView(card,lp);
+  TextView header=label(title,13);
+  header.setTypeface(null,android.graphics.Typeface.BOLD);
+  header.setTextColor(0xffffd783);
+  header.setPadding(dp(11),dp(8),dp(8),dp(5));
+  card.addView(header);
   return card;
  }
  private void settingsItem(LinearLayout section,String iconText,String title,String description,Runnable task){
-  LinearLayout item=new LinearLayout(this);item.setOrientation(0);item.setGravity(android.view.Gravity.CENTER_VERTICAL);item.setPadding(dp(10),dp(4),dp(8),dp(4));item.setMinimumHeight(dp(62));
-  item.setBackground(new android.graphics.drawable.RippleDrawable(android.content.res.ColorStateList.valueOf(0x44ffffff),shape(0xff352748,9),null));
-  TextView icon=label(iconText,20);icon.setTextColor(0xffffd783);icon.setPadding(dp(3),0,dp(10),0);
-  item.addView(icon,new LinearLayout.LayoutParams(dp(44),-2));
+  LinearLayout item=new LinearLayout(this);item.setOrientation(0);
+  item.setGravity(android.view.Gravity.CENTER_VERTICAL);
+  item.setPadding(dp(8),dp(3),dp(7),dp(3));
+  item.setMinimumHeight(dp(54));
+  item.setBackground(new android.graphics.drawable.RippleDrawable(
+   android.content.res.ColorStateList.valueOf(0x44ffffff),shape(0xff352748,8),null));
+  TextView icon=label(iconText,17);icon.setTextColor(0xffffd783);
+  icon.setGravity(android.view.Gravity.CENTER);
+  icon.setPadding(0,0,0,0);
+  item.addView(icon,new LinearLayout.LayoutParams(dp(36),-1));
   LinearLayout copy=new LinearLayout(this);copy.setOrientation(1);
-  TextView name=label(title,15);name.setTypeface(null,android.graphics.Typeface.BOLD);name.setPadding(0,dp(3),0,dp(2));copy.addView(name);
-  TextView helper=label(description,12);helper.setTextColor(0xffbdadce);helper.setPadding(0,0,0,dp(3));copy.addView(helper);
+  TextView name=label(title,14);name.setTypeface(null,android.graphics.Typeface.BOLD);
+  name.setSingleLine(true);name.setEllipsize(android.text.TextUtils.TruncateAt.END);
+  name.setPadding(0,0,0,dp(1));copy.addView(name);
+  TextView helper=label(description,11);helper.setTextColor(0xffbdadce);
+  helper.setMaxLines(2);helper.setEllipsize(android.text.TextUtils.TruncateAt.END);
+  helper.setPadding(0,0,0,0);copy.addView(helper);
   item.addView(copy,new LinearLayout.LayoutParams(0,-2,1));
-  TextView chevron=label("›",22);chevron.setTextColor(0xffd8ae69);chevron.setPadding(dp(8),0,dp(5),0);item.addView(chevron);
-  LinearLayout.LayoutParams row=new LinearLayout.LayoutParams(-1,-2);row.setMargins(0,dp(2),0,dp(2));section.addView(item,row);
+  TextView chevron=label("›",19);chevron.setTextColor(0xffd8ae69);
+  chevron.setPadding(dp(5),0,dp(3),0);item.addView(chevron);
+  LinearLayout.LayoutParams row=new LinearLayout.LayoutParams(-1,-2);
+  row.setMargins(0,dp(1),0,dp(1));section.addView(item,row);
   item.setOnClickListener(v->task.run());
  }
  private void showSettingsScreen(){
-  screenContent.addView(label("INSTELLINGEN",20));
-  LinearLayout language=settingsSection("🌐  TAAL","Kies je voorkeurstaal");
+  // On unfolded phones and tablets, split settings into two compact columns.
+  // Narrow screens retain a natural single-column reading order.
+  LinearLayout left=screenContent,right=screenContent;
+  if(getResources().getConfiguration().screenWidthDp>=600){
+   LinearLayout columns=new LinearLayout(this);columns.setOrientation(LinearLayout.HORIZONTAL);
+   screenContent.addView(columns,new LinearLayout.LayoutParams(-1,-2));
+   left=new LinearLayout(this);left.setOrientation(1);
+   right=new LinearLayout(this);right.setOrientation(1);
+   LinearLayout.LayoutParams leftLayout=new LinearLayout.LayoutParams(0,-2,1);
+   LinearLayout.LayoutParams rightLayout=new LinearLayout.LayoutParams(0,-2,1);
+   rightLayout.setMargins(dp(10),0,0,0);
+   columns.addView(left,leftLayout);columns.addView(right,rightLayout);
+  }
+  LinearLayout language=settingsSection(left,"🌐  TAAL","Kies je voorkeurstaal");
   settingsItem(language,I18n.flag(this),"Taal",I18n.flag(this)+"  "+I18n.label(this),()->chooseLanguage());
-  LinearLayout sync=settingsSection("↻  SYNCHRONISATIE","Accounts bijwerken zonder Clash te verlaten");
+  LinearLayout sync=settingsSection(left,"↻  SYNCHRONISATIE","Accounts bijwerken zonder Clash te verlaten");
   settingsItem(sync,"⚔","Zwevende plakknop",getPreferences(0).getBoolean("floatingEnabled",false)?"Actief · tik om uit te schakelen":"Uit · tik om in te schakelen",()->{toggleFloatingSync();draw();});
   settingsItem(sync,"▤","Synchroniseer vanaf klembord","Importeer een gekopieerde Clash-export",()->importClipboard());
-  LinearLayout notifications=settingsSection("♧  MELDINGEN","Upgrade-alarmen en tests");
+  LinearLayout notifications=settingsSection(left,"♧  MELDINGEN","Upgrade-alarmen en tests");
   settingsItem(notifications,"♧","Meldingen instellen","Gereedmelding en waarschuwingen",()->notificationSettings());
   settingsItem(notifications,"✓","Toestemmingen controleren",
    PermissionWizard.grantedCount(this)+"/4 actief · meldingen, zwevende knop, alarmen en app-updates",
@@ -345,11 +376,11 @@ public final class MainActivity extends Activity {
    String status=t(TimerWidget.scheduleDiagnostic(this));
    new android.app.AlertDialog.Builder(this).setTitle(t("Alarmtest")).setMessage(status).setPositiveButton(t("OK"),null).show();
   });
-  LinearLayout widget=settingsSection("▦  HOMESCREENWIDGET","Toon standaard al je accounts");
+  LinearLayout widget=settingsSection(right,"▦  HOMESCREENWIDGET","Toon standaard al je accounts");
   settingsItem(widget,"⚙","Widget instellen","Alle accounts of een eigen selectie",()->showWidgetSettings());
-  LinearLayout players=settingsSection("♙  ACCOUNTS","Geef je accounts herkenbare namen");
+  LinearLayout players=settingsSection(right,"♙  ACCOUNTS","Geef je accounts herkenbare namen");
   settingsItem(players,"✎","Accountnamen aanpassen","Verander de naam zonder de player tag te wijzigen",()->renameAccount());
-  LinearLayout releases=settingsSection("↓  APP-UPDATES","Versie en GitHub-builds");
+  LinearLayout releases=settingsSection(right,"↓  APP-UPDATES","Versie en GitHub-builds");
   TextView currentBuild=label(installedBuildDescription(),13);
   currentBuild.setTextColor(0xff8be3ad);
   currentBuild.setPadding(dp(12),dp(8),dp(12),dp(4));
@@ -365,17 +396,13 @@ public final class MainActivity extends Activity {
   settingsItem(releases,"↓","GitHub-builds bekijken","Open de builds in je browser",()->openUpdates());
   settingsItem(releases,"ⓘ","Update-diagnose",
    "Bekijk installatiecontrole, downloadstatus en laatste fout",()->showUpdateDiagnostics());
-  LinearLayout backups=settingsSection("▣  BACK-UP","Je opgeslagen accounts veilig bewaren");
+  LinearLayout backups=settingsSection(right,"▣  BACK-UP","Je opgeslagen accounts veilig bewaren");
   settingsItem(backups,"▣","Back-up kopiëren","Accounts, timers, taal, meldingen en widgetinstellingen",()->copyBackup());
   settingsItem(backups,"↶","Back-up herstellen","Herstel timers en opgeslagen voorkeuren",()->restoreBackupClipboard());
   settingsItem(backups,"☁","Opslaan in Google Drive",
-   "Deel een echt JSON-bestand rechtstreeks met de Google Drive-app",()->shareBackupToDrive());
-  settingsItem(backups,"↓","Opslaan als bestand",
-   "Kies een map en bestandsnaam voor een losse .json-back-up",()->saveBackupAsFile());
+   "Deel handmatig een JSON-back-up met Google Drive",()->shareBackupToDrive());
   settingsItem(backups,"↑","Back-upbestand importeren",
    "Kies een eerder opgeslagen .json-bestand om te herstellen",()->openBackupFile());
-  TextView tip=label("Drive-back-ups via Delen zijn handmatig. Voor automatisch vervangen is een aparte Drive-koppeling nodig.",12);
-  tip.setPadding(dp(12),dp(6),dp(12),dp(10));tip.setTextColor(0xffbca7d5);backups.addView(tip);
  }
  private void renameAccount(){
   if(accounts.isEmpty()){toast("Geen accounts beschikbaar");return;}
@@ -966,14 +993,6 @@ public final class MainActivity extends Activity {
    startActivity(Intent.createChooser(share,"Kies Google Drive om je back-up op te slaan"));
   }catch(Exception e){toast("Back-up delen mislukt: "+e.getMessage());}
  }
- private void saveBackupAsFile(){
-  Intent intent=new Intent(Intent.ACTION_CREATE_DOCUMENT);
-  intent.addCategory(Intent.CATEGORY_OPENABLE);
-  intent.setType("application/json");
-  intent.putExtra(Intent.EXTRA_TITLE,backupFilename());
-  try{startActivityForResult(intent,BACKUP_SAVE);}
-  catch(Exception e){toast("Kan bestand opslaan niet openen: "+e.getMessage());}
- }
  private void openBackupFile(){
   Intent intent=new Intent(Intent.ACTION_OPEN_DOCUMENT);
   intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -981,17 +1000,6 @@ public final class MainActivity extends Activity {
   intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
   try{startActivityForResult(intent,RESTORE);}
   catch(Exception e){toast("Kan bestanden niet openen: "+e.getMessage());}
- }
- private void writeBackupToFile(android.net.Uri uri){
-  try{
-   byte[] bytes=backupPayload().toString(2).getBytes(java.nio.charset.StandardCharsets.UTF_8);
-   if(bytes.length>2_000_000)throw new java.io.IOException("Back-up te groot (max. 2 MB)");
-   try(java.io.OutputStream out=getContentResolver().openOutputStream(uri,"wt")){
-    if(out==null)throw new java.io.IOException("Geen toegang tot gekozen bestand");
-    out.write(bytes);out.flush();
-   }
-   toast("Back-upbestand opgeslagen");
-  }catch(Exception e){toast("Back-up opslaan mislukt: "+e.getMessage());}
  }
  private void restorePreferences(JSONObject preferences){
   if(preferences==null)return; // Old backups retain the current device's settings.
@@ -1407,7 +1415,6 @@ public final class MainActivity extends Activity {
    return;
   }
   if(result!=RESULT_OK||data==null)return;
-  if(req==BACKUP_SAVE){if(data.getData()!=null)writeBackupToFile(data.getData());return;}
   if(req==RESTORE){try(InputStream stream=getContentResolver().openInputStream(data.getData())){java.io.ByteArrayOutputStream buffer=new java.io.ByteArrayOutputStream();byte[] bytes=new byte[8192];int n;while((n=stream.read(bytes))!=-1){buffer.write(bytes,0,n);if(buffer.size()>2000000)throw new java.io.IOException("Back-up te groot");}restoreBackup(buffer.toString("UTF-8"));}catch(Exception e){toast("Herstellen mislukt: "+e.getMessage());}return;}
   if(req==IMPORT){try(InputStream stream=getContentResolver().openInputStream(data.getData())){
    java.io.ByteArrayOutputStream buffer=new java.io.ByteArrayOutputStream();byte[] bytes=new byte[8192];int n;
