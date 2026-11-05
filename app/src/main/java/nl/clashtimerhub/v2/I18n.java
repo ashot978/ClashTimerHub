@@ -452,6 +452,10 @@ final class I18n {
   p.put("Je accounts, timers en instellingen zijn behouden.","Your accounts, timers and settings have been preserved.");
   p.put("Bekijk de volledige wijzigingen op GitHub.","See the full list of changes on GitHub.");
   p.put("Deel handmatig een JSON-back-up met Google Drive","Share a JSON backup manually with Google Drive");
+  p.put("Tik: sync · Dubbel tik: export · Sleep: verplaatsen","Tap: sync · Double tap: export · Drag: move");
+  p.put("Open Clash More Settings · Data Export → Copy","Open Clash More Settings · Data Export → Copy");
+  p.put("Open Clash manually: Profile → Settings → More Settings","Open Clash manually: Profile → Settings → More Settings");
+  p.put("Tik eenmaal om te synchroniseren; dubbel tik voor Clash More Settings.","Tap once to sync; double tap for Clash More Settings.");
   ORDERED.addAll(EN.entrySet());
   ORDERED.sort((a,b)->Integer.compare(b.getKey().length(),a.getKey().length()));
  }
