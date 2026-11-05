@@ -314,10 +314,6 @@ public final class MainActivity extends Activity {
   LinearLayout sync=settingsSection("↻  SYNCHRONISATIE","Accounts bijwerken zonder Clash te verlaten");
   settingsItem(sync,"⚔","Zwevende plakknop",getPreferences(0).getBoolean("floatingEnabled",false)?"Actief · tik om uit te schakelen":"Uit · tik om in te schakelen",()->{toggleFloatingSync();draw();});
   settingsItem(sync,"▤","Synchroniseer vanaf klembord","Importeer een gekopieerde Clash-export",()->importClipboard());
-  settingsItem(sync,"✧","Smart Sync Lab · Beta",
-   I18n.english(this)?"Optional vision-based screenshot analysis; existing sync stays unchanged":
-   "Optionele AI-analyse van screenshots; bestaande sync blijft ongewijzigd",
-   ()->startActivity(new Intent(this,SmartSyncLabActivity.class)));
   LinearLayout notifications=settingsSection("♧  MELDINGEN","Upgrade-alarmen en tests");
   settingsItem(notifications,"♧","Meldingen instellen","Gereedmelding en waarschuwingen",()->notificationSettings());
   settingsItem(notifications,"✓","Toestemmingen controleren",
