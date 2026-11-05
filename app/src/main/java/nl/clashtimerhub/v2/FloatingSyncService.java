@@ -133,9 +133,9 @@ public final class FloatingSyncService extends Service {
    intent.setPackage("com.supercell.clashofclans");
    if(intent.resolveActivity(getPackageManager())==null)intent.setPackage(null);
    startActivity(intent);
-   showFeedback(I18n.tr(this,"Open Clash More Settings · Data Export → Copy"),true);
+   showFeedback(I18n.tr(this,"Clash-instellingen openen · Data Export → Copy"),true);
   }catch(Exception error){
-   showFeedback(I18n.tr(this,"Open Clash manually: Profile → Settings → More Settings"),false);
+   showFeedback(I18n.tr(this,"Open Clash zelf: Profiel → Instellingen → Meer instellingen"),false);
   }
  }
  private void showDropTarget(){
