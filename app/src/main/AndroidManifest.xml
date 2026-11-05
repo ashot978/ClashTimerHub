@@ -15,7 +15,6 @@
 </activity>
 <service android:name=".FloatingSyncService" android:exported="false" android:foregroundServiceType="specialUse"><property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="User enabled floating clipboard import shortcut"/></service>
 <activity android:name=".WidgetConfigActivity" android:exported="true" android:theme="@android:style/Theme.Material.NoActionBar"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/></intent-filter></activity>
-<activity android:name=".StudioEditorActivity" android:exported="true" android:theme="@android:style/Theme.Material.NoActionBar"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/></intent-filter></activity>
 <activity android:name=".QuickImportActivity" android:exported="false" android:theme="@android:style/Theme.Material.Dialog"/>
 <receiver android:name=".UpdateInstallReceiver" android:exported="false"/>
 <receiver android:name=".BuilderAlarm" android:exported="false"/>
@@ -23,7 +22,6 @@
 <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED"/><action android:name="android.intent.action.MY_PACKAGE_REPLACED"/><action android:name="android.intent.action.TIME_SET"/><action android:name="android.intent.action.TIMEZONE_CHANGED"/></intent-filter>
 </receiver>
 <receiver android:name=".WidgetSyncReceiver" android:exported="false"/>
-<receiver android:name=".StudioWidget" android:exported="true"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/studio_widget_info"/></receiver>
 <receiver android:name=".SyncWidget" android:exported="true">
 <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter>
 <meta-data android:name="android.appwidget.provider" android:resource="@xml/sync_widget_info"/>
