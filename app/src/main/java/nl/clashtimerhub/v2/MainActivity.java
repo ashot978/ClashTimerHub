@@ -321,7 +321,7 @@ public final class MainActivity extends Activity {
    ()->{if(permissionWizard==null)permissionWizard=new PermissionWizard(this);permissionWizard.start(true);});
   settingsItem(notifications,"✓","Testmelding","Controleer of notificaties aankomen",()->sendTestNotification());
   settingsItem(notifications,"◷","Alarmtest over 1 minuut","Controleer of Android een alarm uitvoert",()->{
-   String status=TimerWidget.scheduleDiagnostic(this);
+   String status=t(TimerWidget.scheduleDiagnostic(this));
    new android.app.AlertDialog.Builder(this).setTitle(t("Alarmtest")).setMessage(status).setPositiveButton(t("OK"),null).show();
   });
   LinearLayout widget=settingsSection("▦  HOMESCREENWIDGET","Toon standaard al je accounts");
@@ -404,7 +404,7 @@ public final class MainActivity extends Activity {
    if(isFinishing()||isDestroyed())return;
    if(error!=null){
     if(!silent)new android.app.AlertDialog.Builder(this).setTitle(t("Updatecontrole"))
-     .setMessage(error+"\nControleer of GitHub de nieuwste APK als Release heeft gepubliceerd.")
+     .setMessage(t(error)+"\n"+t("Controleer of GitHub de nieuwste APK als Release heeft gepubliceerd."))
      .setPositiveButton(t("OK"),null).show();
     return;
    }
@@ -471,7 +471,7 @@ public final class MainActivity extends Activity {
    boolean fallback=apk!=null&&apk.isFile()&&apk.length()>1024*1024;
    android.app.AlertDialog.Builder dialog=new android.app.AlertDialog.Builder(this)
     .setTitle(t("Update niet geïnstalleerd"))
-    .setMessage(reason+"\n\nDe bestaande installatie is niet gewijzigd. Verwijder de app niet.")
+    .setMessage(t(reason)+"\n\n"+t("De bestaande installatie is niet gewijzigd. Verwijder de app niet."))
     .setPositiveButton(t("OK"),null);
    if(fallback)dialog.setNeutralButton(
     I18n.english(this)?"Try Android installer":"Via Android installeren",
@@ -527,12 +527,12 @@ public final class MainActivity extends Activity {
    "\nGeverifieerde APK: "+(!verified.isEmpty()&&new java.io.File(verified).isFile()?"beschikbaar":"geen")+
    "\nLaatste fout: "+(lastError.isEmpty()?"geen opgeslagen fout":lastError);
   android.app.AlertDialog.Builder dialog=new android.app.AlertDialog.Builder(this)
-   .setTitle("APK update-diagnose").setMessage(text).setPositiveButton("Sluiten",null);
+   .setTitle(t("APK update-diagnose")).setMessage(t(text)).setPositiveButton(t("Sluiten"),null);
   if(!verified.isEmpty()&&new java.io.File(verified).isFile()){
    java.io.File file=new java.io.File(verified);
    long build=getPreferences(0).getLong("lastVerifiedBuild",0);
    String hash=getPreferences(0).getString("lastVerifiedHash","");
-   dialog.setNeutralButton("Via Android installeren",
+   dialog.setNeutralButton(t("Via Android installeren"),
     (d,w)->UpdateInstaller.installWithAndroidInstaller(this,file,build,hash));
   }
   dialog.show();
