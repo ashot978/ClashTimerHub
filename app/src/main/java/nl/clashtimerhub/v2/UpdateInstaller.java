@@ -16,7 +16,8 @@ import java.util.Locale;
 
 /** Verified APK update via the official PackageInstaller session API.
  * Android PackageManager, not archive metadata, enforces signing compatibility.
- * Android enforces compatibility for every update; CI pins a stable release certificate. */
+ * Android enforces compatibility for every update; CI pins a stable release certificate.
+ * Build 460: repeat release signing and update-installation verification. */
 final class UpdateInstaller {
  private UpdateInstaller(){}
  static void install(MainActivity activity,File apk,long expectedBuild,String expectedSha256){
