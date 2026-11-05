@@ -222,7 +222,7 @@ public final class StudioEditorActivity extends Activity {
   row.addView(b,new LinearLayout.LayoutParams(0,dp(42),1));
   b.setOnClickListener(v->{
    bg.setText(background);card.setText(cards);textColor.setText(text);accent.setText(highlight);
-   layoutMode.setSelection(layout==0?2:layout==2?1:0);
+   layoutMode.setSelection(layout);
    bgOpacity.setProgress(backgroundPercent);cardOpacity.setProgress(cardPercent);
    if(layout!=0)labels.setChecked(false);
    preview();
@@ -279,49 +279,87 @@ public final class StudioEditorActivity extends Activity {
  }
  private void preview(){
   if(previewBox==null||allAccounts==null||columns==null||sort==null||
-   fontSize==null||spacing==null||bg==null||card==null||textColor==null||accent==null)return;
+   layoutMode==null||fontSize==null||spacing==null||bg==null||card==null||
+   textColor==null||accent==null||bgOpacity==null||cardOpacity==null)return;
   previewBox.removeAllViews();
-  previewBox.setBackgroundColor(color(bg,StudioWidget.DEF_BG));
-  int colorCard=color(card,StudioWidget.DEF_CARD),ink=color(textColor,StudioWidget.DEF_TEXT);
-  int highlight=color(accent,StudioWidget.DEF_ACCENT),font=10+fontSize.getProgress();
-  int gap=spacing.getProgress();
+  int background=StudioWidget.withOpacity(color(bg,StudioWidget.DEF_BG),bgOpacity.getProgress());
+  int colorCard=StudioWidget.withOpacity(color(card,StudioWidget.DEF_CARD),cardOpacity.getProgress());
+  int ink=color(textColor,StudioWidget.DEF_TEXT),highlight=color(accent,StudioWidget.DEF_ACCENT);
+  previewBox.setBackgroundColor(background);
+  int font=10+fontSize.getProgress(),gap=spacing.getProgress();
   ArrayList<String> fields=chosenFields();
   ArrayList<StudioWidget.Status> accounts=previewAccounts();
-  int cols=columns.getSelectedItemPosition();
-  if(cols==0)cols=2;cols=Math.max(1,cols);
-  LinearLayout grid=new LinearLayout(this);grid.setOrientation(0);previewBox.addView(grid);
-  LinearLayout[] containers=new LinearLayout[cols];
-  for(int i=0;i<cols;i++){
-   containers[i]=new LinearLayout(this);containers[i].setOrientation(1);
-   grid.addView(containers[i],new LinearLayout.LayoutParams(0,-2,1));
-  }
   long now=System.currentTimeMillis();
+  int selectedMode=layoutMode.getSelectedItemPosition();
   int limit=Math.min(7,accounts.size());
-  for(int i=0;i<limit;i++){
-   StudioWidget.Status a=accounts.get(i);
-   LinearLayout tile=new LinearLayout(this);tile.setOrientation(1);
-   tile.setBackgroundColor(colorCard);tile.setPadding(dp(5),dp(4+gap),dp(5),dp(4+gap));
-   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(dp(2),dp(2),dp(2),dp(2));
-   containers[i%cols].addView(tile,lp);
-   TextView title=new TextView(this);title.setTextColor(highlight);title.setTextSize(font+1);
-   title.setTypeface(null,1);title.setSingleLine(true);title.setEllipsize(android.text.TextUtils.TruncateAt.END);
-   String name=a.name;if(shortNames.isChecked()&&name.length()>13)name=name.substring(0,12)+"…";
-   title.setText(name);tile.addView(title);
-   for(String key:fields){
-    TextView line=new TextView(this);line.setTextColor(ink);line.setTextSize(font);line.setSingleLine(true);
-    line.setEllipsize(android.text.TextUtils.TruncateAt.END);
-    line.setText((labels.isChecked()?StudioWidget.fieldLabel(this,key)+": ":"")+
-     StudioWidget.fieldValue(this,a,key,now));tile.addView(line);
+  if(selectedMode!=2){
+   for(int i=0;i<limit;i++){
+    StudioWidget.Status a=accounts.get(i);
+    LinearLayout line=new LinearLayout(this);line.setOrientation(0);line.setGravity(Gravity.CENTER_VERTICAL);
+    int rowShade=separators.isChecked()?(i%2==0?colorCard:StudioWidget.withOpacity(colorCard,
+      Math.max(0,cardOpacity.getProgress()-16))):Color.TRANSPARENT;
+    line.setBackgroundColor(rowShade);line.setPadding(dp(4),dp(3+gap/2),dp(4),dp(3+gap/2));
+    previewBox.addView(line,new LinearLayout.LayoutParams(-1,-2));
+    TextView name=new TextView(this);name.setTextColor(highlight);name.setTextSize(Math.max(9,font-1));
+    name.setTypeface(null,1);name.setSingleLine(true);
+    name.setEllipsize(android.text.TextUtils.TruncateAt.END);
+    String shown=a.name;
+    if(shortNames.isChecked()&&shown.length()>13)shown=shown.substring(0,12)+"…";
+    name.setText(shown);
+    line.addView(name,new LinearLayout.LayoutParams(dp(78),-2));
+    for(String key:fields){
+     TextView value=new TextView(this);value.setTextColor(ink);
+     value.setTextSize(Math.max(8,font-2));value.setSingleLine(true);
+     value.setEllipsize(android.text.TextUtils.TruncateAt.END);
+     String content=StudioWidget.fieldValue(this,a,key,now);
+     if(selectedMode==0&&labels.isChecked()){
+      if(key.equals("builders"))content="⚒ "+content;
+      if(key.equals("lab"))content="⚗ "+content;
+      if(key.equals("pets"))content="🐾 "+content;
+     }
+     value.setText(content);
+     line.addView(value,new LinearLayout.LayoutParams(0,-2,1));
+    }
+   }
+  }else{
+   int cols=columns.getSelectedItemPosition();
+   if(cols==0)cols=2;cols=Math.max(1,cols);
+   LinearLayout grid=new LinearLayout(this);grid.setOrientation(0);previewBox.addView(grid);
+   LinearLayout[] containers=new LinearLayout[cols];
+   for(int i=0;i<cols;i++){
+    containers[i]=new LinearLayout(this);containers[i].setOrientation(1);
+    grid.addView(containers[i],new LinearLayout.LayoutParams(0,-2,1));
+   }
+   for(int i=0;i<limit;i++){
+    StudioWidget.Status a=accounts.get(i);
+    LinearLayout tile=new LinearLayout(this);tile.setOrientation(1);
+    tile.setBackgroundColor(colorCard);tile.setPadding(dp(5),dp(4+gap),dp(5),dp(4+gap));
+    LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);
+    lp.setMargins(dp(2),dp(2),dp(2),dp(2));containers[i%cols].addView(tile,lp);
+    TextView title=new TextView(this);title.setTextColor(highlight);title.setTextSize(font+1);
+    title.setTypeface(null,1);title.setSingleLine(true);
+    title.setEllipsize(android.text.TextUtils.TruncateAt.END);
+    String shown=a.name;if(shortNames.isChecked()&&shown.length()>13)shown=shown.substring(0,12)+"…";
+    title.setText(shown);tile.addView(title);
+    for(String key:fields){
+     TextView line=new TextView(this);line.setTextColor(ink);line.setTextSize(font);line.setSingleLine(true);
+     line.setEllipsize(android.text.TextUtils.TruncateAt.END);
+     line.setText((labels.isChecked()?StudioWidget.fieldLabel(this,key)+": ":"")+
+      StudioWidget.fieldValue(this,a,key,now));tile.addView(line);
+    }
    }
   }
   if(accounts.isEmpty()){
    TextView empty=new TextView(this);empty.setText(tr("Geen accounts geselecteerd","No accounts selected"));
    empty.setTextColor(ink);previewBox.addView(empty);
   }
-  TextView caption=new TextView(this);caption.setText(tr("Voorbeeld (max. 7 accounts) · exacte Samsung-grootte kan afwijken",
-   "Preview (up to 7 accounts) · exact Samsung widget size may differ"));
-  caption.setTextColor(ink);caption.setTextSize(10);caption.setPadding(dp(5),dp(8),dp(5),dp(8));
-  previewBox.addView(caption);
+  if(showFooter.isChecked()){
+   TextView caption=new TextView(this);
+   caption.setText(limit+" "+tr("accounts","accounts")+(accounts.size()>limit?" · +"+(accounts.size()-limit):"")+
+    (showGear.isChecked()?"   ⚙":""));
+   caption.setTextColor(ink);caption.setTextSize(11);
+   caption.setPadding(dp(5),dp(7),dp(5),dp(7));previewBox.addView(caption);
+  }
  }
  private String validColor(EditText input){
   String value=input.getText().toString().trim();
@@ -348,6 +386,13 @@ public final class StudioEditorActivity extends Activity {
    write.putInt("space_"+id,spacing.getProgress());
    write.putBoolean("labels_"+id,labels.isChecked());
    write.putBoolean("short_"+id,shortNames.isChecked());
+   int styleIndex=layoutMode.getSelectedItemPosition();
+   write.putInt("layout_"+id,styleIndex==2?0:styleIndex==1?2:1);
+   write.putInt("bgOpacity_"+id,bgOpacity.getProgress());
+   write.putInt("cardOpacity_"+id,cardOpacity.getProgress());
+   write.putBoolean("footer_"+id,showFooter.isChecked());
+   write.putBoolean("gear_"+id,showGear.isChecked());
+   write.putBoolean("separators_"+id,separators.isChecked());
    write.putString("bg_"+id,validColor(bg));write.putString("card_"+id,validColor(card));
    write.putString("text_"+id,validColor(textColor));write.putString("accent_"+id,validColor(accent));
    if(!write.commit())throw new Exception("Save failed");
