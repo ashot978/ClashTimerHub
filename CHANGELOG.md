@@ -1,5 +1,19 @@
 # ClashTimerHub release notes
 
+## Widgetbeheer en update-feedback — 5 November 2026
+
+### NL
+- Widget Studio volledig verwijderd; de vier oorspronkelijke widgets blijven behouden.
+- Terug vanuit het widgetbewerkingsscherm via het tandwiel opent de app bij Instellingen.
+- Na een succesvolle app-update verschijnt bij de volgende appstart een bevestiging met het buildnummer.
+- De lijst met nieuwe functies en verbeteringen verschijnt in de gekozen app-taal.
+
+### EN
+- Widget Studio has been removed completely; the four original widgets remain available.
+- Back from the widget editor opened via the gear now returns to the app's Settings screen.
+- After a successful app update, the next app launch shows confirmation with the installed build number.
+- The list of new features and improvements appears in the language selected in the app.
+
 ## 7.5.9-beta1 — 4 November 2026
 
 ### Helperkolom op dezelfde regel — bredere multi-accountwidget
