@@ -94,7 +94,6 @@ final class DriveBackupManager {
    widgets.put(entry);
   }
   data.put("widgets",widgets);
-  data.put("studioWidgets",StudioWidget.backupSettings(context));
   return data;
  }
 
