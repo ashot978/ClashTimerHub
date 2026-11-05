@@ -74,16 +74,17 @@ final class GoogleDriveUi {
   if(next!=null)next.accept(token);
  }
  private void fail(String msg){pending=null;busy=false;toast(msg);}
- private void toast(String msg){Toast.makeText(activity,msg,Toast.LENGTH_LONG).show();}
+ private String t(String msg){return I18n.tr(activity,msg);}
+ private void toast(String msg){Toast.makeText(activity,t(msg),Toast.LENGTH_LONG).show();}
  private void io(DriveTask task){
   GoogleDriveFiles.IO.execute(()->{
    try{task.work();}
    catch(Exception e){GoogleDriveFiles.error(activity.getApplicationContext(),e);
     activity.runOnUiThread(()->{
      if(activity.isFinishing()||activity.isDestroyed())return;
-     new AlertDialog.Builder(activity).setTitle("Google Drive")
-      .setMessage(e.getMessage()==null?"Er is iets misgegaan":e.getMessage())
-      .setPositiveButton("OK",null).show();refresh.run();
+     new AlertDialog.Builder(activity).setTitle(t("Google Drive"))
+      .setMessage(t(e.getMessage()==null?"Er is iets misgegaan":e.getMessage()))
+      .setPositiveButton(t("OK"),null).show();refresh.run();
     });}
   });
  }
@@ -92,8 +93,8 @@ final class GoogleDriveUi {
   activity.runOnUiThread(()->{
    if(activity.isFinishing()||activity.isDestroyed())return;
    refresh.run();
-   new AlertDialog.Builder(activity).setTitle("Google Drive")
-    .setMessage(msg).setPositiveButton("OK",null).show();
+   new AlertDialog.Builder(activity).setTitle(t("Google Drive"))
+    .setMessage(t(msg)).setPositiveButton(t("OK"),null).show();
   });
  }
 
@@ -103,12 +104,12 @@ final class GoogleDriveUi {
    activity.runOnUiThread(()->{
     if(activity.isFinishing()||activity.isDestroyed())return;
     refresh.run();
-    new AlertDialog.Builder(activity).setTitle("Google Drive verbonden")
-     .setMessage("ClashTimerHub heeft toegang tot zijn eigen JSON-bestanden in Mijn Drive. "+
-      list.size()+" back-upbestand(en) gevonden.\n\nMaak een nieuwe back-up of kies een bestaand bestand.")
-     .setPositiveButton("Nieuwe back-up",(d,w)->create())
-     .setNeutralButton("Bestand kiezen",(d,w)->chooseForAuto())
-     .setNegativeButton("Sluiten",null).show();
+    new AlertDialog.Builder(activity).setTitle(t("Google Drive verbonden"))
+     .setMessage(t("ClashTimerHub heeft toegang tot zijn eigen JSON-bestanden in Mijn Drive. "+
+      list.size()+" back-upbestand(en) gevonden.\n\nMaak een nieuwe back-up of kies een bestaand bestand."))
+     .setPositiveButton(t("Nieuwe back-up"),(d,w)->create())
+     .setNeutralButton(t("Bestand kiezen"),(d,w)->chooseForAuto())
+     .setNegativeButton(t("Sluiten"),null).show();
    });
   }));
  }
@@ -120,10 +121,10 @@ final class GoogleDriveUi {
   int pad=(int)(18*activity.getResources().getDisplayMetrics().density);
   android.widget.LinearLayout wrapper=new android.widget.LinearLayout(activity);
   wrapper.setPadding(pad,0,pad,0);wrapper.addView(field);
-  new AlertDialog.Builder(activity).setTitle("Nieuwe back-up in Mijn Drive")
-   .setMessage("Maak een gewoon JSON-bestand. Dit is zichtbaar in je Google Drive.")
+  new AlertDialog.Builder(activity).setTitle(t("Nieuwe back-up in Mijn Drive"))
+   .setMessage(t("Maak een gewoon JSON-bestand. Dit is zichtbaar in je Google Drive."))
    .setView(wrapper)
-   .setPositiveButton("Opslaan",(d,w)->{
+   .setPositiveButton(t("Opslaan"),(d,w)->{
     final String name=field.getText().toString().trim();
     authorize(token->io(()->{
      JSONObject payload=DriveBackupManager.buildPayload(activity.getApplicationContext());
@@ -134,19 +135,19 @@ final class GoogleDriveUi {
      GoogleDriveFiles.success(activity,file);
      done(file.name+" is opgeslagen in Mijn Drive.\n\nJe kunt dit bestand bij volgende back-ups vervangen.");
     }));
-   }).setNegativeButton("Annuleren",null).show();
+   }).setNegativeButton(t("Annuleren"),null).show();
  }
 
  void overwriteSelected(){
   String fileId=GoogleDriveFiles.selectedId(activity);
   if(fileId.isEmpty()){chooseToOverwrite();return;}
   String fileName=GoogleDriveFiles.selectedName(activity);
-  new AlertDialog.Builder(activity).setTitle("Bestaande back-up vervangen?")
-   .setMessage("Het huidige bestand '"+fileName+"' in Mijn Drive wordt vervangen door de nieuwste gegevens. "+
-    "Je bestaande ClashTimerHub-app en timers blijven staan.")
-   .setPositiveButton("Vervangen",(d,w)->overwrite(fileId,fileName))
-   .setNeutralButton("Ander bestand",(d,w)->chooseToOverwrite())
-   .setNegativeButton("Annuleren",null).show();
+  new AlertDialog.Builder(activity).setTitle(t("Bestaande back-up vervangen?"))
+   .setMessage(t("Het huidige bestand '"+fileName+"' in Mijn Drive wordt vervangen door de nieuwste gegevens. "+
+    "Je bestaande ClashTimerHub-app en timers blijven staan."))
+   .setPositiveButton(t("Vervangen"),(d,w)->overwrite(fileId,fileName))
+   .setNeutralButton(t("Ander bestand"),(d,w)->chooseToOverwrite())
+   .setNegativeButton(t("Annuleren"),null).show();
  }
  private void overwrite(String id,String name){
   authorize(token->io(()->{
@@ -167,23 +168,23 @@ final class GoogleDriveUi {
    activity.runOnUiThread(()->{
     if(activity.isFinishing()||activity.isDestroyed())return;
     if(files.isEmpty()){
-     new AlertDialog.Builder(activity).setTitle("Geen Drive-back-ups gevonden")
-      .setMessage("Er zijn nog geen JSON-bestanden gevonden die ClashTimerHub via Google Drive mag beheren. "+
-       "Maak eerst een nieuwe back-up in Mijn Drive.")
-      .setPositiveButton("Nieuwe back-up",(d,w)->create())
-      .setNegativeButton("Sluiten",null).show();return;
+     new AlertDialog.Builder(activity).setTitle(t("Geen Drive-back-ups gevonden"))
+      .setMessage(t("Er zijn nog geen JSON-bestanden gevonden die ClashTimerHub via Google Drive mag beheren. "+
+       "Maak eerst een nieuwe back-up in Mijn Drive."))
+      .setPositiveButton(t("Nieuwe back-up"),(d,w)->create())
+      .setNegativeButton(t("Sluiten"),null).show();return;
     }
     String[] choices=new String[files.size()];
     for(int i=0;i<choices.length;i++)choices[i]=files.get(i).toString();
     String title=operation==1?"Welke back-up vervangen?":
      operation==2?"Welke back-up herstellen?":"Automatisch back-upbestand kiezen";
-    new AlertDialog.Builder(activity).setTitle(title).setItems(choices,(d,index)->{
+    new AlertDialog.Builder(activity).setTitle(t(title)).setItems(choices,(d,index)->{
      GoogleDriveFiles.FileItem file=files.get(index);
      if(operation==1){
-      new AlertDialog.Builder(activity).setTitle("Back-up vervangen?")
-       .setMessage(file.name+" wordt in Google Drive overschreven. Dit kan niet vanuit de app ongedaan worden gemaakt.")
-       .setPositiveButton("Vervangen",(dialog,which)->overwrite(file.id,file.name))
-       .setNegativeButton("Annuleren",null).show();
+      new AlertDialog.Builder(activity).setTitle(t("Back-up vervangen?"))
+       .setMessage(t(file.name+" wordt in Google Drive overschreven. Dit kan niet vanuit de app ongedaan worden gemaakt."))
+       .setPositiveButton(t("Vervangen"),(dialog,which)->overwrite(file.id,file.name))
+       .setNegativeButton(t("Annuleren"),null).show();
      }else if(operation==2){
       io(()->{
        String json=GoogleDriveFiles.download(token,file);
@@ -194,14 +195,14 @@ final class GoogleDriveUi {
      }else{
       GoogleDriveFiles.select(activity,file);
       refresh.run();
-      new AlertDialog.Builder(activity).setTitle("Back-upbestand geselecteerd")
-       .setMessage(file.name+" is geselecteerd. Wil je na iedere succesvolle Clash-synchronisatie "+
-        "automatisch naar dit bestand back-uppen?")
-       .setPositiveButton("Automatisch aan",(dialog,which)->{
+      new AlertDialog.Builder(activity).setTitle(t("Back-upbestand geselecteerd"))
+       .setMessage(t(file.name+" is geselecteerd. Wil je na iedere succesvolle Clash-synchronisatie "+
+        "automatisch naar dit bestand back-uppen?"))
+       .setPositiveButton(t("Automatisch aan"),(dialog,which)->{
         GoogleDriveFiles.auto(activity,true);refresh.run();
-       }).setNegativeButton("Handmatig",null).show();
+       }).setNegativeButton(t("Handmatig"),null).show();
      }
-    }).setNegativeButton("Annuleren",null).show();
+    }).setNegativeButton(t("Annuleren"),null).show();
    });
   }));
  }
@@ -214,9 +215,9 @@ final class GoogleDriveUi {
   toast(next?"Automatische Google Drive-back-up ingeschakeld":"Automatische Drive-back-up uitgeschakeld");
  }
  void disconnect(){
-  new AlertDialog.Builder(activity).setTitle("Google Drive ontkoppelen?")
-   .setMessage("ClashTimerHub verliest zijn Google Drive-toegang. De JSON-back-ups blijven in Mijn Drive staan.")
-   .setPositiveButton("Ontkoppelen",(d,w)->{
+  new AlertDialog.Builder(activity).setTitle(t("Google Drive ontkoppelen?"))
+   .setMessage(t("ClashTimerHub verliest zijn Google Drive-toegang. De JSON-back-ups blijven in Mijn Drive staan."))
+   .setPositiveButton(t("Ontkoppelen"),(d,w)->{
     GoogleDriveFiles.clear(activity);
     AppData.prefs(activity).edit().putBoolean("googleDriveAuthorized",false).apply();
     try{
@@ -226,7 +227,7 @@ final class GoogleDriveUi {
       .addOnFailureListener(e->toast("Toegang in Google-account mogelijk nog actief: "+e.getMessage()));
     }catch(Exception e){toast("Google-toegang intrekken via je Google-account: "+e.getMessage());}
     refresh.run();
-   }).setNegativeButton("Annuleren",null).show();
+   }).setNegativeButton(t("Annuleren"),null).show();
  }
  /** Best-effort background snapshot. If Google needs a consent screen, never interrupt Clash Sync. */
  static void afterSuccessfulSync(Context context){
