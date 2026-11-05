@@ -182,7 +182,8 @@ final class WidgetV7 {
   if(mode>=2&&mode<=6){
    int layout=mode==6?R.layout.widget_v7_five_line_row:
     mode==5?R.layout.widget_v7_three_line_row:
-    mode==4?R.layout.widget_v7_two_line_row:R.layout.widget_v7_wide_row;
+    mode==4?R.layout.widget_v7_two_line_row:
+    mode==3?R.layout.widget_v7_wide_row_compact:R.layout.widget_v7_wide_row;
    RemoteViews row=new RemoteViews(ctx.getPackageName(),layout);
    row.setInt(R.id.widget_account_root,"setBackgroundResource",rowTheme(background));
    row.setTextViewText(R.id.v7_wide_name,AppData.displayName(ctx,s.account));
@@ -281,10 +282,17 @@ final class WidgetV7 {
   // The full overview is always one horizontal line per account.
   // Extra helper data increases REQUIRED WIDTH, never row height.
   Columns columns=sharedColumns(ctx,ordered,now,fontSize);
-  int mode=2;
-  int rowHeight=24,reservedFooter=28,frame=8;
+  // The launcher reserves widget margins outside the content. A shorter row
+  // can fit an extra account without shrinking any text or changing columns.
+  // Use the standard 23dp + 1dp gap unless a compact 19dp + 1dp row
+  // actually makes one or more additional accounts visible.
+  int reservedFooter=28,frame=8;
   int available=Math.max(0,height-reservedFooter-frame);
-  int count=Math.min(ordered.size(),Math.max(1,available/rowHeight));
+  int normalCount=Math.min(ordered.size(),Math.max(1,available/24));
+  int compactCount=Math.min(ordered.size(),Math.max(1,available/20));
+  boolean compact=compactCount>normalCount;
+  int mode=compact?3:2;
+  int count=compact?compactCount:normalCount;
   RemoteViews w=new RemoteViews(ctx.getPackageName(),R.layout.widget_v7_multi);
   w.setInt(R.id.v7_multi_root,"setBackgroundResource",background==1?R.drawable.widget_background_dark:
     background==2?R.drawable.widget_background_transparent:R.drawable.widget_background);
