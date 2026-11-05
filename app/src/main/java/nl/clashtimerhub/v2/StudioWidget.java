@@ -119,7 +119,7 @@ public final class StudioWidget extends AppWidgetProvider {
  }
  static String fieldValue(Context ctx,Status s,String key,long now){
   switch(key){
-   case "builders":return s.ready+"/"+(s.ready+s.active)+" ✓";
+   case "builders":return s.ready+"✓  "+s.active+"⚒";
    case "next":return duration(s.builder,now);
    case "lab":return s.lab==Long.MAX_VALUE?(AppData.isMaxed(ctx,s.key,"Laboratorium")?"✓":"—"):duration(s.lab,now);
    case "pets":return s.pet==Long.MAX_VALUE?(AppData.isMaxed(ctx,s.key,"Pets")?"✓":"—"):duration(s.pet,now);
