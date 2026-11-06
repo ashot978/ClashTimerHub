@@ -461,6 +461,18 @@ final class I18n {
   p.put("Clash-instellingen openen · Data Export → Copy","Open Clash settings · Data Export → Copy");
   p.put("Open Clash zelf: Profiel → Instellingen → Meer instellingen","Open Clash manually: Profile → Settings → More Settings");
   p.put("Actief · tik = sync · dubbel tik = export","On · tap = sync · double tap = export");
+  p.put("Eerste volledige synchronisatie","First complete sync");
+  p.put("Synchronisatie gelukt","Sync successful");
+  p.put("upgrades klaar","upgrades ready");
+  p.put("Upgrade overzicht","Upgrade overview");
+  p.put("Geen wijzigingen met vorige sync","No changes since last sync");
+  p.put("De scanner kan het upgrade-menu niet herkennen","The scanner cannot recognize the upgrade menu");
+  // Translate previously mixed-language settings and UI feedback.
+  p.put("Zwevende Sync-knop","Floating Sync button");
+  p.put("All Timers, mini-account, account of Sync","All Timers, mini-account, account or Sync");
+  p.put("Kan de APK-download niet controleren: ","Cannot verify APK download: ");
+  p.put("De scanner kan het upgrade-menu niet betrouwbaar herkennen. Controleer of het juiste Clash-menu zichtbaar is. Scan alleen verder als dit klopt.","The scanner cannot reliably recognize the upgrade menu. Check that the correct Clash menu is visible. Only continue scanning if it is.");
+  p.put("Controleer deze tijd","Check this time");
   ORDERED.addAll(EN.entrySet());
   ORDERED.sort((a,b)->Integer.compare(b.getKey().length(),a.getKey().length()));
  }

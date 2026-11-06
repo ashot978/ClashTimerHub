@@ -29,7 +29,7 @@
   android:paddingLeft="2dp" android:paddingRight="5dp">
   <TextView android:id="@+id/all_slot_0_icon" android:layout_width="13dp"
    android:layout_height="match_parent" android:gravity="center_vertical"
-   android:text="🧙" android:textColor="#D6BCEA" android:textSize="9sp"
+   android:text="⚗" android:textColor="#D6BCEA" android:textSize="9sp"
    android:includeFontPadding="false"/>
   <Chronometer android:id="@+id/all_slot_0_clock" android:layout_width="55dp"
    android:layout_height="match_parent" android:gravity="left|center_vertical"
@@ -52,7 +52,7 @@
   android:paddingLeft="9dp" android:paddingRight="5dp">
   <TextView android:id="@+id/all_slot_1_icon" android:layout_width="13dp"
    android:layout_height="match_parent" android:gravity="center_vertical"
-   android:text="🧙" android:textColor="#D6BCEA" android:textSize="9sp"
+   android:text="⚗" android:textColor="#D6BCEA" android:textSize="9sp"
    android:includeFontPadding="false"/>
   <Chronometer android:id="@+id/all_slot_1_clock" android:layout_width="55dp"
    android:layout_height="match_parent" android:gravity="left|center_vertical"
@@ -75,7 +75,7 @@
   android:paddingLeft="9dp" android:paddingRight="5dp">
   <TextView android:id="@+id/all_slot_2_icon" android:layout_width="13dp"
    android:layout_height="match_parent" android:gravity="center_vertical"
-   android:text="🧙" android:textColor="#D6BCEA" android:textSize="9sp"
+   android:text="⚗" android:textColor="#D6BCEA" android:textSize="9sp"
    android:includeFontPadding="false"/>
   <Chronometer android:id="@+id/all_slot_2_clock" android:layout_width="55dp"
    android:layout_height="match_parent" android:gravity="left|center_vertical"

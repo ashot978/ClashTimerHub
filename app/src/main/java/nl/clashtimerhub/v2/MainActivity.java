@@ -391,7 +391,7 @@ public final class MainActivity extends Activity {
   LinearLayout language=settingsSection(left,"🌐  TAAL","Kies je voorkeurstaal");
   settingsItem(language,I18n.flag(this),"Taal",I18n.flag(this)+"  "+I18n.label(this),()->chooseLanguage());
   LinearLayout sync=settingsSection(left,"↻  SYNCHRONISATIE","Accounts bijwerken zonder Clash te verlaten");
-  settingsItem(sync,"⚔","Zwevende Sync-knop",getPreferences(0).getBoolean("floatingEnabled",false)?"Actief · tik = sync · dubbel tik = export":"Uit · tik om in te schakelen",()->{toggleFloatingSync();draw();});
+  settingsItem(sync,WidgetV7.LAB_ICON,"Zwevende Sync-knop",getPreferences(0).getBoolean("floatingEnabled",false)?"Actief · tik = sync · dubbel tik = export":"Uit · tik om in te schakelen",()->{toggleFloatingSync();draw();});
   settingsItem(sync,"▤","Synchroniseer vanaf klembord","Importeer een gekopieerde Clash-export",()->importClipboard());
   LinearLayout notifications=settingsSection(left,"♧  MELDINGEN","Upgrade-alarmen en tests");
   settingsItem(notifications,"♧","Meldingen instellen","Gereedmelding en waarschuwingen",()->notificationSettings());
@@ -405,10 +405,6 @@ public final class MainActivity extends Activity {
   });
   LinearLayout widget=settingsSection(right,"▦  HOMESCREENWIDGET","Toon standaard al je accounts");
   settingsItem(widget,"⚙","Widget instellen","All Timers, mini-account, account of Sync",()->showWidgetSettings());
-   settingsItem(widget,"⚒","Builder Potions","Boosts toevoegen en precieze tijd instellen",()->
-    startActivity(new Intent(this,BuilderBoostEditorActivity.class).putExtra("overview",true)));
-   settingsItem(widget,"🧙","Research Potions","Boosts toevoegen en precieze tijd instellen",()->
-    startActivity(new Intent(this,ResearchBoostEditorActivity.class).putExtra("overview",true)));
   LinearLayout players=settingsSection(right,"♙  ACCOUNTS","Geef je accounts herkenbare namen");
   settingsItem(players,"✎","Accountnamen aanpassen","Verander de naam zonder de player tag te wijzigen",()->renameAccount());
   LinearLayout releases=settingsSection(right,"↓  APP-UPDATES","Versie en GitHub-builds");
@@ -751,7 +747,7 @@ public final class MainActivity extends Activity {
     });
    }
   for(String cat:categories){
-   TextView section=label(("Bouwers".equals(cat)?"⚒  ":"Laboratorium".equals(cat)?"🧙  ":"🐾  ")+cat.toUpperCase(java.util.Locale.ROOT),14);
+   TextView section=label(("Bouwers".equals(cat)?"⚒  ":"Laboratorium".equals(cat)?"⚗  ":"🐾  ")+cat.toUpperCase(java.util.Locale.ROOT),14);
    section.setTextColor(0xffd9b8ff);section.setTypeface(null,android.graphics.Typeface.BOLD);detailPanel.addView(section);
    ArrayList<JSONObject> list=new ArrayList<>();
    list.addAll(effectiveList(ac,cat,System.currentTimeMillis()));
@@ -1292,7 +1288,7 @@ public final class MainActivity extends Activity {
     }
     String labLabel=lab>0?String.valueOf(lab):AppData.isMaxed(this,ac,"Laboratorium")?"✓":"—";
     String petLabel=pets>0?String.valueOf(pets):AppData.isMaxed(this,ac,"Pets")?"✓":"—";
-    TextView detail=label(itemName+"\n⚒ "+busy+" · 🧙 "+labLabel+" · 🐾 "+petLabel,12);
+    TextView detail=label(itemName+"\n⚒ "+busy+" · ⚗ "+labLabel+" · 🐾 "+petLabel,12);
    detail.setTextColor(0xffd4c5e4);detail.setMaxLines(2);
    detail.setEllipsize(android.text.TextUtils.TruncateAt.END);
    detail.setGravity(android.view.Gravity.TOP);detail.setPadding(dp(6),dp(3),dp(3),0);

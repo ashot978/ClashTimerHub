@@ -16,8 +16,8 @@ public final class FloatingSyncService extends Service {
  private View bubble;
  private WindowManager.LayoutParams params;
  private static final int CHANNEL_ID=11;
- // Same wizard glyph as the laboratory timers in the home-screen widgets.
- private static final String SYNC_WIZARD_ICON="🧙";
+ // Reuse the same laboratory glyph as the home-screen widgets.
+ private static final String SYNC_WIZARD_ICON=WidgetV7.LAB_ICON;
  private View dropTarget;
  private WindowManager.LayoutParams dropParams;
  private final Handler holdHandler=new Handler(Looper.getMainLooper());
@@ -284,12 +284,12 @@ public final class FloatingSyncService extends Service {
  private void showFeedback(String message,boolean success){
   clearFeedback();
   // Accept both real and literal newlines from older exports; never print \\n on screen.
-  String normalized=(message==null?"":message).replace("\\n","\n").trim();
+  String normalized=I18n.tr(this,(message==null?"":message).replace("\\n","\n").trim());
   String[] parts=normalized.split("\n",3);
   String first=parts.length>0?parts[0]:"",last=parts.length>1?parts[1]:"";
   int marker=first.indexOf(" ✓ ");
-  String title=success&&marker>0?"✓ "+first.substring(0,marker).trim():
-   success?"✓ Synchronisatie gelukt":"⚠ Synchronisatie mislukt";
+  String title=I18n.tr(this,success&&marker>0?"✓ "+first.substring(0,marker).trim():
+   success?"✓ Synchronisatie gelukt":"⚠ Synchronisatie mislukt");
   String details=success&&marker>0?first.substring(marker+3).trim():first;
   if(details.endsWith(")")){
    int open=details.indexOf(" (");
@@ -301,12 +301,12 @@ public final class FloatingSyncService extends Service {
   }
   LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
   card.setPadding(dp(12),dp(8),dp(12),dp(8));
-  // Match the widgets' standalone, normal-weight 10sp wizard glyph.
+  // Match the widgets' standalone, normal-weight 10sp laboratory glyph.
   // Keep it separate from the bold title for consistent emoji rendering.
   LinearLayout headingRow=new LinearLayout(this);
   headingRow.setOrientation(LinearLayout.HORIZONTAL);
   headingRow.setGravity(Gravity.CENTER_VERTICAL);
-  TextView wizard=new TextView(this);wizard.setText("🧙");wizard.setTextSize(10);
+  TextView wizard=new TextView(this);wizard.setText(SYNC_WIZARD_ICON);wizard.setTextSize(10);
   wizard.setTextColor(0xffd6bcea);
   LinearLayout.LayoutParams wizardParams=new LinearLayout.LayoutParams(
    WindowManager.LayoutParams.WRAP_CONTENT,WindowManager.LayoutParams.WRAP_CONTENT);
@@ -361,7 +361,7 @@ public final class FloatingSyncService extends Service {
  private void flashBubble(boolean success){
   if(!(bubble instanceof TextView))return;
   TextView text=(TextView)bubble;
-  // Keep the wizard visible even during a success or error flash.
+  // Keep the laboratory icon visible even during a success or error flash.
   GradientDrawable shape=(GradientDrawable)text.getBackground();
   shape.setColor(success?0xff267c57:0xffa33b53);
   text.postDelayed(()->{

@@ -13,7 +13,7 @@
   android:gravity="center" android:singleLine="true" android:includeFontPadding="false"/>
  <LinearLayout android:id="@+id/v7_wide_lab_group" android:layout_width="44dp" android:layout_height="wrap_content" android:gravity="center_vertical">
   <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-   android:text="🧙" android:textSize="8sp" android:textColor="#D6BCEA" android:includeFontPadding="false"/>
+   android:text="⚗" android:textSize="8sp" android:textColor="#D6BCEA" android:includeFontPadding="false"/>
   <Chronometer android:id="@+id/v7_wide_lab_timer" android:layout_width="wrap_content"
    android:layout_height="wrap_content" android:textSize="8sp" android:textColor="#D6BCEA"
    android:singleLine="true" android:includeFontPadding="false"/>

@@ -160,7 +160,7 @@ public final class QuickSyncImporter {
    else if("Laboratorium".equals(cat))laboratory++;
    else if("Pets".equals(cat))pets++;
   }
-  String status=AppData.displayName(context,account)+" ✓ "+parsed.length()+" timers (⚒ "+builders+" · ⚗ "+laboratory+" · 🐾 "+pets+")";
+  String status=AppData.displayName(context,account)+" ✓ "+parsed.length()+" timers (⚒ "+builders+" · "+WidgetV7.LAB_ICON+" "+laboratory+" · 🐾 "+pets+")";
   if(previous.isEmpty())status+="\nEerste volledige synchronisatie";
   else if(differences==0)status+="\nGeen verschillen met vorige sync";
   else status+="\nWijzigingen sinds vorige sync gevonden";
