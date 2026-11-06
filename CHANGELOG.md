@@ -1,5 +1,20 @@
 # ClashTimerHub release notes
 
+## MAX-vinkjes terug en uniforme kleuren/tijdvolgorde — 6 november 2026
+
+### NL
+- De groene ✓ verschijnt alleen voor expliciet handmatig als MAX aangevinkte bouwers-, laboratorium- of petcategorieën, op basis van AppData.isMaxed, zoals in de oorspronkelijke multi-accountwidget.
+- Geen actieve timer zonder MAX geeft —; een door boost voorspelde voltooiing die nog moet worden gesynchroniseerd geeft ! / Klaar en is dus niet hetzelfde als MAX.
+- Uniforme kleuren: normale aftelduur goud, normale eindkloktijd en categorie-icoon lavendel, boosted aftelling én eindkloktijd groen, MAX-vinkje groen.
+- Volgorde altijd eerst aftelling, daarna eindkloktijd; ook in de lijst met alle individuele upgrades (aftelling op regel 1, eindklok op regel 2 na de boostindicator).
+- Geen ongeteste Pet Potion-gegevens ingelezen. Originele timers en meldingen behouden.
+
+### EN
+- Restore user-checked MAX categories as green ticks, distinct from idle and boosted-ready, reusing AppData.isMaxed for builders, lab and pets.
+- Unified gold countdown, muted lavender end clock/icon, green boosted countdown+finish and green MAX state.
+- Put remaining duration before actual finish time everywhere, including individual upgrade rows.
+- Do not guess Pet Potion values; keep original alarms and accounts intact.
+
 ## Compacte All Timers-widget zonder lege regels — 6 november 2026
 
 ### NL

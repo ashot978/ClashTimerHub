@@ -16,7 +16,10 @@ public final class AllTimersTestService extends RemoteViewsService {
   return new Factory(getApplicationContext(),id);
  }
  private static final class Factory implements RemoteViewsFactory {
-  private static final int GOLD=0xffffd783,GREEN=0xff8be3ad,LAVENDER=0xffd6bcea;
+  // Timer palette: countdowns GOLD, actual finish clocks LAVENDER,
+  // boosted countdowns and finish clocks GREEN. MAX ticks only when set.
+  private static final int GOLD=0xffffd783,GREEN=0xff8be3ad,
+   LAVENDER=0xffcbb5d9,ICON=0xffd6bcea;
   private final Context ctx;
   private final int widgetId;
   private final ArrayList<AllTimersTestData.Account> accounts=new ArrayList<>();
@@ -55,21 +58,28 @@ public final class AllTimersTestService extends RemoteViewsService {
    return itemView(entries.get(pos-accounts.size()-1));
   }
   private void clock(RemoteViews rv,int clock,int idle,int end,int marker,
-   long finish,int ready,boolean boosted,String normalIcon,int normalColor,long now){
+   long finish,int ready,boolean maxed,boolean boosted,String normalIcon,long now){
    boolean active=finish!=Long.MAX_VALUE&&finish>now;
    rv.setViewVisibility(clock,active?View.VISIBLE:View.GONE);
    rv.setViewVisibility(idle,active?View.GONE:View.VISIBLE);
-   rv.setTextViewText(idle,ready>0?"✓":"—");
+   // The original checkmark means a user-checked MAX category.
+   boolean checkedMax=!active&&maxed;
+   boolean needsSync=!active&&!maxed&&ready>0;
+   rv.setTextViewText(idle,checkedMax?"✓":needsSync?"!":"—");
    if(active){
     rv.setChronometer(clock,SystemClock.elapsedRealtime()+finish-now,null,true);
     rv.setChronometerCountDown(clock,true);
    }
-   rv.setTextViewText(end,active?(wide?AllTimersTestData.endTime(ctx,finish,now):
-    AllTimersTestData.compactEnd(ctx,finish,now)):ready>0?"✓":"—");
-   rv.setTextViewText(marker,boosted?"⚡":normalIcon);
-   int color=boosted?GREEN:normalColor;
-   rv.setTextColor(clock,color);rv.setTextColor(end,ready>0?GREEN:color);
-   rv.setTextColor(marker,color);rv.setTextColor(idle,ready>0?GREEN:color);
+   rv.setTextViewText(end,active?
+    (wide?AllTimersTestData.endTime(ctx,finish,now):
+     AllTimersTestData.compactEnd(ctx,finish,now)):
+    checkedMax?"MAX":needsSync?(I18n.english(ctx)?"Ready":"Klaar"):"—");
+   rv.setTextViewText(marker,active&&boosted?"⚡":normalIcon);
+   rv.setTextColor(clock,boosted?GREEN:GOLD);
+   rv.setTextColor(end,checkedMax?GREEN:needsSync?GOLD:
+    active&&boosted?GREEN:LAVENDER);
+   rv.setTextColor(marker,active&&boosted?GREEN:ICON);
+   rv.setTextColor(idle,checkedMax?GREEN:needsSync?GOLD:LAVENDER);
   }
   private RemoteViews accountView(AllTimersTestData.Account s){
    long now=System.currentTimeMillis();
@@ -82,13 +92,13 @@ public final class AllTimersTestService extends RemoteViewsService {
    rv.setTextViewText(R.id.all_account_helpers,s.helpers.isEmpty()?"":"🤝 "+s.helpers);
    clock(rv,R.id.all_account_builder_clock,R.id.all_account_builder_idle,
     R.id.all_account_builder_end,R.id.all_account_builder_icon,
-    s.builderAt,s.ready,s.builderBoost,"⚒",GOLD,now);
+    s.builderAt,s.ready,s.builderMax,s.builderBoost,"⚒",now);
    clock(rv,R.id.all_account_lab_clock,R.id.all_account_lab_idle,
     R.id.all_account_lab_end,R.id.all_account_lab_icon,
-    s.labAt,s.labReady,s.labBoost,"🧙",LAVENDER,now);
+    s.labAt,s.labReady,s.labMax,s.labBoost,"🧙",now);
    clock(rv,R.id.all_account_pet_clock,R.id.all_account_pet_idle,
     R.id.all_account_pet_end,R.id.all_account_pet_icon,
-    s.petAt,s.petReady,false,"🐾",LAVENDER,now);
+    s.petAt,s.petReady,s.petMax,false,"🐾",now);
    rv.setOnClickFillInIntent(R.id.all_account_row,new Intent().putExtra("account",s.key));
    return rv;
   }
@@ -109,7 +119,7 @@ public final class AllTimersTestService extends RemoteViewsService {
    rv.setTextViewText(R.id.all_timer_boost,item.boosted?
     "⚡ "+("Bouwers".equals(item.category)?"10× ":"24× ")+AllTimersTestData.saved(ctx,item.saved):
     (I18n.english(ctx)?"Normal":"Normaal"));
-   rv.setTextColor(R.id.all_timer_end,item.boosted?GREEN:GOLD);
+   rv.setTextColor(R.id.all_timer_end,item.boosted?GREEN:LAVENDER);
    rv.setTextColor(R.id.all_timer_clock,item.boosted?GREEN:GOLD);
    rv.setTextColor(R.id.all_timer_boost,item.boosted?GREEN:LAVENDER);
    rv.setOnClickFillInIntent(R.id.all_timer_row,new Intent().putExtra("account",item.account));

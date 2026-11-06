@@ -26,7 +26,7 @@ final class AllTimersTestData {
   String key,helpers="";
   int builders,ready,lab,labReady,pets,petReady;
   long builderAt=Long.MAX_VALUE,labAt=Long.MAX_VALUE,petAt=Long.MAX_VALUE;
-  boolean builderBoost,labBoost;
+  boolean builderBoost,labBoost,builderMax,labMax,petMax;
   Account(String key){this.key=key;}
  }
  static final class Snapshot {
@@ -54,11 +54,17 @@ final class AllTimersTestData {
    for(String key:WidgetV7.boostAccountOrder(ctx)){
     if(accounts.contains(key)&&!byAccount.containsKey(key)){
      Account a=new Account(key);a.helpers=HelperTracker.compact(ctx,key,now);
+    a.builderMax=AppData.isMaxed(ctx,key,"Bouwers");
+    a.labMax=AppData.isMaxed(ctx,key,"Laboratorium");
+    a.petMax=AppData.isMaxed(ctx,key,"Pets");
      byAccount.put(key,a);result.overview.add(a);
     }
    }
    for(String key:accounts)if(!byAccount.containsKey(key)){
     Account a=new Account(key);a.helpers=HelperTracker.compact(ctx,key,now);
+    a.builderMax=AppData.isMaxed(ctx,key,"Bouwers");
+    a.labMax=AppData.isMaxed(ctx,key,"Laboratorium");
+    a.petMax=AppData.isMaxed(ctx,key,"Pets");
     byAccount.put(key,a);result.overview.add(a);
    }
    HashMap<String,BuilderPotionTracker.Snapshot> builder=new HashMap<>();
