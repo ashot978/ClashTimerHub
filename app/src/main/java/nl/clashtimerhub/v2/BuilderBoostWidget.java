@@ -73,9 +73,9 @@ public final class BuilderBoostWidget extends AppWidgetProvider {
     RemoteViews rv=new RemoteViews(ctx.getPackageName(),R.layout.widget_builder_boost_multi);
     rv.removeAllViews(R.id.boost_widget_rows);
     Bundle options=mgr.getAppWidgetOptions(id);
-    int h=options==null?310:options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,310);
-    if(h<=0)h=310;
-    int maximum=Math.max(1,(h-62)/32);
+    int h=options==null?220:options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,220);
+    if(h<=0)h=220;
+    int maximum=Math.max(1,(h-47)/23);
     int shown=0;
     for(int i=0;i<accounts.size()&&shown<maximum;i++){
      String account=accounts.get(i);

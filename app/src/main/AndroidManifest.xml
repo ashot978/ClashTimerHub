@@ -20,7 +20,7 @@
 <receiver android:name=".BuilderAlarm" android:exported="false"/>
 <receiver android:name=".PotionCompletionAlarm" android:exported="false"/>
 <activity android:name=".ResearchBoostEditorActivity" android:exported="false" android:theme="@android:style/Theme.Material.NoActionBar"/>
-<receiver android:name=".ResearchBoostWidget" android:exported="true">
+<receiver android:name=".ResearchBoostWidget" android:exported="true" android:label="@string/widget_research_potions_label">
 <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter>
 <meta-data android:name="android.appwidget.provider" android:resource="@xml/research_boost_widget_info"/>
 </receiver>
@@ -29,7 +29,7 @@
 </receiver>
 <receiver android:name=".WidgetSyncReceiver" android:exported="false"/>
 <activity android:name=".BuilderBoostEditorActivity" android:exported="false" android:theme="@android:style/Theme.Material.NoActionBar"/>
-<receiver android:name=".BuilderBoostWidget" android:exported="true">
+<receiver android:name=".BuilderBoostWidget" android:exported="true" android:label="@string/widget_builder_potions_label">
 <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter>
 <meta-data android:name="android.appwidget.provider" android:resource="@xml/builder_boost_widget_info"/>
 </receiver>

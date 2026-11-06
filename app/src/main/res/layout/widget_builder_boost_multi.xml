@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
  android:id="@+id/boost_widget_root" android:layout_width="match_parent" android:layout_height="wrap_content"
  android:orientation="vertical" android:padding="3dp" android:background="@drawable/widget_background">
- <LinearLayout android:layout_width="match_parent" android:layout_height="26dp"
+ <LinearLayout android:layout_width="match_parent" android:layout_height="24dp"
   android:orientation="horizontal" android:gravity="center_vertical" android:background="@drawable/widget_row_background">
   <TextView android:id="@+id/boost_widget_title" android:layout_width="0dp" android:layout_weight="1"
    android:layout_height="match_parent" android:gravity="left|center_vertical" android:paddingLeft="8dp"
@@ -14,6 +14,6 @@
  </LinearLayout>
  <LinearLayout android:id="@+id/boost_widget_rows" android:layout_width="match_parent" android:layout_height="wrap_content"
   android:orientation="vertical"/>
- <TextView android:id="@+id/boost_widget_footer" android:layout_width="match_parent" android:layout_height="26dp"
-  android:gravity="center" android:textSize="10sp" android:textColor="#CBB5D9" android:text="⚡ Geschatte eindtijd · tik account voor details"/>
+ <TextView android:id="@+id/boost_widget_footer" android:layout_width="match_parent" android:layout_height="17dp"
+  android:gravity="center" android:textSize="9sp" android:textColor="#CBB5D9" android:text="⚡ Geschatte eindtijd · tik account voor details"/>
 </LinearLayout>

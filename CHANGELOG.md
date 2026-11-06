@@ -1,5 +1,22 @@
 # ClashTimerHub release notes
 
+## Compacte Potion-widgets met herkenbare namen — 6 november 2026
+
+### NL
+- Beide Potion-widgets zijn standaard 4×2 in plaats van 4×4; rijhoogte 22dp, compactere kop- en voettekst.
+- In de widgetkiezer verschijnen aparte labels: Builder Potions en Research Potions.
+- Beide hebben een eigen statische voorbeeldweergave met herkenbare Builder- of Research-titel en voorbeeldaccounts.
+- De Research-widget toont ook voor de eerste update de correcte 24×-titel.
+- Bestaande +1u-knoppen, eindtijdvoorspellingen, accountherkenning en boostmeldingen blijven werken.
+- Een al geplaatste widget kan handmatig verkleind of opnieuw geplaatst moeten worden; de launcher bewaart de toegewezen ruimte.
+
+### EN
+- Both Potion widgets now default to 4×2 rather than 4×4, with 22dp rows and shorter header/footer.
+- Widget picker displays distinct Builder Potions and Research Potions labels and previews.
+- Research widget now shows 24× in its initial layout as well as its live view.
+- Per-account +1h actions, forecasts and notifications are preserved.
+- Existing widgets may need to be resized or re-added because the launcher controls their reserved space.
+
 ## Research Potions, boostmeldingen en toetsenbordfix — 6 november 2026
 
 ### NL

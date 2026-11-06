@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
- android:id="@+id/boost_row" android:layout_width="match_parent" android:layout_height="31dp"
+ android:id="@+id/boost_row" android:layout_width="match_parent" android:layout_height="22dp"
  android:layout_marginBottom="1dp" android:orientation="horizontal" android:gravity="center_vertical"
  android:paddingLeft="3dp" android:paddingRight="3dp" android:background="@drawable/widget_row_background">
  <TextView android:id="@+id/boost_name" android:layout_width="0dp" android:layout_weight="1.2"
