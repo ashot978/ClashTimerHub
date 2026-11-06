@@ -38,6 +38,7 @@ public final class AllTimersTestService extends RemoteViewsService {
   private final ArrayList<AllTimersTestData.Account> accounts=new ArrayList<>();
   private String[] columns={AllTimersWidgetSettings.LAB,AllTimersWidgetSettings.PETS,AllTimersWidgetSettings.BUILDERS};
   private int layoutMode=1; // 0 narrow, 1 compact, 2 wide.
+  private boolean twoLines;
   Factory(Context c,int id){ctx=c;widgetId=id;}
   @Override public void onCreate(){onDataSetChanged();}
   @Override public void onDataSetChanged(){
@@ -46,6 +47,7 @@ public final class AllTimersTestService extends RemoteViewsService {
    accounts.addAll(AllTimersWidgetSettings.visibleAccounts(ctx,widgetId,snapshot));
    columns=AllTimersWidgetSettings.order(ctx,widgetId);
    layoutMode=AllTimersTestWidget.layoutMode(ctx,widgetId);
+   twoLines=AllTimersWidgetSettings.twoLines(ctx,widgetId);
   }
   @Override public void onDestroy(){accounts.clear();}
   @Override public int getCount(){return accounts.size();}
@@ -53,7 +55,10 @@ public final class AllTimersTestService extends RemoteViewsService {
    if(position<0||position>=accounts.size())return null;
    AllTimersTestData.Account a=accounts.get(position);
    long now=System.currentTimeMillis();
-   int layout=layoutMode==2?R.layout.widget_all_timers_account_wide:
+   // Two-line mode uses the compact row with account/status above all three timers.
+   // Single-line mode remains unchanged and keeps its original responsive layouts.
+   int layout=twoLines?R.layout.widget_all_timers_account_compact:
+    layoutMode==2?R.layout.widget_all_timers_account_wide:
     layoutMode==1?R.layout.widget_all_timers_account_compact:
      R.layout.widget_all_timers_account_narrow;
    RemoteViews rv=new RemoteViews(ctx.getPackageName(),layout);
