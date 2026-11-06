@@ -144,10 +144,23 @@ public final class FloatingSyncService extends Service {
    intent.setPackage("com.supercell.clashofclans");
    if(intent.resolveActivity(getPackageManager())==null)intent.setPackage(null);
    startActivity(intent);
-   showFeedback(I18n.tr(this,"Clash-instellingen openen · Data Export → Copy"),true);
+   // Launching a deep link is not a successful data sync. Briefly signal
+   // the shortcut on the bubble itself without covering Clash with a popup.
+   flashExportShortcut();
   }catch(Exception error){
-   showFeedback(I18n.tr(this,"Open Clash zelf: Profiel → Instellingen → Meer instellingen"),false);
+   android.util.Log.w("ClashTimerHub","Unable to open Clash settings",error);
+   Toast.makeText(this,I18n.tr(this,
+    "Open Clash zelf: Profiel → Instellingen → Meer instellingen"),
+    Toast.LENGTH_SHORT).show();
   }
+ }
+ private void flashExportShortcut(){
+  if(!(bubble instanceof TextView))return;
+  TextView text=(TextView)bubble;
+  text.setText("↗");
+  text.postDelayed(()->{
+   if(bubble==text)text.setText("⚔");
+  },800L);
  }
  private void showDropTarget(){
   if(dropTarget!=null||manager==null)return;

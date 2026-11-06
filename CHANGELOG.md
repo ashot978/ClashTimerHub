@@ -1,5 +1,19 @@
 # ClashTimerHub release notes
 
+## Dubbelklik subtiel; uniforme upgrade-meldingen — 6 november 2026
+
+### NL
+- Bij dubbelklikken op de zwevende Sync-knop opent het Clash-settings-deeplink direct, zonder grote groene overlay. De knop toont 0,8 seconde ↗ en herstelt daarna ⚔. Dit betekent niet dat er is gesynchroniseerd.
+- Wanneer de deep link niet geopend kan worden verschijnt alleen een korte standaard Android-toast met handmatige navigatie-instructie.
+- Notificaties voor normaal en Potion-versneld bouwen, research en pets tonen exact dezelfde standaardtekst. De extra tekst 'Potion-adjusted'/'Potion-versneld' is verwijderd.
+- De berekende eindtijd en exacte alarmplanning blijven inclusief Builder/Research/Pet Potion; één waarschuwing vóór voltooiing en één melding bij voltooiing volgens bestaande voorkeuren.
+- Widgets, accountgegevens, timers, sorting, gebaren en reguliere Sync-importfeedback blijven verder ongewijzigd.
+
+### EN
+- Double tapping the floating Sync button launches the Clash settings deep link without a large success popup. Show a tiny ↗ bubble indication for 800 ms, restoring ⚔ afterward. This is not a sync.
+- Show ordinary upgrade completion and early-warning notifications regardless of boosts; remove Potion-adjusted suffix, preserve effective boost-corrected scheduling.
+- Existing widgets, sorting, account data and normal sync feedback are preserved.
+
 ## Voltooide maar niet gesynchroniseerde upgrades weer bovenaan — 6 november 2026
 
 ### NL
