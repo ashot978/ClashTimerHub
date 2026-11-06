@@ -691,6 +691,23 @@ public final class MainActivity extends Activity {
   intent.putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_ID,id);
   startActivity(intent);
  }
+ private long effectiveFinish(JSONObject o){
+  return UpgradeForecast.finish(this,o.optString("account",""),
+   o.optString("category",""),o.optLong("finish",0L));
+ }
+ private boolean pendingOrActive(JSONObject o,long now){
+  long t=effectiveFinish(o);
+  return t>now||t>getPreferences(0).getLong("ack_"+o.optString("account",""),0L);
+ }
+ private ArrayList<JSONObject> effectiveList(String account,String category,long now){
+  ArrayList<JSONObject> list=new ArrayList<>();
+  for(JSONObject o:upgrades)
+   if((account==null||account.equals(o.optString("account")))&&
+    (category==null||category.equals(o.optString("category")))&&pendingOrActive(o,now))list.add(o);
+  Collections.sort(list,(a,b)->Long.compare(effectiveFinish(a),effectiveFinish(b)));
+  return list;
+ }
+ private boolean boosted(JSONObject o){return effectiveFinish(o)<o.optLong("finish",0L)-1000L;}
  private void renderSelectedDetail(){
   if(detailPanel==null)return;
   detailPanel.removeAllViews();
@@ -702,7 +719,7 @@ public final class MainActivity extends Activity {
   title.setTypeface(null,android.graphics.Typeface.BOLD);detailPanel.addView(title);
   int ready=completedCount(ac,System.currentTimeMillis());
   if(ready>0){
-   TextView done=label("✓  "+ready+" builders klaar",14);done.setTextColor(0xff8be3ad);detailPanel.addView(done);
+   TextView done=label("✓  "+ready+" upgrades klaar",14);done.setTextColor(0xff8be3ad);detailPanel.addView(done);
    Button checked=new Button(this);checked.setText(t("Markeer als gecontroleerd"));checked.setTextSize(12);checked.setAllCaps(false);
    checked.setOnClickListener(v->{acknowledgeAccount(ac);renderSelectedDetail();});detailPanel.addView(checked);
   }
@@ -737,8 +754,7 @@ public final class MainActivity extends Activity {
    TextView section=label(("Bouwers".equals(cat)?"⚒  ":"Laboratorium".equals(cat)?"🧙  ":"🐾  ")+cat.toUpperCase(java.util.Locale.ROOT),14);
    section.setTextColor(0xffd9b8ff);section.setTypeface(null,android.graphics.Typeface.BOLD);detailPanel.addView(section);
    ArrayList<JSONObject> list=new ArrayList<>();
-   for(JSONObject o:upgrades)if(ac.equals(o.optString("account"))&&cat.equals(o.optString("category"))&&o.optLong("finish")>System.currentTimeMillis())list.add(o);
-   Collections.sort(list,(a,b)->Long.compare(a.optLong("finish"),b.optLong("finish")));
+   list.addAll(effectiveList(ac,cat,System.currentTimeMillis()));
    if(list.isEmpty()){TextView none=label("Geen actieve upgrades",11);none.setTextColor(0xffa99bb8);detailPanel.addView(none);}
    else for(JSONObject o:list)addTimerRow(detailPanel,o,true,true);
   }
@@ -746,7 +762,7 @@ public final class MainActivity extends Activity {
  private void showAccountHelpers(LinearLayout parent,String account){
   HelperTracker.Snapshot snap=HelperTracker.forAccount(this,account);
   TextView heading=label(I18n.english(this)?"🤝  HELPERS":"🤝  HELPERS",14);
-  heading.setTextColor(0xff8be3ad);
+  heading.setTextColor(0xffffd783);
   heading.setTypeface(null,android.graphics.Typeface.BOLD);
   parent.addView(heading);
   if(snap==null||snap.items.isEmpty()){
@@ -766,7 +782,7 @@ public final class MainActivity extends Activity {
       (en?" · Working ":" · Bezig ")+HelperTracker.remaining(helper.workingUntil,now,en):"";
    TextView label=label(helper.name(en)+level+"\n"+remaining+work,12);
    label.setPadding(dp(8),dp(5),dp(8),dp(5));
-   label.setTextColor(helper.readyAt>=0&&helper.readyAt<=now?0xff8be3ad:0xffd4c5e4);
+   label.setTextColor(0xffffd783);
    parent.addView(label);
   }
   String updated=new java.text.SimpleDateFormat("dd-MM HH:mm",java.util.Locale.getDefault())
@@ -778,13 +794,12 @@ public final class MainActivity extends Activity {
   TextView header=label("◷  TIJDLIJN · ALLE ACCOUNTS",15);header.setTextColor(0xffffd783);parent.addView(header);
   ArrayList<JSONObject> pending=new ArrayList<>();
   long now=System.currentTimeMillis();
-  for(JSONObject o:upgrades)if(o.optLong("finish")>now)pending.add(o);
-  Collections.sort(pending,(x,y)->Long.compare(x.optLong("finish"),y.optLong("finish")));
+  pending.addAll(effectiveList(null,null,now));
   int shown=Math.min(6,pending.size());
   if(shown==0)parent.addView(label("Geen aankomende upgrades",12));
   for(int i=0;i<shown;i++){
    JSONObject o=pending.get(i);
-   long finish=o.optLong("finish");
+   long finish=effectiveFinish(o);
    String name=cleanName(o.optString("name")),who=o.optString("account");
    TextView row=label(finishAt(finish)+"  ·  "+displayAccount(who)+"\n"+name,12);
    row.setTextColor(0xfff1debd);row.setBackground(clashSurface(0xff2e2340,0xff53416a,10));
@@ -814,8 +829,7 @@ public final class MainActivity extends Activity {
   for(String cat:categories){
    TextView header=label(cat.toUpperCase(java.util.Locale.ROOT),16);header.setTextColor(0xffbba7f3);screenContent.addView(header);
    ArrayList<JSONObject> list=new ArrayList<>();
-   for(JSONObject o:upgrades)if(selectedAccount.equals(o.optString("account"))&&cat.equals(o.optString("category"))&&o.optLong("finish")>System.currentTimeMillis())list.add(o);
-   Collections.sort(list,(x,y)->Long.compare(x.optLong("finish"),y.optLong("finish")));
+   list.addAll(effectiveList(selectedAccount,cat,System.currentTimeMillis()));
    if(list.isEmpty())screenContent.addView(label("Geen actieve upgrades",12));
    for(JSONObject o:list)addTimerRow(screenContent,o,true);
   }
@@ -859,8 +873,7 @@ public final class MainActivity extends Activity {
    filterRow.addView(b,new LinearLayout.LayoutParams(0,dp(44),1));
   }
   ArrayList<JSONObject> list=new ArrayList<>();
-  for(JSONObject o:upgrades)if(o.optLong("finish")>System.currentTimeMillis()&&("Alles".equals(timelineFilter)||timelineFilter.equals(o.optString("category"))))list.add(o);
-  Collections.sort(list,(x,y)->Long.compare(x.optLong("finish"),y.optLong("finish")));
+  list.addAll(effectiveList(null,"Alles".equals(timelineFilter)?null:timelineFilter,System.currentTimeMillis()));
   if(list.isEmpty())screenContent.addView(label("Geen actieve upgrades voor dit filter.",14));
   for(JSONObject o:list)addTimerRow(screenContent,o,false);
  }
@@ -890,7 +903,11 @@ public final class MainActivity extends Activity {
    long finish=(Long)view.getTag();
    if(group.getChildCount()>1&&group.getChildAt(1) instanceof TextView)
     ((TextView)group.getChildAt(1)).setText(format(Math.max(0,(finish-now+999)/1000))+"  ·  "+finishAt(finish));
-   if(finish<=now)expired=true;
+   if(finish<=now){
+     if(group.getChildCount()>1&&group.getChildAt(1) instanceof TextView)
+      ((TextView)group.getChildAt(1)).setText(t("✓ Klaar · nog synchroniseren"));
+     group.setTag(null);
+    }
   }
   if(view instanceof android.view.ViewGroup){
    android.view.ViewGroup group=(android.view.ViewGroup)view;
@@ -914,7 +931,7 @@ public final class MainActivity extends Activity {
   addTimerRow(parent,o,editable,false);
  }
  private void addTimerRow(LinearLayout parent,JSONObject o,boolean editable,boolean showUpgradeIcon){
-  long finish=o.optLong("finish"),remain=Math.max(0,(finish-System.currentTimeMillis()+999)/1000);
+  long finish=effectiveFinish(o),remain=Math.max(0,(finish-System.currentTimeMillis()+999)/1000);
   LinearLayout card=new LinearLayout(this);card.setOrientation(1);card.setPadding(dp(10),dp(5),dp(10),dp(5));card.setBackground(shape(remain<=1800?0xff46351f:0xff30243e,12));card.setTag(finish);
   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(dp(2),dp(3),dp(2),dp(3));parent.addView(card,lp);
   String upgradeName=cleanName(o.optString("name"));
@@ -926,7 +943,10 @@ public final class MainActivity extends Activity {
    LinearLayout.LayoutParams nameParams=new LinearLayout.LayoutParams(0,-2,1f);nameParams.setMargins(dp(8),0,0,0);
    heading.addView(name,nameParams);card.addView(heading);
   }else card.addView(label((editable?"":displayAccount(o.optString("account"))+" · ")+upgradeName,14));
-  TextView time=label(format(remain)+"  ·  "+finishAt(finish),13);time.setTextColor(0xffffd88a);card.addView(time);
+  boolean done=finish<=System.currentTimeMillis();
+   TextView time=label(done?t("✓ Klaar · nog synchroniseren"):
+    format(remain)+"  ·  "+finishAt(finish),13);
+   time.setTextColor(done||boosted(o)?0xff8be3ad:0xffffd88a);card.addView(time);
   if(editable)card.setOnClickListener(v->editTimer(o));
   else card.setOnClickListener(v->{selectedAccount=o.optString("account");activeTab=0;draw();});
  }
@@ -1193,7 +1213,7 @@ public final class MainActivity extends Activity {
    return Long.compare(nextBuilder(a,now),nextBuilder(b,now));
   });
   int active=0,totalReady=0;
-  for(JSONObject o:upgrades)if("Bouwers".equals(o.optString("category"))&&o.optLong("finish")>now)active++;
+  for(JSONObject o:upgrades)if("Bouwers".equals(o.optString("category"))&&effectiveFinish(o)>now)active++;
   for(String ac:accounts)totalReady+=completedCount(ac,now);
   String last=getPreferences(0).getString("lastSyncSummary","");
   if(!last.isEmpty()){
@@ -1226,8 +1246,8 @@ public final class MainActivity extends Activity {
    index++;
    long soonest=nextBuilder(ac,now);
    JSONObject first=null;int busy=0;
-   for(JSONObject o:upgrades)if(ac.equals(o.optString("account"))&&"Bouwers".equals(o.optString("category"))&&o.optLong("finish")>now){
-    busy++;if(o.optLong("finish")==soonest)first=o;
+   for(JSONObject o:upgrades)if(ac.equals(o.optString("account"))&&"Bouwers".equals(o.optString("category"))&&effectiveFinish(o)>now){
+     busy++;if(effectiveFinish(o)==soonest)first=o;
    }
    int completed=completedCount(ac,now);
    boolean ready=completed>0,urgent=!ready&&soonest!=Long.MAX_VALUE&&soonest-now<=1800000L;
@@ -1244,7 +1264,7 @@ public final class MainActivity extends Activity {
    name.setEllipsize(android.text.TextUtils.TruncateAt.END);name.setPadding(dp(6),0,dp(3),0);
    card.addView(name,new LinearLayout.LayoutParams(-1,dp(34)));
 
-   String statusText=ready?(I18n.english(this)?completed+" BUILDERS READY":completed+" BOUWERS KLAAR"):"";
+   String statusText=ready?(I18n.english(this)?completed+" UPGRADES READY":completed+" UPGRADES KLAAR"):"";
    TextView status=label(statusText,10);status.setTextColor(0xff8be3ad);
    status.setSingleLine(true);status.setEllipsize(android.text.TextUtils.TruncateAt.END);
    status.setGravity(android.view.Gravity.CENTER_VERTICAL);status.setPadding(dp(6),0,0,0);
@@ -1266,7 +1286,7 @@ public final class MainActivity extends Activity {
 
    String itemName=first==null?"Geen actieve builder":"⚒  "+cleanName(first.optString("name"));
    int lab=0,pets=0;
-    for(JSONObject upgrade:upgrades)if(ac.equals(upgrade.optString("account"))&&upgrade.optLong("finish")>now){
+    for(JSONObject upgrade:upgrades)if(ac.equals(upgrade.optString("account"))&&effectiveFinish(upgrade)>now){
      if("Laboratorium".equals(upgrade.optString("category")))lab++;
      else if("Pets".equals(upgrade.optString("category")))pets++;
     }
@@ -1292,8 +1312,8 @@ public final class MainActivity extends Activity {
   long acknowledged=getPreferences(0).getLong("ack_"+ac,0L);
   int count=0;
   for(JSONObject o:upgrades){
-   long finish=o.optLong("finish");
-   if(ac.equals(o.optString("account"))&&"Bouwers".equals(o.optString("category"))&&finish>acknowledged&&finish<=now)count++;
+   long finish=effectiveFinish(o);
+    if(ac.equals(o.optString("account"))&&finish>acknowledged&&finish<=now)count++;
   }
   return count;
  }
@@ -1301,8 +1321,8 @@ public final class MainActivity extends Activity {
   long acknowledged=getPreferences(0).getLong("ack_"+ac,0L);
   long oldest=Long.MAX_VALUE;
   for(JSONObject o:upgrades){
-   long finish=o.optLong("finish");
-   if(ac.equals(o.optString("account"))&&finish>acknowledged&&finish<=now)oldest=Math.min(oldest,finish);
+   long finish=effectiveFinish(o);
+    if(ac.equals(o.optString("account"))&&finish>acknowledged&&finish<=now)oldest=Math.min(oldest,finish);
   }
   return oldest;
  }
@@ -1312,7 +1332,7 @@ public final class MainActivity extends Activity {
  }
  private long nextBuilder(String ac,long now){
   long min=Long.MAX_VALUE;
-  for(JSONObject o:upgrades)if(ac.equals(o.optString("account"))&&"Bouwers".equals(o.optString("category"))&&o.optLong("finish")>now)min=Math.min(min,o.optLong("finish"));
+  for(JSONObject o:upgrades)if(ac.equals(o.optString("account"))&&"Bouwers".equals(o.optString("category"))&&effectiveFinish(o)>now)min=Math.min(min,effectiveFinish(o));
   return min;
  }
  private void showAllNextBuilders(){
@@ -1322,7 +1342,7 @@ public final class MainActivity extends Activity {
    JSONObject earliest=null;long soonest=Long.MAX_VALUE;
    for(JSONObject o:upgrades){
     if(!ac.equals(o.optString("account"))||!"Bouwers".equals(o.optString("category")))continue;
-    long finish=o.optLong("finish");if(finish<soonest){soonest=finish;earliest=o;}
+    long finish=effectiveFinish(o);if(finish<soonest){soonest=finish;earliest=o;}
    }
    TextView line=label(displayAccount(ac)+"  ·  "+(earliest==null?"Geen builder bekend":cleanName(earliest.optString("name"))+"  ·  "+(soonest<=now?"Gereed":format((soonest-now+999)/1000))),16);
    line.setBackground(shape(0xff30243e,12));list.addView(line);
@@ -1385,9 +1405,9 @@ public final class MainActivity extends Activity {
   for(String ac:accounts){
    int builders=0,lab=0,pets=0;long soonest=Long.MAX_VALUE;String name="";
    for(JSONObject o:upgrades){
-    if(!ac.equals(o.optString("account"))||o.optLong("finish")<=now)continue;
+    if(!ac.equals(o.optString("account"))||effectiveFinish(o)<=now)continue;
     String type=o.optString("category");
-    if("Bouwers".equals(type)){builders++;if(o.optLong("finish")<soonest){soonest=o.optLong("finish");name=o.optString("name");}}
+    if("Bouwers".equals(type)){builders++;if(effectiveFinish(o)<soonest){soonest=effectiveFinish(o);name=o.optString("name");}}
     else if("Laboratorium".equals(type))lab++;
     else if("Pets".equals(type))pets++;
    }
@@ -1404,7 +1424,7 @@ public final class MainActivity extends Activity {
   LinearLayout form=new LinearLayout(this);form.setOrientation(1);form.setPadding(dp(16),dp(8),dp(16),0);
   EditText n=new EditText(this),t=new EditText(this);
   n.setSingleLine(true);n.setText(cleanName(o.optString("name")));n.setHint(t("Naam"));
-  t.setSingleLine(true);t.setHint(t("Bijv. 2d 5h"));long remaining=Math.max(0,(o.optLong("finish")-System.currentTimeMillis()+999)/1000);
+  t.setSingleLine(true);t.setHint(t("Bijv. 2d 5h"));long remaining=Math.max(0,(effectiveFinish(o)-System.currentTimeMillis()+999)/1000);
   t.setText(format(remaining));form.addView(n);form.addView(t);
   android.app.AlertDialog dialog=new android.app.AlertDialog.Builder(this).setTitle(t("Timer bewerken")).setView(form)
    .setPositiveButton(t("Opslaan"),null).setNeutralButton(t("Verwijderen"),(d,w)->confirmDelete(o))
