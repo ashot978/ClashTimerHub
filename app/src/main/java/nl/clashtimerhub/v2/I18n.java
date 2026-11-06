@@ -461,6 +461,12 @@ final class I18n {
   p.put("Clash-instellingen openen · Data Export → Copy","Open Clash settings · Data Export → Copy");
   p.put("Open Clash zelf: Profiel → Instellingen → Meer instellingen","Open Clash manually: Profile → Settings → More Settings");
   p.put("Actief · tik = sync · dubbel tik = export","On · tap = sync · double tap = export");
+  p.put("Eerste volledige synchronisatie","First complete sync");
+  p.put("Synchronisatie gelukt","Sync successful");
+  p.put("upgrades klaar","upgrades ready");
+  p.put("Upgrade overzicht","Upgrade overview");
+  p.put("Geen wijzigingen met vorige sync","No changes since last sync");
+  p.put("De scanner kan het upgrade-menu niet herkennen","The scanner cannot recognize the upgrade menu");
   // Translate previously mixed-language settings and UI feedback.
   p.put("Zwevende Sync-knop","Floating Sync button");
   p.put("All Timers, mini-account, account of Sync","All Timers, mini-account, account or Sync");
