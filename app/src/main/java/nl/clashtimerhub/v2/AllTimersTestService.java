@@ -21,7 +21,7 @@ public final class AllTimersTestService extends RemoteViewsService {
   private final int widgetId;
   private final ArrayList<AllTimersTestData.Account> accounts=new ArrayList<>();
   private final ArrayList<AllTimersTestData.Item> entries=new ArrayList<>();
-  private boolean wide=false;
+  private boolean wide=false,compact=true;
   Factory(Context c,int id){ctx=c;widgetId=id;}
   @Override public void onCreate(){onDataSetChanged();}
   @Override public void onDataSetChanged(){
@@ -38,7 +38,8 @@ public final class AllTimersTestService extends RemoteViewsService {
       AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,380);
     }
    }
-   wide=width>=730;
+   wide=width>=665;
+   compact=width>=325;
   }
   @Override public void onDestroy(){accounts.clear();entries.clear();}
   @Override public int getCount(){return accounts.size()+1+entries.size();}
@@ -63,7 +64,8 @@ public final class AllTimersTestService extends RemoteViewsService {
     rv.setChronometer(clock,SystemClock.elapsedRealtime()+finish-now,null,true);
     rv.setChronometerCountDown(clock,true);
    }
-   rv.setTextViewText(end,active?AllTimersTestData.endTime(ctx,finish,now):ready>0?"✓":"—");
+   rv.setTextViewText(end,active?(wide?AllTimersTestData.endTime(ctx,finish,now):
+    AllTimersTestData.compactEnd(ctx,finish,now)):ready>0?"✓":"—");
    rv.setTextViewText(marker,boosted?"⚡":normalIcon);
    int color=boosted?GREEN:normalColor;
    rv.setTextColor(clock,color);rv.setTextColor(end,ready>0?GREEN:color);
@@ -72,7 +74,9 @@ public final class AllTimersTestService extends RemoteViewsService {
   private RemoteViews accountView(AllTimersTestData.Account s){
    long now=System.currentTimeMillis();
    RemoteViews rv=new RemoteViews(ctx.getPackageName(),
-    wide?R.layout.widget_all_timers_account_wide:R.layout.widget_all_timers_account_compact);
+    wide?R.layout.widget_all_timers_account_wide:
+     compact?R.layout.widget_all_timers_account_compact:
+      R.layout.widget_all_timers_account_narrow);
    rv.setTextViewText(R.id.all_account_name,AppData.displayName(ctx,s.key));
    rv.setTextViewText(R.id.all_account_builders,s.ready+"✓ "+s.builders+"⚒");
    rv.setTextViewText(R.id.all_account_helpers,s.helpers.isEmpty()?"":"🤝 "+s.helpers);
@@ -112,7 +116,7 @@ public final class AllTimersTestService extends RemoteViewsService {
    return rv;
   }
   @Override public RemoteViews getLoadingView(){return null;}
-  @Override public int getViewTypeCount(){return 4;}
+  @Override public int getViewTypeCount(){return 5;}
   @Override public long getItemId(int pos){
    if(pos<0||pos>=getCount())return pos;
    if(pos<accounts.size())return ("account:"+accounts.get(pos).key).hashCode();

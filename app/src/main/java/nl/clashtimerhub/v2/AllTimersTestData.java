@@ -148,6 +148,19 @@ final class AllTimersTestData {
    return (I18n.english(ctx)?"Tmr ":"Mrg ")+hhmm;
   return new SimpleDateFormat("d MMM HH:mm",loc).format(new Date(millis));
  }
+ static String compactEnd(Context ctx,long millis,long now){
+  Locale loc=I18n.english(ctx)?Locale.UK:Locale.forLanguageTag("nl-NL");
+  Calendar current=Calendar.getInstance(),target=Calendar.getInstance();
+  current.setTimeInMillis(now);target.setTimeInMillis(millis);
+  String time=new SimpleDateFormat("HH:mm",loc).format(new Date(millis));
+  if(current.get(Calendar.YEAR)==target.get(Calendar.YEAR)&&
+   current.get(Calendar.DAY_OF_YEAR)==target.get(Calendar.DAY_OF_YEAR))return time;
+  current.add(Calendar.DAY_OF_YEAR,1);
+  if(current.get(Calendar.YEAR)==target.get(Calendar.YEAR)&&
+   current.get(Calendar.DAY_OF_YEAR)==target.get(Calendar.DAY_OF_YEAR))
+    return (I18n.english(ctx)?"Tmr ":"Mrg ")+time;
+  return new SimpleDateFormat("d/M HH:mm",loc).format(new Date(millis));
+ }
  static String saved(Context ctx,long duration){
   long minutes=Math.max(1,(duration+30000L)/60000L);
   String hour=I18n.english(ctx)?"h":"u";

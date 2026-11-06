@@ -1,5 +1,23 @@
 # ClashTimerHub release notes
 
+## Compacte All Timers-widget zonder lege regels — 6 november 2026
+
+### NL
+- Verwijder het onnodig hoge drieregels-overzicht op Samsung Fold: wanneer er minstens 325dp ruimte is gebruiken alle accounts nu precies 2 regels (naam + bouwers/helpers boven, drie timerparen met resterende tijd én eindkloktijd direct naast elkaar eronder).
+- De zeven accountregels gaan van 69dp naar 44dp: ongeveer 36% minder hoogte. De terugkerende '⚡ = boost'-legenda per account is verwijderd; bovenaan blijft de algemene legenda staan.
+- Vanaf 665dp gebruikt de widget één horizontale regel per account, met kleinere en strakkere kolommen. Alleen onder 325dp blijft de oorspronkelijke drieregels-indeling als veilige fallback.
+- Eindkloktijden blijven zichtbaar dankzij een kortere datumweergave zoals '9/11 23:55' in de compacte indeling.
+- Compactere standaardhoogte (4×4 in plaats van 4×5), betere widgetkiezer-preview en behoud van de bestaande scrollbare volledige timerlijst.
+- De originele multi-accountwidget, accountnamen, potionrekenwerk en normale meldingen blijven onaangetast.
+
+### EN
+- On Fold-sized widgets, reduce each account to just two dense lines: name/builder/helper state above, builder/lab/pet countdowns and finish clock times together below.
+- Reduce row height 69dp → 44dp (~36% less), eliminating the redundant per-account boost legend.
+- One row on wide widgets ≥665dp; retain a safe three-row fallback only below 325dp.
+- Compact calendar dates avoid clock-time truncation, e.g. 9/11 23:55.
+- Reduce default size to 4×4, update launcher preview and preserve the complete scrollable upgrade list.
+- Keep existing widgets, saved account state, potion forecasts and alarms unchanged.
+
 ## Multi-account widget met voorspelde eindkloktijden en visuele Potion-accenten — 6 november 2026
 
 ### NL
