@@ -42,7 +42,7 @@ final class UpgradeIcons {
 
  static FrameLayout view(Activity activity,JSONObject upgrade){
   String category=upgrade.optString("category","");
-  String name=upgrade.optString("name","");
+  String name=ClashNames.displayName(upgrade);
   String key=normalized(name);
   FrameLayout frame=new FrameLayout(activity);
   TextView placeholder=new TextView(activity);
@@ -91,6 +91,14 @@ final class UpgradeIcons {
   return key;
  }
  private static String path(String key,String category){
+  // Seasonal defence upgrades are exported as separate stat/module IDs.
+  // Their icons live under their parent defence in the asset repository.
+  if(key.startsWith("hot_candle"))return "buildings/seasonal-defense/hot_candle/level_1.webp";
+  if(key.startsWith("hero_hunter"))return "buildings/seasonal-defense/hero_hunter/level_1.webp";
+  if(key.startsWith("cake-a-pult")||key.startsWith("cake_a_pult"))return "buildings/seasonal-defense/cake-a-pult/level_1.webp";
+  if(key.equals("roaster"))return "buildings/seasonal-defense/roaster/level_1.webp";
+  if(key.equals("air_bombs"))return "buildings/seasonal-defense/air_bombs/level_1.webp";
+  if(key.equals("lava_launcher"))return "buildings/seasonal-defense/lava_launcher/level_1.webp";
   if(BUILDINGS.contains(key))return "buildings/home-village/"+key.replace("'","%27")+"/level_1.webp";
   if(TRAPS.contains(key))return "traps/home-village/"+key+"/level_1.webp";
   if(HEROES.contains(key))return "heroes/"+key+"/icon.webp";
