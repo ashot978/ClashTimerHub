@@ -26,7 +26,7 @@ public final class AllTimersConfigActivity extends Activity {
  private SharedPreferences prefs;
  private LinearLayout accountRows,columnRows;
  private RadioButton all,custom;
- private Spinner sorter;
+ private Spinner sorter,rowLines;
  private CheckBox helpers;
  private String tr(String nl,String en){return english?en:nl;}
  private int dp(int value){return (int)(value*getResources().getDisplayMetrics().density+.5f);}
@@ -89,6 +89,16 @@ public final class AllTimersConfigActivity extends Activity {
     new String[]{"Volgende bouwer (incl. boost)","Accountnaam (A–Z)","Eigen volgorde"}));
   sorter.setSelection(AllTimersWidgetSettings.sort(this,widgetId));
   content.addView(sorter,new LinearLayout.LayoutParams(-1,dp(50)));
+  heading(content,tr("Weergave per account","Account row layout"),
+   tr("Kies één of twee regels per account. De widget behoudt dezelfde afmetingen en je kunt door de accounts scrollen.",
+      "Choose one or two lines per account. The widget keeps its current size and the accounts remain scrollable."));
+  rowLines=new Spinner(this);
+  rowLines.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,
+   english?new String[]{"1 line per account","2 lines per account"}:
+    new String[]{"1 regel per account","2 regels per account"}));
+  rowLines.setSelection(AllTimersWidgetSettings.twoLines(this,widgetId)?
+   AllTimersWidgetSettings.TWO_LINES:AllTimersWidgetSettings.SINGLE_LINE);
+  content.addView(rowLines,new LinearLayout.LayoutParams(-1,dp(50)));
   heading(content,tr("Accounts","Accounts"),
    tr("Selecteer accounts of kies alle accounts. Iedere widget wordt apart bewaard.",
       "Select accounts or show all. Each widget saves settings independently."));
@@ -194,6 +204,7 @@ public final class AllTimersConfigActivity extends Activity {
   prefs.edit()
    .putString(AllTimersWidgetSettings.key("columns",widgetId),new JSONArray(columns).toString())
    .putInt(AllTimersWidgetSettings.key("sort",widgetId),sorter.getSelectedItemPosition())
+   .putInt(AllTimersWidgetSettings.key("rowLines",widgetId),rowLines.getSelectedItemPosition())
    .putBoolean(AllTimersWidgetSettings.key("all",widgetId),all.isChecked())
    .putString(AllTimersWidgetSettings.key("selected",widgetId),selectedAccounts.toString())
    .putString(AllTimersWidgetSettings.key("accountsOrder",widgetId),new JSONArray(manualAccounts).toString())
