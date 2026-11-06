@@ -31,10 +31,7 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
     java.util.ArrayList<AllTimersTestData.Account> shown=
      AllTimersWidgetSettings.visibleAccounts(ctx,id,snapshot);
     rv.setTextViewText(R.id.all_timers_summary,
-     shown.size()+" "+(I18n.english(ctx)?"accounts":"accounts")+
-     " · "+AllTimersWidgetSettings.boostedCount(snapshot,shown)+" "+
-     (I18n.english(ctx)?"boosted":"versneld")+
-     " · "+(I18n.english(ctx)?"green = potion":"groen = potion"));
+     shown.size()+" accounts · "+(I18n.english(ctx)?"green = boosted":"groen = versneld"));
     Intent service=new Intent(ctx,AllTimersTestService.class);
     service.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,id);
     service.setData(Uri.parse("clashtimerhub://all-timers/"+id));
