@@ -17,7 +17,7 @@
  <LinearLayout android:id="@+id/v7_wide_lab_group" android:layout_width="match_parent"
   android:layout_height="20dp" android:orientation="horizontal" android:gravity="start|center_vertical">
   <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-   android:text="⚗ " android:textSize="10sp" android:textColor="#D6BCEA"/>
+   android:text="🧙 " android:textSize="10sp" android:textColor="#D6BCEA"/>
   <Chronometer android:id="@+id/v7_wide_lab_timer" android:layout_width="wrap_content"
    android:layout_height="wrap_content" android:textSize="10sp" android:textColor="#D6BCEA"
    android:singleLine="true" android:ellipsize="none"/>

@@ -57,7 +57,7 @@ public final class AllTimersConfigActivity extends Activity {
   TextView message=text(detail,13,MUTED);message.setPadding(0,0,0,dp(8));parent.addView(message);
  }
  private String columnLabel(String name){
-  if(AllTimersWidgetSettings.LAB.equals(name))return tr("⚗ Onderzoek","⚗ Research");
+  if(AllTimersWidgetSettings.LAB.equals(name))return tr("🧙 Onderzoek","🧙 Research");
   if(AllTimersWidgetSettings.PETS.equals(name))return tr("🐾 Pets","🐾 Pets");
   return tr("⚒ Bouwers","⚒ Builders");
  }
