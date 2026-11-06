@@ -13,6 +13,7 @@ import java.util.List;
 final class AllTimersWidgetSettings {
  static final String LAB="lab",PETS="pets",BUILDERS="builders";
  static final int NEXT_BUILDER=0,NAME=1,MANUAL=2;
+ static final int SINGLE_LINE=0,TWO_LINES=1;
  private static final String PREFS="WidgetPreferences";
  private static final String[] DEFAULT={LAB,PETS,BUILDERS};
  private AllTimersWidgetSettings(){}
@@ -34,6 +35,9 @@ final class AllTimersWidgetSettings {
  static int sort(Context ctx,int id){
   int mode=preferences(ctx).getInt(key("sort",id),NEXT_BUILDER);
   return mode>=NEXT_BUILDER&&mode<=MANUAL?mode:NEXT_BUILDER;
+ }
+ static boolean twoLines(Context ctx,int id){
+  return preferences(ctx).getInt(key("rowLines",id),SINGLE_LINE)==TWO_LINES;
  }
  static boolean all(Context ctx,int id){return preferences(ctx).getBoolean(key("all",id),true);}
  static ArrayList<String> manualAccounts(Context ctx,int id,List<String> current){
@@ -104,7 +108,7 @@ final class AllTimersWidgetSettings {
  }
  static void delete(Context ctx,int id){
   SharedPreferences.Editor e=preferences(ctx).edit();
-  for(String field:new String[]{"columns","sort","all","selected","accountsOrder","helpers"})
+  for(String field:new String[]{"columns","sort","rowLines","all","selected","accountsOrder","helpers"})
    e.remove(key(field,id));
   e.apply();
  }

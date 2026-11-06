@@ -42,7 +42,8 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
     // sizes it remains scrollable, with the Sync and Settings buttons visible.
     if(Build.VERSION.SDK_INT>=31){
      int mode=layoutMode(ctx,id);
-     int rowDp=mode==2?31:mode==1?49:71;
+     int rowDp=AllTimersWidgetSettings.twoLines(ctx,id)?49:
+      mode==2?31:mode==1?49:71;
      int requestedHeight=widgetHeight(ctx,id);
      int available=Math.max(56,requestedHeight-99);
      int target=Math.max(56,Math.min(shown.size()*rowDp+2,available));
