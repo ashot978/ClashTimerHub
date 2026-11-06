@@ -1,5 +1,11 @@
 # ClashTimerHub release notes
 
+## Behoud interne timerverversing bij widget-opruiming — 6 november 2026
+
+- De oude multi-account-widget wordt niet meer in de widgetkiezer getoond, maar de bijbehorende TimerWidget BroadcastReceiver blijft intern actief voor reeds geplande timerverversingen en alarmrescheduling.
+- Android registreert deze receiver zonder APPWIDGET_UPDATE intent-filter of appwidget-provider metadata; hierdoor ontstaat geen extra widgetkeuze.
+- De 4 zichtbare widgets, Potion-controls en Wizard-Sync veranderen niet.
+
 ## Vier widgets, wizard Sync en snelle Potion-bediening — 6 november 2026
 
 ### NL
