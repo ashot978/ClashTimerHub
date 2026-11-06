@@ -1,3 +1,3 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources><string name="widget_builder_potions_label">Builder Potions</string><string name="widget_research_potions_label">Research Potions</string> <string name="widget_all_timers_test_label">Alle timers · Test</string>
+<resources><string name="widget_builder_potions_label">Builder Potions</string><string name="widget_research_potions_label">Research Potions</string> <string name="widget_all_timers_label">Alle timers</string>
 </resources>

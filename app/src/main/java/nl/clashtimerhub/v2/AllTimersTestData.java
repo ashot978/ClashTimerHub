@@ -22,8 +22,16 @@ final class AllTimersTestData {
   boolean goblin,boosted;
   long original,finish,saved;
  }
+ static final class Account {
+  String key,helpers="";
+  int builders,ready,lab,labReady,pets,petReady;
+  long builderAt=Long.MAX_VALUE,labAt=Long.MAX_VALUE,petAt=Long.MAX_VALUE;
+  boolean builderBoost,labBoost;
+  Account(String key){this.key=key;}
+ }
  static final class Snapshot {
   final ArrayList<Item> items=new ArrayList<>();
+  final ArrayList<Account> overview=new ArrayList<>();
   int accounts,builders,research,pets,boosted;
   long next=Long.MAX_VALUE;
  }
@@ -42,6 +50,17 @@ final class AllTimersTestData {
     if(!name.isEmpty())accounts.add(name);
    }
    result.accounts=accounts.size();
+   HashMap<String,Account> byAccount=new HashMap<>();
+   for(String key:WidgetV7.boostAccountOrder(ctx)){
+    if(accounts.contains(key)&&!byAccount.containsKey(key)){
+     Account a=new Account(key);a.helpers=HelperTracker.compact(ctx,key,now);
+     byAccount.put(key,a);result.overview.add(a);
+    }
+   }
+   for(String key:accounts)if(!byAccount.containsKey(key)){
+    Account a=new Account(key);a.helpers=HelperTracker.compact(ctx,key,now);
+    byAccount.put(key,a);result.overview.add(a);
+   }
    HashMap<String,BuilderPotionTracker.Snapshot> builder=new HashMap<>();
    HashMap<String,ResearchPotionTracker.Snapshot> lab=new HashMap<>();
    JSONArray upgrades=new JSONArray(prefs.getString("upgrades","[]"));
@@ -73,6 +92,23 @@ final class AllTimersTestData {
     item.saved=Math.max(0,original-predicted);
     item.boosted=item.saved>1000L;
     if(item.boosted)result.boosted++;
+    Account a=byAccount.get(account);
+    if(a!=null){
+     if("Bouwers".equals(category)){
+      if(predicted>now){
+       a.builders++;
+       if(predicted<a.builderAt){a.builderAt=predicted;a.builderBoost=item.boosted;}
+      }else a.ready++;
+     }else if("Laboratorium".equals(category)){
+      if(predicted>now){
+       a.lab++;
+       if(predicted<a.labAt){a.labAt=predicted;a.labBoost=item.boosted;}
+      }else a.labReady++;
+     }else if("Pets".equals(category)){
+      if(predicted>now){a.pets++;a.petAt=Math.min(a.petAt,predicted);}
+      else a.petReady++;
+     }
+    }
     if(predicted>now&&predicted<result.next)result.next=predicted;
     result.items.add(item);
    }

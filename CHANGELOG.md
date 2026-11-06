@@ -1,5 +1,25 @@
 # ClashTimerHub release notes
 
+## Multi-account widget met voorspelde eindkloktijden en visuele Potion-accenten — 6 november 2026
+
+### NL
+- De aparte widget is hernoemd van 'All Timers · Test' naar 'Alle timers' (Engels 'All Timers'), zonder test-label in de launcher of widget.
+- De bestaande geïnstalleerde provider blijft dezelfde, zodat de oude testwidget automatisch wordt vervangen door het nieuwe ontwerp en de andere widgets behouden blijven.
+- Bovenaan een overzicht met een regel per account, in de originele paars-gouden stijl en dezelfde accountvolgorde; buildersstatus, helperstatus en bouwer-, onderzoek- en pet-aftellingen met elk hun eigen eindkloktijd.
+- Potion-beïnvloede bouw- en onderzoekstimers tonen een groen bliksemicoon en groene aftel- en eindtijden. Normale eindtijden behouden de oorspronkelijke goud-/lavendeltinten.
+- Op brede schermen verschijnt één regel per account; bij smallere formaten worden de velden compact over drie regels weergegeven.
+- Scroll naar beneden voor een aparte lijst met iedere individuele upgrade, ook Goblin Researcher, en hun geschatte eindtijd / potionwinst.
+- De Sync ON/OFF-balk onderaan is opnieuw klikbaar om de bestaande zwevende syncservice te bedienen.
+- Geen wijzigingen aan originele JSON-upgrades, aparte Potion-widgets, normale alarmschema's of app-identiteit.
+
+### EN
+- Rename the separate widget from All Timers · Test to All Timers, preserving its receiver and any existing installed widget.
+- Restore original purple/gold multi-account appearance and ordering, with builder/helper status and live builder/lab/pet countdowns plus finish clock times for each.
+- Use green lightning, green countdown and green finish times for Potion-accelerated upgrades; keep standard colors for unboosted timers.
+- Show single-line account rows on wide layouts or readable three-line compact rows on smaller widgets.
+- Scroll beyond the account overview to access every individual upgrade, including Goblin Researcher research, sorted by predicted finish.
+- Restore interactive Sync ON/OFF footer. Leave other widgets and normal notification schedule untouched.
+
 ## Experimentele All Timers-widget met potion-voorspellingen — 6 november 2026
 
 ### NL

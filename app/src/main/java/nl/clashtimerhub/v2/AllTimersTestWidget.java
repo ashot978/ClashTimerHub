@@ -12,7 +12,7 @@ import android.os.Build;
 import android.widget.RemoteViews;
 import org.json.JSONArray;
 
-/** Independent experimental widget: scroll all active upgrades with potion-adjusted ends. */
+/** Multi-account summary plus every individual upgrade, with potion-adjusted times. */
 public final class AllTimersTestWidget extends AppWidgetProvider {
  private static final String REFRESH="nl.clashtimerhub.v2.ALL_TIMERS_TEST_REFRESH";
  private static final String OPEN="nl.clashtimerhub.v2.ALL_TIMERS_TEST_OPEN";
@@ -27,14 +27,14 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
    try{
     RemoteViews rv=new RemoteViews(ctx.getPackageName(),R.layout.widget_all_timers_test);
     rv.setTextViewText(R.id.all_timers_title,
-     I18n.english(ctx)?"All timers · TEST":"Alle timers · TEST");
+     I18n.english(ctx)?"All timers":"Alle timers");
     rv.setTextViewText(R.id.all_timers_summary,
-     snapshot.items.size()+" "+(I18n.english(ctx)?"upgrades":"upgrades")+
-     " · "+snapshot.accounts+" "+(I18n.english(ctx)?"accounts":"accounts")+
-     (snapshot.boosted>0?" · "+snapshot.boosted+" × "+(I18n.english(ctx)?"boosted":"versneld"):""));
+     snapshot.accounts+" accounts · "+snapshot.items.size()+" upgrades"+
+     " · ⚡ "+snapshot.boosted+" "+(I18n.english(ctx)?"boosted":"versneld")+
+     " · "+(I18n.english(ctx)?"green = boost":"groen = boost"));
     Intent service=new Intent(ctx,AllTimersTestService.class);
     service.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,id);
-    service.setData(Uri.parse("clashtimerhub://all-timers-test/"+id));
+    service.setData(Uri.parse("clashtimerhub://all-timers/"+id));
     rv.setRemoteAdapter(R.id.all_timers_list,service);
     rv.setEmptyView(R.id.all_timers_list,R.id.all_timers_empty);
     Intent template=new Intent(ctx,AllTimersTestWidget.class).setAction(OPEN);
@@ -43,11 +43,17 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
      (Build.VERSION.SDK_INT>=31?PendingIntent.FLAG_MUTABLE:0);
     rv.setPendingIntentTemplate(R.id.all_timers_list,
      PendingIntent.getBroadcast(ctx,949100+id,template,flags));
-    Intent app=new Intent(ctx,MainActivity.class).setAction("nl.clashtimerhub.v2.OPEN_ALL_TIMERS_TEST_"+id);
+    Intent app=new Intent(ctx,MainActivity.class).setAction("nl.clashtimerhub.v2.OPEN_ALL_TIMERS_"+id);
     app.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
     rv.setOnClickPendingIntent(R.id.all_timers_open,
      PendingIntent.getActivity(ctx,949200+id,app,
       PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE));
+    boolean floating=AppData.prefs(ctx).getBoolean("floatingEnabled",false);
+    rv.setTextViewText(R.id.all_timers_sync,
+     "Sync "+(floating?"ON":"OFF"));
+    Intent toggle=new Intent(ctx,WidgetSyncReceiver.class).setAction(WidgetSyncReceiver.TOGGLE);
+    rv.setOnClickPendingIntent(R.id.all_timers_sync,PendingIntent.getBroadcast(ctx,
+     949300+id,toggle,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE));
     manager.updateAppWidget(id,rv);
    }catch(Exception error){android.util.Log.e("ClashTimerHub","All Timers test widget error",error);}
   }
@@ -72,7 +78,7 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
      alarm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,at,operation);
     else alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,at,operation);
    }else alarm.set(AlarmManager.RTC_WAKEUP,at,operation);
-  }catch(Exception error){android.util.Log.w("ClashTimerHub","Test widget refresh failed",error);}
+  }catch(Exception error){android.util.Log.w("ClashTimerHub","All Timers refresh failed",error);}
  }
  private static boolean registered(Context ctx,String account){
   try{
@@ -94,7 +100,7 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
    String account=intent.getStringExtra("account");
    if(account==null||!registered(ctx,account))return;
    Intent open=new Intent(ctx,MainActivity.class);
-   open.setAction("nl.clashtimerhub.v2.OPEN_TEST_TIMER_"+account);
+   open.setAction("nl.clashtimerhub.v2.OPEN_ALL_TIMERS_ACCOUNT_"+account);
    open.putExtra("openAccount",account);
    open.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
    ctx.startActivity(open);
