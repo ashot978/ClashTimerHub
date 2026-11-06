@@ -114,6 +114,17 @@ public final class AllTimersConfigActivity extends Activity {
   helpers.setTextColor(Color.WHITE);
   helpers.setChecked(prefs.getBoolean(AllTimersWidgetSettings.key("helpers",widgetId),true));
   content.addView(helpers);
+  heading(content,tr("Potionbeheer","Potion controls"),
+   tr("Je kunt +1 uur toevoegen en de boost exact aanpassen, zonder aparte potion-widgets.",
+      "Add +1 hour and adjust exact boost duration without separate Potion widgets."));
+  Button builder=new Button(this);builder.setAllCaps(false);
+  builder.setText(tr("⚒ Builder Potions beheren","⚒ Manage Builder Potions"));
+  content.addView(builder,new LinearLayout.LayoutParams(-1,dp(48)));
+  builder.setOnClickListener(v->startActivity(new Intent(this,BuilderBoostEditorActivity.class).putExtra("overview",true)));
+  Button research=new Button(this);research.setAllCaps(false);
+  research.setText(tr("🧙 Research Potions beheren","🧙 Manage Research Potions"));
+  content.addView(research,new LinearLayout.LayoutParams(-1,dp(48)));
+  research.setOnClickListener(v->startActivity(new Intent(this,ResearchBoostEditorActivity.class).putExtra("overview",true)));
   LinearLayout footer=new LinearLayout(this);footer.setBackgroundColor(SECTION);
   footer.setPadding(dp(16),dp(8),dp(16),dp(10));
   Button save=new Button(this);save.setAllCaps(false);

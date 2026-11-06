@@ -23,10 +23,6 @@
 <receiver android:name=".BuilderAlarm" android:exported="false"/>
 <receiver android:name=".PotionCompletionAlarm" android:exported="false"/>
 <activity android:name=".ResearchBoostEditorActivity" android:exported="false" android:theme="@android:style/Theme.Material.NoActionBar"/>
-<receiver android:name=".ResearchBoostWidget" android:exported="true" android:label="@string/widget_research_potions_label">
-<intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter>
-<meta-data android:name="android.appwidget.provider" android:resource="@xml/research_boost_widget_info"/>
-</receiver>
 <receiver android:name=".AlarmRestoreReceiver" android:exported="false">
 <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED"/><action android:name="android.intent.action.MY_PACKAGE_REPLACED"/><action android:name="android.intent.action.TIME_SET"/><action android:name="android.intent.action.TIMEZONE_CHANGED"/></intent-filter>
 </receiver>
@@ -40,18 +36,10 @@
 <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter>
 <meta-data android:name="android.appwidget.provider" android:resource="@xml/all_timers_test_widget_info"/>
 </receiver>
-<receiver android:name=".BuilderBoostWidget" android:exported="true" android:label="@string/widget_builder_potions_label">
-<intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter>
-<meta-data android:name="android.appwidget.provider" android:resource="@xml/builder_boost_widget_info"/>
-</receiver>
 <receiver android:name=".SyncWidget" android:exported="true">
 <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter>
 <meta-data android:name="android.appwidget.provider" android:resource="@xml/sync_widget_info"/>
 </receiver>
 <receiver android:name=".MiniWidget" android:exported="true"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/mini_widget_info"/></receiver>
 <receiver android:name=".AccountWidget" android:exported="true"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/account_widget_info"/></receiver>
-<receiver android:name=".TimerWidget" android:exported="true">
-<intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter>
-<meta-data android:name="android.appwidget.provider" android:resource="@xml/builder_widget_info"/>
-</receiver>
 </application></manifest>

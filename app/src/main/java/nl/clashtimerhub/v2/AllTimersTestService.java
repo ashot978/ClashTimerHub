@@ -23,6 +23,8 @@ public final class AllTimersTestService extends RemoteViewsService {
  private static final class Factory implements RemoteViewsFactory {
   private static final int GOLD=0xffffd783,GREEN=0xff8be3ad,
    LAVENDER=0xffcbb5d9,ICON=0xffd6bcea;
+  private static final int[] GROUPS={
+   R.id.all_slot_0_group,R.id.all_slot_1_group,R.id.all_slot_2_group};
   private static final int[] ICONS={
    R.id.all_slot_0_icon,R.id.all_slot_1_icon,R.id.all_slot_2_icon};
   private static final int[] CLOCKS={
@@ -71,8 +73,15 @@ public final class AllTimersTestService extends RemoteViewsService {
     AllTimersWidgetSettings.key("helpers",widgetId),true);
    rv.setTextViewText(R.id.all_account_helpers,
     helpers&&!a.helpers.isEmpty()?"🤝 "+a.helpers:"");
-   for(int slot=0;slot<3;slot++)
+   for(int slot=0;slot<3;slot++){
     renderSlot(rv,slot,columns[slot],a,now);
+    Intent intent=new Intent().putExtra("account",a.key);
+    if(AllTimersWidgetSettings.BUILDERS.equals(columns[slot]))
+     intent.putExtra("potionType","builders");
+    else if(AllTimersWidgetSettings.LAB.equals(columns[slot]))
+     intent.putExtra("potionType","research");
+    rv.setOnClickFillInIntent(GROUPS[slot],intent);
+   }
    rv.setOnClickFillInIntent(R.id.all_account_row,new Intent().putExtra("account",a.key));
    return rv;
   }

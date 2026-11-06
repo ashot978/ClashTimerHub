@@ -107,6 +107,14 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
   if(OPEN.equals(intent.getAction())){
    String account=intent.getStringExtra("account");
    if(account==null||!registered(ctx,account))return;
+   String potion=intent.getStringExtra("potionType");
+   if("builders".equals(potion)||"research".equals(potion)){
+    Class<?> editor="builders".equals(potion)?
+     BuilderBoostEditorActivity.class:ResearchBoostEditorActivity.class;
+    Intent openPotion=new Intent(ctx,editor).putExtra("account",account);
+    openPotion.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    ctx.startActivity(openPotion);return;
+   }
    Intent open=new Intent(ctx,MainActivity.class);
    open.setAction("nl.clashtimerhub.v2.OPEN_ALL_TIMERS_ACCOUNT_"+account);
    open.putExtra("openAccount",account);

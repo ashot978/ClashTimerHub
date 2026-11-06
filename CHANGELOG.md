@@ -1,5 +1,21 @@
 # ClashTimerHub release notes
 
+## Vier widgets, wizard Sync en snelle Potion-bediening — 6 november 2026
+
+### NL
+- Beperk de Android widgetkiezer tot vier opties: All Timers (alle accounts), mini-account 1×1, losse accountwidget, 1×1 Sync-knop. Verwijder de aparte Builder Potion-/Research Potion-overzichten en de oude multi-accountwidget uit de widgetkiezer.
+- Herstel de 🧙-icoon van de zwevende Sync-knop (ook nadat ✓/! feedback verdwijnt), synchroniseer het icoon in de 1×1 Sync-widget en op de synchronisatiepagina in de app.
+- Bewaar snelle Potion-bediening zonder aparte widgets: tik in All Timers op het Builder- of Research-timerblok van een account om rechtstreeks het exacte per-account Potion-scherm te openen. Tik op Pets of de accountnaam voor de accountdetails.
+- Onder All Timers-configuratie en in de app-instellingen blijven aparte knoppen naar Builder en Research Potion-beheer: +1 uur, exacte resterende duur, wissen.
+- Bestaande potiontrackers, oude en versneld berekende upgrades, MAX, meldingen, app-ID, signing en opgeslagen voorkeuren zijn niet gewijzigd.
+- Reeds geplaatste widgets van verwijderde provider-types kunnen door Android uit het startscherm verwijderd worden. Opnieuw toevoegen als All Timers. Originele gebruikerdata wordt niet gewist.
+
+### EN
+- Retain only four launcher widget choices: All Timers, 1×1 mini-account, single-account widget and 1×1 Sync.
+- Restore wizard icon on floating Sync and its post-feedback state; use matching wizard on the 1×1 Sync shortcut and app settings.
+- Preserve fast per-account +1h/exact-duration potion controls by tapping Research/Builders category groups on All Timers, with backup access from widget configuration and app Settings.
+- Do not remove any underlying potion tracking, alarm scheduling, accounts or signed app identity. Old legacy widgets disappear from the Android widget picker (and installed instances may need replacing).
+
 ## Instelbare All Timers-widget met boosted buildersortering — 6 november 2026
 
 ### NL

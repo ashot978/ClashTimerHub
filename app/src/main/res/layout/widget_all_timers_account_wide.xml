@@ -17,7 +17,7 @@
   android:layout_width="87dp" 
   android:layout_height="match_parent" android:gravity="center_vertical"
   android:text="🤝 0/2 · 17h" android:textColor="#8BE3AD" android:textSize="9sp"
-  android:singleLine="true" android:ellipsize="end"/><LinearLayout android:layout_width="0dp" android:layout_weight="1"
+  android:singleLine="true" android:ellipsize="end"/><LinearLayout android:id="@+id/all_slot_0_group" android:layout_width="0dp" android:layout_weight="1"
   android:layout_height="match_parent" android:orientation="horizontal"
   android:gravity="center_vertical" android:baselineAligned="false"
   android:paddingLeft="2dp" android:paddingRight="5dp">
@@ -40,7 +40,7 @@
    android:text="Mrg 07:29" android:textColor="#CBB5D9"
    android:textSize="9sp" android:includeFontPadding="false"
    android:singleLine="true" android:ellipsize="end"/>
- </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_weight="1"
+ </LinearLayout><LinearLayout android:id="@+id/all_slot_1_group" android:layout_width="0dp" android:layout_weight="1"
   android:layout_height="match_parent" android:orientation="horizontal"
   android:gravity="center_vertical" android:baselineAligned="false"
   android:paddingLeft="9dp" android:paddingRight="5dp">
@@ -63,7 +63,7 @@
    android:text="Mrg 07:29" android:textColor="#CBB5D9"
    android:textSize="9sp" android:includeFontPadding="false"
    android:singleLine="true" android:ellipsize="end"/>
- </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_weight="1"
+ </LinearLayout><LinearLayout android:id="@+id/all_slot_2_group" android:layout_width="0dp" android:layout_weight="1"
   android:layout_height="match_parent" android:orientation="horizontal"
   android:gravity="center_vertical" android:baselineAligned="false"
   android:paddingLeft="9dp" android:paddingRight="5dp">
