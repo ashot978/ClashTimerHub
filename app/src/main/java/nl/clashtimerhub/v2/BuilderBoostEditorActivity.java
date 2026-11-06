@@ -119,7 +119,7 @@ public final class BuilderBoostEditorActivity extends Activity {
  private void addHour(String target){
   try{
    BuilderPotionTracker.addHour(this,target);
-   TimerWidget.update(this);
+   TimerWidget.schedule(this);
    android.widget.Toast.makeText(this,AppData.displayName(this,target)+
     tr(": +1u Builder Potion",": +1h Builder Potion"),
     android.widget.Toast.LENGTH_SHORT).show();
@@ -137,7 +137,7 @@ public final class BuilderBoostEditorActivity extends Activity {
     int m=Integer.parseInt(minuteField.getText().toString().trim().isEmpty()?"0":minuteField.getText().toString().trim());
     BuilderPotionTracker.setRemaining(this,account,h,m);
    }
-   TimerWidget.update(this);render();
+   TimerWidget.schedule(this);render();
   }catch(Exception e){
    android.widget.Toast.makeText(this,
     e.getMessage()==null?tr("Voer een geldige tijd in","Enter a valid time"):e.getMessage(),

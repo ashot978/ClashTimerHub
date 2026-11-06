@@ -170,7 +170,7 @@ public final class BuilderBoostWidget extends AppWidgetProvider {
    if(account==null||!accountExists(ctx,account))return;
    try{
     BuilderPotionTracker.addHour(ctx,account);
-    TimerWidget.update(ctx);
+    TimerWidget.schedule(ctx);
     android.widget.Toast.makeText(ctx,AppData.displayName(ctx,account)+
      (I18n.english(ctx)?" · Builder Potion +1h":" · Builder Potion +1u"),
      android.widget.Toast.LENGTH_SHORT).show();

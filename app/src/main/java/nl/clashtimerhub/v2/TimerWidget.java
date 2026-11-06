@@ -14,6 +14,8 @@ public class TimerWidget extends AppWidgetProvider {
  static final String CHANNEL="builder_ready_v1";
  private static final String REFRESH="nl.clashtimerhub.v2.WIDGET_REFRESH";
  private static final int REFRESH_ID=90118;
+ static final String UPGRADE_ACTION="nl.clashtimerhub.v2.UNIFIED_UPGRADE_COMPLETE";
+ private static final String UPGRADE_CODES="unifiedUpgradeAlarmCodes";
 
  private static final class Status {
   final String account;
@@ -83,10 +85,8 @@ public class TimerWidget extends AppWidgetProvider {
  }
  static void update(Context context){
   WidgetV7.updateAll(context);
-  BuilderBoostWidget.update(context);
-  ResearchBoostWidget.update(context);
   AllTimersTestWidget.update(context);
-  PotionCompletionAlarm.schedule(context);
+  // Never schedule a second, Potion-specific notification during redraw.
  }
  @Override public void onDeleted(Context context,int[] widgetIds){
   android.content.SharedPreferences.Editor editor=context.getSharedPreferences("WidgetPreferences",Context.MODE_PRIVATE).edit();
@@ -109,54 +109,80 @@ public class TimerWidget extends AppWidgetProvider {
   if(REFRESH.equals(action))schedule(context);
   else if(AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action))update(context);
  }
- private static void scheduleWidgetRefresh(Context context,AlarmManager alarms,JSONArray upgrades,long now){
-  PendingIntent operation=PendingIntent.getBroadcast(context,REFRESH_ID,
-   new Intent(context,TimerWidget.class).setAction(REFRESH),PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
-  alarms.cancel(operation);
+ private static PendingIntent alarmIntent(Context ctx,int code,Intent extras,int flags){
+  Intent action=new Intent(ctx,BuilderAlarm.class).setAction(UPGRADE_ACTION);
+  if(extras!=null)action.putExtras(extras);
+  return PendingIntent.getBroadcast(ctx,code,action,flags|PendingIntent.FLAG_IMMUTABLE);
+ }
+ private static void clearPrevious(Context ctx,AlarmManager mgr,android.content.SharedPreferences prefs){
+  try{
+   JSONArray codes=new JSONArray(prefs.getString(UPGRADE_CODES,"[]"));
+   for(int i=0;i<codes.length();i++){
+    PendingIntent previous=alarmIntent(ctx,codes.optInt(i),null,PendingIntent.FLAG_NO_CREATE);
+    if(previous!=null){mgr.cancel(previous);previous.cancel();}
+   }
+  }catch(Exception e){android.util.Log.w("ClashTimerHub","Cannot cancel previous upgrade alarms",e);}
+  PotionCompletionAlarm.cancelAll(ctx);
+ }
+ private static void cancelLegacy(Context ctx,AlarmManager mgr,String id,int kind){
+  int request=(id+":"+kind).hashCode();
+  PendingIntent old=PendingIntent.getBroadcast(ctx,request,new Intent(ctx,BuilderAlarm.class),
+   PendingIntent.FLAG_NO_CREATE|PendingIntent.FLAG_IMMUTABLE);
+  if(old!=null){mgr.cancel(old);old.cancel();}
+ }
+ private static void scheduleWidgetRefresh(Context ctx,AlarmManager mgr,JSONArray upgrades,long now){
+  PendingIntent operation=PendingIntent.getBroadcast(ctx,REFRESH_ID,
+   new Intent(ctx,TimerWidget.class).setAction(REFRESH),
+   PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+  mgr.cancel(operation);
   long earliest=Long.MAX_VALUE;
   for(int i=0;i<upgrades.length();i++){
-   JSONObject o=upgrades.optJSONObject(i);
-   if(o==null)continue;
-   long finish=o.optLong("finish");
+   JSONObject row=upgrades.optJSONObject(i);if(row==null)continue;
+   long source=row.optLong("finish",0L);if(source<=0)continue;
+   long finish=UpgradeForecast.finish(ctx,row.optString("account"),row.optString("category"),source);
    if(finish>now&&finish<earliest)earliest=finish;
   }
-  if(earliest!=Long.MAX_VALUE)try{scheduleOne(alarms,earliest+1000,operation);}catch(Exception e){
-   android.util.Log.w("ClashTimerHub","Widget refresh alarm unavailable",e);
-  }
+  if(earliest!=Long.MAX_VALUE)try{scheduleOne(mgr,earliest+1000,operation);}
+  catch(Exception e){android.util.Log.w("ClashTimerHub","Widget refresh unavailable",e);}
  }
- static void schedule(Context context){
-  android.content.SharedPreferences prefs=AppData.prefs(context);
+ static synchronized void schedule(Context ctx){
+  android.content.SharedPreferences prefs=AppData.prefs(ctx);
+  AlarmManager mgr=(AlarmManager)ctx.getSystemService(Context.ALARM_SERVICE);
+  if(mgr==null){update(ctx);return;}
+  clearPrevious(ctx,mgr,prefs);
+  JSONArray scheduled=new JSONArray();
   try{
    JSONArray upgrades=new JSONArray(prefs.getString("upgrades","[]"));
    long now=System.currentTimeMillis();
-   AlarmManager alarms=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-   if(alarms==null){update(context);return;}
    boolean enabled=prefs.getBoolean("notifyEnabled",true);
-   boolean onFinish=prefs.getBoolean("notifyOnFinish",true);
+   boolean completion=prefs.getBoolean("notifyOnFinish",true);
    int lead=Math.max(0,Math.min(10080,prefs.getInt("notifyLeadMinutes",15)));
    for(int i=0;i<upgrades.length();i++){
-    JSONObject o=upgrades.getJSONObject(i);
-    long finish=o.optLong("finish");
-    String key=o.optString("id",o.optString("account")+i);
+    JSONObject row=upgrades.optJSONObject(i);if(row==null)continue;
+    String ac=row.optString("account",""),cat=row.optString("category","");
+    String id=row.optString("id","row-"+i);
+    long original=row.optLong("finish",0L);
+    if(ac.isEmpty()||original<=0)continue;
+    long finish=UpgradeForecast.finish(ctx,ac,cat,original);
     for(int kind=0;kind<2;kind++){
-     int request=(key+":"+kind).hashCode();
-     Intent intent=new Intent(context,BuilderAlarm.class);
-     intent.putExtra("account",o.optString("account"));
-     intent.putExtra("name",o.optString("name"));
-     intent.putExtra("finish",finish);
-     intent.putExtra("early",kind==1);
-     PendingIntent operation=PendingIntent.getBroadcast(context,request,intent,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
-     alarms.cancel(operation);
-     long trigger=kind==1?finish-lead*60000L:finish;
-     if(enabled&&(kind==0?onFinish:lead>0)&&trigger>now&&finish>now){
-      try{scheduleOne(alarms,trigger,operation);}
-      catch(Exception e){android.util.Log.e("ClashTimerHub","Timer alarm schedule failed for "+key,e);}
-     }
+     cancelLegacy(ctx,mgr,id,kind);
+     boolean early=kind==1;
+     if(!enabled||(early?lead<=0:!completion)||finish<=now)continue;
+     long when=early?finish-lead*60000L:finish;
+     if(when<=now)continue;
+     int code=("unified:"+ac+":"+cat+":"+id+":"+i+":"+kind).hashCode();
+     Intent extras=new Intent().putExtra("account",ac).putExtra("category",cat)
+      .putExtra("id",id).putExtra("row",i).putExtra("name",row.optString("name",""))
+      .putExtra("sourceFinish",original).putExtra("finish",finish).putExtra("early",early);
+     PendingIntent operation=alarmIntent(ctx,code,extras,PendingIntent.FLAG_UPDATE_CURRENT);
+     try{scheduleOne(mgr,when,operation);scheduled.put(code);}
+     catch(Exception e){android.util.Log.e("ClashTimerHub","Upgrade alert scheduling failed: "+id,e);}
     }
    }
-   scheduleWidgetRefresh(context,alarms,upgrades,now);
+   scheduleWidgetRefresh(ctx,mgr,upgrades,now);
   }catch(Exception e){android.util.Log.e("ClashTimerHub","Scheduling alarms failed",e);}
-  update(context);
+  prefs.edit().putString(UPGRADE_CODES,scheduled.toString()).apply();
+  update(ctx);
  }
  private static boolean scheduleOne(AlarmManager alarms,long time,PendingIntent op){
   if(Build.VERSION.SDK_INT>=23){

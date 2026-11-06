@@ -81,12 +81,12 @@ final class AllTimersTestData {
     if("Bouwers".equals(category)){
      BuilderPotionTracker.Snapshot potion=builder.get(account);
      if(potion==null){potion=BuilderPotionTracker.load(ctx,account);builder.put(account,potion);}
-     predicted=BuilderPotionTracker.estimateFinish(potion,original);
+     predicted=UpgradeForecast.finish(ctx,account,category,original);
      result.builders++;
     }else if("Laboratorium".equals(category)){
      ResearchPotionTracker.Snapshot potion=lab.get(account);
      if(potion==null){potion=ResearchPotionTracker.load(ctx,account);lab.put(account,potion);}
-     predicted=ResearchPotionTracker.estimateFinish(potion,original);
+     predicted=UpgradeForecast.finish(ctx,account,category,original);
      result.research++;
     }else if("Pets".equals(category))result.pets++;
     Item item=new Item();

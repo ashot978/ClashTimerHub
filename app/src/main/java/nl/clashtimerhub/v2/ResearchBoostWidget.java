@@ -170,7 +170,7 @@ public final class ResearchBoostWidget extends AppWidgetProvider {
    if(account==null||!accountExists(ctx,account))return;
    try{
     ResearchPotionTracker.addHour(ctx,account);
-    TimerWidget.update(ctx);
+    TimerWidget.schedule(ctx);
     android.widget.Toast.makeText(ctx,AppData.displayName(ctx,account)+
      (I18n.english(ctx)?" · Research Potion +1h":" · Research Potion +1u"),
      android.widget.Toast.LENGTH_SHORT).show();
