@@ -86,7 +86,7 @@ public final class AllTimersConfigActivity extends Activity {
   sorter=new Spinner(this);
   sorter.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,
    english?new String[]{"Next builder (boost-adjusted)","Account name (A–Z)","Manual order"}:
-    new String[]{"Volgende bouwer (incl. potion)","Accountnaam (A–Z)","Eigen volgorde"}));
+    new String[]{"Volgende bouwer (incl. boost)","Accountnaam (A–Z)","Eigen volgorde"}));
   sorter.setSelection(AllTimersWidgetSettings.sort(this,widgetId));
   content.addView(sorter,new LinearLayout.LayoutParams(-1,dp(50)));
   heading(content,tr("Accounts","Accounts"),
@@ -108,7 +108,7 @@ public final class AllTimersConfigActivity extends Activity {
   content.addView(accountRows);drawAccounts();
   mode.setOnCheckedChangeListener((group,which)->updateEnabled());
   heading(content,tr("Extra instellingen","More settings"),
-   tr("Groen = Potion-verkort, goud = normaal, ✓ = handmatig MAX.",
+   tr("Groen = versneld, goud = normaal, ✓ = handmatig MAX.",
       "Green = boosted, gold = normal, ✓ = manually marked MAX."));
   helpers=new CheckBox(this);helpers.setText(tr("Helpers tonen","Show helpers"));
   helpers.setTextColor(Color.WHITE);
