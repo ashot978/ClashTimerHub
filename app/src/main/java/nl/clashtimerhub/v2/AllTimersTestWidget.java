@@ -75,6 +75,19 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
   plan(ctx,snapshot.next);
  }
 
+ /** Change only the Sync button. Do not rebind the collection, which shows
+  * a launcher loading placeholder when the toggle is tapped repeatedly. */
+ static void updateSyncStatus(Context ctx){
+  AppWidgetManager manager=AppWidgetManager.getInstance(ctx);
+  int[] ids=manager.getAppWidgetIds(new ComponentName(ctx,AllTimersTestWidget.class));
+  boolean enabled=AppData.prefs(ctx).getBoolean("floatingEnabled",false);
+  for(int id:ids){
+   RemoteViews update=new RemoteViews(ctx.getPackageName(),R.layout.widget_all_timers_test);
+   update.setTextViewText(R.id.all_timers_sync,"Sync "+(enabled?"ON":"OFF"));
+   update.setTextColor(R.id.all_timers_sync,enabled?0xff8be3ad:0xffcbb5d9);
+   manager.partiallyUpdateAppWidget(id,update);
+  }
+ }
  /** Read launcher sizing from the same options as the account RemoteViews service. */
  static int layoutMode(Context ctx,int id){
   int width=400;
@@ -142,14 +155,6 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
   if(OPEN.equals(intent.getAction())){
    String account=intent.getStringExtra("account");
    if(account==null||!registered(ctx,account))return;
-   String potion=intent.getStringExtra("potionType");
-   if("builders".equals(potion)||"research".equals(potion)){
-    Class<?> editor="builders".equals(potion)?
-     BuilderBoostEditorActivity.class:ResearchBoostEditorActivity.class;
-    Intent openPotion=new Intent(ctx,editor).putExtra("account",account);
-    openPotion.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
-    ctx.startActivity(openPotion);return;
-   }
    Intent open=new Intent(ctx,MainActivity.class);
    open.setAction("nl.clashtimerhub.v2.OPEN_ALL_TIMERS_ACCOUNT_"+account);
    open.putExtra("openAccount",account);
