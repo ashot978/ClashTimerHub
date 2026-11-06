@@ -26,7 +26,7 @@ public final class AllTimersConfigActivity extends Activity {
  private SharedPreferences prefs;
  private LinearLayout accountRows,columnRows;
  private RadioButton all,custom;
- private Spinner sorter,rowLines;
+ private Spinner sorter,rowLines,topCategory;
  private CheckBox helpers;
  private String tr(String nl,String en){return english?en:nl;}
  private int dp(int value){return (int)(value*getResources().getDisplayMetrics().density+.5f);}
@@ -99,6 +99,23 @@ public final class AllTimersConfigActivity extends Activity {
   rowLines.setSelection(AllTimersWidgetSettings.twoLines(this,widgetId)?
    AllTimersWidgetSettings.TWO_LINES:AllTimersWidgetSettings.SINGLE_LINE);
   content.addView(rowLines,new LinearLayout.LayoutParams(-1,dp(50)));
+  heading(content,tr("Bovenste timer (2 regels)","Top timer (2 lines)"),
+   tr("De accountnaam, helpers en gekozen timer staan bovenaan. De andere twee timers staan eronder.",
+      "Account name, helpers and the selected timer stay on top. The other two timers go below."));
+  topCategory=new Spinner(this);
+  topCategory.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,
+   english?new String[]{"⚒ Builders","🧙 Research","🐾 Pets"}:
+    new String[]{"⚒ Bouwers","🧙 Onderzoek","🐾 Pets"}));
+  String selectedTop=AllTimersWidgetSettings.topCategory(this,widgetId);
+  topCategory.setSelection(AllTimersWidgetSettings.LAB.equals(selectedTop)?1:
+   AllTimersWidgetSettings.PETS.equals(selectedTop)?2:0);
+  content.addView(topCategory,new LinearLayout.LayoutParams(-1,dp(50)));
+  topCategory.setEnabled(rowLines.getSelectedItemPosition()==AllTimersWidgetSettings.TWO_LINES);
+  rowLines.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){
+   @Override public void onItemSelected(android.widget.AdapterView<?> parent,android.view.View view,
+    int position,long id){topCategory.setEnabled(position==AllTimersWidgetSettings.TWO_LINES);}
+   @Override public void onNothingSelected(android.widget.AdapterView<?> parent){}
+  });
   heading(content,tr("Accounts","Accounts"),
    tr("Selecteer accounts of kies alle accounts. Iedere widget wordt apart bewaard.",
       "Select accounts or show all. Each widget saves settings independently."));
@@ -205,6 +222,9 @@ public final class AllTimersConfigActivity extends Activity {
    .putString(AllTimersWidgetSettings.key("columns",widgetId),new JSONArray(columns).toString())
    .putInt(AllTimersWidgetSettings.key("sort",widgetId),sorter.getSelectedItemPosition())
    .putInt(AllTimersWidgetSettings.key("rowLines",widgetId),rowLines.getSelectedItemPosition())
+   .putString(AllTimersWidgetSettings.key("topCategory",widgetId),
+    topCategory.getSelectedItemPosition()==1?AllTimersWidgetSettings.LAB:
+     topCategory.getSelectedItemPosition()==2?AllTimersWidgetSettings.PETS:AllTimersWidgetSettings.BUILDERS)
    .putBoolean(AllTimersWidgetSettings.key("all",widgetId),all.isChecked())
    .putString(AllTimersWidgetSettings.key("selected",widgetId),selectedAccounts.toString())
    .putString(AllTimersWidgetSettings.key("accountsOrder",widgetId),new JSONArray(manualAccounts).toString())
