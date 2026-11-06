@@ -48,6 +48,7 @@ public final class AllTimersTestService extends RemoteViewsService {
    columns=AllTimersWidgetSettings.order(ctx,widgetId);
    layoutMode=AllTimersTestWidget.layoutMode(ctx,widgetId);
    twoLines=AllTimersWidgetSettings.twoLines(ctx,widgetId);
+   if(twoLines)columns=AllTimersWidgetSettings.twoLineOrder(ctx,widgetId);
   }
   @Override public void onDestroy(){accounts.clear();}
   @Override public int getCount(){return accounts.size();}
@@ -57,7 +58,7 @@ public final class AllTimersTestService extends RemoteViewsService {
    long now=System.currentTimeMillis();
    // Two-line mode uses the compact row with account/status above all three timers.
    // Single-line mode remains unchanged and keeps its original responsive layouts.
-   int layout=twoLines?R.layout.widget_all_timers_account_compact:
+   int layout=twoLines?R.layout.widget_all_timers_account_two_line:
     layoutMode==2?R.layout.widget_all_timers_account_wide:
     layoutMode==1?R.layout.widget_all_timers_account_compact:
      R.layout.widget_all_timers_account_narrow;
@@ -97,7 +98,7 @@ public final class AllTimersTestService extends RemoteViewsService {
    rv.setViewVisibility(clock,active?View.VISIBLE:View.GONE);
    rv.setViewVisibility(idle,active?View.GONE:View.VISIBLE);
    rv.setTextViewText(idle,checkedMax?"✓":pendingSync?"!":"—");
-   rv.setTextViewText(end,active?(layoutMode==2?
+   rv.setTextViewText(end,active?(!twoLines&&layoutMode==2?
     AllTimersTestData.endTime(ctx,finish,now):AllTimersTestData.compactEnd(ctx,finish,now)):
     checkedMax?"MAX":pendingSync?(I18n.english(ctx)?"Ready":"Klaar"):"—");
    if(active){
@@ -114,7 +115,7 @@ public final class AllTimersTestService extends RemoteViewsService {
     active&&boosted?GREEN:LAVENDER);
   }
   @Override public RemoteViews getLoadingView(){return null;}
-  @Override public int getViewTypeCount(){return 3;}
+  @Override public int getViewTypeCount(){return 4;}
   @Override public long getItemId(int position){
    return position<0||position>=accounts.size()?position:
     ("account:"+accounts.get(position).key).hashCode();
