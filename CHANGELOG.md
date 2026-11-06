@@ -1,5 +1,23 @@
 # ClashTimerHub release notes
 
+## Builder Potion multi-accountwidget — 6 november 2026
+
+### NL
+- Vijfde optionele widget op basis van de bestaande accountgegevens: toont per account de resterende Builder Potion-boost en de nieuwe geschatte eindtijd van de eerstvolgende bouwer.
+- Tik op +1u bij een account zodra je in Clash een Builder Potion activeert; iedere extra potion voegt één uur aan de boost toe. Er is bewust geen +10m-knop.
+- Tik op de accountnaam of tijd om exacte resterende uren en minuten in te voeren, de boost te wissen en alle geschatte bouwer-eindtijden naast de oorspronkelijke tijden te zien.
+- Alle vier bestaande widgets, originele JSON-timers, meldingen, accounts en synchronisatie blijven intact.
+- De boostvoorspelling wordt na een nieuwe JSON-import uitgeschakeld totdat de boost opnieuw wordt bevestigd; daardoor wordt de bestaande export niet stilzwijgend dubbel versneld.
+- De nieuwe widget werkt zonder schermbediening in Clash of extra Android-toestemmingen.
+
+### EN
+- Fifth optional widget based on existing account data, showing each account's remaining Builder Potion boost and the estimated earlier next builder completion.
+- Tap +1h when you activate a Builder Potion in Clash; each additional potion extends the boost by one hour. No irrelevant +10m action.
+- Tap an account or timer to enter exact hours and minutes, clear a boost and inspect every predicted completion next to its original time.
+- All four existing widgets, imported JSON timers, alerts, accounts and syncing stay unchanged.
+- A new JSON import invalidates previous boost forecasts until the duration is confirmed again, avoiding silent double application.
+- The new widget needs no automated Clash interactions or additional Android permissions.
+
 ## Testrelease automatische updatecontrole — 5 november 2026
 
 ### NL

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ android:id="@+id/boost_row" android:layout_width="match_parent" android:layout_height="31dp"
+ android:layout_marginBottom="1dp" android:orientation="horizontal" android:gravity="center_vertical"
+ android:paddingLeft="3dp" android:paddingRight="3dp" android:background="@drawable/widget_row_background">
+ <TextView android:id="@+id/boost_name" android:layout_width="0dp" android:layout_weight="1.2"
+  android:layout_height="match_parent" android:gravity="center_vertical"
+  android:textSize="11sp" android:textColor="#FFFFFF" android:textStyle="bold" android:singleLine="true"
+  android:ellipsize="end" android:contentDescription="Edit exact Builder Potion time"/>
+ <Chronometer android:id="@+id/boost_remaining" android:layout_width="0dp" android:layout_weight="0.9"
+  android:layout_height="wrap_content" android:gravity="center"
+  android:textSize="10sp" android:textColor="#FFD783" android:singleLine="true"/>
+ <TextView android:id="@+id/boost_idle" android:layout_width="0dp" android:layout_weight="0.9"
+  android:layout_height="match_parent" android:gravity="center"
+  android:textSize="10sp" android:textColor="#CBB5D9" android:text="⚡ —" android:visibility="gone"/>
+ <TextView android:id="@+id/boost_plus60" android:layout_width="48dp"
+  android:layout_height="match_parent" android:gravity="center" android:text="+1u"
+  android:textSize="12sp" android:textStyle="bold" android:textColor="#8BE3AD"
+  android:contentDescription="Register one Builder Potion, add one hour"/>
+ <TextView android:id="@+id/boost_finish" android:layout_width="0dp" android:layout_weight="1.2"
+  android:layout_height="match_parent" android:gravity="right|center_vertical"
+  android:textSize="10sp" android:textColor="#FFD783" android:singleLine="true" android:ellipsize="end"
+  android:contentDescription="Estimated next builder completion"/>
+</LinearLayout>

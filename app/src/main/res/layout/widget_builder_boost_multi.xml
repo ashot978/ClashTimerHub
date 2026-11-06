@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ android:id="@+id/boost_widget_root" android:layout_width="match_parent" android:layout_height="wrap_content"
+ android:orientation="vertical" android:padding="3dp" android:background="@drawable/widget_background">
+ <LinearLayout android:layout_width="match_parent" android:layout_height="26dp"
+  android:orientation="horizontal" android:gravity="center_vertical" android:background="@drawable/widget_row_background">
+  <TextView android:id="@+id/boost_widget_title" android:layout_width="0dp" android:layout_weight="1"
+   android:layout_height="match_parent" android:gravity="left|center_vertical" android:paddingLeft="8dp"
+   android:text="⚡ Builder Potion · 10×" android:textSize="12sp" android:textColor="#FFD783" android:textStyle="bold"/>
+  <TextView android:id="@+id/boost_widget_open" android:layout_width="42dp" android:layout_height="match_parent"
+   android:gravity="center" android:text="↗" android:textSize="18sp" android:textColor="#FFFFFF"
+   android:contentDescription="Open Builder Potion editor"/>
+ </LinearLayout>
+ <LinearLayout android:id="@+id/boost_widget_rows" android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:orientation="vertical"/>
+ <TextView android:id="@+id/boost_widget_footer" android:layout_width="match_parent" android:layout_height="26dp"
+  android:gravity="center" android:textSize="10sp" android:textColor="#CBB5D9" android:text="⚡ Geschatte eindtijd · tik account voor details"/>
+</LinearLayout>
