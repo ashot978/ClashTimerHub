@@ -16,6 +16,8 @@ public final class FloatingSyncService extends Service {
  private View bubble;
  private WindowManager.LayoutParams params;
  private static final int CHANNEL_ID=11;
+ // Same wizard glyph as the laboratory timers in the home-screen widgets.
+ private static final String SYNC_WIZARD_ICON="🧙";
  private View dropTarget;
  private WindowManager.LayoutParams dropParams;
  private final Handler holdHandler=new Handler(Looper.getMainLooper());
@@ -56,7 +58,7 @@ public final class FloatingSyncService extends Service {
   if(Build.VERSION.SDK_INT>=29)startForeground(CHANNEL_ID,nb.build(),android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
   else startForeground(CHANNEL_ID,nb.build());
   manager=(WindowManager)getSystemService(WINDOW_SERVICE);
-  TextView view=new TextView(this);view.setText("⚔");view.setTextSize(23);view.setTextColor(Color.WHITE);view.setGravity(Gravity.CENTER);
+  TextView view=new TextView(this);view.setText(SYNC_WIZARD_ICON);view.setTextSize(23);view.setTextColor(Color.WHITE);view.setGravity(Gravity.CENTER);
   GradientDrawable bg=new GradientDrawable();bg.setColor(0xff6840a0);bg.setCornerRadius(100);view.setBackground(bg);view.setAlpha(.88f);
   int size=(int)(52*getResources().getDisplayMetrics().density);
   params=new WindowManager.LayoutParams(size,size,Build.VERSION.SDK_INT>=26?WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY:WindowManager.LayoutParams.TYPE_PHONE,WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL|WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,PixelFormat.TRANSLUCENT);
@@ -359,12 +361,11 @@ public final class FloatingSyncService extends Service {
  private void flashBubble(boolean success){
   if(!(bubble instanceof TextView))return;
   TextView text=(TextView)bubble;
-  text.setText(success?"✓":"!");
+  // Keep the wizard visible even during a success or error flash.
   GradientDrawable shape=(GradientDrawable)text.getBackground();
   shape.setColor(success?0xff267c57:0xffa33b53);
   text.postDelayed(()->{
    if(bubble==text){
-    text.setText("⚔");
     shape.setColor(0xff6840a0);
    }
   },1200);
