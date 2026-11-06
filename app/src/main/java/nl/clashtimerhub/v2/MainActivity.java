@@ -797,7 +797,7 @@ public final class MainActivity extends Activity {
   for(int i=0;i<shown;i++){
    JSONObject o=pending.get(i);
    long finish=effectiveFinish(o);
-   String name=cleanName(o.optString("name")),who=o.optString("account");
+   String name=cleanName(ClashNames.displayName(o)),who=o.optString("account");
    TextView row=label(finishAt(finish)+"  ·  "+displayAccount(who)+"\n"+name,12);
    row.setTextColor(0xfff1debd);row.setBackground(clashSurface(0xff2e2340,0xff53416a,10));
    LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(0,dp(2),0,dp(2));parent.addView(row,lp);
@@ -931,7 +931,7 @@ public final class MainActivity extends Activity {
   long finish=effectiveFinish(o),remain=Math.max(0,(finish-System.currentTimeMillis()+999)/1000);
   LinearLayout card=new LinearLayout(this);card.setOrientation(1);card.setPadding(dp(10),dp(5),dp(10),dp(5));card.setBackground(shape(remain<=1800?0xff46351f:0xff30243e,12));card.setTag(finish);
   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(dp(2),dp(3),dp(2),dp(3));parent.addView(card,lp);
-  String upgradeName=cleanName(o.optString("name"));
+  String upgradeName=cleanName(ClashNames.displayName(o));
   if(showUpgradeIcon){
    LinearLayout heading=new LinearLayout(this);heading.setOrientation(0);
    heading.setGravity(android.view.Gravity.CENTER_VERTICAL);
@@ -1174,7 +1174,7 @@ public final class MainActivity extends Activity {
    for(JSONObject o:upgrades){
     if(!ac.equals(o.optString("account")))continue;
     long remain=Math.max(0,(o.optLong("finish")-now+999)/1000);
-    section.append("• ").append(o.optString("name")).append(" [").append(o.optString("category")).append("] — ").append(remain==0?"Gereed":format(remain)).append("\n");
+    section.append("• ").append(ClashNames.displayName(o)).append(" [").append(o.optString("category")).append("] — ").append(remain==0?"Gereed":format(remain)).append("\n");
     count++;
    }
    if(section.length()>0)out.append("\n").append(ac).append("\n").append(section);
@@ -1288,7 +1288,7 @@ public final class MainActivity extends Activity {
    end.setGravity(android.view.Gravity.CENTER_VERTICAL);end.setPadding(dp(6),0,dp(3),0);
    card.addView(end,new LinearLayout.LayoutParams(-1,dp(26)));
 
-   String itemName=first==null?"Geen actieve builder":"⚒  "+cleanName(first.optString("name"));
+   String itemName=first==null?"Geen actieve builder":"⚒  "+cleanName(ClashNames.displayName(first));
    int lab=0,pets=0;
     for(JSONObject upgrade:upgrades)if(ac.equals(upgrade.optString("account"))&&effectiveFinish(upgrade)>now){
      if("Laboratorium".equals(upgrade.optString("category")))lab++;
@@ -1348,7 +1348,7 @@ public final class MainActivity extends Activity {
     if(!ac.equals(o.optString("account"))||!"Bouwers".equals(o.optString("category")))continue;
     long finish=effectiveFinish(o);if(finish<soonest){soonest=finish;earliest=o;}
    }
-   TextView line=label(displayAccount(ac)+"  ·  "+(earliest==null?"Geen builder bekend":cleanName(earliest.optString("name"))+"  ·  "+(soonest<=now?"Gereed":format((soonest-now+999)/1000))),16);
+   TextView line=label(displayAccount(ac)+"  ·  "+(earliest==null?"Geen builder bekend":cleanName(ClashNames.displayName(earliest))+"  ·  "+(soonest<=now?"Gereed":format((soonest-now+999)/1000))),16);
    line.setBackground(shape(0xff30243e,12));list.addView(line);
   }
   ScrollView scroll=new ScrollView(this);scroll.addView(list);
@@ -1411,11 +1411,11 @@ public final class MainActivity extends Activity {
    for(JSONObject o:upgrades){
     if(!ac.equals(o.optString("account"))||effectiveFinish(o)<=now)continue;
     String type=o.optString("category");
-    if("Bouwers".equals(type)){builders++;if(effectiveFinish(o)<soonest){soonest=effectiveFinish(o);name=o.optString("name");}}
+    if("Bouwers".equals(type)){builders++;if(effectiveFinish(o)<soonest){soonest=effectiveFinish(o);name=ClashNames.displayName(o);}}
     else if("Laboratorium".equals(type))lab++;
     else if("Pets".equals(type))pets++;
    }
-   String next=soonest==Long.MAX_VALUE?"Geen actieve builder":cleanName(name)+" · "+format((soonest-now+999)/1000);
+   String next=soonest==Long.MAX_VALUE?"Geen actieve builder":cleanName(ClashNames.resolvedName(name,-1L))+" · "+format((soonest-now+999)/1000);
    TextView line=label(displayAccount(ac)+"\n"+next+"\n"+builders+" bouwers bezig · "+lab+" lab · "+pets+" pets",15);
    line.setBackground(shape(0xff30243e,12));
    LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(0,dp(4),0,dp(4));list.addView(line,lp);
@@ -1427,7 +1427,7 @@ public final class MainActivity extends Activity {
  private void editTimer(JSONObject o){
   LinearLayout form=new LinearLayout(this);form.setOrientation(1);form.setPadding(dp(16),dp(8),dp(16),0);
   EditText n=new EditText(this),t=new EditText(this);
-  n.setSingleLine(true);n.setText(cleanName(o.optString("name")));n.setHint(t("Naam"));
+  n.setSingleLine(true);n.setText(cleanName(ClashNames.displayName(o)));n.setHint(t("Naam"));
   t.setSingleLine(true);t.setHint(t("Bijv. 2d 5h"));long remaining=Math.max(0,(effectiveFinish(o)-System.currentTimeMillis()+999)/1000);
   t.setText(format(remaining));form.addView(n);form.addView(t);
   android.app.AlertDialog dialog=new android.app.AlertDialog.Builder(this).setTitle(t("Timer bewerken")).setView(form)
@@ -1442,7 +1442,7 @@ public final class MainActivity extends Activity {
  }
  private void confirmDelete(JSONObject o){
   new android.app.AlertDialog.Builder(this).setTitle(t("Timer verwijderen?"))
-   .setMessage(o.optString("name")).setPositiveButton(t("Verwijderen"),(d,w)->{upgrades.remove(o);persist();showTimers();})
+   .setMessage(ClashNames.displayName(o)).setPositiveButton(t("Verwijderen"),(d,w)->{upgrades.remove(o);persist();showTimers();})
    .setNegativeButton(t("Annuleren"),null).show();
  }
  private void editAccount(){EditText e=new EditText(this);e.setSingleLine(true);new android.app.AlertDialog.Builder(this).setTitle(t("Nieuw account")).setView(e).setPositiveButton(t("Toevoegen"),(d,w)->{String s=e.getText().toString().trim();if(!s.isEmpty()&&!accounts.contains(s)){accounts.add(s);selectedAccount=s;persist();draw();}}).setNegativeButton(t("Annuleren"),null).show();}
@@ -1480,7 +1480,7 @@ public final class MainActivity extends Activity {
     nextFinish=Math.min(nextFinish,candidate.optLong("finish"));
   }
   for(JSONObject o:upgrades){
-   String name=cleanName(o.optString("name")),ac=o.optString("account"),cat=o.optString("category");
+   String name=cleanName(ClashNames.displayName(o)),ac=o.optString("account"),cat=o.optString("category");
    if(!ac.equals(chosenAccount)||!cat.equals(chosenCategory))continue;
    if(o.optLong("finish")<=now)continue;
    count++;long remain=Math.max(0,(o.optLong("finish")-now+999)/1000);
