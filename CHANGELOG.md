@@ -1,5 +1,23 @@
 # ClashTimerHub release notes
 
+## Instelbare All Timers-widget met boosted buildersortering — 6 november 2026
+
+### NL
+- De standaardkolomvolgorde is Research, Pets, Builders; elke categorie houdt het eigen aftelklokje en de eigen eindkloktijd strak bij elkaar.
+- De widget sorteert accounts standaard op de eerstvolgende bouwer die klaar is, inclusief de voorspelde invloed van Builder Potions. Gereed-voor-sync bouwers staan bovenaan.
+- Per widget afzonderlijk in te stellen: kolomvolgorde met ↑/↓, sortering op volgende bouwer/alfabetisch/eigen volgorde, alle of geselecteerde accounts, eigen accountvolgorde en helperweergave.
+- Open configuratie via de pijl in de widget, bij toevoegen via Android of vanuit Instellingen → Widget instellen in de app.
+- Groen betekent een al potion-gecorrigeerde echte resterende duur en bijbehorende ingekorte eindkloktijd. Gewone waarden blijven goud en lavendel, MAX-vinkjes blijven groen.
+- De bestaande Potion-alarmen rekenen met dezelfde onderliggende Builder/Research Potion-voorspelling en worden bij sync opnieuw ingesteld. De aangepaste widgetsortering verandert de alarmtijden niet.
+- Behoud alle geïnstalleerde widget-ID's, originele JSON, andere widgets, accountinstellingen, app-ID en ondertekening.
+
+### EN
+- Default All Timers category order is Research, Pets, Builders, keeping each countdown tightly paired with its actual finish clock.
+- Sort by earliest Potion-adjusted builder completion, with completed-but-awaiting-sync first. Alternative per-widget sort modes: alphabetical or manual.
+- Per-widget configuration includes draggable via arrow category order, all/selected accounts, manual account ordering and helpers visibility.
+- Configuration opens from the widget arrow, Android add-widget flow and the app settings.
+- Keep predicted realtime boost-aware countdowns green and normal values gold/lavender; preserve checked MAX indicators, existing alarms and app identity.
+
 ## All Timers: categorieparen op één plek — 6 november 2026
 
 ### NL

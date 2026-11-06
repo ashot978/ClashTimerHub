@@ -666,9 +666,12 @@ public final class MainActivity extends Activity {
   for(int i=0;i<ids.length;i++){
    int widgetId=ids[i],kind=WidgetV7.kind(this,widgetId);
    String type=kind==WidgetV7.SYNC?"Sync":
-    kind==WidgetV7.MINI?"Mini":kind==WidgetV7.SINGLE?"Account":"Multi-account";
+    kind==WidgetV7.MINI?"Mini":kind==WidgetV7.SINGLE?"Account":
+     kind==WidgetV7.ALL_TIMERS?"All Timers":"Multi-account";
    String account=widgetPreferences.getString("account_"+widgetId,"");
    String details=kind==WidgetV7.SYNC?"Floating Sync":
+    kind==WidgetV7.ALL_TIMERS?(AllTimersWidgetSettings.all(this,widgetId)?
+     "Alle accounts":"Accountselectie"):
     kind==WidgetV7.MULTI?(widgetPreferences.getBoolean("all_"+widgetId,true)?
      "Alle accounts":"Accountselectie"):
      (account.isEmpty()?"Niet ingesteld":AppData.displayName(this,account));
@@ -679,7 +682,8 @@ public final class MainActivity extends Activity {
    .setNegativeButton(t("Annuleren"),null).show();
  }
  private void openWidgetSettings(int id){
-  Intent intent=new Intent(this,WidgetConfigActivity.class);
+  Intent intent=new Intent(this,WidgetV7.kind(this,id)==WidgetV7.ALL_TIMERS?
+    AllTimersConfigActivity.class:WidgetConfigActivity.class);
   intent.putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_ID,id);
   startActivity(intent);
  }

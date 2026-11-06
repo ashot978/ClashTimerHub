@@ -12,7 +12,7 @@ import java.util.*;
 
 /** Shared presentation engine for V7 multi, account, and mini home widgets. */
 final class WidgetV7 {
- static final int MULTI=0, SINGLE=1, MINI=2, SYNC=3;
+ static final int MULTI=0, SINGLE=1, MINI=2, SYNC=3, ALL_TIMERS=4;
  private WidgetV7(){}
  static final class Status {
   String account;
@@ -27,12 +27,13 @@ final class WidgetV7 {
   if(name.equals(MiniWidget.class.getName()))return MINI;
   if(name.equals(SyncWidget.class.getName()))return SYNC;
   if(name.equals(AccountWidget.class.getName()))return SINGLE;
+  if(name.equals(AllTimersTestWidget.class.getName()))return ALL_TIMERS;
   return MULTI;
  }
  static int[] allIds(Context ctx){
   AppWidgetManager manager=AppWidgetManager.getInstance(ctx);
   ArrayList<Integer> ids=new ArrayList<>();
-  Class<?>[] providers={TimerWidget.class,MiniWidget.class,AccountWidget.class,SyncWidget.class};
+  Class<?>[] providers={TimerWidget.class,MiniWidget.class,AccountWidget.class,SyncWidget.class,AllTimersTestWidget.class};
   for(Class<?> provider:providers)for(int id:manager.getAppWidgetIds(new android.content.ComponentName(ctx,provider)))ids.add(id);
   int[] result=new int[ids.size()];for(int i=0;i<result.length;i++)result[i]=ids.get(i);
   return result;
