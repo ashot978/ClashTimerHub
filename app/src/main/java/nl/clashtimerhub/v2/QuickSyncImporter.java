@@ -15,7 +15,7 @@ public final class QuickSyncImporter {
   JSONObject json=new JSONObject(raw.substring(start,end+1));
   // Reject truncated or malformed snapshots before touching previously stored timers.
   int availableSections=0;
-  for(String section:new String[]{"buildings","heroes","units","spells","pets","traps"}){
+  for(String section:new String[]{"buildings","heroes","units","spells","siege_machines","pets","traps"}){
    if(!json.has(section))continue;
    if(!(json.opt(section) instanceof JSONArray))
     throw new IllegalArgumentException("Ongeldige sectie: "+section+". Bestaande timers blijven behouden.");
@@ -70,21 +70,33 @@ public final class QuickSyncImporter {
     "Laboratorium".equals(cat)?json.has("units")&&json.has("spells"):
     json.has("buildings")&&json.has("heroes")&&json.has("traps");
    if(!present)throw new IllegalArgumentException("Export mist "+cat+"; eerdere timers zijn niet overschreven.");
+   // A full export with a Goblin Researcher timer must retain the siege-machine
+   // section; do not silently erase that research from a partial export.
+   if("Laboratorium".equals(cat)&&!json.has("siege_machines")){
+    for(int index=0;index<oldUpgrades.length();index++){
+     JSONObject previous=oldUpgrades.optJSONObject(index);
+     if(previous!=null&&account.equals(previous.optString("account"))
+       &&previous.optBoolean("exported",false)
+       &&previous.optString("syncKey","").startsWith("siege_machines/")
+       &&previous.optLong("finish")>now)
+      throw new IllegalArgumentException("Export mist siege_machines; bestaand Goblin-onderzoek blijft behouden.");
+    }
+   }
   }
   JSONArray parsed=new JSONArray();
-  String[] sections={"buildings","heroes","units","spells","pets","traps"};
+  String[] sections={"buildings","heroes","units","spells","siege_machines","pets","traps"};
   for(String section:sections){
    JSONArray arr=json.optJSONArray(section);if(arr==null)continue;
    for(int i=0;i<arr.length();i++){
     JSONObject entry=arr.optJSONObject(i);if(entry==null)continue;
     long id=entry.optLong("data",-1);if(id<0)continue;
-    String category="pets".equals(section)?"Pets":("units".equals(section)||"spells".equals(section))?"Laboratorium":"Bouwers";
+    String category="pets".equals(section)?"Pets":("units".equals(section)||"spells".equals(section)||"siege_machines".equals(section))?"Laboratorium":"Bouwers";
     JSONArray types=entry.optJSONArray("types");
     if(types!=null)for(int t=0;t<types.length();t++){
      JSONObject type=types.optJSONObject(t);if(type==null)continue;
      JSONArray modules=type.optJSONArray("modules");if(modules==null)continue;
      for(int m=0;m<modules.length();m++){
-      JSONObject module=modules.optJSONObject(m);if(module!=null)add(parsed,account,category,module.optLong("data",-1),module.optLong("timer"),timestamp,tag,section+"/module/"+id+"/"+t+"/"+m);
+      JSONObject module=modules.optJSONObject(m);if(module!=null)add(parsed,account,category,module.optLong("data",-1),module.optLong("timer"),timestamp,tag,section+"/module/"+id+"/"+t+"/"+m,module.optBoolean("extra",false)||entry.optBoolean("extra",false));
      }
     }
     JSONArray timers=entry.optJSONArray("timers");
@@ -92,9 +104,9 @@ public final class QuickSyncImporter {
      for(int j=0;j<timers.length();j++){
       Object value=timers.opt(j);
       long seconds=value instanceof JSONObject?((JSONObject)value).optLong("timer"):timers.optLong(j);
-      add(parsed,account,category,id,seconds,timestamp,tag,section+"/timer/"+id+"/"+j);
+      add(parsed,account,category,id,seconds,timestamp,tag,section+"/timer/"+id+"/"+j,entry.optBoolean("extra",false));
      }
-    }else add(parsed,account,category,id,entry.optLong("timer"),timestamp,tag,section+"/item/"+id+"/"+i);
+    }else add(parsed,account,category,id,entry.optLong("timer"),timestamp,tag,section+"/item/"+id+"/"+i,entry.optBoolean("extra",false));
    }
   }
   // Count actual differences against the previous export. Do not infer
@@ -161,6 +173,11 @@ public final class QuickSyncImporter {
   // retain the last known helper state instead of erasing it.
   String helperJson=HelperTracker.merged(prefs,json,account,timestamp);
   if(helperJson!=null)editor.putString(HelperTracker.KEY,helperJson);
+  // When Clash provides its own active lab boost duration, reconcile the
+  // independent Research Potion timer within this same atomic account sync.
+  // Absent/zero boost metadata never resets a user-entered Potion countdown.
+  String researchBoost=ResearchPotionTracker.mergedFromExport(prefs,json,account,timestamp,now);
+  if(researchBoost!=null)editor.putString(ResearchPotionTracker.KEY,researchBoost);
   if(!editor.commit())throw new IllegalStateException("Opslaan mislukt");
   TimerWidget.schedule(context);
   // Run Drive backup independently: it must never make a successful Clash sync fail.
@@ -168,7 +185,7 @@ public final class QuickSyncImporter {
   return status;
  }
 
- private static void add(JSONArray out,String account,String category,long id,long seconds,long timestamp,String tag,String key)throws JSONException{
+ private static void add(JSONArray out,String account,String category,long id,long seconds,long timestamp,String tag,String key,boolean extra)throws JSONException{
   if(id<0||seconds<=0)return;
   long finish=timestamp+seconds*1000L;
   if(finish<=System.currentTimeMillis())return;
@@ -177,6 +194,8 @@ public final class QuickSyncImporter {
   timer.put("id",stable);timer.put("syncKey",key);timer.put("account",account);
   timer.put("category",category);timer.put("name",ClashNames.name(id));
   timer.put("finish",finish);timer.put("exported",true);timer.put("sourceId",id);
+  // extra=true flags a Goblin Researcher when attached to research data.
+  if(extra)timer.put("extra",true);
   out.put(timer);
  }
 }

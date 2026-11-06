@@ -1,5 +1,22 @@
 # ClashTimerHub release notes
 
+## Goblin Researcher en actieve Research Potion uit de JSON — 6 november 2026
+
+### NL
+- De JSON-import verwerkt nu ook siege_machines als Laboratorium-upgrades. Hierdoor wordt Goblin Researcher-onderzoek, zoals Battle Drill, zichtbaar in de Research-widget, de individuele voorspellingen en de bijbehorende eindtijdmeldingen.
+- De markering extra=true blijft bewaard; in het onderzoeksdetail staat dan expliciet Goblin Researcher.
+- Het echte veld boosts.lab_boost uit de export bevat resterende onderzoekboost-seconden. Bij een nieuwe sync corrigeert de app hiermee de Research Potion-aftelling en de nieuwe onderzoeks-eindtijden.
+- Automatisch verversen van Research Potion-tijd gebeurt alleen bij een geldige, positieve boostduur; ontbrekende of nulwaarden wissen de onafhankelijk bijgehouden boosttijd niet.
+- Een onvolledige export zonder siege_machines mag een eerder actief Goblin-onderzoek niet stilzwijgend verwijderen.
+- De bestaande Builder Potion, andere timers, accountnamen, normale meldingen en ondertekening blijven intact.
+
+### EN
+- Parse siege_machines as Laboratory research, including concurrent Goblin Researcher upgrades such as Battle Drill. Research widgets, per-upgrade forecasts and completion notifications now see these timers.
+- Preserve the extra=true flag and explicitly label Goblin Researcher in the research detail view.
+- Reconcile independent Research Potion countdowns using positive boosts.lab_boost seconds and the original export timestamp, without resetting missing/zero values.
+- Prevent partial exports lacking siege_machines from silently erasing an existing Goblin Researcher timer.
+- Keep Builder Potions, other account data, normal notifications and the signing identity unchanged.
+
 ## Potion-aftellingen blijven onafhankelijk na synchronisatie — 6 november 2026
 
 ### NL

@@ -279,6 +279,8 @@ public final class ResearchBoostEditorActivity extends Activity {
    String title=item.optString("name",tr("Upgrade","Upgrade"));
    int index=seen.getOrDefault(title,0)+1;seen.put(title,index);
    if(repeated.getOrDefault(title,0)>1)title+="  #"+index;
+   if(item.optBoolean("extra",false))
+    title+=tr(" · Goblin-onderzoeker"," · Goblin Researcher");
    LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
    card.setBackgroundColor(0xff2e2040);
    card.setPadding(dp(12),dp(9),dp(12),dp(9));
