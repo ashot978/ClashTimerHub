@@ -9,6 +9,8 @@ final class I18n {
  static{
   LinkedHashMap<String,String> p=EN;
   p.put("Onbekende speler:","Unknown player:");
+  p.put("Potion: minuten vóór versnelde upgrade klaar (0 = uit)","Potion: minutes before boosted upgrade completes (0 = off)");
+  p.put("Potion: melding zodra versnelde upgrade klaar is","Potion: notify when boosted upgrade completes");
   p.put("aan account","to account");
   p.put("Koppel","Link");
   p.put("bouwers","builders");

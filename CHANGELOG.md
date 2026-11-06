@@ -1,5 +1,17 @@
 # ClashTimerHub release notes
 
+## Alle meldingen in één venster met twee potion-opties — 6 november 2026
+
+### NL
+- Samengevoegde meldingsinstellingen: verwijder het aparte Potion-venster en de Potion-alarmtest.
+- Twee opties voor zowel Builder als Research Potions: X minuten voor de aangepaste eindtijd (0 = uit) en melding op de aangepaste eindtijd.
+- Vertalingen Nederlands/Engels toegevoegd. Back-ups bewaren beide instellingen en oudere back-ups blijven leesbaar.
+
+### EN
+- Merge notification preferences into one dialog and remove separate Potion settings and test.
+- Add only two settings for both Potion types: X-minute warning before boosted upgrade completion (0 = off) and notification at boosted completion.
+- English/Dutch translations and backup compatibility are preserved.
+
 ## Instelbare potion-beïnvloede upgrade-eindtijdmeldingen — 6 november 2026
 
 ### NL

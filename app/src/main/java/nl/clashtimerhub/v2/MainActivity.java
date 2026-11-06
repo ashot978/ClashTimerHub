@@ -394,16 +394,7 @@ public final class MainActivity extends Activity {
   settingsItem(sync,"⚔","Zwevende plakknop",getPreferences(0).getBoolean("floatingEnabled",false)?"Actief · tik = sync · dubbel tik = export":"Uit · tik om in te schakelen",()->{toggleFloatingSync();draw();});
   settingsItem(sync,"▤","Synchroniseer vanaf klembord","Importeer een gekopieerde Clash-export",()->importClipboard());
   LinearLayout notifications=settingsSection(left,"♧  MELDINGEN","Upgrade-alarmen en tests");
-  settingsItem(notifications,"♧","Meldingen instellen","Gewone upgrade-eindtijden en waarschuwingen",()->notificationSettings());
-  settingsItem(notifications,"⚡","Potion-meldingen instellen",
-   "Versnelde eindtijden, los van gewone meldingen en instelbaar per account",
-   ()->potionNotificationSettings());
-  settingsItem(notifications,"◷","Potion-alarmtest over 1 minuut",
-   "Controleer het afzonderlijke Potion-alarmkanaal",()->{
-    String result=PotionCompletionAlarm.scheduleTest(this);
-    new android.app.AlertDialog.Builder(this).setTitle(t("Potion-alarmtest"))
-     .setMessage(t(result)).setPositiveButton(t("OK"),null).show();
-   });
+  settingsItem(notifications,"♧","Meldingen instellen","Gereedmelding en waarschuwingen",()->notificationSettings());
   settingsItem(notifications,"✓","Toestemmingen controleren",
    PermissionWizard.grantedCount(this)+"/4 actief · meldingen, zwevende knop, alarmen en app-updates",
    ()->{if(permissionWizard==null)permissionWizard=new PermissionWizard(this);permissionWizard.start(true);});
@@ -969,127 +960,69 @@ public final class MainActivity extends Activity {
   toast("Testmelding verzonden. Controleer je meldingenpaneel.");
  }
  private void notificationSettings(){
-  android.content.SharedPreferences prefs=getPreferences(0);
-  LinearLayout panel=new LinearLayout(this);panel.setOrientation(LinearLayout.VERTICAL);panel.setPadding(dp(16),dp(8),dp(16),dp(8));
-  CheckBox enabled=new CheckBox(this);enabled.setText(t("Meldingen inschakelen"));enabled.setChecked(prefs.getBoolean("notifyEnabled",true));panel.addView(enabled);
-  CheckBox completed=new CheckBox(this);completed.setText(t("Melding zodra upgrade klaar is"));completed.setChecked(prefs.getBoolean("notifyOnFinish",true));panel.addView(completed);
+  android.content.SharedPreferences prefs=AppData.prefs(this);
+  LinearLayout panel=new LinearLayout(this);
+  panel.setOrientation(LinearLayout.VERTICAL);
+  panel.setPadding(dp(16),dp(8),dp(16),dp(8));
+  CheckBox enabled=new CheckBox(this);
+  enabled.setText(t("Meldingen inschakelen"));enabled.setChecked(prefs.getBoolean("notifyEnabled",true));
+  panel.addView(enabled);
+  CheckBox completed=new CheckBox(this);
+  completed.setText(t("Melding zodra upgrade klaar is"));completed.setChecked(prefs.getBoolean("notifyOnFinish",true));
+  panel.addView(completed);
   panel.addView(label("Waarschuw mij zoveel minuten vooraf (0 = uit)",13));
-  EditText lead=new EditText(this);lead.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);lead.setSingleLine(true);
-  lead.setText(String.valueOf(prefs.getInt("notifyLeadMinutes",15)));lead.setSelectAllOnFocus(true);panel.addView(lead);
+  EditText lead=new EditText(this);
+  lead.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);lead.setSingleLine(true);
+  lead.setText(String.valueOf(prefs.getInt("notifyLeadMinutes",15)));
+  lead.setSelectAllOnFocus(true);panel.addView(lead);
   panel.addView(label("Bijvoorbeeld 5, 10, 30, 45 of 120 minuten. Maximaal 10080 (7 dagen).",12));
+  // Exactly two additional options for Builder and Research Potion boosts.
+  LinearLayout potionRow=new LinearLayout(this);
+  potionRow.setOrientation(LinearLayout.HORIZONTAL);
+  potionRow.setGravity(android.view.Gravity.CENTER_VERTICAL);
+  android.widget.TextView potionLabel=label("Potion: minuten vóór versnelde upgrade klaar (0 = uit)",13);
+  potionLabel.setPadding(dp(12),dp(7),dp(4),dp(7));
+  potionRow.addView(potionLabel,new LinearLayout.LayoutParams(0,-2,1));
+  EditText potionLead=new EditText(this);
+  potionLead.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);potionLead.setSingleLine(true);
+  potionLead.setText(String.valueOf(prefs.getInt("potionNotifyLeadMinutes",0)));
+  potionLead.setSelectAllOnFocus(true);
+  potionLead.setContentDescription(t("Potion: minuten vóór versnelde upgrade klaar (0 = uit)"));
+  potionRow.addView(potionLead,new LinearLayout.LayoutParams(dp(78),dp(54)));
+  panel.addView(potionRow);
+  CheckBox potionFinish=new CheckBox(this);
+  potionFinish.setText(t("Potion: melding zodra versnelde upgrade klaar is"));
+  potionFinish.setChecked(prefs.getBoolean("potionNotifyOnFinish",prefs.getBoolean("potionNotifyEnabled",true)));
+  panel.addView(potionFinish);
   if(android.os.Build.VERSION.SDK_INT>=31){
    android.app.AlarmManager alarm=(android.app.AlarmManager)getSystemService(ALARM_SERVICE);
    if(alarm!=null&&!alarm.canScheduleExactAlarms()){
     Button precise=new Button(this);precise.setText(t("Sta exacte alarmen toe"));
     precise.setOnClickListener(v->{
-     try{startActivity(new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,android.net.Uri.parse("package:"+getPackageName())));}
-     catch(Exception e){toast("Open de alarmtoestemming via Android-instellingen");}
-    });
-    panel.addView(precise);
+     try{startActivity(new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+      android.net.Uri.parse("package:"+getPackageName())));}
+     catch(Exception error){toast(t("Open de alarmtoestemming via Android-instellingen"));}
+    });panel.addView(precise);
    }
   }
-  new android.app.AlertDialog.Builder(this).setTitle(t("Meldingen instellen")).setView(panel)
+  ScrollView scroll=new ScrollView(this);scroll.addView(panel);
+  new android.app.AlertDialog.Builder(this).setTitle(t("Meldingen instellen")).setView(scroll)
    .setPositiveButton(t("Opslaan"),(d,w)->{
-    int minutes=15;
+    int minutes=15,boostMinutes=0;
     try{minutes=Integer.parseInt(lead.getText().toString().trim());}catch(Exception ignored){}
+    try{boostMinutes=Integer.parseInt(potionLead.getText().toString().trim());}catch(Exception ignored){}
     minutes=Math.max(0,Math.min(10080,minutes));
+    boostMinutes=Math.max(0,Math.min(10080,boostMinutes));
     prefs.edit().putBoolean("notifyEnabled",enabled.isChecked())
-     .putBoolean("notifyOnFinish",completed.isChecked()).putInt("notifyLeadMinutes",minutes).apply();
-    TimerWidget.schedule(this);toast("Meldingen opgeslagen");
+     .putBoolean("notifyOnFinish",completed.isChecked()).putInt("notifyLeadMinutes",minutes)
+     .putInt("potionNotifyLeadMinutes",boostMinutes)
+     .putBoolean("potionNotifyOnFinish",potionFinish.isChecked()).apply();
+    TimerWidget.schedule(this);toast(t("Meldingen opgeslagen"));
    })
    .setNeutralButton(t("Android-instellingen"),(d,w)->{
     Intent i=new Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS);
     i.putExtra(android.provider.Settings.EXTRA_APP_PACKAGE,getPackageName());startActivity(i);
    }).setNegativeButton(t("Annuleren"),null).show();
- }
-
- /** Notification preferences for potion-affected upgrades, separate from normal timers. */
- private void potionNotificationSettings(){
-  android.content.SharedPreferences prefs=AppData.prefs(this);
-  LinearLayout panel=new LinearLayout(this);
-  panel.setOrientation(LinearLayout.VERTICAL);
-  panel.setPadding(dp(16),dp(8),dp(16),dp(12));
-  CheckBox enabled=new CheckBox(this);
-  enabled.setText(t("Potion-upgrades gereed melden"));
-  enabled.setChecked(prefs.getBoolean("potionNotifyEnabled",true));
-  panel.addView(enabled);
-  CheckBox builder=new CheckBox(this);
-  builder.setText(t("Builder Potion: versnelde bouwer gereed"));
-  builder.setChecked(prefs.getBoolean("potionNotifyBuilders",true));
-  panel.addView(builder);
-  CheckBox research=new CheckBox(this);
-  research.setText(t("Research Potion: versneld onderzoek gereed"));
-  research.setChecked(prefs.getBoolean("potionNotifyResearch",true));
-  panel.addView(research);
-  android.widget.TextView message=label(
-   "Melding op de NIEUWE, door de potion berekende eindtijd. Geen melding wanneer de potion afloopt en geen voorafmelding. Gewone meldingen blijven afzonderlijk.",12);
-  message.setPadding(0,dp(8),0,dp(14));panel.addView(message);
-  android.widget.TextView title=label("Kies accounts",15);
-  title.setTypeface(null,android.graphics.Typeface.BOLD);
-  panel.addView(title);
-  LinkedHashMap<String,CheckBox> accountControls=new LinkedHashMap<>();
-  try{
-   JSONObject stored=new JSONObject(prefs.getString("potionNotifyAccounts","{}"));
-   JSONArray names=new JSONArray(prefs.getString("accounts","[]"));
-   for(int i=0;i<names.length();i++){
-    String key=names.optString(i,"");
-    if(key.isEmpty())continue;
-    CheckBox accountOption=new CheckBox(this);
-    accountOption.setText(AppData.displayName(this,key));
-    accountOption.setChecked(stored.optBoolean(key,true));
-    accountControls.put(key,accountOption);
-    panel.addView(accountOption);
-   }
-  }catch(Exception error){
-   android.util.Log.w("ClashTimerHub","Could not render Potion account preferences",error);
-   panel.addView(label("Accountinstellingen niet beschikbaar",12));
-  }
-  Runnable updateControls=()->{
-   boolean on=enabled.isChecked();
-   builder.setEnabled(on);research.setEnabled(on);
-   for(CheckBox control:accountControls.values())control.setEnabled(on);
-  };
-  enabled.setOnCheckedChangeListener((button,checked)->updateControls.run());
-  updateControls.run();
-  if(android.os.Build.VERSION.SDK_INT>=31){
-   android.app.AlarmManager manager=(android.app.AlarmManager)getSystemService(ALARM_SERVICE);
-   if(manager!=null&&!manager.canScheduleExactAlarms()){
-    Button allow=new Button(this);
-    allow.setText(t("Sta exacte alarmen toe"));
-    allow.setOnClickListener(v->{
-     try{startActivity(new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
-      android.net.Uri.parse("package:"+getPackageName())));}
-     catch(Exception error){toast("Controleer de exacte alarmtoestemming in Android");}
-    });
-    panel.addView(allow);
-   }
-  }
-  ScrollView scroll=new ScrollView(this);
-  scroll.addView(panel);
-  new android.app.AlertDialog.Builder(this).setTitle(t("Potion-meldingen instellen"))
-   .setView(scroll)
-   .setPositiveButton(t("Opslaan"),(d,w)->{
-    JSONObject choices=new JSONObject();
-    try{
-     choices=new JSONObject(prefs.getString("potionNotifyAccounts","{}"));
-     for(Map.Entry<String,CheckBox> entry:accountControls.entrySet())
-      choices.put(entry.getKey(),entry.getValue().isChecked());
-    }catch(Exception error){
-     android.util.Log.w("ClashTimerHub","Could not persist Potion account preferences",error);
-    }
-    prefs.edit().putBoolean("potionNotifyEnabled",enabled.isChecked())
-     .putBoolean("potionNotifyBuilders",builder.isChecked())
-     .putBoolean("potionNotifyResearch",research.isChecked())
-     .putString("potionNotifyAccounts",choices.toString()).apply();
-    PotionCompletionAlarm.schedule(this);
-    toast("Potion-meldingen opgeslagen");
-   })
-   .setNeutralButton(t("Android-instellingen"),(d,w)->{
-    Intent settings=new Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS);
-    settings.putExtra(android.provider.Settings.EXTRA_APP_PACKAGE,getPackageName());
-    startActivity(settings);
-   })
-   .setNegativeButton(t("Annuleren"),null).show();
  }
  private JSONObject backupPayload()throws JSONException{
   return DriveBackupManager.buildPayload(this);
@@ -1155,15 +1088,13 @@ public final class MainActivity extends Activity {
   edit.putBoolean("notifyEnabled",preferences.optBoolean("notifyEnabled",true));
   edit.putBoolean("notifyOnFinish",preferences.optBoolean("notifyOnFinish",true));
   edit.putInt("notifyLeadMinutes",Math.max(0,Math.min(10080,preferences.optInt("notifyLeadMinutes",15))));
-   if(preferences.has("potionNotifyEnabled"))
-    edit.putBoolean("potionNotifyEnabled",preferences.optBoolean("potionNotifyEnabled",true));
-   if(preferences.has("potionNotifyBuilders"))
-    edit.putBoolean("potionNotifyBuilders",preferences.optBoolean("potionNotifyBuilders",true));
-   if(preferences.has("potionNotifyResearch"))
-    edit.putBoolean("potionNotifyResearch",preferences.optBoolean("potionNotifyResearch",true));
-   JSONObject selected=preferences.optJSONObject("potionNotifyAccounts");
-   if(selected!=null)edit.putString("potionNotifyAccounts",selected.toString());
-  edit.apply();
+   if(preferences.has("potionNotifyOnFinish"))
+    edit.putBoolean("potionNotifyOnFinish",preferences.optBoolean("potionNotifyOnFinish",true));
+   else if(preferences.has("potionNotifyEnabled"))
+    edit.putBoolean("potionNotifyOnFinish",preferences.optBoolean("potionNotifyEnabled",true));
+   if(preferences.has("potionNotifyLeadMinutes"))
+    edit.putInt("potionNotifyLeadMinutes",Math.max(0,Math.min(10080,preferences.optInt("potionNotifyLeadMinutes",0))));
+   edit.apply();
  }
  private void restoreWidgetSettings(JSONArray widgets){
   if(widgets==null)return;
