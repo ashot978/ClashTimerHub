@@ -72,8 +72,6 @@ final class DriveBackupManager {
   preferences.put("notifyEnabled",p.getBoolean("notifyEnabled",true));
   preferences.put("notifyOnFinish",p.getBoolean("notifyOnFinish",true));
   preferences.put("notifyLeadMinutes",p.getInt("notifyLeadMinutes",15));
-   preferences.put("potionNotifyOnFinish",p.getBoolean("potionNotifyOnFinish",p.getBoolean("potionNotifyEnabled",true)));
-   preferences.put("potionNotifyLeadMinutes",p.getInt("potionNotifyLeadMinutes",0));
    data.put("preferences",preferences);
   JSONArray widgets=new JSONArray();
   SharedPreferences wp=context.getSharedPreferences("WidgetPreferences",Context.MODE_PRIVATE);

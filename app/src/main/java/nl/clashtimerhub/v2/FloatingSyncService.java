@@ -56,7 +56,7 @@ public final class FloatingSyncService extends Service {
   if(Build.VERSION.SDK_INT>=29)startForeground(CHANNEL_ID,nb.build(),android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
   else startForeground(CHANNEL_ID,nb.build());
   manager=(WindowManager)getSystemService(WINDOW_SERVICE);
-  TextView view=new TextView(this);view.setText("🧙");view.setTextSize(24);view.setTextColor(Color.WHITE);view.setGravity(Gravity.CENTER);
+  TextView view=new TextView(this);view.setText("⚔");view.setTextSize(23);view.setTextColor(Color.WHITE);view.setGravity(Gravity.CENTER);
   GradientDrawable bg=new GradientDrawable();bg.setColor(0xff6840a0);bg.setCornerRadius(100);view.setBackground(bg);view.setAlpha(.88f);
   int size=(int)(52*getResources().getDisplayMetrics().density);
   params=new WindowManager.LayoutParams(size,size,Build.VERSION.SDK_INT>=26?WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY:WindowManager.LayoutParams.TYPE_PHONE,WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL|WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,PixelFormat.TRANSLUCENT);
@@ -283,8 +283,8 @@ public final class FloatingSyncService extends Service {
   String[] parts=normalized.split("\n",3);
   String first=parts.length>0?parts[0]:"",last=parts.length>1?parts[1]:"";
   int marker=first.indexOf(" ✓ ");
-  String title=success&&marker>0?"✓ "+first.substring(0,marker).trim():
-   success?"✓ Synchronisatie gelukt":"⚠ Synchronisatie mislukt";
+  String title=success&&marker>0?"🧙 ✓ "+first.substring(0,marker).trim():
+   success?"🧙 ✓ Synchronisatie gelukt":"🧙 ⚠ Synchronisatie mislukt";
   String details=success&&marker>0?first.substring(marker+3).trim():first;
   if(details.endsWith(")")){
    int open=details.indexOf(" (");
@@ -349,7 +349,7 @@ public final class FloatingSyncService extends Service {
   shape.setColor(success?0xff267c57:0xffa33b53);
   text.postDelayed(()->{
    if(bubble==text){
-    text.setText("🧙");
+    text.setText("⚔");
     shape.setColor(0xff6840a0);
    }
   },1200);

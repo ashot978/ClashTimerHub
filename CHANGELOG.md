@@ -1,5 +1,19 @@
 # ClashTimerHub release notes
 
+## Eén notificatie-instelling; zwaarden op Sync, wizard alleen in resultaat — 6 november 2026
+
+### NL
+- Meldingsinstellingen zijn niet langer dubbel: alleen aan/uit, melding bij afronding en X minuten vooraf. De tijd is gebaseerd op dezelfde voorspelde eindtijd (inclusief actieve potions) als All Timers.
+- De aparte Potion-notificatieopties en hun uitvoer naar nieuwe back-ups zijn verwijderd. Bestaande data en oude back-ups blijven bruikbaar.
+- Herstel het originele ⚔-icoon op de zwevende Sync-knop, de 1×1 Sync-widget en het menu Synchronisatie. Ook na de tijdelijke ✓/!-flash herstelt de knop naar ⚔.
+- Toon 🧙 uitsluitend in de tijdelijke synchronisatie-resultaatmelding, zowel bij succes als mislukking.
+- De nieuwe uniforme alarmplanner onderdrukt/cancelt oude Potion-alarmen en bouwt één melding per upgrade per gebeurtenissoort op de ingekorte eindtijd.
+
+### EN
+- One common notification settings dialog for normal and Potion-affected upgrades: enable, finish and early minutes.
+- Keep crossed swords on floating and 1x1 Sync buttons and app menu, including after the feedback flash. Show wizard in temporary Sync-result popup only.
+- Old Potion notification settings are no longer shown or saved in new backups; legacy backups and imported timers remain compatible.
+
 ## Behoud interne timerverversing bij widget-opruiming — 6 november 2026
 
 - De oude multi-account-widget wordt niet meer in de widgetkiezer getoond, maar de bijbehorende TimerWidget BroadcastReceiver blijft intern actief voor reeds geplande timerverversingen en alarmrescheduling.
