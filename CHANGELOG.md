@@ -1,5 +1,19 @@
 # ClashTimerHub release notes
 
+## All Timers: categorieparen op één plek — 6 november 2026
+
+### NL
+- Plaats binnen elk account steeds de bijbehorende aftelling en eindkloktijd naast elkaar: bouwersicoon + timer + eindklok, daarna onderzoeksicoon + timer + eindklok, daarna petsicoon + timer + eindklok.
+- Herstel dit in de brede, compacte en smalle layouts. Smal plaatst pets op een derde regel, maar wisselt de kolommen niet door elkaar.
+- Groen betekent dat het getoonde eindmoment al potion-versneld is. De countdown telt de werkelijk resterende uren/minuten/seconden af tot die berekende eindklok; hij loopt dus niet nog eens 10× of 24× versneld.
+- Geen nieuwe bliksem-symbolen, geen timeline; originele iconen, MAX-vinkjes en bestaande Sync ON/OFF blijven behouden. Bestaande prognoseformules en notificaties worden niet veranderd.
+
+### EN
+- Show builder icon/countdown/finish as one adjacent pair, followed by research and pet pairs, across all widget widths.
+- For small widths, the pet pair moves to a third line rather than separating the timers from finish times.
+- Boosted times are already real-world duration until the 10x/24x accelerated predicted finish; the Chronometer counts down at normal speed.
+- Preserve original category icons, MAX states, original boost calculations and Sync toggle.
+
 ## Timerblokken links, kloktijden rechts — geen Timeline of bliksem — 6 november 2026
 
 ### NL

@@ -55,9 +55,10 @@ public final class AllTimersTestService extends RemoteViewsService {
    rv.setTextViewText(R.id.all_account_helpers,
     status.helpers.isEmpty()?"":"🤝 "+status.helpers);
 
-   // The columns have one fixed order in ALL layouts:
-   // three original icon+remaining-time columns to the LEFT;
-   // three wall-clock finish columns together on the RIGHT.
+   // All layouts group each category as icon + boosted-adjusted real-world
+   // remaining countdown + estimated wall-clock finish. Builder (10x) and
+   // Research (24x) boost multipliers are already included by estimateFinish;
+   // Chronometers themselves tick at the normal real-world rate.
    renderTimer(rv,R.id.all_account_builder_clock,R.id.all_account_builder_idle,
     R.id.all_account_builder_end,R.id.all_account_builder_icon,
     status.builderAt,status.ready,status.builderMax,status.builderBoost,"⚒",now);
