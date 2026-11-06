@@ -29,6 +29,11 @@ public final class FloatingSyncService extends Service {
  private View feedback;
  private Runnable feedbackDismiss;
  private boolean shuttingDown=false;
+ // The overlay stays non-focusable except during a user-triggered clipboard read.
+ private boolean syncReading=false;
+ private boolean readScheduled=false;
+ private Runnable focusTimeout;
+
  private int dp(int n){return (int)(n*getResources().getDisplayMetrics().density+0.5f);}
  private void cancelTap(){
   if(pendingTap!=null)holdHandler.removeCallbacks(pendingTap);
@@ -104,6 +109,9 @@ public final class FloatingSyncService extends Service {
    }
   });
   bubble=view;manager.addView(bubble,params);
+  view.getViewTreeObserver().addOnWindowFocusChangeListener(focused->{
+   if(focused&&syncReading)scheduleRead();
+  });
   AppData.prefs(this).edit().putBoolean("floatingEnabled",true).apply();
   TimerWidget.update(this);
  }
@@ -120,7 +128,7 @@ public final class FloatingSyncService extends Service {
   pendingTap=()->{
    pendingTap=null;
    previousTapAt=0;
-   if(!shuttingDown)launchFocusedImport();
+   if(!shuttingDown)beginOverlaySync();
   };
   holdHandler.postDelayed(pendingTap,DOUBLE_TAP_WINDOW_MS);
  }
@@ -179,29 +187,94 @@ public final class FloatingSyncService extends Service {
  }
  private void disableBubble(){
   if(shuttingDown)return;
-  shuttingDown=true;cancelHold();cancelTap();hideDropTarget();
+  shuttingDown=true;cancelHold();cancelTap();releaseOverlayFocus();hideDropTarget();
   AppData.prefs(this).edit().putBoolean("floatingEnabled",false).apply();
   TimerWidget.update(this);
   Toast.makeText(this,I18n.tr(this,"Zwevende plakknop uitgeschakeld"),Toast.LENGTH_SHORT).show();
   stopSelf();
  }
- /**
-  * Android 10+ only allows clipboard reads for the focused app or default IME.
-  * Keep our always-on overlay NOT_FOCUSABLE (Clash chat keyboard stays usable).
-  * A single user tap opens a tiny, transparent focused Activity which reads
-  * the clipboard only after the focus callback and returns immediately.
+ /** Temporarily focus the small floating window to read the clipboard.
+  * No Activity is launched: Clash remains visible during a one-tap Sync.
+  * The overlay always returns to NOT_FOCUSABLE for the chat keyboard.
   */
- private void launchFocusedImport(){
+ private void beginOverlaySync(){
+  if(shuttingDown||syncReading||manager==null||bubble==null||params==null)return;
+  syncReading=true;readScheduled=false;
   try{
-   Intent intent=new Intent(this,QuickImportActivity.class);
-   intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_NO_ANIMATION|
-    Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-   startActivity(intent);
+   bubble.setFocusableInTouchMode(true);
+   params.flags&=~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+   params.flags|=WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+   manager.updateViewLayout(bubble,params);
+   bubble.requestFocus();
+   if(bubble.hasWindowFocus())scheduleRead();
+   focusTimeout=()->{
+    if(syncReading)finishOverlaySync(false,I18n.english(this)?
+     "Clipboard focus unavailable. Try again.":"Klembordfocus niet beschikbaar. Probeer opnieuw.");
+   };
+   holdHandler.postDelayed(focusTimeout,1800L);
   }catch(Exception error){
-   flashBubble(false);
-   showFeedback(I18n.tr(this,"Synchronisatie mislukt\nKon klembordinvoer niet openen"),false);
-   android.util.Log.e("ClashTimerHub","Could not open foreground import",error);
+   android.util.Log.w("ClashTimerHub","Overlay clipboard focus denied",error);
+   finishOverlaySync(false,I18n.english(this)?
+    "Unable to access clipboard focus.":"Kon klembordfocus niet verkrijgen.");
   }
+ }
+ private void scheduleRead(){
+  if(!syncReading||readScheduled)return;
+  readScheduled=true;
+  holdHandler.postDelayed(()->readClipboardOnOverlay(0),80L);
+ }
+ private void readClipboardOnOverlay(int attempt){
+  if(shuttingDown||!syncReading)return;
+  if(bubble==null||!bubble.hasWindowFocus()){
+   if(attempt<6)holdHandler.postDelayed(()->readClipboardOnOverlay(attempt+1),100L);
+   return;
+  }
+  try{
+   android.content.ClipboardManager clipboard=
+    (android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
+   android.content.ClipData clip=clipboard==null?null:clipboard.getPrimaryClip();
+   if(clip==null||clip.getItemCount()==0){
+    if(attempt<4){
+     holdHandler.postDelayed(()->readClipboardOnOverlay(attempt+1),120L);
+     return;
+    }
+    finishOverlaySync(false,I18n.english(this)?
+     "Clipboard unavailable. Copy Clash JSON and tap Sync again.":
+     "Klembord niet beschikbaar. Kopieer de Clash-JSON en tik opnieuw op Sync.");
+    return;
+   }
+   CharSequence value=clip.getItemAt(0).coerceToText(this);
+   if(value==null||value.length()==0){
+    finishOverlaySync(false,I18n.english(this)?
+     "Clipboard is empty. Copy Clash JSON first.":
+     "Klembord is leeg. Kopieer eerst de Clash-JSON.");
+    return;
+   }
+   finishOverlaySync(true,QuickSyncImporter.importJson(this,value.toString()));
+  }catch(Exception error){
+   android.util.Log.w("ClashTimerHub","Focused overlay import failed",error);
+   finishOverlaySync(false,error.getMessage()==null?
+    (I18n.english(this)?"Import failed.":"Import mislukt."):error.getMessage());
+  }
+ }
+ private void releaseOverlayFocus(){
+  if(focusTimeout!=null)holdHandler.removeCallbacks(focusTimeout);
+  focusTimeout=null;syncReading=false;readScheduled=false;
+  if(manager!=null&&bubble!=null&&params!=null){
+   params.flags|=WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+   try{manager.updateViewLayout(bubble,params);}
+   catch(RuntimeException error){android.util.Log.w("ClashTimerHub","Restore overlay focus failed",error);}
+   bubble.setFocusableInTouchMode(false);
+  }
+ }
+ private void finishOverlaySync(boolean success,String message){
+  if(!syncReading)return;
+  releaseOverlayFocus();
+  if(shuttingDown)return;
+  flashBubble(success);
+  showFeedback(success?message:
+   (I18n.english(this)?"Sync failed\n":"Synchronisatie mislukt\n")+
+    (message==null?"":message),success);
  }
  private void showFeedback(String message,boolean success){
   clearFeedback();
@@ -292,7 +365,7 @@ public final class FloatingSyncService extends Service {
   return START_STICKY;
  }
  @Override public void onDestroy(){
-  cancelHold();cancelTap();hideDropTarget();clearFeedback();
+  cancelHold();cancelTap();releaseOverlayFocus();hideDropTarget();clearFeedback();
   if(manager!=null&&bubble!=null){
    try{manager.removeView(bubble);}catch(RuntimeException ignored){}
   }

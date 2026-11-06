@@ -1,5 +1,21 @@
 # ClashTimerHub release notes
 
+## Een-tik Sync zonder game te verlaten — 6 november 2026
+
+### NL
+- Een enkele tik op de zwevende Sync-knop leest de Clash-JSON zonder een Activity te openen of van de game weg te schakelen.
+- De knop krijgt uitsluitend tijdens een expliciete sync heel kort focus voor de Android-klembordbeveiliging.
+- Direct na afloop of een fout wordt FLAG_NOT_FOCUSABLE hersteld, zodat Clash-chat zijn toetsenbord kan gebruiken.
+- Bij weigering van klembordfocus blijft Clash open en verschijnt een foutmelding in de zwevende feedback.
+- Behoud dubbel tikken voor More Settings, het verslepen van de knop en bestaande accounts/timers.
+
+### EN
+- One-tap floating Sync reads Clash JSON without launching an Activity or switching away from the game.
+- The small bubble temporarily requests input focus only while importing the clipboard.
+- Restore FLAG_NOT_FOCUSABLE after success, failure or timeout to preserve Clash chat keyboard.
+- On denied focus, keep Clash open and show overlay feedback.
+- Preserve double-tap More Settings, dragging and all account/timer data.
+
 ## Herstel zwevende Sync-knop en Android klembordfocus — 6 november 2026
 
 ### NL
