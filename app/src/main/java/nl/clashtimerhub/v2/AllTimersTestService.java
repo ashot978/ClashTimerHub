@@ -84,7 +84,7 @@ public final class AllTimersTestService extends RemoteViewsService {
    if(AllTimersWidgetSettings.BUILDERS.equals(category)){
     finish=a.builderAt;ready=a.ready;maxed=a.builderMax;boosted=a.builderBoost;icon="⚒";
    }else if(AllTimersWidgetSettings.PETS.equals(category)){
-    finish=a.petAt;ready=a.petReady;maxed=a.petBoost;icon="🐾";
+    finish=a.petAt;ready=a.petReady;maxed=a.petMax;boosted=a.petBoost;icon="🐾";
    }else{
     finish=a.labAt;ready=a.labReady;maxed=a.labMax;boosted=a.labBoost;icon="🧙";
    }
