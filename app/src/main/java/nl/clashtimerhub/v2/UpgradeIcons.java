@@ -46,7 +46,7 @@ final class UpgradeIcons {
   String key=normalized(name);
   FrameLayout frame=new FrameLayout(activity);
   TextView placeholder=new TextView(activity);
-  placeholder.setText("Pets".equals(category)?"🐾":"Laboratorium".equals(category)?"⚗":"⚒");
+  placeholder.setText("Pets".equals(category)?"🐾":"Laboratorium".equals(category)?"🧙":"⚒");
   placeholder.setTextSize(22);
   placeholder.setGravity(Gravity.CENTER);
   frame.addView(placeholder,new FrameLayout.LayoutParams(-1,-1));
