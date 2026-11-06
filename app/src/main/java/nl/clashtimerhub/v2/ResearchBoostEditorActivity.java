@@ -157,7 +157,7 @@ public final class ResearchBoostEditorActivity extends Activity {
   TextView hint=text(tr("Zelfde volgorde als je oorspronkelijke multi-accountwidget. "+
     "Tik op +1u zodra je in Clash een Research Potion activeert. Tik op een account om de precieze tijd en alle onderzoeksupgrades te bekijken.",
     "Matches your original multi-account widget order. "+
-    "Tap +1h when you activate a Research Potion in Clash. Select an account for exact timing and all builders."),13,MUTED);
+    "Tap +1h when you activate a Research Potion in Clash. Select an account for exact timing and all Laboratory upgrades."),13,MUTED);
   hint.setPadding(0,dp(9),0,dp(15));body.addView(hint);
   ArrayList<String> accounts=WidgetV7.boostAccountOrder(this);
   if(accounts.isEmpty())body.addView(text(tr("Geen accounts beschikbaar","No accounts available"),15,MUTED));
@@ -213,8 +213,8 @@ public final class ResearchBoostEditorActivity extends Activity {
   TextView name=text("⚡ "+AppData.displayName(this,account),22,GOLD);
   name.setTypeface(null,1);name.setPadding(0,dp(12),0,dp(2));body.addView(name);
   TextView hint=text(tr(
-   "Research Potion · 24×. Eén potion = 1 uur boost en maximaal 23 uur tijdwinst per actieve bouwer.",
-   "Research Potion · 24×. One potion = one hour of boost and up to 23 hours saved per active builder."),13,MUTED);
+   "Research Potion · 24×. Eén potion = 1 uur boost en maximaal 23 uur tijdwinst per actieve Laboratory-upgrade.",
+   "Research Potion · 24×. One potion = one hour of boost and up to 23 hours saved per active Laboratory upgrade."),13,MUTED);
   hint.setPadding(0,dp(3),0,dp(10));body.addView(hint);
   TextView current=text(tr("Resterende boosttijd: ","Remaining boost: ")+boostTime(snapshot,now),16,GREEN);
   current.setTypeface(null,1);body.addView(current);
@@ -264,7 +264,7 @@ public final class ResearchBoostEditorActivity extends Activity {
   Collections.sort(list,(a,b)->Long.compare(
    ResearchPotionTracker.estimateFinish(snapshot,a.optLong("finish")),
    ResearchPotionTracker.estimateFinish(snapshot,b.optLong("finish"))));
-  if(list.isEmpty())body.addView(text(tr("Geen actieve bouwer-upgrades. Synchroniseer dit account.",
+  if(list.isEmpty())body.addView(text(tr("Geen actief Laboratory-onderzoek. Synchroniseer dit account.",
    "No active research upgrades. Sync this account."),14,MUTED));
   HashMap<String,Integer> repeated=new HashMap<>();
   for(JSONObject item:list){
