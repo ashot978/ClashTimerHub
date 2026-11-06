@@ -105,7 +105,7 @@ public final class ResearchBoostWidget extends AppWidgetProvider {
       row.setChronometer(R.id.boost_remaining,SystemClock.elapsedRealtime()+left,null,true);
       row.setChronometerCountDown(R.id.boost_remaining,true);
      }
-     row.setTextViewText(R.id.boost_idle,!snapshot.valid?"🧪 !":"🧪 —");
+     row.setTextViewText(R.id.boost_idle,!snapshot.valid?"!":"—");
      row.setTextViewText(R.id.boost_plus60,I18n.english(ctx)?"+1h":"+1u");
      String end=endTime(ctx,soonest,now);
      if(soonest==Long.MAX_VALUE&&ready>0)end="✓ "+ready;
@@ -120,7 +120,7 @@ public final class ResearchBoostWidget extends AppWidgetProvider {
      rv.addView(R.id.boost_widget_rows,row);
     }
     if(shown==0)rv.addView(R.id.boost_widget_rows,new RemoteViews(ctx.getPackageName(),R.layout.widget_empty));
-    rv.setTextViewText(R.id.boost_widget_title,I18n.english(ctx)?"🧪 Research Potion · 24×":"🧪 Research Potion · 24×");
+    rv.setTextViewText(R.id.boost_widget_title,I18n.english(ctx)?"Research Potion · 24×":"Research Potion · 24×");
     rv.setTextViewText(R.id.boost_widget_footer,I18n.english(ctx)?
      "≡ All accounts · tap account to edit boost":
      "≡ Alle accounts · tik om boost te bewerken");

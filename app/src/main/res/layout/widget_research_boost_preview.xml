@@ -4,56 +4,56 @@
  android:orientation="vertical" android:background="@drawable/widget_background" android:padding="3dp">
  <TextView android:layout_width="match_parent" android:layout_height="24dp"
   android:gravity="center_vertical" android:paddingLeft="8dp"
-  android:background="@drawable/widget_row_background" android:text="🧪 Research Potions · 24×"
-  android:textSize="12sp" android:textStyle="bold" android:textColor="#99DDDF"/>
+  android:background="@drawable/widget_row_background" android:text="Research Potions · 24×"
+  android:textSize="12sp" android:textStyle="bold" android:textColor="#FFD783"/>
  
  <LinearLayout android:layout_width="match_parent" android:layout_height="23dp"
   android:orientation="horizontal" android:gravity="center_vertical" android:background="@drawable/widget_row_background">
   <TextView android:layout_width="0dp" android:layout_weight="1.1" android:layout_height="match_parent"
    android:gravity="center_vertical" android:paddingLeft="4dp" android:text="Shotty" android:textSize="10sp" android:textColor="#FFFFFF"/>
   <TextView android:layout_width="0dp" android:layout_weight="0.8" android:layout_height="match_parent"
-   android:gravity="center_vertical" android:text="1h40" android:textSize="10sp" android:textColor="#99DDDF"/>
+   android:gravity="center_vertical" android:text="1h40" android:textSize="10sp" android:textColor="#FFD783"/>
   <TextView android:layout_width="40dp" android:layout_height="21dp" android:gravity="center"
    android:background="@drawable/widget_boost_action" android:text="+1u" android:textColor="#FFFFFF" android:textSize="10sp"/>
   <TextView android:layout_width="0dp" android:layout_weight="1.1" android:layout_height="match_parent"
    android:gravity="right|center_vertical" android:paddingRight="4dp" android:text="14:30"
-   android:textSize="10sp" android:textColor="#99DDDF"/>
+   android:textSize="10sp" android:textColor="#FFD783"/>
  </LinearLayout>
  <LinearLayout android:layout_width="match_parent" android:layout_height="23dp"
   android:orientation="horizontal" android:gravity="center_vertical" android:background="@drawable/widget_row_background">
   <TextView android:layout_width="0dp" android:layout_weight="1.1" android:layout_height="match_parent"
    android:gravity="center_vertical" android:paddingLeft="4dp" android:text="RushShot" android:textSize="10sp" android:textColor="#FFFFFF"/>
   <TextView android:layout_width="0dp" android:layout_weight="0.8" android:layout_height="match_parent"
-   android:gravity="center_vertical" android:text="—" android:textSize="10sp" android:textColor="#99DDDF"/>
+   android:gravity="center_vertical" android:text="—" android:textSize="10sp" android:textColor="#FFD783"/>
   <TextView android:layout_width="40dp" android:layout_height="21dp" android:gravity="center"
    android:background="@drawable/widget_boost_action" android:text="+1u" android:textColor="#FFFFFF" android:textSize="10sp"/>
   <TextView android:layout_width="0dp" android:layout_weight="1.1" android:layout_height="match_parent"
    android:gravity="right|center_vertical" android:paddingRight="4dp" android:text="18:20"
-   android:textSize="10sp" android:textColor="#99DDDF"/>
+   android:textSize="10sp" android:textColor="#FFD783"/>
  </LinearLayout>
  <LinearLayout android:layout_width="match_parent" android:layout_height="23dp"
   android:orientation="horizontal" android:gravity="center_vertical" android:background="@drawable/widget_row_background">
   <TextView android:layout_width="0dp" android:layout_weight="1.1" android:layout_height="match_parent"
    android:gravity="center_vertical" android:paddingLeft="4dp" android:text="AshotRush" android:textSize="10sp" android:textColor="#FFFFFF"/>
   <TextView android:layout_width="0dp" android:layout_weight="0.8" android:layout_height="match_parent"
-   android:gravity="center_vertical" android:text="—" android:textSize="10sp" android:textColor="#99DDDF"/>
+   android:gravity="center_vertical" android:text="—" android:textSize="10sp" android:textColor="#FFD783"/>
   <TextView android:layout_width="40dp" android:layout_height="21dp" android:gravity="center"
    android:background="@drawable/widget_boost_action" android:text="+1u" android:textColor="#FFFFFF" android:textSize="10sp"/>
   <TextView android:layout_width="0dp" android:layout_weight="1.1" android:layout_height="match_parent"
    android:gravity="right|center_vertical" android:paddingRight="4dp" android:text="21:15"
-   android:textSize="10sp" android:textColor="#99DDDF"/>
+   android:textSize="10sp" android:textColor="#FFD783"/>
  </LinearLayout>
  <LinearLayout android:layout_width="match_parent" android:layout_height="23dp"
   android:orientation="horizontal" android:gravity="center_vertical" android:background="@drawable/widget_row_background">
   <TextView android:layout_width="0dp" android:layout_weight="1.1" android:layout_height="match_parent"
    android:gravity="center_vertical" android:paddingLeft="4dp" android:text="Ashotty" android:textSize="10sp" android:textColor="#FFFFFF"/>
   <TextView android:layout_width="0dp" android:layout_weight="0.8" android:layout_height="match_parent"
-   android:gravity="center_vertical" android:text="—" android:textSize="10sp" android:textColor="#99DDDF"/>
+   android:gravity="center_vertical" android:text="—" android:textSize="10sp" android:textColor="#FFD783"/>
   <TextView android:layout_width="40dp" android:layout_height="21dp" android:gravity="center"
    android:background="@drawable/widget_boost_action" android:text="+1u" android:textColor="#FFFFFF" android:textSize="10sp"/>
   <TextView android:layout_width="0dp" android:layout_weight="1.1" android:layout_height="match_parent"
    android:gravity="right|center_vertical" android:paddingRight="4dp" android:text="23:10"
-   android:textSize="10sp" android:textColor="#99DDDF"/>
+   android:textSize="10sp" android:textColor="#FFD783"/>
  </LinearLayout>
  <TextView android:layout_width="match_parent" android:layout_height="17dp" android:gravity="center"
   android:text="Example account times" android:textSize="9sp" android:textColor="#CBB5D9"/>

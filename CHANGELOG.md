@@ -1,5 +1,19 @@
 # ClashTimerHub release notes
 
+## Uniforme Research Potion-widget zonder flask-icoon — 6 november 2026
+
+### NL
+- De Research Potion-widget gebruikt nu dezelfde paars-gouden styling als de Builder Potion-widget, ook in de widgetkiezer.
+- Het 🧪-icoon is verwijderd uit de Research-widgettitel, lege booststatus en statische voorbeeldweergave.
+- De herkenbare titel Research Potion · 24× en de bestaande +1u-knoppen, timers, meldingen en accountvolgorde blijven behouden.
+- Builder Potion- en reguliere widgets zijn ongewijzigd.
+
+### EN
+- Research Potion now uses the same purple-and-gold styling as Builder Potion, including its widget picker preview.
+- Removed the flask emoji from the Research header, idle timer state and static preview.
+- Research Potion · 24× remains distinguishable by text; +1h buttons, forecasts, notifications and account order are preserved.
+- Builder Potion and other widgets are unchanged.
+
 ## Compacte Potion-widgets met herkenbare namen — 6 november 2026
 
 ### NL
