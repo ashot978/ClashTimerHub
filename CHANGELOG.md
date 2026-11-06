@@ -1,5 +1,23 @@
 # ClashTimerHub release notes
 
+## Research Potions, boostmeldingen en toetsenbordfix — 6 november 2026
+
+### NL
+- Zesde aparte multi-accountwidget voor Research Potions: 24× Laboratory-snelheid gedurende één uur, maximaal 23 uur tijdwinst; +1u of exacte resterende boosttijd per account.
+- Research-overzicht toont de voorspelde eindtijden van alle actieve Laboratory-upgrades naast de oorspronkelijke tijden.
+- Afzonderlijke meldingen wanneer een door Builder Potions of Research Potions versnelde upgrade volgens de voorspelling gereed is.
+- Voorspelde meldingen zijn account- en upgradegebonden, worden opnieuw berekend na wijziging of sync, en controleren bij afgaan of de oorspronkelijke timer en boostvoorspelling nog kloppen.
+- Bestaande JSON-timers en hun oorspronkelijke alarmen blijven ongewijzigd.
+- De zwevende Sync-knop gebruikt voortaan een niet-focusbaar overlayvenster, zodat deze de invoerfocus en het Android-toetsenbord van Clash-chat niet meer mag overnemen.
+
+### EN
+- Sixth standalone multi-account widget for Research Potions: 24× Laboratory speed for one hour, up to 23 hours saved; +1h or precise remaining duration per account.
+- Research overview shows forecast completion of every active Laboratory upgrade alongside the original times.
+- Separate notifications when builder or research upgrades are expected to finish early due to potions.
+- Forecast notifications are account/upgrade scoped, rescheduled on edits and syncs, and validated against the current JSON and boost projection before posting.
+- Original imported timers and their notifications are preserved.
+- The floating Sync overlay is now non-focusable so it cannot steal the game's chat input focus and soft keyboard.
+
 ## Duidelijkere Builder Potion-bediening — 6 november 2026
 
 ### NL

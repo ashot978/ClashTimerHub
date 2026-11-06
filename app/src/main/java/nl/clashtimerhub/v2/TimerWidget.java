@@ -81,7 +81,12 @@ public class TimerWidget extends AppWidgetProvider {
   row.setOnClickPendingIntent(R.id.widget_account_root,click);
   return row;
  }
- static void update(Context context){WidgetV7.updateAll(context);BuilderBoostWidget.update(context);}
+ static void update(Context context){
+  WidgetV7.updateAll(context);
+  BuilderBoostWidget.update(context);
+  ResearchBoostWidget.update(context);
+  PotionCompletionAlarm.schedule(context);
+ }
  @Override public void onDeleted(Context context,int[] widgetIds){
   android.content.SharedPreferences.Editor editor=context.getSharedPreferences("WidgetPreferences",Context.MODE_PRIVATE).edit();
   for(int id:widgetIds){editor.remove("all_"+id);editor.remove("selected_"+id);editor.remove("account_"+id);}

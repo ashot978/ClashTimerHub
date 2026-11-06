@@ -51,7 +51,7 @@ public final class FloatingSyncService extends Service {
   TextView view=new TextView(this);view.setText("⚔");view.setTextSize(23);view.setTextColor(Color.WHITE);view.setGravity(Gravity.CENTER);
   GradientDrawable bg=new GradientDrawable();bg.setColor(0xff6840a0);bg.setCornerRadius(100);view.setBackground(bg);view.setAlpha(.88f);
   int size=(int)(52*getResources().getDisplayMetrics().density);
-  params=new WindowManager.LayoutParams(size,size,Build.VERSION.SDK_INT>=26?WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY:WindowManager.LayoutParams.TYPE_PHONE,WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL|WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,PixelFormat.TRANSLUCENT);
+  params=new WindowManager.LayoutParams(size,size,Build.VERSION.SDK_INT>=26?WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY:WindowManager.LayoutParams.TYPE_PHONE,WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL|WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,PixelFormat.TRANSLUCENT);
   params.gravity=Gravity.TOP|Gravity.START;params.x=getResources().getDisplayMetrics().widthPixels-size;params.y=getResources().getDisplayMetrics().heightPixels/3;
   android.content.SharedPreferences preferences=AppData.prefs(this);
   params.x=Math.max(0,preferences.getInt("floatingX",params.x));
