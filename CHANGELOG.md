@@ -1,5 +1,23 @@
 # ClashTimerHub release notes
 
+## All Timers: compact widgetvlak en bereikbaar tandwiel/opslaan — 6 november 2026
+
+### NL
+- Vervang de pijltjesknop rechtsboven door een tastbaar 48dp-breed ⚙-tandwiel in de footer rechtsonder, direct naast de Sync ON/OFF-bediening.
+- Maak het zichtbare widgetpaneel net zo hoog als de accountlijst in plaats van een paarse rechthoek over alle gereserveerde launcherhoogte. Extra launcherhoogte blijft transparant. De launcher kan de gereserveerde ruimte alleen zelf aanpassen via lang indrukken/verslepen.
+- Op Android 12+ past de lengte van de lijst zich aan het aantal geselecteerde accounts en de widgethoogte aan. Wordt de widget smaller, dan worden de timers in twee of drie nette regels per account verdeeld en blijft de lijst scrollbaar.
+- De widget ondersteunt nu ook verkleinen tot circa 130dp. De footer met Sync en instellingen blijft zichtbaar, ook bij minder hoogte.
+- De Potion Controls-sectie en beide beheerknoppen zijn verwijderd uit het configuratiescherm; Boosts worden nog steeds via bestaande accounttimer-acties en app-instellingen beheerd.
+- Voorkom dat Android 15+/Samsung taakbalk en navigatiebalk de Save Widget-knop afdekken door expliciete statusbalk- en navigatie-insets te gebruiken. De opslaanknop blijft vast onder het scrollbare instellingendeel en boven de systeembalk.
+- Laat bestaande sorteervolgorde, kolomconfiguratie, potionberekeningen, notificaties, accounts en app-signing ongemoeid.
+
+### EN
+- Bottom-right 48dp settings gear replaces the top-right arrow; footer Sync remains accessible.
+- Wrap purple widget panel to the content and dynamically size the account list using widget size and row count. Keep remaining launcher allocation transparent. Reflow to two/three lines for narrow widgets.
+- Remove obsolete Potion Controls from All Timers configuration. Leave Potion editing elsewhere intact.
+- Handle Android 15+ status/navigation/taskbar insets so sticky Save Widget is always visible and tappable.
+- Preserve sorted accounts, potion-adjusted predicted completion, notifications and existing user data.
+
 ## Eén notificatie-instelling; zwaarden op Sync, wizard alleen in resultaat — 6 november 2026
 
 ### NL

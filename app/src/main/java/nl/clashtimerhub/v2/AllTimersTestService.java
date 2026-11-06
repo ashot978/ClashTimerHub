@@ -45,17 +45,7 @@ public final class AllTimersTestService extends RemoteViewsService {
    accounts.clear();
    accounts.addAll(AllTimersWidgetSettings.visibleAccounts(ctx,widgetId,snapshot));
    columns=AllTimersWidgetSettings.order(ctx,widgetId);
-   int width=400;
-   if(widgetId!=AppWidgetManager.INVALID_APPWIDGET_ID){
-    android.os.Bundle options=AppWidgetManager.getInstance(ctx).getAppWidgetOptions(widgetId);
-    if(options!=null){
-     boolean landscape=ctx.getResources().getConfiguration().orientation==
-      android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-     width=options.getInt(landscape?AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH:
-      AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,400);
-    }
-   }
-   layoutMode=width>=670?2:width>=420?1:0;
+   layoutMode=AllTimersTestWidget.layoutMode(ctx,widgetId);
   }
   @Override public void onDestroy(){accounts.clear();}
   @Override public int getCount(){return accounts.size();}

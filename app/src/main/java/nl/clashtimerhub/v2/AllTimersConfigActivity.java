@@ -114,23 +114,28 @@ public final class AllTimersConfigActivity extends Activity {
   helpers.setTextColor(Color.WHITE);
   helpers.setChecked(prefs.getBoolean(AllTimersWidgetSettings.key("helpers",widgetId),true));
   content.addView(helpers);
-  heading(content,tr("Potionbeheer","Potion controls"),
-   tr("Je kunt +1 uur toevoegen en de boost exact aanpassen, zonder aparte potion-widgets.",
-      "Add +1 hour and adjust exact boost duration without separate Potion widgets."));
-  Button builder=new Button(this);builder.setAllCaps(false);
-  builder.setText(tr("⚒ Builder Potions beheren","⚒ Manage Builder Potions"));
-  content.addView(builder,new LinearLayout.LayoutParams(-1,dp(48)));
-  builder.setOnClickListener(v->startActivity(new Intent(this,BuilderBoostEditorActivity.class).putExtra("overview",true)));
-  Button research=new Button(this);research.setAllCaps(false);
-  research.setText(tr("🧙 Research Potions beheren","🧙 Manage Research Potions"));
-  content.addView(research,new LinearLayout.LayoutParams(-1,dp(48)));
-  research.setOnClickListener(v->startActivity(new Intent(this,ResearchBoostEditorActivity.class).putExtra("overview",true)));
   LinearLayout footer=new LinearLayout(this);footer.setBackgroundColor(SECTION);
   footer.setPadding(dp(16),dp(8),dp(16),dp(10));
   Button save=new Button(this);save.setAllCaps(false);
   save.setText(tr("✓ Widget opslaan","✓ Save widget"));save.setTextColor(Color.WHITE);
   save.setTextSize(16);save.setBackgroundTintList(ColorStateList.valueOf(0xff7652a3));
+  save.setContentDescription(tr("Widgetinstellingen opslaan","Save widget settings"));
   footer.addView(save,new LinearLayout.LayoutParams(-1,dp(52)));root.addView(footer);
+  // Target SDK 35 edge-to-edge: Samsung taskbars and gesture navigation
+  // can otherwise cover the final Save button. Keep it above system bars.
+  if(android.os.Build.VERSION.SDK_INT>=35){
+   getWindow().setDecorFitsSystemWindows(false);
+   final int startBottom=dp(10);
+   root.setOnApplyWindowInsetsListener((v,insets)->{
+    android.graphics.Insets safe=insets.getInsets(
+     android.view.WindowInsets.Type.systemBars() |
+     android.view.WindowInsets.Type.displayCutout());
+    root.setPadding(0,safe.top,0,0);
+    footer.setPadding(dp(16),dp(8),dp(16),Math.max(startBottom,safe.bottom+dp(12)));
+    return insets;
+   });
+   root.requestApplyInsets();
+  }
   save.setOnClickListener(v->save());
  }
  private void drawColumns(){

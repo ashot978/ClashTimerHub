@@ -40,6 +40,18 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
     service.setData(Uri.parse("clashtimerhub://all-timers/"+id));
     rv.setRemoteAdapter(R.id.all_timers_list,service);
     rv.setEmptyView(R.id.all_timers_list,R.id.all_timers_empty);
+    // On modern Android, make the ListView only as tall as the data instead
+    // of stretching it to fill the launcher allocation. On smaller widget
+    // sizes it remains scrollable, with the Sync and Settings buttons visible.
+    if(Build.VERSION.SDK_INT>=31){
+     int mode=layoutMode(ctx,id);
+     int rowDp=mode==2?31:mode==1?49:71;
+     int requestedHeight=widgetHeight(ctx,id);
+     int available=Math.max(56,requestedHeight-99);
+     int target=Math.max(56,Math.min(shown.size()*rowDp+2,available));
+     rv.setViewLayoutHeight(R.id.all_timers_list,(float)target,
+      android.util.TypedValue.COMPLEX_UNIT_DIP);
+    }
     Intent template=new Intent(ctx,AllTimersTestWidget.class).setAction(OPEN);
     template.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,id);
     int flags=PendingIntent.FLAG_UPDATE_CURRENT |
@@ -50,7 +62,7 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
      .setAction("nl.clashtimerhub.v2.CONFIG_ALL_TIMERS_"+id)
      .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,id);
     config.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    rv.setOnClickPendingIntent(R.id.all_timers_open,
+    rv.setOnClickPendingIntent(R.id.all_timers_settings,
      PendingIntent.getActivity(ctx,949200+id,config,
       PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE));
     boolean floating=AppData.prefs(ctx).getBoolean("floatingEnabled",false);
@@ -64,6 +76,32 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
   }
   manager.notifyAppWidgetViewDataChanged(ids,R.id.all_timers_list);
   plan(ctx,snapshot.next);
+ }
+
+ /** Read launcher sizing from the same options as the account RemoteViews service. */
+ static int layoutMode(Context ctx,int id){
+  int width=400;
+  if(id!=AppWidgetManager.INVALID_APPWIDGET_ID){
+   android.os.Bundle options=AppWidgetManager.getInstance(ctx).getAppWidgetOptions(id);
+   if(options!=null){
+    boolean landscape=ctx.getResources().getConfiguration().orientation==
+     android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+    width=options.getInt(landscape?AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH:
+     AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,400);
+   }
+  }
+  return width>=670?2:width>=420?1:0;
+ }
+ private static int widgetHeight(Context ctx,int id){
+  int height=320;
+  android.os.Bundle options=AppWidgetManager.getInstance(ctx).getAppWidgetOptions(id);
+  if(options!=null){
+   boolean landscape=ctx.getResources().getConfiguration().orientation==
+    android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+   height=options.getInt(landscape?AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT:
+    AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,320);
+  }
+  return height>0?height:320;
  }
  private static PendingIntent refresh(Context ctx){
   return PendingIntent.getBroadcast(ctx,REQUEST_REFRESH,
