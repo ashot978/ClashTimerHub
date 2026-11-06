@@ -9,6 +9,8 @@ final class UpgradeForecast {
    BuilderPotionTracker.load(ctx,account),sourceFinish);
   if("Laboratorium".equals(category))return ResearchPotionTracker.estimateFinish(
    ResearchPotionTracker.load(ctx,account),sourceFinish);
+  if("Pets".equals(category))return PetPotionTracker.estimateFinish(
+   PetPotionTracker.load(ctx,account),sourceFinish);
   return sourceFinish;
  }
 }

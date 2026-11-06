@@ -63,6 +63,7 @@ public final class AllTimersTestService extends RemoteViewsService {
     AllTimersWidgetSettings.key("helpers",widgetId),true);
    rv.setTextViewText(R.id.all_account_helpers,
     helpers&&!a.helpers.isEmpty()?"🤝 "+a.helpers:"");
+   rv.setTextColor(R.id.all_account_helpers,GOLD);
    for(int slot=0;slot<3;slot++){
     renderSlot(rv,slot,columns[slot],a,now);
     Intent intent=new Intent().putExtra("account",a.key);
@@ -83,7 +84,7 @@ public final class AllTimersTestService extends RemoteViewsService {
    if(AllTimersWidgetSettings.BUILDERS.equals(category)){
     finish=a.builderAt;ready=a.ready;maxed=a.builderMax;boosted=a.builderBoost;icon="⚒";
    }else if(AllTimersWidgetSettings.PETS.equals(category)){
-    finish=a.petAt;ready=a.petReady;maxed=a.petMax;boosted=false;icon="🐾";
+    finish=a.petAt;ready=a.petReady;maxed=a.petBoost;icon="🐾";
    }else{
     finish=a.labAt;ready=a.labReady;maxed=a.labMax;boosted=a.labBoost;icon="🧙";
    }

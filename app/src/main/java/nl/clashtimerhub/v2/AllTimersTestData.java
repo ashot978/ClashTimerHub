@@ -26,7 +26,7 @@ final class AllTimersTestData {
   String key,helpers="";
   int builders,ready,lab,labReady,pets,petReady;
   long builderAt=Long.MAX_VALUE,labAt=Long.MAX_VALUE,petAt=Long.MAX_VALUE;
-  boolean builderBoost,labBoost,builderMax,labMax,petMax;
+  boolean builderBoost,labBoost,petBoost,builderMax,labMax,petMax;
   Account(String key){this.key=key;}
  }
  static final class Snapshot {
@@ -92,7 +92,10 @@ final class AllTimersTestData {
      if(potion==null){potion=ResearchPotionTracker.load(ctx,account);lab.put(account,potion);}
      predicted=UpgradeForecast.finish(ctx,account,category,original);
      result.research++;
-    }else if("Pets".equals(category))result.pets++;
+    }else if("Pets".equals(category)){
+     predicted=UpgradeForecast.finish(ctx,account,category,original);
+     result.pets++;
+    }
     // A previous sync has already acknowledged this completion. On a fresh
     // JSON import stale upgrades disappear, but this guard also prevents
     // old/acknowledged alarms from resurfacing in a widget.
@@ -119,7 +122,10 @@ final class AllTimersTestData {
        if(predicted<a.labAt){a.labAt=predicted;a.labBoost=item.boosted;}
       }else a.labReady++;
      }else if("Pets".equals(category)){
-      if(predicted>now){a.pets++;a.petAt=Math.min(a.petAt,predicted);}
+      if(predicted>now){
+       a.pets++;
+       if(predicted<a.petAt){a.petAt=predicted;a.petBoost=item.boosted;}
+      }
       else a.petReady++;
      }
     }

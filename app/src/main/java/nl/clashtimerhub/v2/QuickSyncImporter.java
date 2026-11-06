@@ -182,6 +182,8 @@ public final class QuickSyncImporter {
   // valid positive value, preserving manual Potion timers otherwise.
   String builderBoost=BuilderPotionTracker.mergedFromExport(prefs,json,account,timestamp,now);
   if(builderBoost!=null)editor.putString(BuilderPotionTracker.KEY,builderBoost);
+  String petBoost=PetPotionTracker.mergedFromExport(prefs,json,account,timestamp,now);
+  if(petBoost!=null)editor.putString(PetPotionTracker.KEY,petBoost);
   if(!editor.commit())throw new IllegalStateException("Opslaan mislukt");
   TimerWidget.schedule(context);
   // Run Drive backup independently: it must never make a successful Clash sync fail.
