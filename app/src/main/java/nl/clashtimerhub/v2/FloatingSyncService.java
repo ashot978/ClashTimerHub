@@ -144,23 +144,13 @@ public final class FloatingSyncService extends Service {
    intent.setPackage("com.supercell.clashofclans");
    if(intent.resolveActivity(getPackageManager())==null)intent.setPackage(null);
    startActivity(intent);
-   // Launching a deep link is not a successful data sync. Briefly signal
-   // the shortcut on the bubble itself without covering Clash with a popup.
-   flashExportShortcut();
+   // Keep the floating sync button unchanged after opening export settings.
   }catch(Exception error){
    android.util.Log.w("ClashTimerHub","Unable to open Clash settings",error);
    Toast.makeText(this,I18n.tr(this,
     "Open Clash zelf: Profiel → Instellingen → Meer instellingen"),
     Toast.LENGTH_SHORT).show();
   }
- }
- private void flashExportShortcut(){
-  if(!(bubble instanceof TextView))return;
-  TextView text=(TextView)bubble;
-  text.setText("↗");
-  text.postDelayed(()->{
-   if(bubble==text)text.setText("⚔");
-  },800L);
  }
  private void showDropTarget(){
   if(dropTarget!=null||manager==null)return;
@@ -296,8 +286,8 @@ public final class FloatingSyncService extends Service {
   String[] parts=normalized.split("\n",3);
   String first=parts.length>0?parts[0]:"",last=parts.length>1?parts[1]:"";
   int marker=first.indexOf(" ✓ ");
-  String title=success&&marker>0?"🧙 ✓ "+first.substring(0,marker).trim():
-   success?"🧙 ✓ Synchronisatie gelukt":"🧙 ⚠ Synchronisatie mislukt";
+  String title=success&&marker>0?"✓ "+first.substring(0,marker).trim():
+   success?"✓ Synchronisatie gelukt":"⚠ Synchronisatie mislukt";
   String details=success&&marker>0?first.substring(marker+3).trim():first;
   if(details.endsWith(")")){
    int open=details.indexOf(" (");
@@ -309,10 +299,22 @@ public final class FloatingSyncService extends Service {
   }
   LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
   card.setPadding(dp(12),dp(8),dp(12),dp(8));
+  // Match the widgets' standalone, normal-weight 10sp wizard glyph.
+  // Keep it separate from the bold title for consistent emoji rendering.
+  LinearLayout headingRow=new LinearLayout(this);
+  headingRow.setOrientation(LinearLayout.HORIZONTAL);
+  headingRow.setGravity(Gravity.CENTER_VERTICAL);
+  TextView wizard=new TextView(this);wizard.setText("🧙");wizard.setTextSize(10);
+  wizard.setTextColor(0xffd6bcea);
+  LinearLayout.LayoutParams wizardParams=new LinearLayout.LayoutParams(
+   WindowManager.LayoutParams.WRAP_CONTENT,WindowManager.LayoutParams.WRAP_CONTENT);
+  wizardParams.rightMargin=dp(5);
+  headingRow.addView(wizard,wizardParams);
   TextView heading=new TextView(this);heading.setText(title);heading.setTextColor(Color.WHITE);
   heading.setTextSize(13);heading.setTypeface(null,android.graphics.Typeface.BOLD);
   heading.setSingleLine(true);heading.setEllipsize(android.text.TextUtils.TruncateAt.END);
-  card.addView(heading);
+  headingRow.addView(heading,new LinearLayout.LayoutParams(0,WindowManager.LayoutParams.WRAP_CONTENT,1f));
+  card.addView(headingRow);
   if(!details.isEmpty()){
    TextView meta=new TextView(this);meta.setText(details);meta.setTextColor(0xffe7ddeb);
    meta.setTextSize(11);meta.setSingleLine(true);meta.setEllipsize(android.text.TextUtils.TruncateAt.END);
