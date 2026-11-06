@@ -102,7 +102,7 @@ final class AllTimersTestData {
     if(predicted<=lastAcknowledged)continue;
     Item item=new Item();
     item.account=account;item.category=category;
-    item.name=raw.optString("name","Upgrade");
+    item.name=ClashNames.displayName(raw);
     item.id=raw.optString("id","timer-"+i);
     item.goblin=raw.optBoolean("extra",false)&&"Laboratorium".equals(category);
     item.original=original;item.finish=predicted;
