@@ -13,8 +13,8 @@ public final class WidgetSyncReceiver extends BroadcastReceiver {
   boolean enabled=prefs.getBoolean("floatingEnabled",false);
   Intent service=new Intent(context,FloatingSyncService.class);
   if(enabled){
+   prefs.edit().putBoolean("floatingEnabled",false).commit();
    context.stopService(service);
-   prefs.edit().putBoolean("floatingEnabled",false).apply();
   }else if(!Settings.canDrawOverlays(context)){
    Intent open=new Intent(context,MainActivity.class);
    open.putExtra("widgetEnableOverlay",true);
@@ -24,12 +24,14 @@ public final class WidgetSyncReceiver extends BroadcastReceiver {
    try{
     if(Build.VERSION.SDK_INT>=26)context.startForegroundService(service);
     else context.startService(service);
-    prefs.edit().putBoolean("floatingEnabled",true).apply();
+    prefs.edit().putBoolean("floatingEnabled",true).commit();
    }catch(RuntimeException e){
-    prefs.edit().putBoolean("floatingEnabled",false).apply();
+    prefs.edit().putBoolean("floatingEnabled",false).commit();
     Toast.makeText(context,I18n.english(context)?"Could not start floating sync":"Kan zwevende synchronisatie niet starten",Toast.LENGTH_LONG).show();
    }
   }
-  TimerWidget.update(context);
+  // Avoid reloading the entire collection on each ON/OFF tap.
+  WidgetV7.updateAll(context);
+  AllTimersTestWidget.updateSyncStatus(context);
  }
 }
