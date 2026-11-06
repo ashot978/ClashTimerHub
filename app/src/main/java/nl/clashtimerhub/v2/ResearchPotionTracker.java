@@ -8,8 +8,9 @@ import java.util.ArrayList;
 
 /**
  * Research Potion forecasts per account. The original JSON timers remain untouched.
- * Each forecast is anchored to a specific import snapshot and becomes stale after
- * a new import so boosts cannot silently be applied twice.
+ * Potion start and end timestamps belong to the account independently of JSON.
+ * Each new import moves the forecast baseline to current per-account timers,
+ * without resetting the actual Potion duration or applying elapsed boost twice.
  */
 final class ResearchPotionTracker {
  private static final String KEY="researchPotionForecasts";
@@ -51,7 +52,8 @@ final class ResearchPotionTracker {
    JSONObject map=new JSONObject(p.getString(KEY,"{}"));
    JSONObject item=map.optJSONObject(account);
    if(item==null)return new Snapshot(current,true,false,new ArrayList<>());
-   long anchored=item.optLong("syncedAt",-1L);
+   // The stored sync marker is legacy metadata, not an expiry condition.
+   // A fresh JSON import must never invalidate an active Potion countdown.
    JSONArray values=item.optJSONArray("periods");
    ArrayList<Period> periods=new ArrayList<>();
    if(values!=null)for(int i=0;i<Math.min(MAX_PERIODS,values.length());i++){
@@ -60,7 +62,9 @@ final class ResearchPotionTracker {
     long start=v.optLong("start",0L),end=v.optLong("end",0L);
     if(start>0&&end>start&&end-start<=MAX_DURATION)periods.add(new Period(start,end));
    }
-   return new Snapshot(anchored,anchored==current,true,periods);
+   // Use current per-account import as forecast baseline. Existing real-world
+   // boost periods stay intact; estimateFinish ignores periods before baseline.
+   return new Snapshot(current,true,true,periods);
   }catch(Exception e){
    android.util.Log.w("ClashTimerHub","Research Potion state unavailable",e);
    return new Snapshot(current,false,true,new ArrayList<>());
@@ -116,7 +120,9 @@ final class ResearchPotionTracker {
  }
  static void reset(Context ctx,String account){change(ctx,account,0L,2);}
 
- /** Integration of 10x speed over potion periods, using normal-work milliseconds. */
+ /** Integrate remaining boost over normal-work milliseconds. Newer JSON
+  * finish times already account for work completed before the last sync.
+  */
  static long estimateFinish(Snapshot snapshot,long originalFinish){
   if(!snapshot.valid||snapshot.periods.isEmpty())return originalFinish;
   long anchor=snapshot.syncedAt>0?snapshot.syncedAt:snapshot.periods.get(0).start;

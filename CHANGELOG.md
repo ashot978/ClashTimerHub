@@ -1,5 +1,21 @@
 # ClashTimerHub release notes
 
+## Potion-aftellingen blijven onafhankelijk na synchronisatie — 6 november 2026
+
+### NL
+- Actieve Builder- en Research Potion-timers blijven zichtbaar en tellen verder na iedere JSON-sync; geen uitroepteken meer doordat de importtijd verandert.
+- Potions bewaren hun echte start- en eindmoment per account. Een nieuwe sync wist of herstart deze niet.
+- Nieuwe JSON-tijden worden het uitgangspunt voor de upgradevoorspellingen; alleen daarna relevante boosttijd telt nog mee. Oude, reeds verbruikte boosttijd wordt niet dubbel toegepast.
+- De bestaande sync plant de bijbehorende voorspelde gereed- en voorafmeldingen opnieuw. Gewone upgrade-timers en alarmen worden niet veranderd.
+- Alleen echt onleesbare opgeslagen Potion-gegevens geven nog een waarschuwing.
+
+### EN
+- Builder and Research Potion countdowns continue across JSON imports without sync-induced exclamation marks.
+- Real-world boost start/end times remain independent per account and are never erased or restarted by sync.
+- Forecasts use the latest imported upgrade finish times and apply only relevant remaining boost, not past boost time already consumed.
+- Existing sync scheduling updates boosted completion/prewarning alarms without changing ordinary upgrade notifications.
+- Warn only if saved Potion data genuinely cannot be read.
+
 ## Alle meldingen in één venster met twee potion-opties — 6 november 2026
 
 ### NL

@@ -249,8 +249,8 @@ public final class ResearchBoostEditorActivity extends Activity {
   clear.setOnClickListener(v->action(1));
   body.addView(quick);
   if(!snapshot.valid){
-   TextView warn=text(tr("⚠ Nieuwe JSON geïmporteerd na deze boost. De oude voorspelling staat uit om dubbel rekenen te voorkomen. Controleer de resterende boosttijd in Clash.",
-    "⚠ New JSON imported after this boost. The old forecast is disabled to avoid double counting. Verify remaining boost time in Clash."),13,0xffffb1a8);
+   TextView warn=text(tr("⚠ Opgeslagen Potion-gegevens konden niet worden gelezen. Controleer de resterende tijd en stel deze opnieuw in.",
+    "⚠ Saved Potion data could not be read. Check the remaining time and enter it again."),13,0xffffb1a8);
    warn.setPadding(0,dp(10),0,0);body.addView(warn);
   }
   TextView section=text(tr("Geschatte eindtijden van onderzoeksupgrades",
