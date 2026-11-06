@@ -1211,7 +1211,7 @@ public final class MainActivity extends Activity {
   int active=0,totalReady=0;
   for(JSONObject o:upgrades)if("Bouwers".equals(o.optString("category"))&&effectiveFinish(o)>now)active++;
   for(String ac:accounts)totalReady+=completedCount(ac,now);
-  String last=getPreferences(0).getString("lastSyncSummary","");
+  String last=getPreferences(0).getString("lastSyncSummary","").replace("⚗",WidgetV7.LAB_ICON);
   if(!last.isEmpty()){
    TextView recent=label("↻  "+last,11);recent.setTextColor(0xffbba7d1);dashboard.addView(recent);
   }
