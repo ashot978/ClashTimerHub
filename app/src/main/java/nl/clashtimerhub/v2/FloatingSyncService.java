@@ -284,12 +284,12 @@ public final class FloatingSyncService extends Service {
  private void showFeedback(String message,boolean success){
   clearFeedback();
   // Accept both real and literal newlines from older exports; never print \\n on screen.
-  String normalized=(message==null?"":message).replace("\\n","\n").trim();
+  String normalized=I18n.tr(this,(message==null?"":message).replace("\\n","\n").trim());
   String[] parts=normalized.split("\n",3);
   String first=parts.length>0?parts[0]:"",last=parts.length>1?parts[1]:"";
   int marker=first.indexOf(" ✓ ");
-  String title=success&&marker>0?"✓ "+first.substring(0,marker).trim():
-   success?"✓ Synchronisatie gelukt":"⚠ Synchronisatie mislukt";
+  String title=I18n.tr(this,success&&marker>0?"✓ "+first.substring(0,marker).trim():
+   success?"✓ Synchronisatie gelukt":"⚠ Synchronisatie mislukt");
   String details=success&&marker>0?first.substring(marker+3).trim():first;
   if(details.endsWith(")")){
    int open=details.indexOf(" (");
