@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ android:layout_width="match_parent" android:layout_height="match_parent"
+ android:orientation="vertical" android:padding="4dp" android:background="@drawable/widget_background">
+ <TextView android:layout_width="match_parent" android:layout_height="28dp"
+  android:paddingLeft="8dp" android:gravity="center_vertical"
+  android:background="@drawable/widget_row_background"
+  android:text="All timers · TEST" android:textColor="#FFD783"
+  android:textStyle="bold" android:textSize="12sp"/>
+ <TextView android:layout_width="match_parent" android:layout_height="24dp"
+  android:paddingLeft="8dp" android:gravity="center_vertical"
+  android:text="7 accounts · potion-adjusted" android:textColor="#CBB5D9" android:textSize="10sp"/>
+ <TextView android:layout_width="match_parent" android:layout_height="50dp"
+  android:padding="8dp" android:background="@drawable/widget_row_background"
+  android:text="Shotty     Battle Drill       17:02&#10;Goblin research    24× −19h     52m"
+  android:textColor="#FFFFFF" android:textSize="11sp"/>
+ <TextView android:layout_width="match_parent" android:layout_height="50dp"
+  android:padding="8dp" android:background="@drawable/widget_row_background"
+  android:text="Ashot     Archer Tower      18:15&#10;Builders             10× −8h     1h25"
+  android:textColor="#FFFFFF" android:textSize="11sp"/>
+ <TextView android:layout_width="match_parent" android:layout_height="50dp"
+  android:padding="8dp" android:background="@drawable/widget_row_background"
+  android:text="Rushot    Unicorn           19:30&#10;Pets                           3h15"
+  android:textColor="#FFFFFF" android:textSize="11sp"/>
+</LinearLayout>

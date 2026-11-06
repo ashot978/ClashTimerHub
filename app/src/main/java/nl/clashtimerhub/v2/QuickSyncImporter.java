@@ -178,6 +178,10 @@ public final class QuickSyncImporter {
   // Absent/zero boost metadata never resets a user-entered Potion countdown.
   String researchBoost=ResearchPotionTracker.mergedFromExport(prefs,json,account,timestamp,now);
   if(researchBoost!=null)editor.putString(ResearchPotionTracker.KEY,researchBoost);
+  // Builder boost is optional in exports; apply only when the game provides a
+  // valid positive value, preserving manual Potion timers otherwise.
+  String builderBoost=BuilderPotionTracker.mergedFromExport(prefs,json,account,timestamp,now);
+  if(builderBoost!=null)editor.putString(BuilderPotionTracker.KEY,builderBoost);
   if(!editor.commit())throw new IllegalStateException("Opslaan mislukt");
   TimerWidget.schedule(context);
   // Run Drive backup independently: it must never make a successful Clash sync fail.

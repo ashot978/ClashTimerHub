@@ -1,5 +1,24 @@
 # ClashTimerHub release notes
 
+## Experimentele All Timers-widget met potion-voorspellingen — 6 november 2026
+
+### NL
+- Nieuwe zelfstandige, scrollbare 'Alle timers · Test'-widget voor alle actieve upgrades van alle opgeslagen accounts, standaard 4×3 en vrij te vergroten.
+- Toon per regel account, upgrade, categorie (bouwers, laboratorium, Goblin Researcher of pets), live resterende tijd, nieuwe eindtijd en de eventuele door 10×/24× potion bespaarde tijd.
+- Sorteer alle timers op hun door potions berekende eindtijd; voltooide maar nog niet opnieuw gesynchroniseerde versnellingen blijven als 'Klaar' zichtbaar.
+- Een tik op een timer opent het bijbehorende account in ClashTimerHub. De testwidget wijzigt geen bestaande timers of alarmen.
+- De JSON-import verwerkt nu, indien aanwezig, ook boosts.builder_boost in seconden om de Builder Potion-aftelling te synchroniseren. Bestaande Research Potion-import via boosts.lab_boost blijft ongewijzigd.
+- Ontbrekende/lege boostvelden wissen geen handmatig ingestelde actieve potion.
+- De zes bestaande widgets, opgeslagen accounts, meldingen en Android-app-ID blijven intact.
+
+### EN
+- Independent, vertically scrollable 'All Timers · Test' widget for every active upgrade across all saved accounts; starts at 4×3 and can be resized.
+- Each row shows account, upgrade, category (builders, lab, Goblin Researcher or pets), live countdown, potion-adjusted end time and any 10×/24× time saved.
+- Sort by predicted finish; potion-completed timers remain marked Ready until resynced.
+- Tap a row to open its account. This experimental widget leaves original upgrade alarms and saved data untouched.
+- If an export includes boosts.builder_boost, use its remaining seconds to refresh Builder Potion status, while preserving manual entries when metadata is absent.
+- Keep all existing widgets and application identity unchanged.
+
 ## Goblin Researcher en actieve Research Potion uit de JSON — 6 november 2026
 
 ### NL

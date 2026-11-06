@@ -13,7 +13,7 @@ import java.util.ArrayList;
  * without resetting the actual Potion duration or applying elapsed boost twice.
  */
 final class BuilderPotionTracker {
- private static final String KEY="builderPotionForecasts";
+ static final String KEY="builderPotionForecasts";
  private static final long MINUTE=60000L;
  private static final long MAX_DURATION=72L*60L*MINUTE;
  private static final int MAX_PERIODS=32;
@@ -68,6 +68,50 @@ final class BuilderPotionTracker {
   }catch(Exception e){
    android.util.Log.w("ClashTimerHub","Builder Potion state unavailable",e);
    return new Snapshot(current,false,true,new ArrayList<>());
+  }
+ }
+
+ /**
+  * Optional JSON boost: boosts.builder_boost is remaining seconds at export.
+  * Missing/zero metadata never discards a manually recorded Builder Potion.
+  */
+ static String mergedFromExport(SharedPreferences prefs,JSONObject export,
+   String account,long exportedAt,long now){
+  JSONObject boosts=export.optJSONObject("boosts");
+  if(boosts==null||!boosts.has("builder_boost"))return null;
+  long seconds=boosts.optLong("builder_boost",-1L);
+  if(seconds<=0||seconds>MAX_DURATION/1000L)return null;
+  long end=exportedAt+seconds*1000L;
+  if(end<=now||end-now>MAX_DURATION)return null;
+  try{
+   JSONObject all=new JSONObject(prefs.getString(KEY,"{}"));
+   JSONObject saved=all.optJSONObject(account);
+   JSONArray previous=saved==null?null:saved.optJSONArray("periods");
+   JSONArray updated=new JSONArray();
+   boolean replaced=false;
+   if(previous!=null)for(int i=0;i<previous.length()&&i<MAX_PERIODS;i++){
+    JSONObject p=previous.optJSONObject(i);
+    if(p==null)continue;
+    long start=p.optLong("start",0L),oldEnd=p.optLong("end",0L);
+    if(start<=0||oldEnd<=start||oldEnd-start>MAX_DURATION)continue;
+    if(!replaced&&start<=now&&oldEnd>now){
+     if(end>start)updated.put(new JSONObject().put("start",start).put("end",end));
+     replaced=true;
+    }else updated.put(new JSONObject().put("start",start).put("end",oldEnd));
+   }
+   if(!replaced){
+    if(updated.length()>=MAX_PERIODS){
+     JSONArray trimmed=new JSONArray();
+     for(int i=1;i<updated.length();i++)trimmed.put(updated.get(i));
+     updated=trimmed;
+    }
+    updated.put(new JSONObject().put("start",Math.min(now,exportedAt)).put("end",end));
+   }
+   all.put(account,new JSONObject().put("syncedAt",now).put("periods",updated));
+   return all.toString();
+  }catch(Exception error){
+   android.util.Log.w("ClashTimerHub","Could not reconcile builder_boost; manual Potion retained",error);
+   return null;
   }
  }
 

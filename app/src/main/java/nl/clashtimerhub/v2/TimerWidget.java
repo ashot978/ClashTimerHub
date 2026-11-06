@@ -85,6 +85,7 @@ public class TimerWidget extends AppWidgetProvider {
   WidgetV7.updateAll(context);
   BuilderBoostWidget.update(context);
   ResearchBoostWidget.update(context);
+  AllTimersTestWidget.update(context);
   PotionCompletionAlarm.schedule(context);
  }
  @Override public void onDeleted(Context context,int[] widgetIds){

@@ -32,6 +32,11 @@
 </receiver>
 <receiver android:name=".WidgetSyncReceiver" android:exported="false"/>
 <activity android:name=".BuilderBoostEditorActivity" android:exported="false" android:theme="@android:style/Theme.Material.NoActionBar"/>
+<service android:name=".AllTimersTestService" android:permission="android.permission.BIND_REMOTEVIEWS" android:exported="true"/>
+<receiver android:name=".AllTimersTestWidget" android:exported="true" android:label="@string/widget_all_timers_test_label">
+<intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter>
+<meta-data android:name="android.appwidget.provider" android:resource="@xml/all_timers_test_widget_info"/>
+</receiver>
 <receiver android:name=".BuilderBoostWidget" android:exported="true" android:label="@string/widget_builder_potions_label">
 <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter>
 <meta-data android:name="android.appwidget.provider" android:resource="@xml/builder_boost_widget_info"/>

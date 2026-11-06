@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ android:layout_width="match_parent" android:layout_height="match_parent"
+ android:orientation="vertical" android:padding="4dp" android:background="@drawable/widget_background">
+ <LinearLayout android:layout_width="match_parent" android:layout_height="27dp"
+  android:orientation="horizontal" android:gravity="center_vertical"
+  android:background="@drawable/widget_row_background">
+  <TextView android:id="@+id/all_timers_title" android:layout_width="0dp" android:layout_weight="1"
+   android:layout_height="match_parent" android:gravity="center_vertical"
+   android:paddingLeft="8dp" android:singleLine="true"
+   android:text="All timers · TEST" android:textSize="12sp"
+   android:textColor="#FFD783" android:textStyle="bold"/>
+  <TextView android:id="@+id/all_timers_open" android:layout_width="42dp" android:layout_height="25dp"
+   android:gravity="center" android:layout_marginRight="2dp"
+   android:background="@drawable/widget_boost_action"
+   android:text="↗" android:textColor="#FFFFFF" android:textSize="18sp"
+   android:contentDescription="Open Clash Timer Hub"/>
+ </LinearLayout>
+ <TextView android:id="@+id/all_timers_summary" android:layout_width="match_parent"
+  android:layout_height="21dp" android:paddingLeft="7dp"
+  android:gravity="center_vertical" android:singleLine="true"
+  android:text="All accounts · potion-adjusted times" android:textColor="#CBB5D9" android:textSize="10sp"/>
+ <ListView android:id="@+id/all_timers_list" android:layout_width="match_parent"
+  android:layout_height="0dp" android:layout_weight="1"
+  android:divider="@android:color/transparent" android:dividerHeight="1dp"
+  android:scrollbars="vertical" android:fadeScrollbars="true"
+  android:cacheColorHint="#00000000"/>
+ <TextView android:id="@+id/all_timers_empty" android:layout_width="match_parent"
+  android:layout_height="0dp" android:layout_weight="1"
+  android:gravity="center" android:padding="10dp"
+  android:text="No active upgrades · sync an account"
+  android:textColor="#CBB5D9" android:textSize="12sp"/>
+</LinearLayout>
