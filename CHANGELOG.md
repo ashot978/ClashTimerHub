@@ -1,5 +1,23 @@
 # ClashTimerHub release notes
 
+## Herstel zwevende Sync-knop en Android klembordfocus — 6 november 2026
+
+### NL
+- Herstel de een-tik JSON-import vanuit de zwevende Sync-knop op Android 10+ en Samsung One UI.
+- De altijd-zichtbare knop blijft niet-focusbaar zodat Clash-chat het toetsenbord kan openen.
+- Een tik opent heel kort de bestaande QuickImportActivity met een klein transparant venster; importeren gebeurt pas na de echte Android focusmelding.
+- Het importresultaat verschijnt opnieuw op de paarse zwevende knop (groen bij succes, rood bij fout), waarna Clash weer zichtbaar is.
+- Beperk het wachten op focus en herprobeer tijdelijk lege klembordresultaten kort. Toon een duidelijke foutmelding als de klembordinhoud echt niet beschikbaar is.
+- Dubbel tikken voor Data Export, het verslepen van de knop, zeven accountgegevens en alle timers blijven behouden.
+
+### EN
+- Restore single-tap JSON import from the floating Sync button on Android 10+ and Samsung One UI.
+- Keep the persistent bubble non-focusable to avoid blocking the Clash chat keyboard.
+- A tap briefly opens a tiny transparent QuickImportActivity and only reads the clipboard once Android grants input focus.
+- Report success or failure on the floating bubble and return straight to Clash.
+- Bound focus waiting and retry transient null clipboard reads; show helpful errors.
+- Preserve double tap for Data Export, dragging and all account/timer data.
+
 ## Uniforme Research Potion-widget zonder flask-icoon — 6 november 2026
 
 ### NL

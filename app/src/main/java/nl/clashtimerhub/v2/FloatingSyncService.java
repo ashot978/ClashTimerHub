@@ -23,6 +23,9 @@ public final class FloatingSyncService extends Service {
  private Runnable pendingTap;
  private long previousTapAt;
  private static final long DOUBLE_TAP_WINDOW_MS=350L;
+ static final String ACTION_IMPORT_RESULT="nl.clashtimerhub.v2.FLOATING_IMPORT_RESULT";
+ static final String EXTRA_IMPORT_MESSAGE="importMessage";
+ static final String EXTRA_IMPORT_SUCCESS="importSuccess";
  private View feedback;
  private Runnable feedbackDismiss;
  private boolean shuttingDown=false;
@@ -117,7 +120,7 @@ public final class FloatingSyncService extends Service {
   pendingTap=()->{
    pendingTap=null;
    previousTapAt=0;
-   if(!shuttingDown)pasteNow();
+   if(!shuttingDown)launchFocusedImport();
   };
   holdHandler.postDelayed(pendingTap,DOUBLE_TAP_WINDOW_MS);
  }
@@ -182,19 +185,22 @@ public final class FloatingSyncService extends Service {
   Toast.makeText(this,I18n.tr(this,"Zwevende plakknop uitgeschakeld"),Toast.LENGTH_SHORT).show();
   stopSelf();
  }
- private void pasteNow(){
+ /**
+  * Android 10+ only allows clipboard reads for the focused app or default IME.
+  * Keep our always-on overlay NOT_FOCUSABLE (Clash chat keyboard stays usable).
+  * A single user tap opens a tiny, transparent focused Activity which reads
+  * the clipboard only after the focus callback and returns immediately.
+  */
+ private void launchFocusedImport(){
   try{
-   android.content.ClipboardManager clipboard=(android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
-   if(clipboard==null||!clipboard.hasPrimaryClip())throw new IllegalArgumentException("Klembord is leeg");
-   android.content.ClipData clip=clipboard.getPrimaryClip();
-   if(clip==null||clip.getItemCount()==0)throw new IllegalArgumentException("Klembord is leeg");
-   CharSequence value=clip.getItemAt(0).coerceToText(this);
-   String result=QuickSyncImporter.importJson(this,value==null?"":value.toString());
-   flashBubble(true);
-   showFeedback(I18n.tr(this,result),true);
-  }catch(Exception e){
+   Intent intent=new Intent(this,QuickImportActivity.class);
+   intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_NO_ANIMATION|
+    Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+   startActivity(intent);
+  }catch(Exception error){
    flashBubble(false);
-   showFeedback(I18n.tr(this,"Synchronisatie mislukt\n"+e.getMessage()),false);
+   showFeedback(I18n.tr(this,"Synchronisatie mislukt\nKon klembordinvoer niet openen"),false);
+   android.util.Log.e("ClashTimerHub","Could not open foreground import",error);
   }
  }
  private void showFeedback(String message,boolean success){
@@ -275,7 +281,16 @@ public final class FloatingSyncService extends Service {
    }
   },1200);
  }
- @Override public int onStartCommand(Intent intent,int flags,int startId){return START_STICKY;}
+ @Override public int onStartCommand(Intent intent,int flags,int startId){
+  if(intent!=null&&ACTION_IMPORT_RESULT.equals(intent.getAction())&&!shuttingDown){
+   boolean success=intent.getBooleanExtra(EXTRA_IMPORT_SUCCESS,false);
+   String message=intent.getStringExtra(EXTRA_IMPORT_MESSAGE);
+   flashBubble(success);
+   showFeedback(success?message:
+    I18n.tr(this,"Synchronisatie mislukt\n")+(message==null?"":message),success);
+  }
+  return START_STICKY;
+ }
  @Override public void onDestroy(){
   cancelHold();cancelTap();hideDropTarget();clearFeedback();
   if(manager!=null&&bubble!=null){
