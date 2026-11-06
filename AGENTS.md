@@ -2,6 +2,18 @@
 
 ## Mandatory release completion gate
 
+## Unconditional build after EVERY prompt
+
+**Non-negotiable: EACH NEW USER PROMPT addressed to the Clash Timer Hub Maintainer MUST result in a NEW Android APK build.** This applies to every request, without exception: code changes, UI tweaks, bug reports, instruction/agent changes, reviews, questions, clarification requests, and prompts that require no source changes. Never reuse an older build as proof of completing a new prompt.
+
+- For prompts that change the repository, commit the requested changes to `main` (or merge a PR to `main`), which triggers the APK GitHub Actions workflow.
+- For prompts that do not change source files, trigger a fresh `workflow_dispatch` run of `.github/workflows/build-apk.yml` against the current `main` commit. If dispatch is not available, make an appropriate meaningful, transparent repository update that triggers the normal push build; never pretend an old run is new.
+- Verify that the run was launched **in response to this specific prompt**, capture its run ID and run number, and confirm that it creates a newly published and installable APK for the intended commit.
+- Report completion only when the new run finishes successfully AND the APK artifact and matching release asset are verified. A queued, running, failed, or missing-artifact build does NOT count.
+- When a run fails or APK publication fails, inspect logs, fix what is wrong, and launch a **new build**. Retry until successful. If blocked by external permissions, unavailable tools, or other irrecoverable limitations, clearly state that the prompt is **not yet completed** rather than declaring success.
+
+This policy also applies when the user asks to change these agent instructions: commit the instruction update, run a fresh build, and verify it before claiming completion.
+
 For **every user-requested application change**, implement it, commit/push it to the build-triggering branch, and initiate the Android APK build in the same session. A code commit, merged PR, green checkmark on a PR, or queued/running workflow **does not mean the task is finished**.
 
 Before saying "done", "klaar", "completed", or equivalent:
