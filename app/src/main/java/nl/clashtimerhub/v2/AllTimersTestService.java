@@ -86,7 +86,7 @@ public final class AllTimersTestService extends RemoteViewsService {
    }else if(AllTimersWidgetSettings.PETS.equals(category)){
     finish=a.petAt;ready=a.petReady;maxed=a.petMax;boosted=a.petBoost;icon="🐾";
    }else{
-    finish=a.labAt;ready=a.labReady;maxed=a.labMax;boosted=a.labBoost;icon="🧙";
+    finish=a.labAt;ready=a.labReady;maxed=a.labMax;boosted=a.labBoost;icon="⚗";
    }
    int clock=CLOCKS[slot],idle=IDLES[slot],end=ENDS[slot],marker=ICONS[slot];
    boolean active=finish!=Long.MAX_VALUE&&finish>now;
