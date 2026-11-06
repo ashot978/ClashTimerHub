@@ -75,9 +75,16 @@ final class AllTimersWidgetSettings {
   int mode=sort(ctx,widgetId);
   Collections.sort(out,(a,b)->{
    if(mode==NEXT_BUILDER){
-    // Show a boosted-completed builder waiting for sync first, then earliest
-    // actual builder completion. Both statuses use potion-adjusted forecasts.
-    if((a.ready>0)!=(b.ready>0))return a.ready>0?-1:1;
+    // A completed upgrade not yet acknowledged by a fresh account sync is
+    // always above accounts with only running upgrades. This includes
+    // builders, lab (also goblin research) and pets, with or without Potions.
+    // When there are no pending completions, sort by the first effective
+    // Builder finish, which already includes Builder Potion acceleration.
+    int aPending=a.ready+a.labReady+a.petReady;
+    int bPending=b.ready+b.labReady+b.petReady;
+    if((aPending>0)!=(bPending>0))return aPending>0?-1:1;
+    if(aPending>0&&bPending>0&&aPending!=bPending)
+     return Integer.compare(bPending,aPending);
     int c=Long.compare(a.builderAt,b.builderAt);
     if(c!=0)return c;
    }else if(mode==NAME){

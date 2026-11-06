@@ -89,8 +89,9 @@ public final class AllTimersTestService extends RemoteViewsService {
    }
    int clock=CLOCKS[slot],idle=IDLES[slot],end=ENDS[slot],marker=ICONS[slot];
    boolean active=finish!=Long.MAX_VALUE&&finish>now;
-   boolean checkedMax=!active&&maxed;
-   boolean pendingSync=!active&&!maxed&&ready>0;
+   // Do not hide an unsynced completion behind a manually checked MAX flag.
+   boolean pendingSync=!active&&ready>0;
+   boolean checkedMax=!active&&maxed&&!pendingSync;
    rv.setViewVisibility(clock,active?View.VISIBLE:View.GONE);
    rv.setViewVisibility(idle,active?View.GONE:View.VISIBLE);
    rv.setTextViewText(idle,checkedMax?"✓":pendingSync?"!":"—");

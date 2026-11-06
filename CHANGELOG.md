@@ -1,5 +1,21 @@
 # ClashTimerHub release notes
 
+## Voltooide maar niet gesynchroniseerde upgrades weer bovenaan — 6 november 2026
+
+### NL
+- Herstel de prioriteit voor accounts met upgrades die inmiddels klaar zijn maar nog niet met een nieuwe Clash-export/sync zijn bevestigd. Die accounts staan weer helemaal bovenaan bij de standaardinstelling 'Volgende bouwer'.
+- Een originele eindtijd die verstreken is, blijft na afloop in de accountoverzichtprojectie staan zolang de voorspelde eindtijd ná de laatste bevestigde account-sync valt; dat geldt ook voor Potion-versnelde upgrades.
+- Ondersteun wachtende voltooiingen van bouwers, onderzoek (inclusief Goblin-onderzoek) én pets. Bij meerdere wachtende upgrades komen accounts met meer voltooiingen eerst.
+- Na een nieuwe sync verdwijnen de voltooide upgrades via de bestaande atomische JSON-verversing en keert de normale sortering op de vroegste, Potion-gecorrigeerde builder terug.
+- Markeer een ongecontroleerde voltooiing met ! / Ready vóórdat een eventuele MAX-markering wordt getoond. Bestaande handmatige MAX-voorkeuren blijven ongewijzigd.
+- Geen wijzigingen aan Potion-berekeningen, notificaties, app-identiteit, ondertekening, accountgegevens, kolomvolgorde of afwijkende sorteerstanden (alfabetisch/eigen volgorde).
+
+### EN
+- Restore first-priority sorting for accounts with completed, still-unsynced upgrades across Builders, Research (including Goblin Research), and Pets.
+- Completed timestamps remain pending until the next confirmed account sync, including Potion-adjusted finishes; show pending "!" ahead of MAX display.
+- Multiple pending completions sort first by count, then the earliest Builder finish. Other accounts continue sorting by effective Potion-adjusted Builder completion.
+- Do not change existing notifications, timing math, saved data, layout or other widget sort modes.
+
 ## All Timers: compact widgetvlak en bereikbaar tandwiel/opslaan — 6 november 2026
 
 ### NL

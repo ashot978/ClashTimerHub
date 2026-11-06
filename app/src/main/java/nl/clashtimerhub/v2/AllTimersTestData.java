@@ -75,7 +75,11 @@ final class AllTimersTestData {
     if(raw==null)continue;
     String account=raw.optString("account","");
     long original=raw.optLong("finish",0L);
-    if(original<=now||!accounts.contains(account))continue;
+    if(original<=0||!accounts.contains(account))continue;
+    // A timer whose source finish has elapsed must remain visible until the
+    // player makes a fresh export/sync for THIS account. This is what "!" in
+    // the widget represents; do not remove it simply because time passed.
+    long lastAcknowledged=prefs.getLong("ack_"+account,0L);
     String category=raw.optString("category","");
     long predicted=original;
     if("Bouwers".equals(category)){
@@ -89,6 +93,10 @@ final class AllTimersTestData {
      predicted=UpgradeForecast.finish(ctx,account,category,original);
      result.research++;
     }else if("Pets".equals(category))result.pets++;
+    // A previous sync has already acknowledged this completion. On a fresh
+    // JSON import stale upgrades disappear, but this guard also prevents
+    // old/acknowledged alarms from resurfacing in a widget.
+    if(predicted<=lastAcknowledged)continue;
     Item item=new Item();
     item.account=account;item.category=category;
     item.name=raw.optString("name","Upgrade");
@@ -118,8 +126,9 @@ final class AllTimersTestData {
     if(predicted>now&&predicted<result.next)result.next=predicted;
     result.items.add(item);
    }
-   // Earliest predicted completion first; completed-by-boost but not re-synced
-   // upgrades remain visible at the top until a fresh JSON import removes them.
+   // Include both normal and boost-completed timers until their next sync.
+   // Sort individual upgrades by effective finish; account priority is in
+   // AllTimersWidgetSettings and uses a.ready + a.labReady + a.petReady.
    Collections.sort(result.items,(a,b)->{
     int time=Long.compare(a.finish,b.finish);
     if(time!=0)return time;
