@@ -14,13 +14,71 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.HashSet;
 
-/** Explicit, account-specific early completion notifications for potion forecasts.
- * Never modifies or cancels the original imported upgrade timers and notifications.
- */
+/** Notify at the predicted potion-accelerated upgrade finish, independently from regular timer alarms. */
 public final class PotionCompletionAlarm extends BroadcastReceiver {
  private static final String ACTION="nl.clashtimerhub.v2.POTION_COMPLETION";
  private static final String CHANNEL="potion_completion_v1";
  private static final String KEY="scheduledPotionCompletions";
+ private static final String ACTION_TEST="nl.clashtimerhub.v2.POTION_TEST_ALARM";
+ private static final int TEST_REQUEST=90994;
+
+ /** Defaults to on for all saved accounts; users can opt out individually. */
+ static boolean enabled(android.content.SharedPreferences prefs,String account,String category){
+  if(!prefs.getBoolean("potionNotifyEnabled",true))return false;
+  if("Bouwers".equals(category)&&!prefs.getBoolean("potionNotifyBuilders",true))return false;
+  if("Laboratorium".equals(category)&&!prefs.getBoolean("potionNotifyResearch",true))return false;
+  if(!"Bouwers".equals(category)&&!"Laboratorium".equals(category))return false;
+  try{
+   return new JSONObject(prefs.getString("potionNotifyAccounts","{}")).optBoolean(account,true);
+  }catch(Exception error){
+   Log.w("ClashTimerHub","Potion notification account settings invalid",error);
+   return false;
+  }
+ }
+ private static void createChannel(Context ctx,NotificationManager manager){
+  if(Build.VERSION.SDK_INT>=26)manager.createNotificationChannel(
+   new NotificationChannel(CHANNEL,I18n.english(ctx)?"Potion upgrade completions":
+    "Potion-versnelde upgrades",NotificationManager.IMPORTANCE_HIGH));
+ }
+ static String scheduleTest(Context ctx){
+  if(Build.VERSION.SDK_INT>=33&&ctx.checkSelfPermission("android.permission.POST_NOTIFICATIONS")
+     !=android.content.pm.PackageManager.PERMISSION_GRANTED)
+   return "Sta eerst meldingen toe in de Android-instellingen.";
+  AlarmManager manager=(AlarmManager)ctx.getSystemService(Context.ALARM_SERVICE);
+  if(manager==null)return "Alarmservice niet beschikbaar.";
+  PendingIntent pending=PendingIntent.getBroadcast(ctx,TEST_REQUEST,
+   new Intent(ctx,PotionCompletionAlarm.class).setAction(ACTION_TEST),
+   PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+  manager.cancel(pending);
+  try{
+   long when=System.currentTimeMillis()+60000L;
+   boolean exact=Build.VERSION.SDK_INT<31||manager.canScheduleExactAlarms();
+   if(Build.VERSION.SDK_INT>=23){
+    if(exact)manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,when,pending);
+    else manager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,when,pending);
+   }else manager.set(AlarmManager.RTC_WAKEUP,when,pending);
+   return exact?"Potion-testmelding gepland over één minuut.":
+    "Potion-test gepland. Zonder exacte alarmtoestemming kan Android de melding vertragen.";
+  }catch(Exception error){
+   Log.w("ClashTimerHub","Potion alarm test could not be scheduled",error);
+   return "Potion-test mislukt. Controleer de Android-alarmtoestemming.";
+  }
+ }
+ private static void testNotification(Context ctx){
+  if(Build.VERSION.SDK_INT>=33&&ctx.checkSelfPermission("android.permission.POST_NOTIFICATIONS")
+     !=android.content.pm.PackageManager.PERMISSION_GRANTED)return;
+  NotificationManager manager=(NotificationManager)ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+  if(manager==null)return;
+  createChannel(ctx,manager);
+  Notification.Builder message=Build.VERSION.SDK_INT>=26?
+   new Notification.Builder(ctx,CHANNEL):new Notification.Builder(ctx);
+  message.setSmallIcon(android.R.drawable.ic_dialog_info)
+   .setContentTitle("Clash Timer Hub · Potion-testmelding")
+   .setContentText("Meldingen voor versnelde upgrades werken.")
+   .setAutoCancel(true);
+  manager.notify(880101,message.build());
+ }
+
 
  private static PendingIntent intent(Context ctx,int code,String account,String id,String category,long source,long predicted){
   Intent i=new Intent(ctx,PotionCompletionAlarm.class).setAction(ACTION);
@@ -47,7 +105,7 @@ public final class PotionCompletionAlarm extends BroadcastReceiver {
    }
   }catch(Exception ex){Log.w("ClashTimerHub","Old potion alarms unavailable",ex);}
   JSONArray scheduled=new JSONArray();
-  if(!prefs.getBoolean("notifyEnabled",true)||!prefs.getBoolean("notifyOnFinish",true)){
+  if(!prefs.getBoolean("potionNotifyEnabled",true)){
    prefs.edit().putString(KEY,scheduled.toString()).apply();return;
   }
   long now=System.currentTimeMillis();
@@ -59,7 +117,7 @@ public final class PotionCompletionAlarm extends BroadcastReceiver {
     if(upgrade==null)continue;
     String account=upgrade.optString("account","");
     String category=upgrade.optString("category","");
-    if(account.isEmpty()||(!"Bouwers".equals(category)&&!"Laboratorium".equals(category)))continue;
+    if(account.isEmpty()||!enabled(prefs,account,category))continue;
     long original=upgrade.optLong("finish",0L);
     if(original<=now)continue;
     boolean builder="Bouwers".equals(category);
@@ -83,14 +141,16 @@ public final class PotionCompletionAlarm extends BroadcastReceiver {
   prefs.edit().putString(KEY,scheduled.toString()).apply();
  }
  @Override public void onReceive(Context ctx,Intent intent){
-  if(intent==null||!ACTION.equals(intent.getAction()))return;
+  if(intent==null)return;
+  if(ACTION_TEST.equals(intent.getAction())){testNotification(ctx);return;}
+  if(!ACTION.equals(intent.getAction()))return;
   android.content.SharedPreferences prefs=AppData.prefs(ctx);
-  if(!prefs.getBoolean("notifyEnabled",true)||!prefs.getBoolean("notifyOnFinish",true))return;
   String account=intent.getStringExtra("account"),id=intent.getStringExtra("id"),category=intent.getStringExtra("category");
   long original=intent.getLongExtra("original",0L),predicted=intent.getLongExtra("predicted",0L);
   if(account==null||id==null||category==null||predicted<=0)return;
+  if(!enabled(prefs,account,category))return;
   long now=System.currentTimeMillis();
-  if(now+60000L<predicted)return;
+  if(now<predicted)return; // Never notify before the recalculated finish.
   boolean matched=false;
   try{
    JSONArray upgrades=new JSONArray(prefs.getString("upgrades","[]"));
@@ -112,10 +172,7 @@ public final class PotionCompletionAlarm extends BroadcastReceiver {
      !=android.content.pm.PackageManager.PERMISSION_GRANTED)return;
   NotificationManager manager=(NotificationManager)ctx.getSystemService(Context.NOTIFICATION_SERVICE);
   if(manager==null)return;
-  if(Build.VERSION.SDK_INT>=26)
-   manager.createNotificationChannel(new NotificationChannel(CHANNEL,
-    I18n.english(ctx)?"Potion completions":"Potion-upgrades gereed",
-    NotificationManager.IMPORTANCE_HIGH));
+  createChannel(ctx,manager);
   String name=id;
   try{
    JSONArray values=new JSONArray(prefs.getString("upgrades","[]"));

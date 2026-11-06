@@ -1,5 +1,25 @@
 # ClashTimerHub release notes
 
+## Instelbare potion-beïnvloede upgrade-eindtijdmeldingen — 6 november 2026
+
+### NL
+- Eigen instellingen 'Potion-meldingen instellen', volledig onafhankelijk van gewone upgrade-alarmen.
+- Zet potion-upgrades gereed aan of uit, afzonderlijk voor Builder en Research, en per opgeslagen account.
+- Melding alleen op de door potions herberekende eindtijd: geen melding wanneer de potion afloopt en geen voorafmelding.
+- Potionalarmen worden bij sync of het aanpassen van de boosttijd opnieuw gepland en gecontroleerd voor verzending.
+- Test het aparte Potion-alarmkanaal met de nieuwe test over één minuut, inclusief melding bij ontbrekende exacte alarmtoestemming.
+- Potionalarmvoorkeuren blijven behouden na sync en maken deel uit van lokale/Drive-back-ups en herstel; oude back-ups blijven compatibel.
+- Oorspronkelijke JSON-timers en gewone meldingen blijven intact.
+
+### EN
+- Separate Potion completion settings, independent from ordinary upgrade alarms.
+- Toggle Potion completion alerts globally, by Builder/Research type and by account.
+- Notify only when the potion-recalculated upgrade actually reaches its finish time, with no expiry reminder or early warning.
+- Reschedule and validate potion alarms after sync or boost adjustment.
+- Verify the dedicated notification channel using a one-minute Potion alarm test.
+- Back up and restore potion notification preferences without breaking old backups.
+- Preserve regular imported timers and notifications.
+
 ## Een-tik Sync zonder game te verlaten — 6 november 2026
 
 ### NL
