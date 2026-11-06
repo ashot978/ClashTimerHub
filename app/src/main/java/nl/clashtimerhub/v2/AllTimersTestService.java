@@ -9,6 +9,7 @@ import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 import java.util.ArrayList;
 
+/** Multi-account summary only. The timeline is intentionally not part of this widget. */
 public final class AllTimersTestService extends RemoteViewsService {
  @Override public RemoteViewsFactory onGetViewFactory(Intent intent){
   int id=intent==null?AppWidgetManager.INVALID_APPWIDGET_ID:
@@ -16,123 +17,89 @@ public final class AllTimersTestService extends RemoteViewsService {
   return new Factory(getApplicationContext(),id);
  }
  private static final class Factory implements RemoteViewsFactory {
-  // Timer palette: countdowns GOLD, actual finish clocks LAVENDER,
-  // boosted countdowns and finish clocks GREEN. MAX ticks only when set.
   private static final int GOLD=0xffffd783,GREEN=0xff8be3ad,
    LAVENDER=0xffcbb5d9,ICON=0xffd6bcea;
   private final Context ctx;
   private final int widgetId;
   private final ArrayList<AllTimersTestData.Account> accounts=new ArrayList<>();
-  private final ArrayList<AllTimersTestData.Item> entries=new ArrayList<>();
-  private boolean wide=false,compact=true;
-  Factory(Context c,int id){ctx=c;widgetId=id;}
+  private int layoutMode=1; // 0: narrow, 1: two-line, 2: full-width single-line.
+  Factory(Context ctx,int id){this.ctx=ctx;this.widgetId=id;}
   @Override public void onCreate(){onDataSetChanged();}
   @Override public void onDataSetChanged(){
-   AllTimersTestData.Snapshot s=AllTimersTestData.load(ctx);
-   accounts.clear();accounts.addAll(s.overview);
-   entries.clear();entries.addAll(s.items);
-   int width=380;
+   AllTimersTestData.Snapshot snapshot=AllTimersTestData.load(ctx);
+   accounts.clear();accounts.addAll(snapshot.overview);
+   int width=400;
    if(widgetId!=AppWidgetManager.INVALID_APPWIDGET_ID){
     android.os.Bundle options=AppWidgetManager.getInstance(ctx).getAppWidgetOptions(widgetId);
     if(options!=null){
      boolean landscape=ctx.getResources().getConfiguration().orientation==
       android.content.res.Configuration.ORIENTATION_LANDSCAPE;
      width=options.getInt(landscape?AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH:
-      AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,380);
+      AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,400);
     }
    }
-   wide=width>=665;
-   compact=width>=325;
+   layoutMode=width>=670?2:width>=420?1:0;
   }
-  @Override public void onDestroy(){accounts.clear();entries.clear();}
-  @Override public int getCount(){return accounts.size()+1+entries.size();}
-  @Override public RemoteViews getViewAt(int pos){
-   if(pos<0||pos>=getCount())return null;
-   if(pos<accounts.size())return accountView(accounts.get(pos));
-   if(pos==accounts.size()){
-    RemoteViews section=new RemoteViews(ctx.getPackageName(),R.layout.widget_all_timers_section);
-    section.setTextViewText(R.id.all_timers_section_title,
-     (I18n.english(ctx)?"ALL UPGRADES · ":"ALLE UPGRADES · ")+entries.size());
-    return section;
-   }
-   return itemView(entries.get(pos-accounts.size()-1));
+  @Override public void onDestroy(){accounts.clear();}
+  @Override public int getCount(){return accounts.size();}
+  @Override public RemoteViews getViewAt(int position){
+   if(position<0||position>=accounts.size())return null;
+   AllTimersTestData.Account status=accounts.get(position);
+   long now=System.currentTimeMillis();
+   int layout=layoutMode==2?R.layout.widget_all_timers_account_wide:
+    layoutMode==1?R.layout.widget_all_timers_account_compact:
+     R.layout.widget_all_timers_account_narrow;
+   RemoteViews rv=new RemoteViews(ctx.getPackageName(),layout);
+   rv.setTextViewText(R.id.all_account_name,AppData.displayName(ctx,status.key));
+   rv.setTextViewText(R.id.all_account_builders,status.ready+"✓ "+status.builders+"⚒");
+   rv.setTextViewText(R.id.all_account_helpers,
+    status.helpers.isEmpty()?"":"🤝 "+status.helpers);
+
+   // The columns have one fixed order in ALL layouts:
+   // three original icon+remaining-time columns to the LEFT;
+   // three wall-clock finish columns together on the RIGHT.
+   renderTimer(rv,R.id.all_account_builder_clock,R.id.all_account_builder_idle,
+    R.id.all_account_builder_end,R.id.all_account_builder_icon,
+    status.builderAt,status.ready,status.builderMax,status.builderBoost,"⚒",now);
+   renderTimer(rv,R.id.all_account_lab_clock,R.id.all_account_lab_idle,
+    R.id.all_account_lab_end,R.id.all_account_lab_icon,
+    status.labAt,status.labReady,status.labMax,status.labBoost,"🧙",now);
+   renderTimer(rv,R.id.all_account_pet_clock,R.id.all_account_pet_idle,
+    R.id.all_account_pet_end,R.id.all_account_pet_icon,
+    status.petAt,status.petReady,status.petMax,false,"🐾",now);
+   rv.setOnClickFillInIntent(R.id.all_account_row,
+    new Intent().putExtra("account",status.key));
+   return rv;
   }
-  private void clock(RemoteViews rv,int clock,int idle,int end,int marker,
-   long finish,int ready,boolean maxed,boolean boosted,String normalIcon,long now){
+  private void renderTimer(RemoteViews rv,int clock,int idle,int finishView,int iconView,
+   long finish,int ready,boolean maxed,boolean boosted,String icon,long now){
    boolean active=finish!=Long.MAX_VALUE&&finish>now;
+   boolean checkedMax=!active&&maxed;
+   boolean pendingSync=!active&&!maxed&&ready>0;
    rv.setViewVisibility(clock,active?View.VISIBLE:View.GONE);
    rv.setViewVisibility(idle,active?View.GONE:View.VISIBLE);
-   // The original checkmark means a user-checked MAX category.
-   boolean checkedMax=!active&&maxed;
-   boolean needsSync=!active&&!maxed&&ready>0;
-   rv.setTextViewText(idle,checkedMax?"✓":needsSync?"!":"—");
+   rv.setTextViewText(idle,checkedMax?"✓":pendingSync?"!":"—");
+   rv.setTextViewText(finishView,active?
+    (layoutMode==2?AllTimersTestData.endTime(ctx,finish,now):
+     AllTimersTestData.compactEnd(ctx,finish,now)):
+    checkedMax?"MAX":pendingSync?(I18n.english(ctx)?"Ready":"Klaar"):"—");
    if(active){
     rv.setChronometer(clock,SystemClock.elapsedRealtime()+finish-now,null,true);
     rv.setChronometerCountDown(clock,true);
    }
-   rv.setTextViewText(end,active?
-    (wide?AllTimersTestData.endTime(ctx,finish,now):
-     AllTimersTestData.compactEnd(ctx,finish,now)):
-    checkedMax?"MAX":needsSync?(I18n.english(ctx)?"Ready":"Klaar"):"—");
-   rv.setTextViewText(marker,active&&boosted?"⚡":normalIcon);
-   rv.setTextColor(clock,boosted?GREEN:GOLD);
-   rv.setTextColor(end,checkedMax?GREEN:needsSync?GOLD:
+   // Never replace the original category icon with a potion lightning symbol.
+   rv.setTextViewText(iconView,icon);
+   rv.setTextColor(iconView,ICON);
+   rv.setTextColor(clock,active&&boosted?GREEN:GOLD);
+   rv.setTextColor(idle,checkedMax?GREEN:pendingSync?GOLD:LAVENDER);
+   rv.setTextColor(finishView,checkedMax?GREEN:pendingSync?GOLD:
     active&&boosted?GREEN:LAVENDER);
-   rv.setTextColor(marker,active&&boosted?GREEN:ICON);
-   rv.setTextColor(idle,checkedMax?GREEN:needsSync?GOLD:LAVENDER);
-  }
-  private RemoteViews accountView(AllTimersTestData.Account s){
-   long now=System.currentTimeMillis();
-   RemoteViews rv=new RemoteViews(ctx.getPackageName(),
-    wide?R.layout.widget_all_timers_account_wide:
-     compact?R.layout.widget_all_timers_account_compact:
-      R.layout.widget_all_timers_account_narrow);
-   rv.setTextViewText(R.id.all_account_name,AppData.displayName(ctx,s.key));
-   rv.setTextViewText(R.id.all_account_builders,s.ready+"✓ "+s.builders+"⚒");
-   rv.setTextViewText(R.id.all_account_helpers,s.helpers.isEmpty()?"":"🤝 "+s.helpers);
-   clock(rv,R.id.all_account_builder_clock,R.id.all_account_builder_idle,
-    R.id.all_account_builder_end,R.id.all_account_builder_icon,
-    s.builderAt,s.ready,s.builderMax,s.builderBoost,"⚒",now);
-   clock(rv,R.id.all_account_lab_clock,R.id.all_account_lab_idle,
-    R.id.all_account_lab_end,R.id.all_account_lab_icon,
-    s.labAt,s.labReady,s.labMax,s.labBoost,"🧙",now);
-   clock(rv,R.id.all_account_pet_clock,R.id.all_account_pet_idle,
-    R.id.all_account_pet_end,R.id.all_account_pet_icon,
-    s.petAt,s.petReady,s.petMax,false,"🐾",now);
-   rv.setOnClickFillInIntent(R.id.all_account_row,new Intent().putExtra("account",s.key));
-   return rv;
-  }
-  private RemoteViews itemView(AllTimersTestData.Item item){
-   long now=System.currentTimeMillis();
-   RemoteViews rv=new RemoteViews(ctx.getPackageName(),R.layout.widget_all_timers_test_row);
-   rv.setTextViewText(R.id.all_timer_account,AppData.displayName(ctx,item.account));
-   rv.setTextViewText(R.id.all_timer_name,item.name);
-   rv.setTextViewText(R.id.all_timer_category,AllTimersTestData.category(ctx,item));
-   rv.setTextViewText(R.id.all_timer_end,AllTimersTestData.endTime(ctx,item.finish,now));
-   rv.setViewVisibility(R.id.all_timer_clock,item.finish>now?View.VISIBLE:View.GONE);
-   rv.setViewVisibility(R.id.all_timer_ready,item.finish>now?View.GONE:View.VISIBLE);
-   if(item.finish>now){
-    rv.setChronometer(R.id.all_timer_clock,SystemClock.elapsedRealtime()+item.finish-now,null,true);
-    rv.setChronometerCountDown(R.id.all_timer_clock,true);
-   }
-   rv.setTextViewText(R.id.all_timer_ready,I18n.english(ctx)?"✓ Ready":"✓ Klaar");
-   rv.setTextViewText(R.id.all_timer_boost,item.boosted?
-    "⚡ "+("Bouwers".equals(item.category)?"10× ":"24× ")+AllTimersTestData.saved(ctx,item.saved):
-    (I18n.english(ctx)?"Normal":"Normaal"));
-   rv.setTextColor(R.id.all_timer_end,item.boosted?GREEN:LAVENDER);
-   rv.setTextColor(R.id.all_timer_clock,item.boosted?GREEN:GOLD);
-   rv.setTextColor(R.id.all_timer_boost,item.boosted?GREEN:LAVENDER);
-   rv.setOnClickFillInIntent(R.id.all_timer_row,new Intent().putExtra("account",item.account));
-   return rv;
   }
   @Override public RemoteViews getLoadingView(){return null;}
-  @Override public int getViewTypeCount(){return 5;}
-  @Override public long getItemId(int pos){
-   if(pos<0||pos>=getCount())return pos;
-   if(pos<accounts.size())return ("account:"+accounts.get(pos).key).hashCode();
-   if(pos==accounts.size())return -1;
-   AllTimersTestData.Item s=entries.get(pos-accounts.size()-1);
-   return ("timer:"+s.account+":"+s.category+":"+s.id).hashCode();
+  @Override public int getViewTypeCount(){return 3;}
+  @Override public long getItemId(int position){
+   return position<0||position>=accounts.size()?position:
+    ("account:"+accounts.get(position).key).hashCode();
   }
   @Override public boolean hasStableIds(){return true;}
  }

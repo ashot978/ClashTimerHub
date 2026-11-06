@@ -1,5 +1,22 @@
 # ClashTimerHub release notes
 
+## Timerblokken links, kloktijden rechts — geen Timeline of bliksem — 6 november 2026
+
+### NL
+- De All Timers-widget bevat voortaan uitsluitend het multi-accountoverzicht. De extra 'ALL UPGRADES'-sectie, scrollbare upgrade-timeline en individuele upgrade-rijen zijn uit deze widget verwijderd.
+- Elk account toont nu op vaste volgorde bouwers-, onderzoeks- en pet-aftellingen als groep links; daarna de drie bijbehorende eindkloktijden als groep rechts. Dit is niet meer aftelling-eindtijd-afwisseling per categorie.
+- De categorie-iconen ⚒, 🧙 en 🐾 blijven altijd zichtbaar en veranderen nooit in een bliksemsymbool. De widget bevat geen bliksem of bliksemlegenda meer; alleen de groene tekst onderscheidt Potion-verkorte aftellingen/eindtijden.
+- MAX-✓ en het onderscheid met — of klaar-voor-sync ! blijven behouden. Normale aftellingen goud, normale eindklokken lavendel, versnelde waarden groen.
+- Ashotgun 6:44 resterend en 'morgen 00:00' was op het getoonde toestel rond 17:16 mathematisch consistent, maar de feitelijke correcte eindtijd vereist nieuwe game-export om te valideren. Daarom zijn de Potion-algoritmes niet willekeurig aangepast.
+- De widget wordt lager van standaardformaat (4×3), met reeds geplaatste widgets, accounts, overige widgets en notificaties behouden.
+
+### EN
+- All Timers now shows only account-level countdowns, with no timeline or ALL UPGRADES rows.
+- Render all three countdown columns together on the left, followed by their three clock-time columns together on the right. Uniform order in wide/compact/narrow layouts.
+- Preserve the original builders/research/pets icons; never substitute a lightning emoji. Green text alone indicates Potion-adjusted forecasts.
+- Keep checked MAX marks and existing alert logic. Reduce default widget height to 4×3.
+- Ashotgun's displayed countdown and midnight finish agree arithmetically, but actual correctness still requires fresh game-export comparison.
+
 ## MAX-vinkjes terug en uniforme kleuren/tijdvolgorde — 6 november 2026
 
 ### NL

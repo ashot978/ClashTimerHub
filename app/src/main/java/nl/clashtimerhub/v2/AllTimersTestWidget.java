@@ -12,7 +12,7 @@ import android.os.Build;
 import android.widget.RemoteViews;
 import org.json.JSONArray;
 
-/** Multi-account summary plus every individual upgrade, with potion-adjusted times. */
+/** Compact multi-account timers without a timeline or potion lightning icons. */
 public final class AllTimersTestWidget extends AppWidgetProvider {
  private static final String REFRESH="nl.clashtimerhub.v2.ALL_TIMERS_TEST_REFRESH";
  private static final String OPEN="nl.clashtimerhub.v2.ALL_TIMERS_TEST_OPEN";
@@ -29,9 +29,9 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
     rv.setTextViewText(R.id.all_timers_title,
      I18n.english(ctx)?"All timers":"Alle timers");
     rv.setTextViewText(R.id.all_timers_summary,
-     snapshot.accounts+" accounts · "+snapshot.items.size()+" upgrades"+
-     " · ⚡ "+snapshot.boosted+" "+(I18n.english(ctx)?"boosted":"versneld")+
-     " · "+(I18n.english(ctx)?"green = boost":"groen = boost"));
+     snapshot.accounts+" accounts · "+snapshot.boosted+" "+
+      (I18n.english(ctx)?"boosted":"versneld")+
+     " · "+(I18n.english(ctx)?"green = potion":"groen = potion"));
     Intent service=new Intent(ctx,AllTimersTestService.class);
     service.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,id);
     service.setData(Uri.parse("clashtimerhub://all-timers/"+id));
@@ -55,7 +55,7 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
     rv.setOnClickPendingIntent(R.id.all_timers_sync,PendingIntent.getBroadcast(ctx,
      949300+id,toggle,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE));
     manager.updateAppWidget(id,rv);
-   }catch(Exception error){android.util.Log.e("ClashTimerHub","All Timers test widget error",error);}
+   }catch(Exception error){android.util.Log.e("ClashTimerHub","All Timers widget error",error);}
   }
   manager.notifyAppWidgetViewDataChanged(ids,R.id.all_timers_list);
   plan(ctx,snapshot.next);
