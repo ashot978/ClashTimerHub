@@ -36,6 +36,18 @@ final class AllTimersWidgetSettings {
   int mode=preferences(ctx).getInt(key("sort",id),NEXT_BUILDER);
   return mode>=NEXT_BUILDER&&mode<=MANUAL?mode:NEXT_BUILDER;
  }
+ /** Category shown alongside account/helpers in optional two-line mode. */
+ static String topCategory(Context ctx,int id){
+  String category=preferences(ctx).getString(key("topCategory",id),BUILDERS);
+  return validColumn(category)?category:BUILDERS;
+ }
+ static String[] twoLineOrder(Context ctx,int id){
+  String top=topCategory(ctx,id);
+  ArrayList<String> ordered=new ArrayList<>();
+  ordered.add(top);
+  for(String category:order(ctx,id))if(!top.equals(category))ordered.add(category);
+  return ordered.toArray(new String[0]);
+ }
  static boolean twoLines(Context ctx,int id){
   return preferences(ctx).getInt(key("rowLines",id),SINGLE_LINE)==TWO_LINES;
  }
@@ -108,7 +120,7 @@ final class AllTimersWidgetSettings {
  }
  static void delete(Context ctx,int id){
   SharedPreferences.Editor e=preferences(ctx).edit();
-  for(String field:new String[]{"columns","sort","rowLines","all","selected","accountsOrder","helpers"})
+  for(String field:new String[]{"columns","sort","rowLines","topCategory","all","selected","accountsOrder","helpers"})
    e.remove(key(field,id));
   e.apply();
  }
