@@ -28,9 +28,12 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
     RemoteViews rv=new RemoteViews(ctx.getPackageName(),R.layout.widget_all_timers_test);
     rv.setTextViewText(R.id.all_timers_title,
      I18n.english(ctx)?"All timers":"Alle timers");
+    java.util.ArrayList<AllTimersTestData.Account> shown=
+     AllTimersWidgetSettings.visibleAccounts(ctx,id,snapshot);
     rv.setTextViewText(R.id.all_timers_summary,
-     snapshot.accounts+" accounts · "+snapshot.boosted+" "+
-      (I18n.english(ctx)?"boosted":"versneld")+
+     shown.size()+" "+(I18n.english(ctx)?"accounts":"accounts")+
+     " · "+AllTimersWidgetSettings.boostedCount(snapshot,shown)+" "+
+     (I18n.english(ctx)?"boosted":"versneld")+
      " · "+(I18n.english(ctx)?"green = potion":"groen = potion"));
     Intent service=new Intent(ctx,AllTimersTestService.class);
     service.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,id);
@@ -43,10 +46,12 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
      (Build.VERSION.SDK_INT>=31?PendingIntent.FLAG_MUTABLE:0);
     rv.setPendingIntentTemplate(R.id.all_timers_list,
      PendingIntent.getBroadcast(ctx,949100+id,template,flags));
-    Intent app=new Intent(ctx,MainActivity.class).setAction("nl.clashtimerhub.v2.OPEN_ALL_TIMERS_"+id);
-    app.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    Intent config=new Intent(ctx,AllTimersConfigActivity.class)
+     .setAction("nl.clashtimerhub.v2.CONFIG_ALL_TIMERS_"+id)
+     .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,id);
+    config.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     rv.setOnClickPendingIntent(R.id.all_timers_open,
-     PendingIntent.getActivity(ctx,949200+id,app,
+     PendingIntent.getActivity(ctx,949200+id,config,
       PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE));
     boolean floating=AppData.prefs(ctx).getBoolean("floatingEnabled",false);
     rv.setTextViewText(R.id.all_timers_sync,
@@ -91,7 +96,10 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
  @Override public void onAppWidgetOptionsChanged(Context ctx,AppWidgetManager manager,int id,android.os.Bundle options){
   super.onAppWidgetOptionsChanged(ctx,manager,id,options);update(ctx);
  }
- @Override public void onDeleted(Context ctx,int[] ids){super.onDeleted(ctx,ids);update(ctx);}
+ @Override public void onDeleted(Context ctx,int[] ids){
+  for(int id:ids)AllTimersWidgetSettings.delete(ctx,id);
+  super.onDeleted(ctx,ids);update(ctx);
+ }
  @Override public void onReceive(Context ctx,Intent intent){
   super.onReceive(ctx,intent);
   if(intent==null)return;

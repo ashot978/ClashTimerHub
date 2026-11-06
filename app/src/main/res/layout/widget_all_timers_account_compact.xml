@@ -5,90 +5,92 @@
  android:layout_marginBottom="1dp" android:paddingLeft="4dp"
  android:paddingRight="4dp" android:gravity="center_vertical"
  android:orientation="vertical"
- android:background="@drawable/widget_row_background"><LinearLayout android:layout_width="match_parent" android:layout_height="21dp"
- android:orientation="horizontal" android:gravity="center_vertical"><TextView android:id="@+id/all_account_name"
-  android:layout_width="83dp" android:layout_height="match_parent"
-  android:gravity="left|center_vertical" android:textSize="10sp"
-  android:textStyle="bold" android:text="AshotRush" android:textColor="#FFFFFF"
-  android:singleLine="true" android:ellipsize="end"/>
- <TextView android:id="@+id/all_account_builders"
-  android:layout_width="58dp" android:layout_height="match_parent"
-  android:gravity="left|center_vertical" android:text="0✓ 7⚒"
-  android:textSize="9sp" android:textColor="#8BE3AD" android:singleLine="true"/>
+ android:background="@drawable/widget_row_background"><LinearLayout android:layout_width="match_parent"
+ android:layout_height="21dp" android:orientation="horizontal" android:gravity="center_vertical">
+ <TextView android:id="@+id/all_account_name" android:layout_width="83dp"
+  android:layout_height="match_parent" android:gravity="left|center_vertical"
+  android:text="Shotty" android:textColor="#FFFFFF" android:textSize="10sp"
+  android:textStyle="bold" android:singleLine="true" android:ellipsize="end"/>
+ <TextView android:id="@+id/all_account_builders" android:layout_width="58dp"
+  android:layout_height="match_parent" android:gravity="left|center_vertical"
+  android:text="0✓ 7⚒" android:textColor="#8BE3AD"
+  android:textSize="9sp" android:singleLine="true"/>
  <TextView android:id="@+id/all_account_helpers"
   android:layout_width="0dp" android:layout_weight="1"
   android:layout_height="match_parent" android:gravity="center_vertical"
-  android:text="🤝 0/2 · 16h35" android:textSize="9sp" android:textColor="#8BE3AD"
-  android:singleLine="true" android:ellipsize="end"/></LinearLayout>
-<LinearLayout android:layout_width="match_parent" android:layout_height="24dp"
- android:orientation="horizontal" android:gravity="center_vertical" android:baselineAligned="false">
-<LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent"
- android:orientation="horizontal" android:gravity="center_vertical" android:baselineAligned="false"
- android:paddingLeft="2dp" android:paddingRight="3dp">
- <TextView android:id="@+id/all_account_builder_icon" android:layout_width="14dp"
-  android:layout_height="match_parent" android:gravity="center_vertical"
-  android:text="⚒" android:textSize="9sp" android:textColor="#D6BCEA"
-  android:includeFontPadding="false"/>
- <Chronometer android:id="@+id/all_account_builder_clock" android:layout_width="0dp"
-  android:layout_weight="1" android:layout_height="match_parent"
-  android:gravity="left|center_vertical" android:textSize="9sp"
-  android:includeFontPadding="false" android:textColor="#FFD783"
-  android:singleLine="true" android:text="03:12:15"/>
- <TextView android:id="@+id/all_account_builder_idle" android:layout_width="0dp"
-  android:layout_weight="1" android:layout_height="match_parent"
-  android:gravity="left|center_vertical" android:textSize="9sp"
-  android:includeFontPadding="false" android:visibility="gone"
-  android:textColor="#CBB5D9" android:singleLine="true" android:text="—"/>
- <TextView android:id="@+id/all_account_builder_end" android:layout_width="0dp"
-  android:layout_weight="1.1" android:layout_height="match_parent"
-  android:gravity="right|center_vertical" android:textSize="9sp"
-  android:includeFontPadding="false" android:singleLine="true"
-  android:ellipsize="end" android:textColor="#CBB5D9" android:text="Mrg 07:29"/>
-</LinearLayout>
-<LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent"
- android:orientation="horizontal" android:gravity="center_vertical" android:baselineAligned="false"
- android:paddingLeft="2dp" android:paddingRight="3dp">
- <TextView android:id="@+id/all_account_lab_icon" android:layout_width="14dp"
-  android:layout_height="match_parent" android:gravity="center_vertical"
-  android:text="🧙" android:textSize="9sp" android:textColor="#D6BCEA"
-  android:includeFontPadding="false"/>
- <Chronometer android:id="@+id/all_account_lab_clock" android:layout_width="0dp"
-  android:layout_weight="1" android:layout_height="match_parent"
-  android:gravity="left|center_vertical" android:textSize="9sp"
-  android:includeFontPadding="false" android:textColor="#FFD783"
-  android:singleLine="true" android:text="03:12:15"/>
- <TextView android:id="@+id/all_account_lab_idle" android:layout_width="0dp"
-  android:layout_weight="1" android:layout_height="match_parent"
-  android:gravity="left|center_vertical" android:textSize="9sp"
-  android:includeFontPadding="false" android:visibility="gone"
-  android:textColor="#CBB5D9" android:singleLine="true" android:text="—"/>
- <TextView android:id="@+id/all_account_lab_end" android:layout_width="0dp"
-  android:layout_weight="1.1" android:layout_height="match_parent"
-  android:gravity="right|center_vertical" android:textSize="9sp"
-  android:includeFontPadding="false" android:singleLine="true"
-  android:ellipsize="end" android:textColor="#CBB5D9" android:text="Mrg 07:29"/>
-</LinearLayout>
-<LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent"
- android:orientation="horizontal" android:gravity="center_vertical" android:baselineAligned="false"
- android:paddingLeft="2dp" android:paddingRight="3dp">
- <TextView android:id="@+id/all_account_pet_icon" android:layout_width="14dp"
-  android:layout_height="match_parent" android:gravity="center_vertical"
-  android:text="🐾" android:textSize="9sp" android:textColor="#D6BCEA"
-  android:includeFontPadding="false"/>
- <Chronometer android:id="@+id/all_account_pet_clock" android:layout_width="0dp"
-  android:layout_weight="1" android:layout_height="match_parent"
-  android:gravity="left|center_vertical" android:textSize="9sp"
-  android:includeFontPadding="false" android:textColor="#FFD783"
-  android:singleLine="true" android:text="03:12:15"/>
- <TextView android:id="@+id/all_account_pet_idle" android:layout_width="0dp"
-  android:layout_weight="1" android:layout_height="match_parent"
-  android:gravity="left|center_vertical" android:textSize="9sp"
-  android:includeFontPadding="false" android:visibility="gone"
-  android:textColor="#CBB5D9" android:singleLine="true" android:text="—"/>
- <TextView android:id="@+id/all_account_pet_end" android:layout_width="0dp"
-  android:layout_weight="1.1" android:layout_height="match_parent"
-  android:gravity="right|center_vertical" android:textSize="9sp"
-  android:includeFontPadding="false" android:singleLine="true"
-  android:ellipsize="end" android:textColor="#CBB5D9" android:text="Mrg 07:29"/>
-</LinearLayout>
-</LinearLayout></LinearLayout>
+  android:text="🤝 0/2 · 17h" android:textColor="#8BE3AD" android:textSize="9sp"
+  android:singleLine="true" android:ellipsize="end"/>
+ </LinearLayout>
+ <LinearLayout android:layout_width="match_parent" android:layout_height="24dp"
+  android:orientation="horizontal" android:gravity="center_vertical" android:baselineAligned="false">
+ <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+  android:layout_height="match_parent" android:orientation="horizontal"
+  android:gravity="center_vertical" android:baselineAligned="false"
+  android:paddingLeft="2dp" android:paddingRight="5dp">
+  <TextView android:id="@+id/all_slot_0_icon" android:layout_width="13dp"
+   android:layout_height="match_parent" android:gravity="center_vertical"
+   android:text="🧙" android:textColor="#D6BCEA" android:textSize="9sp"
+   android:includeFontPadding="false"/>
+  <Chronometer android:id="@+id/all_slot_0_clock" android:layout_width="55dp"
+   android:layout_height="match_parent" android:gravity="left|center_vertical"
+   android:text="03:12:15" android:textColor="#FFD783" android:textSize="9sp"
+   android:singleLine="true" android:includeFontPadding="false"/>
+  <TextView android:id="@+id/all_slot_0_idle" android:layout_width="55dp"
+   android:layout_height="match_parent" android:gravity="left|center_vertical"
+   android:text="—" android:textColor="#CBB5D9" android:textSize="9sp"
+   android:singleLine="true" android:visibility="gone"
+   android:includeFontPadding="false"/>
+  <TextView android:id="@+id/all_slot_0_end" android:layout_width="0dp"
+   android:layout_weight="1" android:layout_height="match_parent"
+   android:gravity="left|center_vertical" android:layout_marginLeft="2dp"
+   android:text="Mrg 07:29" android:textColor="#CBB5D9"
+   android:textSize="9sp" android:includeFontPadding="false"
+   android:singleLine="true" android:ellipsize="end"/>
+ </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_weight="1"
+  android:layout_height="match_parent" android:orientation="horizontal"
+  android:gravity="center_vertical" android:baselineAligned="false"
+  android:paddingLeft="9dp" android:paddingRight="5dp">
+  <TextView android:id="@+id/all_slot_1_icon" android:layout_width="13dp"
+   android:layout_height="match_parent" android:gravity="center_vertical"
+   android:text="🧙" android:textColor="#D6BCEA" android:textSize="9sp"
+   android:includeFontPadding="false"/>
+  <Chronometer android:id="@+id/all_slot_1_clock" android:layout_width="55dp"
+   android:layout_height="match_parent" android:gravity="left|center_vertical"
+   android:text="03:12:15" android:textColor="#FFD783" android:textSize="9sp"
+   android:singleLine="true" android:includeFontPadding="false"/>
+  <TextView android:id="@+id/all_slot_1_idle" android:layout_width="55dp"
+   android:layout_height="match_parent" android:gravity="left|center_vertical"
+   android:text="—" android:textColor="#CBB5D9" android:textSize="9sp"
+   android:singleLine="true" android:visibility="gone"
+   android:includeFontPadding="false"/>
+  <TextView android:id="@+id/all_slot_1_end" android:layout_width="0dp"
+   android:layout_weight="1" android:layout_height="match_parent"
+   android:gravity="left|center_vertical" android:layout_marginLeft="2dp"
+   android:text="Mrg 07:29" android:textColor="#CBB5D9"
+   android:textSize="9sp" android:includeFontPadding="false"
+   android:singleLine="true" android:ellipsize="end"/>
+ </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_weight="1"
+  android:layout_height="match_parent" android:orientation="horizontal"
+  android:gravity="center_vertical" android:baselineAligned="false"
+  android:paddingLeft="9dp" android:paddingRight="5dp">
+  <TextView android:id="@+id/all_slot_2_icon" android:layout_width="13dp"
+   android:layout_height="match_parent" android:gravity="center_vertical"
+   android:text="🧙" android:textColor="#D6BCEA" android:textSize="9sp"
+   android:includeFontPadding="false"/>
+  <Chronometer android:id="@+id/all_slot_2_clock" android:layout_width="55dp"
+   android:layout_height="match_parent" android:gravity="left|center_vertical"
+   android:text="03:12:15" android:textColor="#FFD783" android:textSize="9sp"
+   android:singleLine="true" android:includeFontPadding="false"/>
+  <TextView android:id="@+id/all_slot_2_idle" android:layout_width="55dp"
+   android:layout_height="match_parent" android:gravity="left|center_vertical"
+   android:text="—" android:textColor="#CBB5D9" android:textSize="9sp"
+   android:singleLine="true" android:visibility="gone"
+   android:includeFontPadding="false"/>
+  <TextView android:id="@+id/all_slot_2_end" android:layout_width="0dp"
+   android:layout_weight="1" android:layout_height="match_parent"
+   android:gravity="left|center_vertical" android:layout_marginLeft="2dp"
+   android:text="Mrg 07:29" android:textColor="#CBB5D9"
+   android:textSize="9sp" android:includeFontPadding="false"
+   android:singleLine="true" android:ellipsize="end"/>
+ </LinearLayout>
+ </LinearLayout></LinearLayout>
