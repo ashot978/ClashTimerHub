@@ -85,7 +85,7 @@ public final class BuilderBoostEditorActivity extends Activity {
     scroll.setPadding(bars.left,bars.top,bars.right,bars.bottom);
     return insets;
    });
-   scroll.requestApplyWindowInsets();
+   scroll.requestApplyInsets();
   }else scroll.setFitsSystemWindows(true);
   return body;
  }
