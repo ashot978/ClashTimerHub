@@ -22,12 +22,10 @@
 <receiver android:name=".UpdateInstallReceiver" android:exported="false"/>
 <receiver android:name=".BuilderAlarm" android:exported="false"/>
 <receiver android:name=".PotionCompletionAlarm" android:exported="false"/>
-<activity android:name=".ResearchBoostEditorActivity" android:exported="false" android:theme="@android:style/Theme.Material.NoActionBar"/>
 <receiver android:name=".AlarmRestoreReceiver" android:exported="false">
 <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED"/><action android:name="android.intent.action.MY_PACKAGE_REPLACED"/><action android:name="android.intent.action.TIME_SET"/><action android:name="android.intent.action.TIMEZONE_CHANGED"/></intent-filter>
 </receiver>
 <receiver android:name=".WidgetSyncReceiver" android:exported="false"/>
-<activity android:name=".BuilderBoostEditorActivity" android:exported="false" android:theme="@android:style/Theme.Material.NoActionBar"/>
 <activity android:name=".AllTimersConfigActivity" android:exported="true" android:theme="@android:style/Theme.Material.NoActionBar">
 <intent-filter><action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/></intent-filter>
 </activity>

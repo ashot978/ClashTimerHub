@@ -16,8 +16,6 @@ public final class FloatingSyncService extends Service {
  private View bubble;
  private WindowManager.LayoutParams params;
  private static final int CHANNEL_ID=11;
- // Reuse the same laboratory glyph as the home-screen widgets.
- private static final String SYNC_WIZARD_ICON=WidgetV7.LAB_ICON;
  private View dropTarget;
  private WindowManager.LayoutParams dropParams;
  private final Handler holdHandler=new Handler(Looper.getMainLooper());
@@ -115,7 +113,8 @@ public final class FloatingSyncService extends Service {
    if(focused&&syncReading)scheduleRead();
   });
   AppData.prefs(this).edit().putBoolean("floatingEnabled",true).apply();
-  TimerWidget.update(this);
+  WidgetV7.updateAll(this);
+  AllTimersTestWidget.updateSyncStatus(this);
  }
  private void handleTap(){
   long now=SystemClock.uptimeMillis();
@@ -194,7 +193,8 @@ public final class FloatingSyncService extends Service {
   if(shuttingDown)return;
   shuttingDown=true;cancelHold();cancelTap();releaseOverlayFocus();hideDropTarget();
   AppData.prefs(this).edit().putBoolean("floatingEnabled",false).apply();
-  TimerWidget.update(this);
+  WidgetV7.updateAll(this);
+  AllTimersTestWidget.updateSyncStatus(this);
   Toast.makeText(this,I18n.tr(this,"Zwevende plakknop uitgeschakeld"),Toast.LENGTH_SHORT).show();
   stopSelf();
  }
@@ -284,7 +284,7 @@ public final class FloatingSyncService extends Service {
  private void showFeedback(String message,boolean success){
   clearFeedback();
   // Accept both real and literal newlines from older exports; never print \\n on screen.
-  String normalized=I18n.tr(this,(message==null?"":message).replace("\\n","\n").trim());
+  String normalized=I18n.tr(this,(message==null?"":message).replace("\\n","\n").trim()).replace("⚗",WidgetV7.LAB_ICON);
   String[] parts=normalized.split("\n",3);
   String first=parts.length>0?parts[0]:"",last=parts.length>1?parts[1]:"";
   int marker=first.indexOf(" ✓ ");
@@ -301,22 +301,11 @@ public final class FloatingSyncService extends Service {
   }
   LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
   card.setPadding(dp(12),dp(8),dp(12),dp(8));
-  // Match the widgets' standalone, normal-weight 10sp laboratory glyph.
-  // Keep it separate from the bold title for consistent emoji rendering.
-  LinearLayout headingRow=new LinearLayout(this);
-  headingRow.setOrientation(LinearLayout.HORIZONTAL);
-  headingRow.setGravity(Gravity.CENTER_VERTICAL);
-  TextView wizard=new TextView(this);wizard.setText(SYNC_WIZARD_ICON);wizard.setTextSize(10);
-  wizard.setTextColor(0xffd6bcea);
-  LinearLayout.LayoutParams wizardParams=new LinearLayout.LayoutParams(
-   WindowManager.LayoutParams.WRAP_CONTENT,WindowManager.LayoutParams.WRAP_CONTENT);
-  wizardParams.rightMargin=dp(5);
-  headingRow.addView(wizard,wizardParams);
+  // The account title does not need a second wizard: the lab count has it.
   TextView heading=new TextView(this);heading.setText(title);heading.setTextColor(Color.WHITE);
   heading.setTextSize(13);heading.setTypeface(null,android.graphics.Typeface.BOLD);
   heading.setSingleLine(true);heading.setEllipsize(android.text.TextUtils.TruncateAt.END);
-  headingRow.addView(heading,new LinearLayout.LayoutParams(0,WindowManager.LayoutParams.WRAP_CONTENT,1f));
-  card.addView(headingRow);
+  card.addView(heading);
   if(!details.isEmpty()){
    TextView meta=new TextView(this);meta.setText(details);meta.setTextColor(0xffe7ddeb);
    meta.setTextSize(11);meta.setSingleLine(true);meta.setEllipsize(android.text.TextUtils.TruncateAt.END);
@@ -385,8 +374,10 @@ public final class FloatingSyncService extends Service {
   if(manager!=null&&bubble!=null){
    try{manager.removeView(bubble);}catch(RuntimeException ignored){}
   }
-  AppData.prefs(this).edit().putBoolean("floatingEnabled",false).apply();
-  TimerWidget.update(this);
+  // Do not overwrite the latest requested state: a rapid OFF -> ON may
+  // have already started a replacement service while this one is stopping.
+  WidgetV7.updateAll(this);
+  AllTimersTestWidget.updateSyncStatus(this);
   super.onDestroy();
  }
  @Override public IBinder onBind(Intent intent){return null;}

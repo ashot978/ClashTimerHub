@@ -177,7 +177,8 @@ public final class MainActivity extends Activity {
   handleWidgetNavigation(getIntent());
   handleSharedJson(getIntent());
   // Display after the activity is visible, not during an external JSON import.
-  if(b==null&&getIntent()!=null&&!Intent.ACTION_SEND.equals(getIntent().getAction()))
+  if(b==null&&getIntent()!=null&&!Intent.ACTION_SEND.equals(getIntent().getAction())
+    &&!getIntent().hasExtra("openAccount"))
    getWindow().getDecorView().post(()->{
     if(permissionWizard!=null&&!isFinishing()&&!isDestroyed())
      permissionWizard.start(false);
@@ -951,9 +952,10 @@ public final class MainActivity extends Activity {
   boolean active=prefs.getBoolean("floatingEnabled",false);
   Intent service=new Intent(this,FloatingSyncService.class);
   if(active){
+   prefs.edit().putBoolean("floatingEnabled",false).commit();
    stopService(service);
-   prefs.edit().putBoolean("floatingEnabled",false).apply();
-   TimerWidget.update(this);
+   WidgetV7.updateAll(this);
+   AllTimersTestWidget.updateSyncStatus(this);
    toast("Zwevende plakknop uitgeschakeld");
    return;
   }
@@ -970,10 +972,16 @@ public final class MainActivity extends Activity {
   try{
    if(android.os.Build.VERSION.SDK_INT>=26)startForegroundService(service);
    else startService(service);
-   prefs.edit().putBoolean("floatingEnabled",true).apply();
-   TimerWidget.update(this);
+   prefs.edit().putBoolean("floatingEnabled",true).commit();
+   WidgetV7.updateAll(this);
+   AllTimersTestWidget.updateSyncStatus(this);
    toast("Zwevende plakknop ingeschakeld");
-  }catch(Exception e){toast("Kan zwevende knop niet starten: "+e.getMessage());}
+  }catch(Exception e){
+   prefs.edit().putBoolean("floatingEnabled",false).commit();
+   WidgetV7.updateAll(this);
+   AllTimersTestWidget.updateSyncStatus(this);
+   toast("Kan zwevende knop niet starten: "+e.getMessage());
+  }
  }
  private void sendTestNotification(){
   if(android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED){
@@ -1211,7 +1219,7 @@ public final class MainActivity extends Activity {
   int active=0,totalReady=0;
   for(JSONObject o:upgrades)if("Bouwers".equals(o.optString("category"))&&effectiveFinish(o)>now)active++;
   for(String ac:accounts)totalReady+=completedCount(ac,now);
-  String last=getPreferences(0).getString("lastSyncSummary","");
+  String last=getPreferences(0).getString("lastSyncSummary","").replace("⚗",WidgetV7.LAB_ICON);
   if(!last.isEmpty()){
    TextView recent=label("↻  "+last,11);recent.setTextColor(0xffbba7d1);dashboard.addView(recent);
   }

@@ -66,12 +66,8 @@ public final class AllTimersTestService extends RemoteViewsService {
    rv.setTextColor(R.id.all_account_helpers,GOLD);
    for(int slot=0;slot<3;slot++){
     renderSlot(rv,slot,columns[slot],a,now);
-    Intent intent=new Intent().putExtra("account",a.key);
-    if(AllTimersWidgetSettings.BUILDERS.equals(columns[slot]))
-     intent.putExtra("potionType","builders");
-    else if(AllTimersWidgetSettings.LAB.equals(columns[slot]))
-     intent.putExtra("potionType","research");
-    rv.setOnClickFillInIntent(GROUPS[slot],intent);
+    // Every point in the row opens the same account, never a potion editor.
+    rv.setOnClickFillInIntent(GROUPS[slot],new Intent().putExtra("account",a.key));
    }
    rv.setOnClickFillInIntent(R.id.all_account_row,new Intent().putExtra("account",a.key));
    return rv;
