@@ -72,6 +72,36 @@ final class WidgetV7 {
   });
   return list;
  }
+
+ /** Mirror the original multi-account widget's ordering, including its configured
+  * alphabetical/custom sort. Its default sorts ready builders first, then
+  * the next unboosted builder completion -- identical to the original widget. */
+ static ArrayList<String> boostAccountOrder(Context ctx){
+  ArrayList<Status> ordered=read(ctx,System.currentTimeMillis());
+  int[] mainIds=AppWidgetManager.getInstance(ctx).getAppWidgetIds(
+   new android.content.ComponentName(ctx,TimerWidget.class));
+  if(mainIds.length>0){
+   java.util.Arrays.sort(mainIds);
+   int sourceId=mainIds[0];
+   android.content.SharedPreferences settings=ctx.getSharedPreferences("WidgetPreferences",Context.MODE_PRIVATE);
+   int sort=settings.getInt("sort_"+sourceId,0);
+   if(sort==1)Collections.sort(ordered,(a,b)->
+    AppData.displayName(ctx,a.account).compareToIgnoreCase(AppData.displayName(ctx,b.account)));
+   else if(sort==2){
+    LinkedHashMap<String,Integer> positions=new LinkedHashMap<>();
+    try{
+     JSONArray values=new JSONArray(settings.getString("order_"+sourceId,"[]"));
+     if(values.length()==0)values=new JSONArray(AppData.prefs(ctx).getString("accounts","[]"));
+     for(int i=0;i<values.length();i++)positions.put(values.optString(i),i);
+    }catch(Exception ignored){}
+    Collections.sort(ordered,(a,b)->Integer.compare(
+     positions.getOrDefault(a.account,9999),positions.getOrDefault(b.account,9999)));
+   }
+  }
+  ArrayList<String> names=new ArrayList<>();
+  for(Status status:ordered)names.add(status.account);
+  return names;
+ }
  private static String finish(Context ctx,long when,boolean shortForm){
   if(when==Long.MAX_VALUE)return "—";
   Calendar now=Calendar.getInstance(),date=Calendar.getInstance();

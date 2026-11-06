@@ -13,11 +13,13 @@
  <TextView android:id="@+id/boost_idle" android:layout_width="0dp" android:layout_weight="0.9"
   android:layout_height="match_parent" android:gravity="center"
   android:textSize="10sp" android:textColor="#CBB5D9" android:text="⚡ —" android:visibility="gone"/>
- <TextView android:id="@+id/boost_plus60" android:layout_width="48dp"
+ <TextView android:id="@+id/boost_plus60" android:layout_width="60dp"
   android:layout_height="match_parent" android:gravity="center" android:text="+1u"
-  android:textSize="12sp" android:textStyle="bold" android:textColor="#8BE3AD"
+  android:textSize="12sp" android:textStyle="bold" android:textColor="#FFFFFF"
+  android:layout_marginLeft="3dp" android:layout_marginRight="3dp" android:layout_marginTop="1dp" android:layout_marginBottom="1dp"
+  android:background="@drawable/widget_boost_action"
   android:contentDescription="Register one Builder Potion, add one hour"/>
- <TextView android:id="@+id/boost_finish" android:layout_width="0dp" android:layout_weight="1.2"
+ <TextView android:id="@+id/boost_finish" android:layout_width="0dp" android:layout_weight="1.5"
   android:layout_height="match_parent" android:gravity="right|center_vertical"
   android:textSize="10sp" android:textColor="#FFD783" android:singleLine="true" android:ellipsize="end"
   android:contentDescription="Estimated next builder completion"/>

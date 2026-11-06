@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.ArrayList;
 
 /** An optional multi-account home-screen view of Builder Potion forecasts. */
 public final class BuilderBoostWidget extends AppWidgetProvider {
@@ -44,6 +45,10 @@ public final class BuilderBoostWidget extends AppWidgetProvider {
   }catch(Exception ignored){}
   return false;
  }
+ private static String savedLabel(long ms){
+  long m=Math.max(1,(ms+30000L)/60000L);
+  return m>=60?(m/60)+"h"+String.format(Locale.ROOT,"%02d",m%60):m+"m";
+ }
  private static String endTime(Context ctx,long when,long now){
   if(when==Long.MAX_VALUE)return "—";
   Calendar date=Calendar.getInstance(),today=Calendar.getInstance();
@@ -62,7 +67,7 @@ public final class BuilderBoostWidget extends AppWidgetProvider {
   if(ids.length==0){schedule(ctx,Long.MAX_VALUE);return;}
   long now=System.currentTimeMillis(),next=Long.MAX_VALUE;
   try{
-   JSONArray accounts=new JSONArray(AppData.prefs(ctx).getString("accounts","[]"));
+   ArrayList<String> accounts=WidgetV7.boostAccountOrder(ctx);
    JSONArray upgrades=new JSONArray(AppData.prefs(ctx).getString("upgrades","[]"));
    for(int id:ids){
     RemoteViews rv=new RemoteViews(ctx.getPackageName(),R.layout.widget_builder_boost_multi);
@@ -72,18 +77,20 @@ public final class BuilderBoostWidget extends AppWidgetProvider {
     if(h<=0)h=310;
     int maximum=Math.max(1,(h-62)/32);
     int shown=0;
-    for(int i=0;i<accounts.length()&&shown<maximum;i++){
-     String account=accounts.optString(i,"");
+    for(int i=0;i<accounts.size()&&shown<maximum;i++){
+     String account=accounts.get(i);
      if(account.isEmpty())continue;
      shown++;
      BuilderPotionTracker.Snapshot snapshot=BuilderPotionTracker.load(ctx,account);
-     long left=snapshot.remaining(now),soonest=Long.MAX_VALUE;
+     long left=snapshot.remaining(now),soonest=Long.MAX_VALUE,earliestOriginal=Long.MAX_VALUE;
      int ready=0;
      for(int j=0;j<upgrades.length();j++){
       JSONObject item=upgrades.optJSONObject(j);
       if(item==null||!account.equals(item.optString("account"))
         ||!"Bouwers".equals(item.optString("category")))continue;
-      long predicted=BuilderPotionTracker.estimateFinish(snapshot,item.optLong("finish",0L));
+      long sourceFinish=item.optLong("finish",0L);
+      if(sourceFinish>now&&sourceFinish<earliestOriginal)earliestOriginal=sourceFinish;
+      long predicted=BuilderPotionTracker.estimateFinish(snapshot,sourceFinish);
       if(predicted>now&&predicted<soonest)soonest=predicted;
       if(predicted<=now&&predicted>AppData.prefs(ctx).getLong("ack_"+account,0L))ready++;
      }
@@ -99,8 +106,11 @@ public final class BuilderBoostWidget extends AppWidgetProvider {
       row.setChronometerCountDown(R.id.boost_remaining,true);
      }
      row.setTextViewText(R.id.boost_idle,!snapshot.valid?"⚡ !":"⚡ —");
+     row.setTextViewText(R.id.boost_plus60,I18n.english(ctx)?"+1h":"+1u");
      String end=endTime(ctx,soonest,now);
      if(soonest==Long.MAX_VALUE&&ready>0)end="✓ "+ready;
+     if(soonest!=Long.MAX_VALUE&&earliestOriginal>soonest&&snapshot.valid)
+      end+="  −"+savedLabel(earliestOriginal-soonest);
      row.setTextViewText(R.id.boost_finish,end);
      row.setOnClickPendingIntent(R.id.boost_name,edit(ctx,id,account));
      row.setOnClickPendingIntent(R.id.boost_remaining,edit(ctx,id,account));
@@ -112,12 +122,16 @@ public final class BuilderBoostWidget extends AppWidgetProvider {
     if(shown==0)rv.addView(R.id.boost_widget_rows,new RemoteViews(ctx.getPackageName(),R.layout.widget_empty));
     rv.setTextViewText(R.id.boost_widget_title,I18n.english(ctx)?"⚡ Builder Potion · 10×":"⚡ Builder Potion · 10×");
     rv.setTextViewText(R.id.boost_widget_footer,I18n.english(ctx)?
-     "Estimate · tap account for exact time & all builders":
-     "Schatting · tik account voor exacte tijd & alle bouwers");
-    if(accounts.length()>0){
-     String first=accounts.optString(0,"");
-     rv.setOnClickPendingIntent(R.id.boost_widget_open,edit(ctx,id,first));
-    }
+     "≡ All accounts · tap account to edit boost":
+     "≡ Alle accounts · tik om boost te bewerken");
+    Intent showAll=new Intent(ctx,BuilderBoostEditorActivity.class);
+    showAll.setAction("nl.clashtimerhub.v2.BOOST_OVERVIEW_"+id);
+    showAll.putExtra("overview",true);
+    PendingIntent overview=PendingIntent.getActivity(ctx,810000+id,showAll,
+     PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+    rv.setOnClickPendingIntent(R.id.boost_widget_open,overview);
+    rv.setOnClickPendingIntent(R.id.boost_widget_title,overview);
+    rv.setOnClickPendingIntent(R.id.boost_widget_footer,overview);
     mgr.updateAppWidget(id,rv);
    }
    schedule(ctx,next);
@@ -157,6 +171,9 @@ public final class BuilderBoostWidget extends AppWidgetProvider {
    try{
     BuilderPotionTracker.addHour(ctx,account);
     TimerWidget.update(ctx);
+    android.widget.Toast.makeText(ctx,AppData.displayName(ctx,account)+
+     (I18n.english(ctx)?" · Builder Potion +1h":" · Builder Potion +1u"),
+     android.widget.Toast.LENGTH_SHORT).show();
    }catch(Exception e){
     android.widget.Toast.makeText(ctx,e.getMessage(),android.widget.Toast.LENGTH_LONG).show();
    }

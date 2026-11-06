@@ -1,5 +1,25 @@
 # ClashTimerHub release notes
 
+## Duidelijkere Builder Potion-bediening — 6 november 2026
+
+### NL
+- De Builder Potion-widget gebruikt nu dezelfde accountvolgorde als de bestaande multi-accountwidget, inclusief sortering op eerstvolgende bouwer of een ingestelde eigen volgorde.
+- De +1u-knop heeft een contrastrijke achtergrond en een groter aanraakvlak. Tikken toont ook kort een bevestiging.
+- De nieuwe eindtijd toont, waar er een versnelling is, ook de exacte geschatte tijdwinst (bijv. 02:45 −8h34).
+- De knop rechtsboven opent voortaan een bruikbaar overzicht met alle accounts, booststatus, voorspelde bouwer-eindtijd en afzonderlijke +1u-knoppen.
+- Compacte, duidelijk gekleurde knoppen in het boost-bewerkscherm, een terugknop en correcte afstand tot Android-status- en navigatiebalk.
+- Toon per bouwer de voorspelde eindtijd, oorspronkelijke eindtijd en werkelijke berekende tijdwinst; gelijknamige upgrades krijgen een volgnummer.
+- Verduidelijk waarom één uur 10×-boost soms minder dan negen uur tijdwinst geeft: de upgrade eindigt dan al binnen de potion.
+
+### EN
+- Builder Potion widget now follows the original multi-account widget's sorting, including next-builder or configured custom order.
+- The +1h button is larger and more prominent, with a short tap confirmation.
+- Forecasted finish time also shows the estimated time saved, e.g. 02:45 −8h34.
+- Top-right menu opens a useful all-account overview with per-account potion status, predicted builder finish and one-tap +1h actions.
+- Compact, high-contrast controls in the boost editor, an all-accounts back button and proper system-bar insets.
+- Each builder shows predicted and original completion with actual time saved; duplicate upgrade labels get ordinal suffixes.
+- Explain why a one-hour 10× boost saves less than nine hours when an upgrade finishes during the potion.
+
 ## Builder Potion multi-accountwidget — 6 november 2026
 
 ### NL
