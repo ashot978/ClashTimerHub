@@ -1,11 +1,11 @@
 ### NL
-- Verbeterde de herstelverversing van de live aftellers in de All Timers-widget. Als de Samsung-launcher de chronometers bevriest, worden de timerregels opnieuw geladen via een achtergrondalarm dat ongeveer iedere minuut wordt ingepland wanneer de telefoon wakker is.
-- In tegenstelling tot de vorige 10-minutenoplossing gebruikt dit geen wake-up-alarms. De telefoon wordt niet gewekt alleen om de widget bij te werken.
-- Onder Settings → Update diagnostics zie je nu wanneer de widgetverversing voor het laatst daadwerkelijk draaide en wanneer de volgende is ingepland. Dat helpt om een uitgesteld Android-alarm te onderscheiden van een launcherprobleem.
-- De eindtijden en opgeslagen upgrades blijven ongewijzigd. Android kan alarmen nog steeds vertragen wanneer het apparaat slaapt.
+- Nieuwe optionele instelling **Aftellers altijd actief houden** in de All Timers-widgetinstellingen. Deze staat standaard aan en kan per widget worden uitgezet.
+- Een aparte voorgrondservice houdt de timerregels actief zolang minstens één widget deze stand gebruikt. Bij een ingeschakeld scherm vraagt de app ongeveer iedere 15 seconden een nieuwe weergave van de countdowns aan. Bij het aanzetten van het scherm volgt direct een vernieuwing.
+- Android toont hiervoor een blijvende Clash Timer Hub-melding. Wanneer geen widget de instelling gebruikt, stopt de service.
+- De app probeert de live service na herstart, app-update en het openen van Clash Timer Hub te herstellen. Android of Samsung kan updates nog steeds beperken; ononderbroken secondenweergave is niet gegarandeerd. Deze stand kost extra batterij.
 
 ### EN
-- Improved recovery of frozen live countdowns in the All Timers widget. If the Samsung launcher pauses the chronometers, account rows are refreshed by a background alarm scheduled approximately every minute while the phone is awake.
-- Unlike the previous 10-minute workaround, this no longer uses wake-up alarms. The device is not awakened just to repaint the widget.
-- Settings → Update diagnostics now shows when countdown recovery last ran and when the next refresh is scheduled, helping distinguish a delayed Android alarm from a launcher rendering issue.
-- Stored upgrades and finish times are unchanged. Android may still defer alarms while the device sleeps.
+- New optional **Keep countdowns always active** setting in the All Timers widget configuration. Enabled by default and configurable per widget.
+- A dedicated foreground service keeps account timer rows refreshed while at least one widget uses the setting. With the screen on, it requests new countdown views about every 15 seconds and refreshes immediately when the screen wakes.
+- Android displays an ongoing Clash Timer Hub notification while the service is active, and the service stops when no widgets require it.
+- The app attempts to restore live updates after restart, app updates, or reopening Clash Timer Hub. Android and Samsung can still throttle rendering; uninterrupted per-second animation cannot be guaranteed. This mode uses extra battery.
