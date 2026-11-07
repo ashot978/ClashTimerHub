@@ -14,6 +14,9 @@ public final class AlarmRestoreReceiver extends BroadcastReceiver {
     || Intent.ACTION_TIME_CHANGED.equals(action)
     || Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
    TimerWidget.schedule(context);
+   // Reconcile the opt-in persistent widget update after reboot/app update.
+   // Foreground start restrictions are handled gracefully by reconcile().
+   LiveWidgetService.reconcile(context);
    // Android sends this after an actual package replacement, including system-installer
    // updates. Record it for the next app launch, because the old installer process
    // may have been terminated before it could display a success screen.
