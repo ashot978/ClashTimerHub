@@ -16,7 +16,7 @@ public final class LiveWidgetService extends Service {
  static final String ACTION_RECONCILE="nl.clashtimerhub.v2.LIVE_WIDGET_RECONCILE";
  private static final String CHANNEL="widget_live_countdowns";
  private static final int NOTIFICATION_ID=22;
- private static final long INTERVAL_MS=15_000L;
+ private static final long INTERVAL_MS=1_000L;
  private final Handler handler=new Handler(Looper.getMainLooper());
  private boolean registered;
  private boolean interactive=true;
@@ -24,7 +24,10 @@ public final class LiveWidgetService extends Service {
   @Override public void run(){
    if(!hasLiveWidgets(LiveWidgetService.this)){stopSelf();return;}
    if(interactive)AllTimersTestWidget.refreshCountdownRows(LiveWidgetService.this);
-   handler.postDelayed(this,INTERVAL_MS);
+   // Keep successive refreshes aligned to whole-second boundaries so that
+   // scheduling latency never accumulates into a slower-than-1s cadence.
+   long uptime=SystemClock.uptimeMillis();
+   handler.postAtTime(this,(uptime/INTERVAL_MS+1L)*INTERVAL_MS);
   }
  };
  private final BroadcastReceiver screenReceiver=new BroadcastReceiver(){
@@ -93,6 +96,7 @@ public final class LiveWidgetService extends Service {
  }
  private void scheduleTick(){
   handler.removeCallbacks(tick);
+  // Render promptly on service start, then one update each elapsed second.
   handler.post(tick);
  }
  @Override public int onStartCommand(Intent intent,int flags,int startId){
