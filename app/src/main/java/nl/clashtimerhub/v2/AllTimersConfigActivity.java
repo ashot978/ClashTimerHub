@@ -27,7 +27,7 @@ public final class AllTimersConfigActivity extends Activity {
  private LinearLayout accountRows,columnRows;
  private RadioButton all,custom;
  private Spinner sorter,rowLines,topCategory;
- private CheckBox helpers;
+ private CheckBox helpers,liveCountdowns;
  private String tr(String nl,String en){return english?en:nl;}
  private int dp(int value){return (int)(value*getResources().getDisplayMetrics().density+.5f);}
  private TextView text(String t,int size,int color){
@@ -141,6 +141,14 @@ public final class AllTimersConfigActivity extends Activity {
   helpers.setTextColor(Color.WHITE);
   helpers.setChecked(prefs.getBoolean(AllTimersWidgetSettings.key("helpers",widgetId),true));
   content.addView(helpers);
+  heading(content,tr("Altijd actieve aftellers","Always-active countdowns"),
+   tr("Houd de widget actief met een blijvende melding. De timers worden ongeveer iedere 15 seconden opnieuw opgehaald terwijl het scherm aanstaat. Kost extra batterij.",
+      "Keep widget countdowns active with an ongoing notification. Refreshes account rows about every 15 seconds when the screen is on. Uses additional battery."));
+  liveCountdowns=new CheckBox(this);
+  liveCountdowns.setText(tr("Aftellers altijd actief houden","Keep countdowns always active"));
+  liveCountdowns.setTextColor(Color.WHITE);
+  liveCountdowns.setChecked(AllTimersWidgetSettings.liveCountdowns(this,widgetId));
+  content.addView(liveCountdowns);
   LinearLayout footer=new LinearLayout(this);footer.setBackgroundColor(SECTION);
   footer.setPadding(dp(16),dp(8),dp(16),dp(10));
   Button save=new Button(this);save.setAllCaps(false);
@@ -228,7 +236,9 @@ public final class AllTimersConfigActivity extends Activity {
    .putBoolean(AllTimersWidgetSettings.key("all",widgetId),all.isChecked())
    .putString(AllTimersWidgetSettings.key("selected",widgetId),selectedAccounts.toString())
    .putString(AllTimersWidgetSettings.key("accountsOrder",widgetId),new JSONArray(manualAccounts).toString())
-   .putBoolean(AllTimersWidgetSettings.key("helpers",widgetId),helpers.isChecked()).apply();
+   .putBoolean(AllTimersWidgetSettings.key("helpers",widgetId),helpers.isChecked())
+   .putBoolean(AllTimersWidgetSettings.key("liveCountdowns",widgetId),liveCountdowns.isChecked()).apply();
+  LiveWidgetService.reconcile(this);
   AllTimersTestWidget.update(this);
   setResult(RESULT_OK,new Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,widgetId));
   finish();

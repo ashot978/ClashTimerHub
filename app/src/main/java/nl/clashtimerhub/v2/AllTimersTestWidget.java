@@ -83,6 +83,7 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
   manager.notifyAppWidgetViewDataChanged(ids,R.id.all_timers_list);
   plan(ctx,snapshot.next);
   planHeartbeat(ctx,snapshot.next);
+  LiveWidgetService.reconcile(ctx);
  }
 
  /** Change only the Sync button. Do not rebind the collection, which shows
@@ -155,17 +156,19 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
   }catch(Exception e){android.util.Log.w("ClashTimerHub","Countdown heartbeat scheduling failed",e);}
  }
  private static void refreshCountdowns(Context ctx){
+  refreshCountdownRows(ctx);
+  planHeartbeat(ctx,AllTimersTestData.load(ctx).next);
+ }
+ /** Preserve the root widget, scroll position and button actions. The Android
+  * host may still throttle Chronometers, so request just fresh account rows.
+  */
+ static void refreshCountdownRows(Context ctx){
   AppWidgetManager manager=AppWidgetManager.getInstance(ctx);
   int[] ids=manager.getAppWidgetIds(new ComponentName(ctx,AllTimersTestWidget.class));
-  if(ids.length==0){planHeartbeat(ctx,Long.MAX_VALUE);return;}
-  // Save a timestamp so an actual on-device report can distinguish deferred
-  // Android alarms from stale launcher Chronometer rendering.
+  if(ids.length==0)return;
   ctx.getSharedPreferences(DIAGNOSTICS,Context.MODE_PRIVATE).edit()
    .putLong("lastRun",System.currentTimeMillis()).apply();
-  // Chronometer bases are recomputed in AllTimersTestService.getViewAt().
-  // Only invalidate the list, not the entire widget or its buttons.
   manager.notifyAppWidgetViewDataChanged(ids,R.id.all_timers_list);
-  planHeartbeat(ctx,AllTimersTestData.load(ctx).next);
  }
  private static void plan(Context ctx,long next){
   AlarmManager alarm=(AlarmManager)ctx.getSystemService(Context.ALARM_SERVICE);
@@ -196,6 +199,7 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
  @Override public void onDeleted(Context ctx,int[] ids){
   for(int id:ids)AllTimersWidgetSettings.delete(ctx,id);
   super.onDeleted(ctx,ids);update(ctx);
+  LiveWidgetService.reconcile(ctx);
  }
  @Override public void onReceive(Context ctx,Intent intent){
   super.onReceive(ctx,intent);

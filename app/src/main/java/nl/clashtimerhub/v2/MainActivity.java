@@ -116,6 +116,9 @@ public final class MainActivity extends Activity {
   if(permissionWizard!=null)permissionWizard.onResume();
   getPreferences(0).registerOnSharedPreferenceChangeListener(syncWatcher);
   refreshExternalImport();ticker.removeCallbacks(tick);ticker.post(tick);
+  // Android 12+ may block a background service start; foreground resume
+  // provides a user-visible opportunity to restore live widget updates.
+  LiveWidgetService.reconcile(this);
   // An installer already in progress must not compete with a new update prompt.
   boolean hadActiveDownload=getPreferences(0).getLong("activeUpdateDownloadId",-1)>0;
   startListeningForUpdateDownload();
