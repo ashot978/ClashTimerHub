@@ -39,7 +39,7 @@ jobs:
       - name: Set version for upgrade
         run: sed -i -E "s/versionCode [0-9]+/versionCode $((1000 + ${{ github.run_number }}))/" app/build.gradle
       - name: Build new app
-        run: gradle --no-daemon :app:assembleDebug
+        run: gradle --no-daemon :app:testDebugUnitTest :app:assembleDebug
       - name: Verify actual APK signing certificate
         shell: bash
         run: |

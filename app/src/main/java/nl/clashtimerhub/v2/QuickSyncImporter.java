@@ -184,6 +184,10 @@ public final class QuickSyncImporter {
   if(builderBoost!=null)editor.putString(BuilderPotionTracker.KEY,builderBoost);
   String petBoost=PetPotionTracker.mergedFromExport(prefs,json,account,timestamp,now);
   if(petBoost!=null)editor.putString(PetPotionTracker.KEY,petBoost);
+  // Magic Snacks are distinct from Potions. Keep each per-account active
+  // duration when provided, and do not infer snacks from an absent field.
+  String snackBoost=MagicSnackTracker.mergedFromExport(prefs,json,account,timestamp,now);
+  if(snackBoost!=null)editor.putString(MagicSnackTracker.KEY,snackBoost);
   if(!editor.commit())throw new IllegalStateException("Opslaan mislukt");
   TimerWidget.schedule(context);
   // Run Drive backup independently: it must never make a successful Clash sync fail.
