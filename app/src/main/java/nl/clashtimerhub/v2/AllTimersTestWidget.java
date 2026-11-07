@@ -15,13 +15,19 @@ import org.json.JSONArray;
 /** Compact multi-account timers without a timeline or potion lightning icons. */
 public final class AllTimersTestWidget extends AppWidgetProvider {
  private static final String REFRESH="nl.clashtimerhub.v2.ALL_TIMERS_TEST_REFRESH";
+ // Some launcher implementations suspend RemoteViews Chronometer updates.
+ // Rebind only the collection periodically so each row receives a fresh
+ // elapsedRealtime-based countdown, even when the app has not been opened.
+ private static final String COUNTDOWN_HEARTBEAT="nl.clashtimerhub.v2.ALL_TIMERS_COUNTDOWN_HEARTBEAT";
+ private static final int REQUEST_HEARTBEAT=949002;
+ private static final long HEARTBEAT_INTERVAL_MS=10L*60L*1000L;
  private static final String OPEN="nl.clashtimerhub.v2.ALL_TIMERS_TEST_OPEN";
  private static final int REQUEST_REFRESH=949001;
 
  static void update(Context ctx){
   AppWidgetManager manager=AppWidgetManager.getInstance(ctx);
   int[] ids=manager.getAppWidgetIds(new ComponentName(ctx,AllTimersTestWidget.class));
-  if(ids.length==0){plan(ctx,Long.MAX_VALUE);return;}
+  if(ids.length==0){plan(ctx,Long.MAX_VALUE);planHeartbeat(ctx,Long.MAX_VALUE);return;}
   AllTimersTestData.Snapshot snapshot=AllTimersTestData.load(ctx);
   for(int id:ids){
    try{
@@ -74,6 +80,7 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
   }
   manager.notifyAppWidgetViewDataChanged(ids,R.id.all_timers_list);
   plan(ctx,snapshot.next);
+  planHeartbeat(ctx,snapshot.next);
  }
 
  /** Change only the Sync button. Do not rebind the collection, which shows
@@ -119,6 +126,37 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
    new Intent(ctx,AllTimersTestWidget.class).setAction(REFRESH),
    PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
  }
+ /** Wake the collection on a conservative interval to restore launcher-
+  * suspended Chronometers. Avoid a full widget rebind (and its loading UI).
+  * Android may defer alarms in Doze; a per-second update is not guaranteed.
+  */
+ private static PendingIntent heartbeatIntent(Context ctx){
+  return PendingIntent.getBroadcast(ctx,REQUEST_HEARTBEAT,
+   new Intent(ctx,AllTimersTestWidget.class).setAction(COUNTDOWN_HEARTBEAT),
+   PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+ }
+ private static void planHeartbeat(Context ctx,long next){
+  AlarmManager alarm=(AlarmManager)ctx.getSystemService(Context.ALARM_SERVICE);
+  if(alarm==null)return;
+  PendingIntent operation=heartbeatIntent(ctx);
+  alarm.cancel(operation);
+  if(next==Long.MAX_VALUE||next<=System.currentTimeMillis())return;
+  long trigger=android.os.SystemClock.elapsedRealtime()+HEARTBEAT_INTERVAL_MS;
+  try{
+   if(Build.VERSION.SDK_INT>=23)
+    alarm.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,trigger,operation);
+   else alarm.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,trigger,operation);
+  }catch(Exception e){android.util.Log.w("ClashTimerHub","Countdown heartbeat scheduling failed",e);}
+ }
+ private static void refreshCountdowns(Context ctx){
+  AppWidgetManager manager=AppWidgetManager.getInstance(ctx);
+  int[] ids=manager.getAppWidgetIds(new ComponentName(ctx,AllTimersTestWidget.class));
+  if(ids.length==0){planHeartbeat(ctx,Long.MAX_VALUE);return;}
+  // Chronometer bases are recomputed in AllTimersTestService.getViewAt().
+  // Only invalidate the list, not the entire widget or its buttons.
+  manager.notifyAppWidgetViewDataChanged(ids,R.id.all_timers_list);
+  planHeartbeat(ctx,AllTimersTestData.load(ctx).next);
+ }
  private static void plan(Context ctx,long next){
   AlarmManager alarm=(AlarmManager)ctx.getSystemService(Context.ALARM_SERVICE);
   if(alarm==null)return;
@@ -153,6 +191,7 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
   super.onReceive(ctx,intent);
   if(intent==null)return;
   if(REFRESH.equals(intent.getAction())){update(ctx);return;}
+  if(COUNTDOWN_HEARTBEAT.equals(intent.getAction())){refreshCountdowns(ctx);return;}
   if(OPEN.equals(intent.getAction())){
    String account=intent.getStringExtra("account");
    if(account==null||!registered(ctx,account))return;
