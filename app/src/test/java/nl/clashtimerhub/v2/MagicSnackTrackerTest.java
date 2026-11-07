@@ -26,7 +26,7 @@ public class MagicSnackTrackerTest {
  }
  @Test public void studySoupAndResearchPotionAreAdditive(){
   // First 30m at 27x = 13.5 hours work, next 30m at 4x = 2h.
-  assertEquals(HOUR,MagicSnackTracker.integrate(0L,15L*HOUR,0L,HOUR,
+  assertEquals(HOUR,MagicSnackTracker.integrate(0L,15L*HOUR+HOUR/2L,0L,HOUR,
    false,Arrays.asList(new long[]{0L,HOUR/2L})));
  }
  @Test public void futureSnackStartsOnlyWhenActivated(){
