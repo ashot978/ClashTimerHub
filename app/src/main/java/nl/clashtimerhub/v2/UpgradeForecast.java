@@ -5,12 +5,8 @@ import android.content.Context;
 final class UpgradeForecast {
  private UpgradeForecast(){}
  static long finish(Context ctx,String account,String category,long sourceFinish){
-  if("Bouwers".equals(category))return BuilderPotionTracker.estimateFinish(
-   BuilderPotionTracker.load(ctx,account),sourceFinish);
-  if("Laboratorium".equals(category))return ResearchPotionTracker.estimateFinish(
-   ResearchPotionTracker.load(ctx,account),sourceFinish);
-  if("Pets".equals(category))return PetPotionTracker.estimateFinish(
-   PetPotionTracker.load(ctx,account),sourceFinish);
+  if("Bouwers".equals(category)||"Laboratorium".equals(category)||"Pets".equals(category))
+   return MagicSnackTracker.estimateFinish(ctx,account,category,sourceFinish);
   return sourceFinish;
  }
 }
