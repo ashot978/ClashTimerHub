@@ -20,7 +20,9 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
  // elapsedRealtime-based countdown, even when the app has not been opened.
  private static final String COUNTDOWN_HEARTBEAT="nl.clashtimerhub.v2.ALL_TIMERS_COUNTDOWN_HEARTBEAT";
  private static final int REQUEST_HEARTBEAT=949002;
- private static final long HEARTBEAT_INTERVAL_MS=10L*60L*1000L;
+ // Refresh when the phone is awake; never wake it just to repaint seconds.
+ private static final long HEARTBEAT_INTERVAL_MS=60L*1000L;
+ private static final String DIAGNOSTICS="allTimersWidgetHeartbeat";
  private static final String OPEN="nl.clashtimerhub.v2.ALL_TIMERS_TEST_OPEN";
  private static final int REQUEST_REFRESH=949001;
 
@@ -126,9 +128,9 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
    new Intent(ctx,AllTimersTestWidget.class).setAction(REFRESH),
    PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
  }
- /** Wake the collection on a conservative interval to restore launcher-
-  * suspended Chronometers. Avoid a full widget rebind (and its loading UI).
-  * Android may defer alarms in Doze; a per-second update is not guaranteed.
+ /** Restore launcher-suspended Chronometers with a non-wakeup alarm while
+  * the phone is already awake. In Doze the alarm may be delayed, but it will
+  * not wake the phone or request restricted exact-alarm privileges.
   */
  private static PendingIntent heartbeatIntent(Context ctx){
   return PendingIntent.getBroadcast(ctx,REQUEST_HEARTBEAT,
@@ -143,15 +145,23 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
   if(next==Long.MAX_VALUE||next<=System.currentTimeMillis())return;
   long trigger=android.os.SystemClock.elapsedRealtime()+HEARTBEAT_INTERVAL_MS;
   try{
-   if(Build.VERSION.SDK_INT>=23)
-    alarm.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,trigger,operation);
-   else alarm.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,trigger,operation);
+   // Do not use ELAPSED_REALTIME_WAKEUP or setAndAllowWhileIdle: Android
+   // severely rate-limits those during idle, so a 10-min heartbeat can become
+   // much slower. Inexact non-wakeup alarms are allowed to run while awake.
+   alarm.set(AlarmManager.ELAPSED_REALTIME,trigger,operation);
+   ctx.getSharedPreferences(DIAGNOSTICS,Context.MODE_PRIVATE).edit()
+    .putLong("scheduled",System.currentTimeMillis()+HEARTBEAT_INTERVAL_MS)
+    .apply();
   }catch(Exception e){android.util.Log.w("ClashTimerHub","Countdown heartbeat scheduling failed",e);}
  }
  private static void refreshCountdowns(Context ctx){
   AppWidgetManager manager=AppWidgetManager.getInstance(ctx);
   int[] ids=manager.getAppWidgetIds(new ComponentName(ctx,AllTimersTestWidget.class));
   if(ids.length==0){planHeartbeat(ctx,Long.MAX_VALUE);return;}
+  // Save a timestamp so an actual on-device report can distinguish deferred
+  // Android alarms from stale launcher Chronometer rendering.
+  ctx.getSharedPreferences(DIAGNOSTICS,Context.MODE_PRIVATE).edit()
+   .putLong("lastRun",System.currentTimeMillis()).apply();
   // Chronometer bases are recomputed in AllTimersTestService.getViewAt().
   // Only invalidate the list, not the entire widget or its buttons.
   manager.notifyAppWidgetViewDataChanged(ids,R.id.all_timers_list);

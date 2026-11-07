@@ -629,11 +629,19 @@ public final class MainActivity extends Activity {
   String lastError=getPreferences(0).getString("lastInstallError","");
   String verified=getPreferences(0).getString("lastVerifiedApk","");
   boolean permitted=getPackageManager().canRequestPackageInstalls();
+  android.content.SharedPreferences heartbeat=getSharedPreferences("allTimersWidgetHeartbeat",MODE_PRIVATE);
+  long lastHeartbeat=heartbeat.getLong("lastRun",0L);
+  long scheduledHeartbeat=heartbeat.getLong("scheduled",0L);
+  java.text.SimpleDateFormat clockFormat=new java.text.SimpleDateFormat("dd-MM HH:mm:ss",java.util.Locale.getDefault());
+  String widgetHeartbeat=(lastHeartbeat>0?clockFormat.format(new java.util.Date(lastHeartbeat)):"nog nooit")+
+   " · volgende gepland: "+(scheduledHeartbeat>0?
+    clockFormat.format(new java.util.Date(scheduledHeartbeat)):"niet gepland");
   String text="Geïnstalleerde build: "+(installed>=1000?"#"+(installed-1000):String.valueOf(installed))+
    "\nNieuwste gepubliceerde build: "+(latest>0?"#"+latest:"niet gecontroleerd")+
    "\nAPK-installatietoestemming: "+(permitted?"toegestaan":"ontbreekt")+
    "\nDownload: "+(pending>0?"bezig (#"+pending+")":"geen actieve download")+
    "\nGeverifieerde APK: "+(!verified.isEmpty()&&new java.io.File(verified).isFile()?"beschikbaar":"geen")+
+   "\nWidget-timer herstel: "+widgetHeartbeat+
    "\nLaatste fout: "+(lastError.isEmpty()?"geen opgeslagen fout":lastError);
   android.app.AlertDialog.Builder dialog=new android.app.AlertDialog.Builder(this)
    .setTitle(t("APK update-diagnose")).setMessage(t(text)).setPositiveButton(t("Sluiten"),null);
