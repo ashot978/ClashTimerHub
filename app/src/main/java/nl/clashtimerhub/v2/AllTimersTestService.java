@@ -68,7 +68,7 @@ public final class AllTimersTestService extends RemoteViewsService {
    boolean helpers=AllTimersWidgetSettings.preferences(ctx).getBoolean(
     AllTimersWidgetSettings.key("helpers",widgetId),true);
    rv.setTextViewText(R.id.all_account_helpers,
-    helpers&&!a.helpers.isEmpty()?"🤝 "+a.helpers:"");
+    helpers&&!a.helpers.isEmpty()?a.helpers:"");
    rv.setTextColor(R.id.all_account_helpers,GOLD);
    for(int slot=0;slot<3;slot++){
     renderSlot(rv,slot,columns[slot],a,now);
