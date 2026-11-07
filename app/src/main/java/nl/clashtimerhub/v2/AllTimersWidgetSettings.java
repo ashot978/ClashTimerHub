@@ -48,6 +48,10 @@ final class AllTimersWidgetSettings {
   for(String category:order(ctx,id))if(!top.equals(category))ordered.add(category);
   return ordered.toArray(new String[0]);
  }
+ /** Live countdowns can opt out of the persistent foreground service. */
+ static boolean liveCountdowns(Context ctx,int id){
+  return preferences(ctx).getBoolean(key("liveCountdowns",id),true);
+ }
  static boolean twoLines(Context ctx,int id){
   return preferences(ctx).getInt(key("rowLines",id),SINGLE_LINE)==TWO_LINES;
  }
@@ -120,7 +124,7 @@ final class AllTimersWidgetSettings {
  }
  static void delete(Context ctx,int id){
   SharedPreferences.Editor e=preferences(ctx).edit();
-  for(String field:new String[]{"columns","sort","rowLines","topCategory","all","selected","accountsOrder","helpers"})
+  for(String field:new String[]{"columns","sort","rowLines","topCategory","liveCountdowns","all","selected","accountsOrder","helpers"})
    e.remove(key(field,id));
   e.apply();
  }
