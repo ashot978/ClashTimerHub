@@ -27,7 +27,7 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
  static void update(Context ctx){
   AppWidgetManager manager=AppWidgetManager.getInstance(ctx);
   int[] ids=manager.getAppWidgetIds(new ComponentName(ctx,AllTimersTestWidget.class));
-  if(ids.length==0){plan(ctx,Long.MAX_VALUE);return;}
+  if(ids.length==0){plan(ctx,Long.MAX_VALUE);planHeartbeat(ctx,Long.MAX_VALUE);return;}
   AllTimersTestData.Snapshot snapshot=AllTimersTestData.load(ctx);
   for(int id:ids){
    try{
