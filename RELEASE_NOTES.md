@@ -1,11 +1,9 @@
 ### NL
-- Release-notities worden vanaf deze versie per build vernieuwd en tonen de daadwerkelijke wijzigingen sinds de vorige gepubliceerde APK.
-- Verouderde teksten uit CHANGELOG.md, zoals het verwijderde pijltje van 800 ms, worden niet langer hergebruikt bij nieuwe builds.
-- De update-melding toont de Nederlandse release-notities; bij ontbrekende handmatige notities verschijnt een samenvatting van de nieuwe commits.
-- Builds zonder codewijzigingen vermelden duidelijk dat er geen nieuwe functies zijn.
+- All Timers herstelt stilgevallen live aftellers automatisch met een lichte verversing van de accountregels, ongeveer iedere 10 minuten zolang er actieve upgrades zijn.
+- De verversing werkt zonder de app te openen en bouwt niet telkens de hele widget of Sync-knop opnieuw op. Er worden geen timergegevens of eindtijden aangepast.
+- Bij verwijdering van de laatste All Timers-widget stopt de extra verversing. Android kan verversingen tijdens diepe slaapstand uitstellen, dus secondenupdates zijn niet continu te garanderen.
 
 ### EN
-- Release notes now refresh for every build and describe the actual changes since the previously published APK.
-- Outdated CHANGELOG.md entries, including the removed 800 ms arrow animation, are no longer reused in new releases.
-- The in-app update dialog displays English release notes; if no fresh curated notes exist, the new commit summaries are shown.
-- Rebuilds with no source changes explicitly say that no new features were introduced.
+- All Timers now automatically recovers stalled live countdowns with a lightweight refresh of the account rows, approximately every 10 minutes while upgrades are active.
+- The recovery works without opening the app and avoids rebuilding the entire widget or its Sync control. It does not change stored timers or finish times.
+- The periodic refresh stops when no All Timers widgets remain. Android may defer refreshes during deep sleep, so continuous per-second updates cannot be guaranteed.
