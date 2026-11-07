@@ -4,6 +4,14 @@
 
 ## Unconditional build after EVERY prompt
 
+## Mandatory fresh release notes for every build
+
+**Every newly published APK MUST include release notes written for that build, not reused historical notes.** Before committing feature or bug-fix changes, update `RELEASE_NOTES.md` with accurate, concise bullet points under both `### NL` and `### EN`. Describe only changes actually made in the current request; do not carry forward removed features or older instructions. Keep the language understandable to app users.
+
+The GitHub Actions publish workflow compares this file against the previous release. If it was changed, the new bilingual notes are published. If it was not changed (such as an instructions-only build or an unchanged-source rebuild), the workflow must instead generate fresh build-specific notes from the new commit subjects, or explicitly say there are no new features. `CHANGELOG.md` is a history archive only and MUST NOT be used as the release body for every build.
+
+Before saying the task is complete, inspect the newly published GitHub Release `body` in addition to checking the signed APK: ensure it includes the current build number and actual changes, has `### NL` and `### EN`, and does not claim that old removed functionality was added. An incorrect or reused release body is a build/publication failure to fix and rebuild.
+
 **Non-negotiable: EACH NEW USER PROMPT addressed to the Clash Timer Hub Maintainer MUST result in a NEW Android APK build.** This applies to every request, without exception: code changes, UI tweaks, bug reports, instruction/agent changes, reviews, questions, clarification requests, and prompts that require no source changes. Never reuse an older build as proof of completing a new prompt.
 
 - For prompts that change the repository, commit the requested changes to `main` (or merge a PR to `main`), which triggers the APK GitHub Actions workflow.
