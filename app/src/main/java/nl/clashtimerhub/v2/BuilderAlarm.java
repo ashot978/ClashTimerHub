@@ -43,6 +43,7 @@ public final class BuilderAlarm extends android.content.BroadcastReceiver {
   if(early&&(now+60000L<finish-lead*60000L||now>=finish))return;
   if(finish<=prefs.getLong("ack_"+ac,0L))return;
   boolean stillCurrent=false;
+  String resolvedName=ClashNames.resolvedName(name,-1L);
   try{
    JSONArray upgrades=new JSONArray(prefs.getString("upgrades","[]"));
    for(int i=0;i<upgrades.length();i++){
@@ -52,6 +53,7 @@ public final class BuilderAlarm extends android.content.BroadcastReceiver {
      ||!name.equals(row.optString("name"))||source!=row.optLong("finish",0L)
      ||!id.equals(row.optString("id","row-"+i)))continue;
     stillCurrent=Math.abs(UpgradeForecast.finish(ctx,ac,cat,source)-finish)<=2000L;
+    if(stillCurrent)resolvedName=ClashNames.displayName(row);
     break;
    }
   }catch(Exception e){android.util.Log.w("ClashTimerHub","Upgrade alert validation failed",e);}
@@ -66,9 +68,9 @@ public final class BuilderAlarm extends android.content.BroadcastReceiver {
   String title=AppData.displayName(ctx,ac)+(I18n.english(ctx)?
    (early?" · Upgrade nearly ready":" · Upgrade complete"):
    (early?" · Upgrade bijna klaar":" · Upgrade voltooid"));
-  String text=early?name+" · "+Math.max(1,(finish-now+59999L)/60000L)+
+  String text=early?resolvedName+" · "+Math.max(1,(finish-now+59999L)/60000L)+
    (I18n.english(ctx)?" min remaining":" min resterend"):
-   name+(I18n.english(ctx)?" is ready":" is klaar");
+   resolvedName+(I18n.english(ctx)?" is ready":" is klaar");
   Intent open=new Intent(ctx,MainActivity.class).setAction("nl.clashtimerhub.v2.OPEN_UPGRADE_"+id);
   open.putExtra("openAccount",ac);
   PendingIntent click=PendingIntent.getActivity(ctx,("click:"+ac+":"+cat+":"+id).hashCode(),open,
