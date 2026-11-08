@@ -168,7 +168,8 @@ public final class QuickSyncImporter {
   SharedPreferences.Editor editor=prefs.edit().putString("accounts",new JSONArray(accounts).toString())
    .putString("upgrades",merged.toString()).putString("playerTags",tags.toString())
    .putLong("ack_"+account,now).putLong("syncRevision",revision)
-   .putLong("lastSyncAt_"+account,now).putString("lastSyncSummary",status);
+   .putLong("lastSyncAt_"+account,now)
+   .putLong("lastExportAt_"+account,timestamp).putString("lastSyncSummary",status);
   // Helper snapshots are independent of upgrades. Exports without helpers
   // retain the last known helper state instead of erasing it.
   String helperJson=HelperTracker.merged(prefs,json,account,timestamp);
