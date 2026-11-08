@@ -15,6 +15,9 @@ import java.util.ArrayList;
  * gap BETWEEN pairs. Per-widget order and sorting are independent.
  */
 public final class AllTimersTestService extends RemoteViewsService {
+ static boolean showMixedLabReady(String category,int ready,long finish,long now){
+  return AllTimersWidgetSettings.LAB.equals(category)&&ready>0&&finish!=Long.MAX_VALUE&&finish>now;
+ }
  @Override public RemoteViewsFactory onGetViewFactory(Intent intent){
   int id=intent==null?AppWidgetManager.INVALID_APPWIDGET_ID:
    intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,AppWidgetManager.INVALID_APPWIDGET_ID);
@@ -79,9 +82,6 @@ public final class AllTimersTestService extends RemoteViewsService {
    }
    rv.setOnClickFillInIntent(R.id.all_account_row,new Intent().putExtra("account",a.key));
    return rv;
-  }
-  static boolean showMixedLabReady(String category,int ready,long finish,long now){
-   return AllTimersWidgetSettings.LAB.equals(category)&&ready>0&&finish!=Long.MAX_VALUE&&finish>now;
   }
   private void renderSlot(RemoteViews rv,int slot,String category,AllTimersTestData.Account a,long now){
    long finish;
