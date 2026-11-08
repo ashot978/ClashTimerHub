@@ -101,7 +101,8 @@ final class MagicSnackTracker {
   if(snackStart<=0L||snackEnd<=snackStart){
    return potionOnly(ctx,account,category,sourceFinish);
   }
-  long anchor=AppData.prefs(ctx).getLong("lastSyncAt_"+account,0L);
+  android.content.SharedPreferences prefs=AppData.prefs(ctx);
+  long anchor=prefs.getLong("lastExportAt_"+account,prefs.getLong("lastSyncAt_"+account,0L));
   if(anchor<=0L||sourceFinish<=anchor||snackEnd<=anchor)
    return potionOnly(ctx,account,category,sourceFinish);
 
