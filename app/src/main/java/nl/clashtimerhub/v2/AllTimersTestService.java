@@ -98,11 +98,11 @@ public final class AllTimersTestService extends RemoteViewsService {
    int clock=CLOCKS[slot],idle=IDLES[slot],end=ENDS[slot],marker=ICONS[slot];
    boolean active=finish!=Long.MAX_VALUE&&finish>now;
    // Display completed research alongside another still-running laboratory
-   // job, e.g. "🧙 1 ✅ 2:14:26". Only the fourth, mixed state replaces the
+   // job, e.g. "🧙 1 ✓ 2:14:26". Only the fourth, mixed state replaces the
    // finish-time label; ordinary running, boosted and idle views are unchanged.
    boolean mixedLab=showMixedLabReady(category,ready,finish,now);
    rv.setViewVisibility(READY[slot],mixedLab?View.VISIBLE:View.GONE);
-   rv.setTextViewText(READY[slot],ready+" ✅");
+   rv.setTextViewText(READY[slot],ready+" ✓");
    rv.setTextColor(READY[slot],GREEN);
    rv.setViewVisibility(end,mixedLab?View.GONE:View.VISIBLE);
    // Do not hide an unsynced completion behind a manually checked MAX flag.
