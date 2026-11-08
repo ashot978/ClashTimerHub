@@ -490,9 +490,24 @@ public final class MainActivity extends Activity {
    manualUpdateCheckRequested=false;
    if(isFinishing()||isDestroyed())return;
    if(error!=null){
-    if(!automatic)new android.app.AlertDialog.Builder(this).setTitle(t("Updatecontrole"))
-     .setMessage(t(error)+"\n"+t("Controleer of GitHub de nieuwste APK als Release heeft gepubliceerd."))
-     .setPositiveButton(t("OK"),null).show();
+    if(!automatic){
+     boolean english=I18n.english(this);
+     String explanation="network_timeout".equals(error)?
+      (english?"GitHub did not respond in time. The release may still be available. Please try again.":"GitHub reageerde niet op tijd. De release kan gewoon beschikbaar zijn. Probeer opnieuw."):
+      "network_unreachable".equals(error)?
+      (english?"Cannot reach GitHub. Check your internet connection and try again.":"GitHub is niet bereikbaar. Controleer je internetverbinding en probeer opnieuw."):
+      (english?"Could not check for updates: ":"Updatecontrole mislukt: ")+error;
+     new android.app.AlertDialog.Builder(this)
+      .setTitle(english?"Update check":"Updatecontrole")
+      .setMessage(explanation)
+      .setNegativeButton(english?"Close":"Sluiten",null)
+      .setNeutralButton(english?"Open GitHub":"Open GitHub",(d,w)->{
+       startActivity(new Intent(Intent.ACTION_VIEW,
+        android.net.Uri.parse("https://github.com/ashot978/ClashTimerHub/releases/latest")));
+      })
+      .setPositiveButton(english?"Retry":"Opnieuw proberen",(d,w)->checkUpdates(false))
+      .show();
+    }
     return;
    }
    long versionCode=data.optLong("versionCode",0);

@@ -10,6 +10,8 @@ import java.net.URL;
 import java.io.InputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.net.SocketTimeoutException;
+import java.io.IOException;
 
 /** Checks the newest published GitHub Release (or an explicitly configured HTTPS feed). */
 final class UpdateChecker {
@@ -32,12 +34,12 @@ final class UpdateChecker {
   HttpURLConnection connection=null;
   try{
    connection=(HttpURLConnection)new URL(url).openConnection();
-   connection.setConnectTimeout(8000);connection.setReadTimeout(8000);
+   connection.setConnectTimeout(12000);connection.setReadTimeout(12000);
    connection.setInstanceFollowRedirects(false);
    connection.setRequestProperty("Accept","application/vnd.github+json");
    connection.setRequestProperty("User-Agent","ClashTimerHub-Android");
-   if(connection.getResponseCode()!=200)
-    throw new java.io.IOException("GitHub HTTP "+connection.getResponseCode());
+   int code=connection.getResponseCode();
+   if(code!=200)throw new IOException("GitHub HTTP "+code);
    ByteArrayOutputStream buffer=new ByteArrayOutputStream();
    try(InputStream stream=connection.getInputStream()){
     byte[] chunk=new byte[2048];int n;
@@ -78,11 +80,35 @@ final class UpdateChecker {
   new Thread(()->{
    JSONObject data=null;String error=null;
    try{
-    JSONObject raw=getJSON(url);
+    // Retry transient network failures once with a new HTTPS connection.
+    JSONObject raw=null;
+    for(int attempt=0;attempt<2;attempt++){
+     try{raw=getJSON(url);break;}
+     catch(Exception e){
+      boolean retryable=e instanceof SocketTimeoutException||
+       e instanceof java.net.ConnectException||
+       e instanceof java.net.UnknownHostException||
+       e instanceof java.net.SocketException||
+       e instanceof IOException&&e.getMessage()!=null&&
+        (e.getMessage().matches("GitHub HTTP (429|5[0-9][0-9])")||
+         e.getMessage().contains("timed out"));
+      if(!retryable||attempt==1)throw e;
+      try{Thread.sleep(500L);}catch(InterruptedException interrupted){
+       Thread.currentThread().interrupt();throw new IOException("Updatecontrole onderbroken",interrupted);
+      }
+     }
+    }
+    if(raw==null)throw new IOException("Geen versie-informatie ontvangen");
     data=url.equals(RELEASE_URL)?releaseInfo(raw):raw;
     if(data.optLong("versionCode",0)<=0||!validHttps(data.optString("apkUrl","")))
-     throw new java.io.IOException("Ongeldige versie-informatie");
-   }catch(Exception e){error=e.getMessage();}
+     throw new IOException("Ongeldige versie-informatie");
+   }catch(SocketTimeoutException e){
+    error="network_timeout";
+   }catch(java.net.UnknownHostException e){
+    error="network_unreachable";
+   }catch(java.net.ConnectException e){
+    error="network_unreachable";
+   }catch(Exception e){error=e.getMessage()==null?e.getClass().getSimpleName():e.getMessage();}
    JSONObject answer=data;String problem=error;
    new Handler(Looper.getMainLooper()).post(()->result.completed(problem==null?answer:null,problem));
   },"ClashTimerHub-update-check").start();

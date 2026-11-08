@@ -1,9 +1,9 @@
 ### NL
-- Nieuwe naamkoppeling: Clash-upgrade-ID 26000109 wordt nu als **Ice Block Spell** weergegeven in plaats van 'Upgrade #26000109'.
-- Ook eerder ingeplande meldingen zoeken bij het verschijnen de actuele upgrade op, zodat de juiste naam wordt getoond zonder eerst een nieuwe sync te hoeven uitvoeren.
-- Het bijbehorende spell-icoon wordt automatisch via de bestaande afbeeldingskoppeling opgehaald in het upgradeoverzicht.
+- De updatecontrole probeert een tijdelijke GitHub-time-out of netwerkfout nu automatisch één keer opnieuw, met ruimere verbindingstime-outs.
+- Bij een mislukte controle meldt de app duidelijk dat GitHub mogelijk tijdelijk niet bereikbaar is. Een time-out wordt niet langer uitgelegd alsof de APK ontbreekt.
+- Nieuwe acties: **Opnieuw proberen** en **Open GitHub**. De bestaande APK-download, handtekeningcontrole en update-installatie zijn ongewijzigd.
 
 ### EN
-- New name mapping: Clash upgrade ID 26000109 now displays as **Ice Block Spell** instead of 'Upgrade #26000109'.
-- Previously scheduled alerts now resolve the current upgrade name when delivered, avoiding the old fallback label without needing another sync.
-- The matching spell artwork is loaded using the existing image lookup in the upgrade overview.
+- The update checker now retries a transient GitHub timeout or network error once, with more generous connection timeouts.
+- If checking still fails, the app explains that GitHub may be temporarily unreachable instead of suggesting the APK was not published.
+- New actions: **Retry** and **Open GitHub**. Existing APK downloads, signature verification and installation are unchanged.
