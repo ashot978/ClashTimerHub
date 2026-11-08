@@ -1,9 +1,9 @@
 ### NL
-- Nieuwe APK-build op verzoek, met de eerder doorgevoerde lab-vinkjescorrectie. Geen aanvullende functiewijzigingen.
-- De gecombineerde labweergave toont nu een **gewoon groen vinkje (✓)** in plaats van de groene checkbox-emoji (✅). Bijvoorbeeld: **🧙 1 ✓ 2:14:26**.
-- Dit geldt voor alle All Timers-widgetindelingen. De timers, sortering, kleuren en overige weergaven blijven ongewijzigd.
+- Nieuwe APK-build naar aanleiding van de vraag over de blijvende melding 'Live widget-timers actief'. Geen wijzigingen aan de appcode, widgets, timers of meldingslogica.
+- De live widgetservice moet volgens Android een voorgrondservicemelding aanmaken. Op Android 13+ kan de gebruiker uitsluitend de meldingscategorie 'Live widget-aftellers' in de telefooninstellingen uitschakelen; de live widgetservice blijft werken.
+- Andere meldingscategorieen, upgrade-alarmen, accountgegevens en de bestaande app-instellingen blijven ongewijzigd.
 
 ### EN
-- Fresh APK build on request, including the previously implemented lab checkmark correction. No additional functional changes.
-- The combined ready-and-running lab status now uses a **plain green check mark (✓)** instead of the checkbox emoji (✅). For example: **🧙 1 ✓ 2:14:26**.
-- This applies to every All Timers widget layout. Timers, sorting, colors and other display states are unchanged.
+- Fresh APK build in response to the persistent 'Live widget timers enabled' notification question. No changes to app code, widgets, timers or notification logic.
+- Android requires the live widget foreground service to create a notification. On Android 13+, the user can disable only the 'Live widget countdowns' notification category in device settings while the live widget service keeps running.
+- Other notification categories, upgrade alarms, account data and existing app settings remain unchanged.
