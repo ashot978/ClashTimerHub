@@ -24,7 +24,8 @@ final class AllTimersTestData {
  }
  static final class Account {
   String key,helpers="";
-  int builders,ready,lab,labReady,pets,petReady;
+  int builders,ready,lab,labReady,pets,petReady,helperReady;
+  long helperNext=Long.MAX_VALUE;
   long builderAt=Long.MAX_VALUE,labAt=Long.MAX_VALUE,petAt=Long.MAX_VALUE;
   boolean builderBoost,labBoost,petBoost,builderMax,labMax,petMax;
   Account(String key){this.key=key;}
@@ -37,6 +38,16 @@ final class AllTimersTestData {
  }
  private AllTimersTestData(){}
 
+ /** Use the same helper readiness criteria as the visible helper status. */
+ private static void loadHelpers(Context ctx,Account account,long now,Snapshot result){
+  HelperTracker.Snapshot helpers=HelperTracker.forAccount(ctx,account.key);
+  account.helpers=HelperTracker.compact(ctx,account.key,now);
+  if(helpers==null)return;
+  account.helperReady=helpers.ready(now);
+  account.helperNext=helpers.soonest(now);
+  if(account.helperNext>now&&account.helperNext<result.next)
+   result.next=account.helperNext;
+ }
  static Snapshot load(Context ctx){
   Snapshot result=new Snapshot();
   AppData.migrate(ctx);
@@ -53,7 +64,7 @@ final class AllTimersTestData {
    HashMap<String,Account> byAccount=new HashMap<>();
    for(String key:WidgetV7.boostAccountOrder(ctx)){
     if(accounts.contains(key)&&!byAccount.containsKey(key)){
-     Account a=new Account(key);a.helpers=HelperTracker.compact(ctx,key,now);
+     Account a=new Account(key);loadHelpers(ctx,a,now,result);
     a.builderMax=AppData.isMaxed(ctx,key,"Bouwers");
     a.labMax=AppData.isMaxed(ctx,key,"Laboratorium");
     a.petMax=AppData.isMaxed(ctx,key,"Pets");
@@ -61,7 +72,7 @@ final class AllTimersTestData {
     }
    }
    for(String key:accounts)if(!byAccount.containsKey(key)){
-    Account a=new Account(key);a.helpers=HelperTracker.compact(ctx,key,now);
+    Account a=new Account(key);loadHelpers(ctx,a,now,result);
     a.builderMax=AppData.isMaxed(ctx,key,"Bouwers");
     a.labMax=AppData.isMaxed(ctx,key,"Laboratorium");
     a.petMax=AppData.isMaxed(ctx,key,"Pets");
@@ -134,7 +145,7 @@ final class AllTimersTestData {
    }
    // Include both normal and boost-completed timers until their next sync.
    // Sort individual upgrades by effective finish; account priority is in
-   // AllTimersWidgetSettings and uses a.ready + a.labReady + a.petReady.
+   // AllTimersWidgetSettings and includes ready helpers if enabled.
    Collections.sort(result.items,(a,b)->{
     int time=Long.compare(a.finish,b.finish);
     if(time!=0)return time;
