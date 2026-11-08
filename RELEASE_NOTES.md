@@ -1,9 +1,11 @@
 ### NL
-- De updatecontrole probeert een tijdelijke GitHub-time-out of netwerkfout nu automatisch één keer opnieuw, met ruimere verbindingstime-outs.
-- Bij een mislukte controle meldt de app duidelijk dat GitHub mogelijk tijdelijk niet bereikbaar is. Een time-out wordt niet langer uitgelegd alsof de APK ontbreekt.
-- Nieuwe acties: **Opnieuw proberen** en **Open GitHub**. De bestaande APK-download, handtekeningcontrole en update-installatie zijn ongewijzigd.
+- Vrije helpers tellen nu mee bij de prioritering van accounts in de All Timers-widget wanneer **Volgende bouwer (incl. boost)** en **Helpers tonen** zijn ingeschakeld.
+- Iedere beschikbare helper telt als één actie, net als een afgeronde bouw-, onderzoeks- of pet-upgrade. Accounts met meer beschikbare acties komen hoger te staan.
+- Als er geen acties klaarstaan, sorteert de widget nog steeds op de eerstvolgende boost-gecorrigeerde builder-eindtijd. Alfabetische en handmatige sortering blijven onveranderd.
+- Zodra een helper beschikbaar wordt, wordt de widgetverversing ook op dat moment ingepland om de rangorde te actualiseren. Vijf tests controleren de prioriteitsberekening.
 
 ### EN
-- The update checker now retries a transient GitHub timeout or network error once, with more generous connection timeouts.
-- If checking still fails, the app explains that GitHub may be temporarily unreachable instead of suggesting the APK was not published.
-- New actions: **Retry** and **Open GitHub**. Existing APK downloads, signature verification and installation are unchanged.
+- Ready helpers now contribute to account priority in the All Timers widget when **Next builder (boost-adjusted)** and **Show helpers** are enabled.
+- Each available helper counts as one actionable item, alongside completed builder, research and pet upgrades. Accounts with more actionable items come first.
+- Without ready actions, accounts still sort by the next boost-adjusted builder finish. Alphabetical and manual sorting are unchanged.
+- A widget refresh is also scheduled when a helper becomes available so the ordering can update. Five tests cover the priority calculation.
