@@ -33,6 +33,8 @@ public final class AllTimersTestService extends RemoteViewsService {
    R.id.all_slot_0_idle,R.id.all_slot_1_idle,R.id.all_slot_2_idle};
   private static final int[] ENDS={
    R.id.all_slot_0_end,R.id.all_slot_1_end,R.id.all_slot_2_end};
+  private static final int[] READY={
+   R.id.all_slot_0_ready,R.id.all_slot_1_ready,R.id.all_slot_2_ready};
   private final Context ctx;
   private final int widgetId;
   private final ArrayList<AllTimersTestData.Account> accounts=new ArrayList<>();
@@ -78,6 +80,9 @@ public final class AllTimersTestService extends RemoteViewsService {
    rv.setOnClickFillInIntent(R.id.all_account_row,new Intent().putExtra("account",a.key));
    return rv;
   }
+  static boolean showMixedLabReady(String category,int ready,long finish,long now){
+   return AllTimersWidgetSettings.LAB.equals(category)&&ready>0&&finish!=Long.MAX_VALUE&&finish>now;
+  }
   private void renderSlot(RemoteViews rv,int slot,String category,AllTimersTestData.Account a,long now){
    long finish;
    int ready;
@@ -92,6 +97,14 @@ public final class AllTimersTestService extends RemoteViewsService {
    }
    int clock=CLOCKS[slot],idle=IDLES[slot],end=ENDS[slot],marker=ICONS[slot];
    boolean active=finish!=Long.MAX_VALUE&&finish>now;
+   // Display completed research alongside another still-running laboratory
+   // job, e.g. "🧙 1 ✅ 2:14:26". Only the fourth, mixed state replaces the
+   // finish-time label; ordinary running, boosted and idle views are unchanged.
+   boolean mixedLab=showMixedLabReady(category,ready,finish,now);
+   rv.setViewVisibility(READY[slot],mixedLab?View.VISIBLE:View.GONE);
+   rv.setTextViewText(READY[slot],ready+" ✅");
+   rv.setTextColor(READY[slot],GREEN);
+   rv.setViewVisibility(end,mixedLab?View.GONE:View.VISIBLE);
    // Do not hide an unsynced completion behind a manually checked MAX flag.
    boolean pendingSync=!active&&ready>0;
    boolean checkedMax=!active&&maxed&&!pendingSync;
