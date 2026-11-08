@@ -136,6 +136,7 @@ final class ClashNames {
   NAMES.put(26000035L, "Invisibility Spell");
   NAMES.put(26000053L, "Recall Spell");
   NAMES.put(26000070L, "Overgrowth Spell");
+  NAMES.put(26000109L, "Ice Block Spell");
  }
  static String name(long id){String n=NAMES.get(id);return n==null?"Upgrade #"+id:n;}
 
