@@ -79,6 +79,10 @@ final class AllTimersWidgetSettings {
   }catch(Exception ignored){}
   return selected;
  }
+ /** A ready helper counts as one actionable slot, just like an unacknowledged upgrade. */
+ static int actionableCount(AllTimersTestData.Account a,boolean includeHelpers){
+  return a.ready+a.labReady+a.petReady+(includeHelpers?a.helperReady:0);
+ }
  static ArrayList<AllTimersTestData.Account> visibleAccounts(Context ctx,int widgetId,
     AllTimersTestData.Snapshot snapshot){
   ArrayList<AllTimersTestData.Account> out=new ArrayList<>();
@@ -93,15 +97,12 @@ final class AllTimersWidgetSettings {
   HashMap<String,Integer> ranks=new HashMap<>();
   for(int i=0;i<manual.size();i++)ranks.put(manual.get(i),i);
   int mode=sort(ctx,widgetId);
+  // A hidden helper section must not unexpectedly reorder accounts.
+  boolean includeHelpers=preferences(ctx).getBoolean(key("helpers",widgetId),true);
   Collections.sort(out,(a,b)->{
    if(mode==NEXT_BUILDER){
-    // A completed upgrade not yet acknowledged by a fresh account sync is
-    // always above accounts with only running upgrades. This includes
-    // builders, lab (also goblin research) and pets, with or without Potions.
-    // When there are no pending completions, sort by the first effective
-    // Builder finish, which already includes Builder Potion acceleration.
-    int aPending=a.ready+a.labReady+a.petReady;
-    int bPending=b.ready+b.labReady+b.petReady;
+    int aPending=actionableCount(a,includeHelpers);
+    int bPending=actionableCount(b,includeHelpers);
     if((aPending>0)!=(bPending>0))return aPending>0?-1:1;
     if(aPending>0&&bPending>0&&aPending!=bPending)
      return Integer.compare(bPending,aPending);
