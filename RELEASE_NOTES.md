@@ -1,11 +1,11 @@
 ### NL
-- Vrije helpers tellen nu mee bij de prioritering van accounts in de All Timers-widget wanneer **Volgende bouwer (incl. boost)** en **Helpers tonen** zijn ingeschakeld.
-- Iedere beschikbare helper telt als één actie, net als een afgeronde bouw-, onderzoeks- of pet-upgrade. Accounts met meer beschikbare acties komen hoger te staan.
-- Als er geen acties klaarstaan, sorteert de widget nog steeds op de eerstvolgende boost-gecorrigeerde builder-eindtijd. Alfabetische en handmatige sortering blijven onveranderd.
-- Zodra een helper beschikbaar wordt, wordt de widgetverversing ook op dat moment ingepland om de rangorde te actualiseren. Vijf tests controleren de prioriteitsberekening.
+- De All Timers-widget toont voortaan **🧙 1 ✅ + afteltijd** wanneer een laboratoriumonderzoek afgerond is terwijl een ander onderzoek nog loopt (bijvoorbeeld met de Goblin Researcher).
+- Zijn meerdere onderzoeken klaar, dan toont de widget het juiste aantal (bijvoorbeeld 2 ✅). De realtime afteller blijft doorlopen.
+- De andere drie labweergaven (gewone timer, boosttimer en klaar/MAX) blijven ongewijzigd. De widget behoudt dezelfde afmetingen in de één- en tweeregelige stand.
+- Nieuwe tests controleren de gecombineerde status en de bestaande weergaven.
 
 ### EN
-- Ready helpers now contribute to account priority in the All Timers widget when **Next builder (boost-adjusted)** and **Show helpers** are enabled.
-- Each available helper counts as one actionable item, alongside completed builder, research and pet upgrades. Accounts with more actionable items come first.
-- Without ready actions, accounts still sort by the next boost-adjusted builder finish. Alphabetical and manual sorting are unchanged.
-- A widget refresh is also scheduled when a helper becomes available so the ordering can update. Five tests cover the priority calculation.
+- The All Timers widget now shows **🧙 1 ✅ + countdown** when one laboratory upgrade is ready while another research upgrade is still running (including Goblin Researcher).
+- If multiple upgrades are ready, the widget shows their count (e.g. 2 ✅), while the live timer keeps counting down.
+- The other three lab states (normal countdown, boosted countdown, ready/MAX) remain unchanged. Existing widget dimensions and one-/two-line layouts are preserved.
+- New tests cover the mixed ready/running state and existing views.
