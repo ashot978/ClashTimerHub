@@ -158,9 +158,6 @@ public final class AllTimersTestWidget extends AppWidgetProvider {
  private static void refreshCountdowns(Context ctx){
   refreshCountdownRows(ctx);
   planHeartbeat(ctx,AllTimersTestData.load(ctx).next);
-  // An alarm can revive the widget process after Android has paused it.
-  // Resume the notification-free ticker without starting a foreground service.
-  LiveWidgetService.reconcile(ctx);
  }
  /** Preserve the root widget, scroll position and button actions. The Android
   * host may still throttle Chronometers, so request just fresh account rows.
