@@ -47,7 +47,8 @@ final class ResearchPotionTracker {
 
  static Snapshot load(Context ctx,String account){
   SharedPreferences p=AppData.prefs(ctx);
-  long current=p.getLong("lastSyncAt_"+account,0L);
+  // JSON timers are anchored to the export timestamp, NOT clipboard import time.
+  long current=p.getLong("lastExportAt_"+account,p.getLong("lastSyncAt_"+account,0L));
   try{
    JSONObject map=new JSONObject(p.getString(KEY,"{}"));
    JSONObject item=map.optJSONObject(account);

@@ -29,6 +29,29 @@ public class MagicSnackTrackerTest {
   assertEquals(HOUR,MagicSnackTracker.integrate(0L,15L*HOUR+HOUR/2L,0L,HOUR,
    false,Arrays.asList(new long[]{0L,HOUR/2L})));
  }
+ @Test public void exportTimeAnchorPreventsPotionDelayOvercount(){
+  // The export says 10h38m normal work is left. The potion runs 58m25s
+  // from export; the clipboard is imported 90s later.
+  long minute=60_000L, export=1_000_000_000L;
+  long potionEnd=export+58L*minute+25_000L;
+  long actual=MagicSnackTracker.integrate(export,638L*minute,
+   0L,0L,true,Arrays.asList(new long[]{export,potionEnd}));
+  assertEquals(export+112L*minute+15_000L,actual);
+  long importTime=export+90_000L;
+  long incorrectlyAnchored=MagicSnackTracker.integrate(importTime,
+   638L*minute-90_000L,0L,0L,true,
+   Arrays.asList(new long[]{export,potionEnd}));
+  assertEquals(13L*minute+30_000L,incorrectlyAnchored-actual);
+ }
+ @Test public void exportTimeAnchorHandlesPotionAndBuilderBite(){
+  long minute=60_000L, export=2_000_000_000L;
+  long potionEnd=export+58L*minute+25_000L;
+  long snackEnd=export+58L*minute+6_000L;
+  long predicted=MagicSnackTracker.integrate(export,638L*minute,
+   export,snackEnd,true,Arrays.asList(new long[]{export,potionEnd}));
+  // 10x potion always overrides concurrent 2x Builder Bite.
+  assertEquals(export+112L*minute+15_000L,predicted);
+ }
  @Test public void futureSnackStartsOnlyWhenActivated(){
   assertEquals(HOUR+HOUR/2L,MagicSnackTracker.integrate(0L,2L*HOUR,
    HOUR,HOUR+HOUR, true,Collections.emptyList()));
