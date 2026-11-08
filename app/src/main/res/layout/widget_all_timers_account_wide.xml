@@ -25,6 +25,11 @@
    android:layout_height="match_parent" android:gravity="center_vertical"
    android:text="🧙" android:textColor="#D6BCEA" android:textSize="9sp"
    android:includeFontPadding="false"/>
+  <TextView android:id="@+id/all_slot_0_ready" android:layout_width="32dp"
+   android:layout_height="match_parent" android:gravity="left|center_vertical"
+   android:text="1 ✅" android:textColor="#8BE3AD" android:textSize="9sp"
+   android:singleLine="true" android:visibility="gone"
+   android:includeFontPadding="false"/>
   <Chronometer android:id="@+id/all_slot_0_clock" android:layout_width="55dp"
    android:layout_height="match_parent" android:gravity="left|center_vertical"
    android:text="03:12:15" android:textColor="#FFD783" android:textSize="9sp"
@@ -48,6 +53,11 @@
    android:layout_height="match_parent" android:gravity="center_vertical"
    android:text="🧙" android:textColor="#D6BCEA" android:textSize="9sp"
    android:includeFontPadding="false"/>
+  <TextView android:id="@+id/all_slot_1_ready" android:layout_width="32dp"
+   android:layout_height="match_parent" android:gravity="left|center_vertical"
+   android:text="1 ✅" android:textColor="#8BE3AD" android:textSize="9sp"
+   android:singleLine="true" android:visibility="gone"
+   android:includeFontPadding="false"/>
   <Chronometer android:id="@+id/all_slot_1_clock" android:layout_width="55dp"
    android:layout_height="match_parent" android:gravity="left|center_vertical"
    android:text="03:12:15" android:textColor="#FFD783" android:textSize="9sp"
@@ -70,6 +80,11 @@
   <TextView android:id="@+id/all_slot_2_icon" android:layout_width="13dp"
    android:layout_height="match_parent" android:gravity="center_vertical"
    android:text="🧙" android:textColor="#D6BCEA" android:textSize="9sp"
+   android:includeFontPadding="false"/>
+  <TextView android:id="@+id/all_slot_2_ready" android:layout_width="32dp"
+   android:layout_height="match_parent" android:gravity="left|center_vertical"
+   android:text="1 ✅" android:textColor="#8BE3AD" android:textSize="9sp"
+   android:singleLine="true" android:visibility="gone"
    android:includeFontPadding="false"/>
   <Chronometer android:id="@+id/all_slot_2_clock" android:layout_width="55dp"
    android:layout_height="match_parent" android:gravity="left|center_vertical"
