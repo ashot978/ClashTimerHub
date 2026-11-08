@@ -1,42 +1,53 @@
 package nl.clashtimerhub.v2;
 
-import android.app.*;
 import android.appwidget.AppWidgetManager;
-import android.content.*;
-import android.os.*;
-import android.widget.RemoteViews;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.PowerManager;
+import android.os.SystemClock;
 
 /**
- * User-enabled foreground companion for All Timers launcher widgets.
- * It cannot force a third-party launcher to render every second, but it
- * actively rebinds countdown rows while the screen is interactive and
- * refreshes immediately when the screen wakes.
+ * Notification-free live widget ticker. Keep the existing class name so that
+ * widget call sites and per-widget settings stay unchanged.
+ *
+ * The launcher owns the actual Chronometer countdowns; this best-effort
+ * in-process ticker rebinds rows every second while the screen is interactive.
+ * Android may pause a background process, so the existing non-wakeup widget
+ * heartbeat and native Chronometers are retained as fallbacks.
  */
-public final class LiveWidgetService extends Service {
- static final String ACTION_RECONCILE="nl.clashtimerhub.v2.LIVE_WIDGET_RECONCILE";
- private static final String CHANNEL="widget_live_countdowns";
- private static final int NOTIFICATION_ID=22;
+public final class LiveWidgetService {
  private static final long INTERVAL_MS=1_000L;
- private final Handler handler=new Handler(Looper.getMainLooper());
- private boolean registered;
- private boolean interactive=true;
- private final Runnable tick=new Runnable(){
+ private static final Handler handler=new Handler(Looper.getMainLooper());
+ private static Context application;
+ private static boolean registered;
+ private static boolean interactive=true;
+ private LiveWidgetService(){}
+
+ private static final Runnable tick=new Runnable(){
   @Override public void run(){
-   if(!hasLiveWidgets(LiveWidgetService.this)){stopSelf();return;}
-   if(interactive)AllTimersTestWidget.refreshCountdownRows(LiveWidgetService.this);
-   // Keep successive refreshes aligned to whole-second boundaries so that
-   // scheduling latency never accumulates into a slower-than-1s cadence.
+   Context ctx=application;
+   if(ctx==null||!hasLiveWidgets(ctx)){stop();return;}
+   if(!interactive)return;
+   AllTimersTestWidget.refreshCountdownRows(ctx);
    long uptime=SystemClock.uptimeMillis();
    handler.postAtTime(this,(uptime/INTERVAL_MS+1L)*INTERVAL_MS);
   }
  };
- private final BroadcastReceiver screenReceiver=new BroadcastReceiver(){
+ private static final BroadcastReceiver screenReceiver=new BroadcastReceiver(){
   @Override public void onReceive(Context context,Intent intent){
    String action=intent==null?"":intent.getAction();
-   if(Intent.ACTION_SCREEN_OFF.equals(action)){interactive=false;return;}
-   if(Intent.ACTION_SCREEN_ON.equals(action)||Intent.ACTION_USER_PRESENT.equals(action)){
+   if(Intent.ACTION_SCREEN_OFF.equals(action)){
+    interactive=false;
+    handler.removeCallbacks(tick);
+   }else if(Intent.ACTION_SCREEN_ON.equals(action)||
+            Intent.ACTION_USER_PRESENT.equals(action)){
     interactive=true;
-    AllTimersTestWidget.refreshCountdownRows(context);
     scheduleTick();
    }
   }
@@ -47,67 +58,44 @@ public final class LiveWidgetService extends Service {
   for(int id:ids)if(AllTimersWidgetSettings.liveCountdowns(ctx,id))return true;
   return false;
  }
- /** A foreground activity, widget configuration or user interaction should
-  * call reconcile. Background starts are best effort on Android 12+.
+ /**
+  * Start or resume a best-effort second-by-second in-process refresh.
+  * Unlike a foreground service this does not post an ongoing notification.
   */
- static void reconcile(Context ctx){
-  Intent service=new Intent(ctx,LiveWidgetService.class).setAction(ACTION_RECONCILE);
-  if(!hasLiveWidgets(ctx)){ctx.stopService(service);return;}
-  try{
-   if(Build.VERSION.SDK_INT>=26)ctx.startForegroundService(service);
-   else ctx.startService(service);
-  }catch(RuntimeException blocked){
-   android.util.Log.w("ClashTimerHub","Android deferred live widget service start",blocked);
+ static synchronized void reconcile(Context ctx){
+  Context app=ctx.getApplicationContext();
+  if(!hasLiveWidgets(app)){stop();return;}
+  application=app;
+  if(!registered){
+   IntentFilter filter=new IntentFilter();
+   filter.addAction(Intent.ACTION_SCREEN_ON);
+   filter.addAction(Intent.ACTION_SCREEN_OFF);
+   filter.addAction(Intent.ACTION_USER_PRESENT);
+   try{
+    if(Build.VERSION.SDK_INT>=33)
+     app.registerReceiver(screenReceiver,filter,Context.RECEIVER_NOT_EXPORTED);
+    else app.registerReceiver(screenReceiver,filter);
+    registered=true;
+   }catch(RuntimeException e){
+    android.util.Log.w("ClashTimerHub","Live widget screen receiver unavailable",e);
+   }
   }
- }
- @Override public void onCreate(){
-  super.onCreate();
-  if(Build.VERSION.SDK_INT>=26){
-   NotificationChannel channel=new NotificationChannel(CHANNEL,
-    I18n.english(this)?"Live widget countdowns":"Live widget-aftellers",
-    NotificationManager.IMPORTANCE_LOW);
-   channel.setDescription("Keeps launcher widget countdowns refreshed");
-   NotificationManager manager=getSystemService(NotificationManager.class);
-   if(manager!=null)manager.createNotificationChannel(channel);
-  }
-  Intent open=new Intent(this,MainActivity.class);
-  PendingIntent launch=PendingIntent.getActivity(this,NOTIFICATION_ID,open,
-   PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
-  Notification.Builder notification=Build.VERSION.SDK_INT>=26?
-   new Notification.Builder(this,CHANNEL):new Notification.Builder(this);
-  notification.setSmallIcon(android.R.drawable.ic_popup_sync)
-   .setContentTitle("Clash Timer Hub")
-   .setContentText(I18n.english(this)?"Live widget timers enabled":"Live widget-timers actief")
-   .setOngoing(true).setContentIntent(launch);
-  if(Build.VERSION.SDK_INT>=29)
-   startForeground(NOTIFICATION_ID,notification.build(),
-    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
-  else startForeground(NOTIFICATION_ID,notification.build());
-  PowerManager power=(PowerManager)getSystemService(POWER_SERVICE);
+  PowerManager power=(PowerManager)app.getSystemService(Context.POWER_SERVICE);
   interactive=power==null||power.isInteractive();
-  IntentFilter filter=new IntentFilter();
-  filter.addAction(Intent.ACTION_SCREEN_ON);
-  filter.addAction(Intent.ACTION_SCREEN_OFF);
-  filter.addAction(Intent.ACTION_USER_PRESENT);
-  if(Build.VERSION.SDK_INT>=33)registerReceiver(screenReceiver,filter,Context.RECEIVER_NOT_EXPORTED);
-  else registerReceiver(screenReceiver,filter);
-  registered=true;
-  scheduleTick();
+  if(interactive)scheduleTick();
+  else handler.removeCallbacks(tick);
  }
- private void scheduleTick(){
+ private static void scheduleTick(){
   handler.removeCallbacks(tick);
-  // Render promptly on service start, then one update each elapsed second.
-  handler.post(tick);
+  if(application!=null&&interactive)handler.post(tick);
  }
- @Override public int onStartCommand(Intent intent,int flags,int startId){
-  if(!hasLiveWidgets(this)){stopSelf();return START_NOT_STICKY;}
-  scheduleTick();
-  return START_STICKY;
- }
- @Override public void onDestroy(){
+ private static synchronized void stop(){
   handler.removeCallbacks(tick);
-  if(registered){unregisterReceiver(screenReceiver);registered=false;}
-  super.onDestroy();
+  if(registered&&application!=null){
+   try{application.unregisterReceiver(screenReceiver);}
+   catch(IllegalArgumentException ignored){}
+  }
+  registered=false;
+  application=null;
  }
- @Override public IBinder onBind(Intent intent){return null;}
 }
