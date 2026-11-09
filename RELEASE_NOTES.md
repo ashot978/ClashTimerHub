@@ -1,9 +1,9 @@
 ### NL
-- De Logger-onderbouw in de Clash-export (`guardians`, ID 107000008) wordt nu als actieve bouwupgrade geïmporteerd en telt mee bij de bezette bouwers.
-- Bij een export met 5 Wizard Towers, 1 Revenge Tower en 1 Logger worden alle 7 actieve bouwtimers herkend; Guardians zonder actieve timer worden genegeerd.
-- Een gedeeltelijke export zonder `guardians` kan bestaande actieve Guardian-timers niet stilzwijgend wissen. Overige timers, accounts en widgetindelingen blijven ongewijzigd.
+- De naam van Hot Candle - Hitpoints verschijnt nu correct in plaats van 'Upgrade #102000033'. Een foutieve module-ID (103000033) is hersteld naar de ID uit Clash-exports (102000033).
+- Ook eerder geïmporteerde upgrades met deze ID krijgen automatisch de juiste naam en bestaande Hot Candle-afbeelding, zonder opnieuw te synchroniseren.
+- Alle overige timers, importregels, widgetindelingen, meldingen en gebruikersgegevens blijven ongewijzigd.
 
 ### EN
-- Logger upgrades in Clash exports (`guardians`, ID 107000008) now import as active builder upgrades and count toward occupied builders.
-- An export with 5 Wizard Towers, 1 Revenge Tower and 1 Logger now recognizes all 7 active builder timers; Guardians without an active timer are ignored.
-- Partial exports missing `guardians` cannot silently erase previously active Guardian timers. Other timers, accounts and widget layouts are unchanged.
+- Hot Candle - Hitpoints now displays its correct name instead of 'Upgrade #102000033'. Corrected the module ID from 103000033 to the actual Clash export ID 102000033.
+- Previously imported upgrades with this ID automatically resolve to the right name and existing Hot Candle artwork without another sync.
+- All other timers, import rules, widget layouts, notifications and user data remain unchanged.

@@ -82,7 +82,7 @@ final class ClashNames {
   NAMES.put(103000011L, "Hot Candle");
   NAMES.put(103000012L, "Hero Hunter");
   NAMES.put(103000013L, "Cake-A-Pult");
-  NAMES.put(103000033L, "Hot Candle - Hitpoints");
+  NAMES.put(102000033L, "Hot Candle - Hitpoints");
   NAMES.put(102000034L, "Hot Candle - DPS");
   NAMES.put(102000035L, "Hot Candle - TSA");
   NAMES.put(102000036L, "Hero Hunter - Hitpoints");
