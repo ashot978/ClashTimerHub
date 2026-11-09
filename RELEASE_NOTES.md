@@ -1,9 +1,11 @@
 ### NL
-- Alle 9 seasonal defense-upgrades gecontroleerd: 3 modules voor Hot Candle (102000033-035), Hero Hunter (102000036-038) en Cake-a-Pult (102000039-041).
-- Nieuwe automatische regressietests controleren alle 9 namen en het automatisch herstellen van oude 'Upgrade #ID'-namen, zonder nieuwe synchronisatie.
-- De bestaande module-import en de drie bijbehorende iconenpaden zijn nagekeken. Geen functiewijzigingen aan timers, widgets, accounts of meldingen.
+- Controle van alle Home Village-timerbronnen: gebouwen, helden, troepen, spreuken, belegeringsmachines, huisdieren, vallen en Guardians (inclusief Logger).
+- Extra regressietests controleren de 8 importsecties, de Logger-ID en alle 9 seasonal defense-modules (3 x 3).
+- Builder Base-secties (buildings2, traps2, units2, heroes2) blijven bewust buiten de Home Village-bouwersteller. De gedeelde export bevatte daar geen lopende timers. Hero Equipment bevatte alleen levels.
+- Geen appfunctionaliteit, widgetindeling, accountgegevens of meldingen gewijzigd.
 
 ### EN
-- Verified all 9 seasonal defense upgrades: 3 modules each for Hot Candle (102000033-035), Hero Hunter (102000036-038), and Cake-a-Pult (102000039-041).
-- New automated regression tests cover all 9 readable names and recovery of previously imported 'Upgrade #ID' fallback labels without a new sync.
-- Reviewed existing module import logic and all three artwork paths. No functional changes to timers, widgets, accounts, or notifications.
+- Audited all Home Village timer sources: buildings, heroes, troops, spells, siege machines, pets, traps and Guardians (including Logger).
+- Added regression tests covering the 8 import sections, Logger ID and all 9 seasonal defense modules (3 x 3).
+- Builder Base sections (buildings2, traps2, units2, heroes2) remain intentionally excluded from Home Village builder counts. The supplied export showed no active timers there; Hero Equipment entries contained levels only.
+- No app functionality, widget layout, account data or notifications changed.
