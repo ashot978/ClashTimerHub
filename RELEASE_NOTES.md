@@ -1,11 +1,15 @@
 ### NL
-- Controle van alle Home Village-timerbronnen: gebouwen, helden, troepen, spreuken, belegeringsmachines, huisdieren, vallen en Guardians (inclusief Logger).
-- Extra regressietests controleren de 8 importsecties, de Logger-ID en alle 9 seasonal defense-modules (3 x 3).
-- Builder Base-secties (buildings2, traps2, units2, heroes2) blijven bewust buiten de Home Village-bouwersteller. De gedeelde export bevatte daar geen lopende timers. Hero Equipment bevatte alleen levels.
-- Geen appfunctionaliteit, widgetindeling, accountgegevens of meldingen gewijzigd.
+- De updatepop-up toont nu alle release-notes-bullets.
+- Lange bullets worden niet meer halverwege afgekapt.
+- Scroll om alle wijzigingen te lezen.
+- Nieuwe releases gebruiken kortere, losse bullets.
+- Release notes blijven beschikbaar in Nederlands en Engels.
+- Timers, widgets, accounts en meldingen zijn ongewijzigd.
 
 ### EN
-- Audited all Home Village timer sources: buildings, heroes, troops, spells, siege machines, pets, traps and Guardians (including Logger).
-- Added regression tests covering the 8 import sections, Logger ID and all 9 seasonal defense modules (3 x 3).
-- Builder Base sections (buildings2, traps2, units2, heroes2) remain intentionally excluded from Home Village builder counts. The supplied export showed no active timers there; Hero Equipment entries contained levels only.
-- No app functionality, widget layout, account data or notifications changed.
+- The update dialog now shows every release-note bullet.
+- Long bullets are no longer cut off mid-sentence.
+- Scroll to read the full list of changes.
+- Future releases use shorter, separate bullets.
+- Release notes remain available in Dutch and English.
+- Timers, widgets, accounts and notifications are unchanged.

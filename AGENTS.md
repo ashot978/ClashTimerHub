@@ -6,7 +6,21 @@
 
 ## Mandatory fresh release notes for every build
 
-**Every newly published APK MUST include release notes written for that build, not reused historical notes.** Before committing feature or bug-fix changes, update `RELEASE_NOTES.md` with accurate, concise bullet points under both `### NL` and `### EN`. Describe only changes actually made in the current request; do not carry forward removed features or older instructions. Keep the language understandable to app users.
+**Every newly published APK MUST include release notes written for that build, not reused historical notes.**
+
+### Concise, fully readable in-app release notes
+
+The in-app update dialog must show every release-note bullet without artificially
+truncating bullet text or discarding bullets. The Android message area stays scrollable.
+For every future release, write **more short bullets rather than fewer long paragraphs**:
+- Aim for at most 90 characters per bullet, including spaces.
+- Keep each bullet to one specific change, in plain user-friendly language.
+- Split longer explanations into separate concise bullets; do not shorten by cutting off text.
+- Put technical investigation and lengthy background in commit messages, not release notes.
+- Keep both NL and EN sections factual, scannable and comparable in length.
+- Never show literal ellipses in place of a cut-off change.
+
+ Before committing feature or bug-fix changes, update `RELEASE_NOTES.md` with accurate, concise bullet points under both `### NL` and `### EN`. Describe only changes actually made in the current request; do not carry forward removed features or older instructions. Keep the language understandable to app users.
 
 The GitHub Actions publish workflow compares this file against the previous release. If it was changed, the new bilingual notes are published. If it was not changed (such as an instructions-only build or an unchanged-source rebuild), the workflow must instead generate fresh build-specific notes from the new commit subjects, or explicitly say there are no new features. `CHANGELOG.md` is a history archive only and MUST NOT be used as the release body for every build.
 

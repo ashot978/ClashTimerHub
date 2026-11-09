@@ -551,42 +551,9 @@ public final class MainActivity extends Activity {
    if(activeTab==3&&!automatic)draw();
   });
  }
- /** Show release features only in the selected language. */
+ /** Show the full release notes in the selected language, without truncation. */
  private String cleanReleaseNotes(String input){
-  boolean english=I18n.english(this);
-  String fallback=english?"See the full list of changes on GitHub.":"Bekijk de volledige wijzigingen op GitHub.";
-  if(input==null||input.trim().isEmpty())return fallback;
-  String raw=input.replace("\\n","\n");
-  String[] lines=raw.split("\n");
-  int chosen=english?2:1;
-  int section=0;
-  boolean bilingual=false;
-  StringBuilder result=new StringBuilder();
-  int bullets=0;
-  for(String original:lines){
-   String line=original.trim();
-   String heading=line.toLowerCase(java.util.Locale.ROOT);
-   if(heading.startsWith("### ")){
-    if(heading.equals("### nl")||heading.equals("### nederlands")||heading.equals("### dutch")){
-     section=1;bilingual=true;
-    }else if(heading.equals("### en")||heading.equals("### english")||heading.equals("### engels")){
-     section=2;bilingual=true;
-    }else section=0;
-    continue;
-   }
-   if(line.startsWith("## ")){
-    if(bilingual)break;
-    continue;
-   }
-   if(section!=chosen||!(line.startsWith("- ")||line.startsWith("* ")))continue;
-   String content=line.substring(2).replace("**","").trim();
-   if(content.isEmpty())continue;
-   if(content.length()>175)content=content.substring(0,172)+"…";
-   if(result.length()>0)result.append('\n');
-   result.append("• ").append(content);
-   if(++bullets>=6)break;
-  }
-  return bilingual&&result.length()>0?result.toString():fallback;
+  return ReleaseNotesFormatter.format(input,I18n.english(this));
  }
  void showUpdateInstallError(String reason){
   runOnUiThread(()->{
