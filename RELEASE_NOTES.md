@@ -1,9 +1,9 @@
 ### NL
-- Teruggezet naar de exacte appcode en widgetwerking van build #533; de wijzigingen na #533 zijn ongedaan gemaakt.
-- De oorspronkelijke live widget-timers en hun voorgrondservice werken weer zoals in #533, inclusief de Android-melding.
-- Verder geen functiewijzigingen. Bestaande accounts, timers, widgetindelingen en de groene lab-vinkjes uit #533 blijven behouden.
+- De Logger-onderbouw in de Clash-export (`guardians`, ID 107000008) wordt nu als actieve bouwupgrade geïmporteerd en telt mee bij de bezette bouwers.
+- Bij een export met 5 Wizard Towers, 1 Revenge Tower en 1 Logger worden alle 7 actieve bouwtimers herkend; Guardians zonder actieve timer worden genegeerd.
+- Een gedeeltelijke export zonder `guardians` kan bestaande actieve Guardian-timers niet stilzwijgend wissen. Overige timers, accounts en widgetindelingen blijven ongewijzigd.
 
 ### EN
-- Restored the exact application source and widget behavior from build #533, reverting all changes made after #533.
-- The original live widget timers and foreground service work as in #533, including the Android notification.
-- No other functional changes. Existing accounts, timers, widget layouts and the green lab check marks from #533 remain unchanged.
+- Logger upgrades in Clash exports (`guardians`, ID 107000008) now import as active builder upgrades and count toward occupied builders.
+- An export with 5 Wizard Towers, 1 Revenge Tower and 1 Logger now recognizes all 7 active builder timers; Guardians without an active timer are ignored.
+- Partial exports missing `guardians` cannot silently erase previously active Guardian timers. Other timers, accounts and widget layouts are unchanged.

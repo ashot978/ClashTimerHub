@@ -7,6 +7,8 @@ import java.util.*;
 
 /** Atomic, account-scoped clipboard import for the floating shortcut. */
 public final class QuickSyncImporter {
+ // Import Guardians alongside building and hero upgrades; entries without a timer are ignored.
+ static final String[] TIMER_SECTIONS={"buildings","heroes","units","spells","siege_machines","pets","traps","guardians"};
  private QuickSyncImporter(){}
  public static String importJson(Context context,String raw)throws Exception{
   if(raw==null||raw.length()>10000000)throw new IllegalArgumentException("Klembord is leeg of te groot");
@@ -15,7 +17,7 @@ public final class QuickSyncImporter {
   JSONObject json=new JSONObject(raw.substring(start,end+1));
   // Reject truncated or malformed snapshots before touching previously stored timers.
   int availableSections=0;
-  for(String section:new String[]{"buildings","heroes","units","spells","siege_machines","pets","traps"}){
+  for(String section:TIMER_SECTIONS){
    if(!json.has(section))continue;
    if(!(json.opt(section) instanceof JSONArray))
     throw new IllegalArgumentException("Ongeldige sectie: "+section+". Bestaande timers blijven behouden.");
@@ -72,6 +74,17 @@ public final class QuickSyncImporter {
    if(!present)throw new IllegalArgumentException("Export mist "+cat+"; eerdere timers zijn niet overschreven.");
    // A full export with a Goblin Researcher timer must retain the siege-machine
    // section; do not silently erase that research from a partial export.
+   // Do not delete a running Guardian upgrade when a partial export omits guardians.
+   if("Bouwers".equals(cat)&&!json.has("guardians")){
+    for(int index=0;index<oldUpgrades.length();index++){
+     JSONObject previous=oldUpgrades.optJSONObject(index);
+     if(previous!=null&&account.equals(previous.optString("account"))
+       &&previous.optBoolean("exported",false)
+       &&previous.optString("syncKey","").startsWith("guardians/")
+       &&previous.optLong("finish")>now)
+      throw new IllegalArgumentException("Export mist guardians; bestaande Guardian-timers blijven behouden.");
+    }
+   }
    if("Laboratorium".equals(cat)&&!json.has("siege_machines")){
     for(int index=0;index<oldUpgrades.length();index++){
      JSONObject previous=oldUpgrades.optJSONObject(index);
@@ -84,7 +97,7 @@ public final class QuickSyncImporter {
    }
   }
   JSONArray parsed=new JSONArray();
-  String[] sections={"buildings","heroes","units","spells","siege_machines","pets","traps"};
+  String[] sections=TIMER_SECTIONS;
   for(String section:sections){
    JSONArray arr=json.optJSONArray(section);if(arr==null)continue;
    for(int i=0;i<arr.length();i++){

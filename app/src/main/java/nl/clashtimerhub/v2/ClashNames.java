@@ -45,6 +45,7 @@ final class ClashNames {
   NAMES.put(1000085L, "Ricochet Cannon");
   NAMES.put(1000079L, "Multi-Gear Tower");
   NAMES.put(1000086L, "Revenge Tower");
+  NAMES.put(107000008L, "Logger");
   NAMES.put(1000089L, "Firespitter");
   NAMES.put(1000093L, "Helper Hut");
   NAMES.put(1000097L, "Crafting Station");
