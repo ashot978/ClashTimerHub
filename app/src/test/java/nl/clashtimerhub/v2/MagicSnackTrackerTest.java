@@ -56,4 +56,21 @@ public class MagicSnackTrackerTest {
   assertEquals(HOUR+HOUR/2L,MagicSnackTracker.integrate(0L,2L*HOUR,
    HOUR,HOUR+HOUR, true,Collections.emptyList()));
  }
+ @Test public void nineHoursTwentyOneMinutesWithAnHourOfBuilderPotionFinishesInFiftySixMinutes(){
+  // Screenshot: shortest Bomb has 9h21m of regular work, with 59m of 10x boost.
+  // At 10x, 9h21m of work finishes in 56m06s, before the boost ends.
+  long minute=60_000L;
+  long work=9L*HOUR+21L*minute;
+  long activeBoost=59L*minute;
+  assertEquals(56L*minute+6_000L,MagicSnackTracker.integrate(
+   0L,work,0L,0L,true,Arrays.asList(new long[]{0L,activeBoost})));
+ }
+ @Test public void builderPotionExpiryReturnsToNormalSpeed(){
+  // Once a 10x potion ends, the unprocessed work runs at normal speed.
+  long minute=60_000L;
+  long work=9L*HOUR+21L*minute;
+  long activeBoost=50L*minute;
+  assertEquals(111L*minute,MagicSnackTracker.integrate(
+   0L,work,0L,0L,true,Arrays.asList(new long[]{0L,activeBoost})));
+ }
 }
