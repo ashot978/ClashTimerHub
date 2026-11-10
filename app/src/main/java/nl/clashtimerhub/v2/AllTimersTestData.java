@@ -96,15 +96,15 @@ final class AllTimersTestData {
     if("Bouwers".equals(category)){
      BuilderPotionTracker.Snapshot potion=builder.get(account);
      if(potion==null){potion=BuilderPotionTracker.load(ctx,account);builder.put(account,potion);}
-     predicted=UpgradeForecast.finish(ctx,account,category,original);
+     predicted=UpgradeForecast.finish(ctx,raw);
      result.builders++;
     }else if("Laboratorium".equals(category)){
      ResearchPotionTracker.Snapshot potion=lab.get(account);
      if(potion==null){potion=ResearchPotionTracker.load(ctx,account);lab.put(account,potion);}
-     predicted=UpgradeForecast.finish(ctx,account,category,original);
+     predicted=UpgradeForecast.finish(ctx,raw);
      result.research++;
     }else if("Pets".equals(category)){
-     predicted=UpgradeForecast.finish(ctx,account,category,original);
+     predicted=UpgradeForecast.finish(ctx,raw);
      result.pets++;
     }
     // A previous sync has already acknowledged this completion. On a fresh

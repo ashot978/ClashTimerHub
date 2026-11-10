@@ -102,6 +102,16 @@ public final class QuickSyncImporter {
     }
    }
   }
+  int builderHelperLevel=0,labHelperLevel=0;
+  JSONArray helpers=json.optJSONArray("helpers");
+  if(helpers!=null)for(int h=0;h<helpers.length();h++){
+   JSONObject item=helpers.optJSONObject(h);if(item==null)continue;
+   int level=item.optInt("lvl",0);
+   if(level<=0||level>32)continue;
+   long kind=item.optLong("data",-1L);
+   if(kind==93000000L)builderHelperLevel=level;
+   else if(kind==93000001L)labHelperLevel=level;
+  }
   JSONArray parsed=new JSONArray();
   String[] sections=TIMER_SECTIONS;
   for(String section:sections){
@@ -110,12 +120,14 @@ public final class QuickSyncImporter {
     JSONObject entry=arr.optJSONObject(i);if(entry==null)continue;
     long id=entry.optLong("data",-1);if(id<0)continue;
     String category="pets".equals(section)?"Pets":("units".equals(section)||"spells".equals(section)||"siege_machines".equals(section))?"Laboratorium":"Bouwers";
+    int helperLevel="Bouwers".equals(category)?builderHelperLevel:
+     "Laboratorium".equals(category)?labHelperLevel:0;
     JSONArray types=entry.optJSONArray("types");
     if(types!=null)for(int t=0;t<types.length();t++){
      JSONObject type=types.optJSONObject(t);if(type==null)continue;
      JSONArray modules=type.optJSONArray("modules");if(modules==null)continue;
      for(int m=0;m<modules.length();m++){
-      JSONObject module=modules.optJSONObject(m);if(module!=null)add(parsed,account,category,module.optLong("data",-1),module.optLong("timer"),timestamp,tag,section+"/module/"+id+"/"+t+"/"+m,module.optBoolean("extra",false)||entry.optBoolean("extra",false));
+      JSONObject module=modules.optJSONObject(m);if(module!=null)add(parsed,account,category,module.optLong("data",-1),module.optLong("timer"),timestamp,tag,section+"/module/"+id+"/"+t+"/"+m,module.optBoolean("extra",false)||entry.optBoolean("extra",false),module,helperLevel);
      }
     }
     JSONArray timers=entry.optJSONArray("timers");
@@ -123,9 +135,14 @@ public final class QuickSyncImporter {
      for(int j=0;j<timers.length();j++){
       Object value=timers.opt(j);
       long seconds=value instanceof JSONObject?((JSONObject)value).optLong("timer"):timers.optLong(j);
-      add(parsed,account,category,id,seconds,timestamp,tag,section+"/timer/"+id+"/"+j,entry.optBoolean("extra",false));
+      // Attach a helper only to its specific timer, never to all instances.
+      JSONObject timed=value instanceof JSONObject?(JSONObject)value:
+       timers.length()==1?entry:null;
+      add(parsed,account,category,id,seconds,timestamp,tag,
+       section+"/timer/"+id+"/"+j,entry.optBoolean("extra",false),
+       timed,helperLevel);
      }
-    }else add(parsed,account,category,id,entry.optLong("timer"),timestamp,tag,section+"/item/"+id+"/"+i,entry.optBoolean("extra",false));
+    }else add(parsed,account,category,id,entry.optLong("timer"),timestamp,tag,section+"/item/"+id+"/"+i,entry.optBoolean("extra",false),entry,helperLevel);
    }
   }
   // Count actual differences against the previous export. Do not infer
@@ -220,7 +237,9 @@ public final class QuickSyncImporter {
   return previous>0L&&incoming<previous;
  }
 
- private static void add(JSONArray out,String account,String category,long id,long seconds,long timestamp,String tag,String key,boolean extra)throws JSONException{
+ private static void add(JSONArray out,String account,String category,long id,long seconds,
+  long timestamp,String tag,String key,boolean extra,JSONObject source,int helperLevel)
+  throws JSONException{
   if(id<0||seconds<=0)return;
   long finish=timestamp+seconds*1000L;
   if(finish<=System.currentTimeMillis())return;
@@ -231,6 +250,14 @@ public final class QuickSyncImporter {
   timer.put("finish",finish);timer.put("exported",true);timer.put("sourceId",id);
   // extra=true flags a Goblin Researcher when attached to research data.
   if(extra)timer.put("extra",true);
+  // helper_timer is the remaining duration of the shift ON THIS upgrade.
+  // The shared helper_cooldown is not the remaining work time.
+  long helperSeconds=source==null?0L:source.optLong("helper_timer",0L);
+  if(helperLevel>0&&helperSeconds>0&&helperSeconds<=3600L
+     &&("Bouwers".equals(category)||"Laboratorium".equals(category))){
+   timer.put("helperUntil",timestamp+helperSeconds*1000L);
+   timer.put("helperLevel",helperLevel);
+  }
   out.put(timer);
  }
 }

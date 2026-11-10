@@ -37,7 +37,7 @@ public class TimerWidget extends AppWidgetProvider {
     for(int i=0;i<upgrades.length();i++){
      JSONObject o=upgrades.getJSONObject(i);
      if(!ac.equals(o.optString("account"))||!"Bouwers".equals(o.optString("category")))continue;
-     long finish=o.optLong("finish");
+     long finish=UpgradeForecast.finish(context,o);
      if(finish<=now&&finish>ack)s.ready++;
      if(finish>now&&finish<s.next){s.next=finish;s.name=o.optString("name");}
     }
@@ -139,7 +139,7 @@ public class TimerWidget extends AppWidgetProvider {
   for(int i=0;i<upgrades.length();i++){
    JSONObject row=upgrades.optJSONObject(i);if(row==null)continue;
    long source=row.optLong("finish",0L);if(source<=0)continue;
-   long finish=UpgradeForecast.finish(ctx,row.optString("account"),row.optString("category"),source);
+   long finish=UpgradeForecast.finish(ctx,row);
    if(finish>now&&finish<earliest)earliest=finish;
   }
   if(earliest!=Long.MAX_VALUE)try{scheduleOne(mgr,earliest+1000,operation);}
@@ -163,7 +163,7 @@ public class TimerWidget extends AppWidgetProvider {
     String id=row.optString("id","row-"+i);
     long original=row.optLong("finish",0L);
     if(ac.isEmpty()||original<=0)continue;
-    long finish=UpgradeForecast.finish(ctx,ac,cat,original);
+    long finish=UpgradeForecast.finish(ctx,row);
     for(int kind=0;kind<2;kind++){
      cancelLegacy(ctx,mgr,id,kind);
      boolean early=kind==1;

@@ -91,6 +91,10 @@ final class MagicSnackTracker {
   * applied after expiry or a potion twice.
   */
  static long estimateFinish(Context ctx,String account,String category,long sourceFinish){
+  return estimateFinish(ctx,account,category,sourceFinish,0L,0);
+ }
+ static long estimateFinish(Context ctx,String account,String category,long sourceFinish,
+  long helperUntil,int helperLevel){
   if(!"Bouwers".equals(category)&&!"Laboratorium".equals(category)&&!"Pets".equals(category))
    return sourceFinish;
   Snapshot snacks=load(ctx,account);
@@ -98,12 +102,12 @@ final class MagicSnackTracker {
   boolean laboratory="Laboratorium".equals(category);
   long snackStart=builder?snacks.builderStart:snacks.labStart;
   long snackEnd=builder?snacks.builderEnd:snacks.labEnd;
-  if(snackStart<=0L||snackEnd<=snackStart){
-   return potionOnly(ctx,account,category,sourceFinish);
-  }
   android.content.SharedPreferences prefs=AppData.prefs(ctx);
   long anchor=prefs.getLong("lastExportAt_"+account,prefs.getLong("lastSyncAt_"+account,0L));
-  if(anchor<=0L||sourceFinish<=anchor||snackEnd<=anchor)
+  boolean helperActive=helperLevel>0&&helperLevel<=32&&helperUntil>anchor
+   &&(builder||laboratory);
+  boolean snackActive=snackStart>0L&&snackEnd>snackStart&&snackEnd>anchor;
+  if(anchor<=0L||sourceFinish<=anchor||(!helperActive&&!snackActive))
    return potionOnly(ctx,account,category,sourceFinish);
 
   java.util.ArrayList<long[]> potions=new java.util.ArrayList<>();
@@ -123,8 +127,9 @@ final class MagicSnackTracker {
    for(PetPotionTracker.Period period:p.periods)
     potions.add(new long[]{period.start,period.end});
   }
-  return integrate(anchor,sourceFinish-anchor,snackStart,snackEnd,
-   builder, potions);
+  return integrate(anchor,sourceFinish-anchor,snackStart,snackEnd,builder,
+   potions,helperActive?anchor:0L,helperActive?helperUntil:0L,
+   helperActive?helperLevel:0);
  }
  private static long potionOnly(Context ctx,String account,String category,long finish){
   if("Bouwers".equals(category))
@@ -137,11 +142,21 @@ final class MagicSnackTracker {
  /** Package-private pure arithmetic: units are source-work milliseconds. */
  static long integrate(long anchor,long work,long snackStart,long snackEnd,
   boolean builder,java.util.List<long[]> potionPeriods){
+  return integrate(anchor,work,snackStart,snackEnd,builder,potionPeriods,0L,0L,0);
+ }
+ /** Helper speed adds to normal builder/research work, never multiplies a potion. */
+ static long integrate(long anchor,long work,long snackStart,long snackEnd,
+  boolean builder,java.util.List<long[]> potionPeriods,long helperStart,
+  long helperEnd,int helperBonus){
   if(work<=0)return anchor;
   java.util.TreeSet<Long> boundaries=new java.util.TreeSet<>();
   boundaries.add(anchor);
   if(snackStart>anchor)boundaries.add(snackStart);
   if(snackEnd>anchor)boundaries.add(snackEnd);
+  if(helperBonus>0&&helperEnd>helperStart){
+   if(helperStart>anchor)boundaries.add(helperStart);
+   if(helperEnd>anchor)boundaries.add(helperEnd);
+  }
   for(long[] p:potionPeriods){
    if(p[0]>anchor)boundaries.add(p[0]);
    if(p[1]>anchor)boundaries.add(p[1]);
@@ -149,7 +164,8 @@ final class MagicSnackTracker {
   long clock=anchor,outstanding=work;
   for(long transition:boundaries.tailSet(anchor,false)){
    if(transition<=clock)continue;
-   long speed=speedAt(clock,snackStart,snackEnd,builder,potionPeriods);
+   long speed=speedAt(clock,snackStart,snackEnd,builder,potionPeriods)
+    +((helperBonus>0&&helperStart<=clock&&helperEnd>clock)?helperBonus:0L);
    long millis=transition-clock;
    // Avoid overflow if a malformed export presents far-future transition.
    if(outstanding/speed<millis||outstanding/speed==millis&&outstanding%speed==0)
@@ -157,7 +173,8 @@ final class MagicSnackTracker {
    outstanding-=millis*speed;
    clock=transition;
   }
-  long speed=speedAt(clock,snackStart,snackEnd,builder,potionPeriods);
+  long speed=speedAt(clock,snackStart,snackEnd,builder,potionPeriods)
+   +((helperBonus>0&&helperStart<=clock&&helperEnd>clock)?helperBonus:0L);
   return clock+(outstanding+speed-1)/speed;
  }
  private static long speedAt(long when,long snackStart,long snackEnd,

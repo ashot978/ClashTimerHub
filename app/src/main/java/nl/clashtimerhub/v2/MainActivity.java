@@ -682,8 +682,7 @@ public final class MainActivity extends Activity {
   startActivity(intent);
  }
  private long effectiveFinish(JSONObject o){
-  return UpgradeForecast.finish(this,o.optString("account",""),
-   o.optString("category",""),o.optLong("finish",0L));
+  return UpgradeForecast.finish(this,o);
  }
  private boolean pendingOrActive(JSONObject o,long now){
   long t=effectiveFinish(o);

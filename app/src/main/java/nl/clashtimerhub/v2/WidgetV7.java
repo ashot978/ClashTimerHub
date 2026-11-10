@@ -53,7 +53,7 @@ final class WidgetV7 {
     JSONObject o=upgrades.optJSONObject(i);if(o==null)continue;
     Status s=map.get(o.optString("account"));if(s==null)continue;
     String category=o.optString("category");
-    long finish=o.optLong("finish");
+    long finish=UpgradeForecast.finish(ctx,o);
     if("Bouwers".equals(category)){
      if(finish<=now){
       if(finish>prefs.getLong("ack_"+s.account,0))s.builderReady++;
