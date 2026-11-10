@@ -1,13 +1,13 @@
 ### NL
-- Builder Potion-berekening gecontroleerd met de gemelde Bomb-timer.
-- 9u21 werk bij 10× snelheid duurt 56 minuten en 6 seconden.
-- Met nog 59 minuten boost wordt de upgrade op tijd voltooid.
-- Extra tests bewaken de berekening en het einde van een boost.
-- De timerberekening en widgetweergave zijn niet gewijzigd.
+- Oude Clash-exports overschrijven geen nieuwere accountgegevens meer.
+- Accountdetails tonen nu ook wanneer de Clash-export is gemaakt.
+- Zo zie je het verschil tussen exporteren en importeren.
+- Archer Queen en de overige helden blijven ondersteund.
+- De widgettimers en boostberekening zijn niet gewijzigd.
 
 ### EN
-- Checked Builder Potion math against the reported Bomb timer.
-- 9h21 of work at 10× speed takes 56 minutes and 6 seconds.
-- With 59 minutes of boost left, the upgrade finishes in time.
-- Added tests for the forecast and the end of a boost.
-- No changes to timer calculations or widget appearance.
+- Older Clash exports can no longer replace newer account data.
+- Account details now also show when the Clash export was created.
+- This distinguishes the export time from the import time.
+- Archer Queen and other heroes remain supported.
+- Widget timers and boost calculations are unchanged.

@@ -715,6 +715,13 @@ public final class MainActivity extends Activity {
   }
   long last=getPreferences(0).getLong("lastSyncAt_"+ac,0);
   if(last>0){TextView synced=label("↻ Gesynchroniseerd: "+finishAt(last),11);synced.setTextColor(0xffbba7d1);detailPanel.addView(synced);}
+  // The last import moment is not necessarily when Clash generated its JSON.
+  long exportedAt=getPreferences(0).getLong("lastExportAt_"+ac,0L);
+  if(exportedAt>0L){
+   String caption=I18n.english(this)?"↻ Clash export: ":"↻ Clash-export: ";
+   TextView exported=label(caption+finishAt(exportedAt),11);
+   exported.setTextColor(0xffbba7d1);detailPanel.addView(exported);
+  }
   if(ac.startsWith("#")){Button link=new Button(this);link.setAllCaps(false);link.setText(t("Koppel deze player tag aan bestaand account"));link.setOnClickListener(v->linkImportedAccount(ac));detailPanel.addView(link);}
   showAccountHelpers(detailPanel,ac);
   CheckBox alchemist=new CheckBox(this);

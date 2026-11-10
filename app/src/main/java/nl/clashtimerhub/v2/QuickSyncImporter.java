@@ -60,6 +60,12 @@ public final class QuickSyncImporter {
   long now=System.currentTimeMillis();
   long timestamp=json.optLong("timestamp",now/1000L)*1000L;
   if(timestamp>now+3600000L||timestamp<now-30L*86400000L)throw new IllegalArgumentException("Exporttijd is ongeldig of te oud");
+  // Never replace a newer account snapshot with a previously copied JSON.
+  // The widget cannot know about a new in-game upgrade until it is imported.
+  if(olderThanStoredExport(timestamp,prefs.getLong("lastExportAt_"+account,0L)))
+   throw new IllegalArgumentException(
+    "Deze Clash-export is ouder dan de laatste export voor dit account. Maak een nieuwe export in Clash.");
+
   // A missing section must never silently clear active timers of that category.
   HashSet<String> previousCategories=new HashSet<>();
   for(int i=0;i<oldUpgrades.length();i++){
@@ -207,6 +213,11 @@ public final class QuickSyncImporter {
   // Run Drive backup independently: it must never make a successful Clash sync fail.
   
   return status;
+ }
+
+ /** True only when a snapshot predates the most recently imported account export. */
+ static boolean olderThanStoredExport(long incoming,long previous){
+  return previous>0L&&incoming<previous;
  }
 
  private static void add(JSONArray out,String account,String category,long id,long seconds,long timestamp,String tag,String key,boolean extra)throws JSONException{
