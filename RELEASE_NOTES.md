@@ -1,11 +1,11 @@
 ### NL
-- De kortste actieve timer krijgt een dunne groene rand in Alle timers.
-- Dit werkt over accounts, bouwers, lab, pets en zichtbare helpers heen.
-- De rand verhuist vanzelf zodra de eerstvolgende timer is afgelopen.
-- Sortering, boostkleuren en de overige timers blijven gelijk.
+- De groene rand sluit nu mooi aan op de tekst van de kortste timer.
+- Geen brede of te hoge kaders meer rondom de countdown.
+- Alle timerkolommen blijven netjes uitgelijnd.
+- Ook helpers krijgen de compacte rand wanneer hun timer als eerste afloopt.
 
 ### EN
-- The shortest active timer gets a thin green outline in All timers.
-- It works across accounts, builders, lab, pets and visible helpers.
-- The outline moves automatically when the next timer finishes.
-- Sorting, boost colors and all other timers remain unchanged.
+- The green outline now fits the shortest countdown text closely.
+- No more overly wide or tall boxes around the countdown.
+- All timer columns stay neatly aligned.
+- Helpers use the same compact outline when their timer finishes first.
