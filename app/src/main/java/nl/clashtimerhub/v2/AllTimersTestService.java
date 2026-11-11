@@ -75,15 +75,21 @@ public final class AllTimersTestService extends RemoteViewsService {
    rv.setTextViewText(R.id.all_account_helpers,
     helpers&&!a.helpers.isEmpty()?a.helpers:"");
    rv.setTextColor(R.id.all_account_helpers,GOLD);
+   // One winner across every visible account and timer type, regardless of row/column order.
+   NextTimerHighlight.Selection highlight=NextTimerHighlight.find(accounts,helpers,now);
+   rv.setInt(R.id.all_account_helpers,"setBackgroundResource",
+    helpers&&highlight!=null&&highlight.matches(a.key,NextTimerHighlight.HELPERS,a.helperNext)?
+     R.drawable.widget_next_timer_border:0);
    for(int slot=0;slot<3;slot++){
-    renderSlot(rv,slot,columns[slot],a,now);
+    renderSlot(rv,slot,columns[slot],a,now,highlight);
     // Every point in the row opens the same account, never a potion editor.
     rv.setOnClickFillInIntent(GROUPS[slot],new Intent().putExtra("account",a.key));
    }
    rv.setOnClickFillInIntent(R.id.all_account_row,new Intent().putExtra("account",a.key));
    return rv;
   }
-  private void renderSlot(RemoteViews rv,int slot,String category,AllTimersTestData.Account a,long now){
+  private void renderSlot(RemoteViews rv,int slot,String category,AllTimersTestData.Account a,
+   long now,NextTimerHighlight.Selection highlight){
    long finish;
    int ready;
    boolean maxed,boosted;
@@ -97,6 +103,10 @@ public final class AllTimersTestService extends RemoteViewsService {
    }
    int clock=CLOCKS[slot],idle=IDLES[slot],end=ENDS[slot],marker=ICONS[slot];
    boolean active=finish!=Long.MAX_VALUE&&finish>now;
+   // Outline only the active countdown, not the entire category or its finish date.
+   rv.setInt(clock,"setBackgroundResource",
+    active&&highlight!=null&&highlight.matches(a.key,category,finish)?
+     R.drawable.widget_next_timer_border:0);
    // Display completed research alongside another still-running laboratory
    // job, e.g. "🧙 1 ✓ 2:14:26". Only the fourth, mixed state replaces the
    // finish-time label; ordinary running, boosted and idle views are unchanged.

@@ -1,17 +1,11 @@
 ### NL
-- Kortere waarschuwing: account · Bijna klaar.
-- De upgrade toont hoeveel minuten er nog resten.
-- Kortere eindmelding: account · Upgrade klaar!
-- Bij voltooiing: Controleer in Clash.
-- Iedere upgrade houdt zijn eigen melding.
-- Instelbare voorafwaarschuwingen blijven werken.
-- Meldingen volgen de ingestelde Nederlandse of Engelse taal.
+- De kortste actieve timer krijgt een dunne groene rand in Alle timers.
+- Dit werkt over accounts, bouwers, lab, pets en zichtbare helpers heen.
+- De rand verhuist vanzelf zodra de eerstvolgende timer is afgelopen.
+- Sortering, boostkleuren en de overige timers blijven gelijk.
 
 ### EN
-- Shorter advance alert: account · Almost ready.
-- The upgrade displays how many minutes remain.
-- Shorter completion alert: account · Upgrade complete!
-- Completion text says: Check in Clash.
-- Each upgrade keeps its own notification.
-- Configurable advance warnings still work.
-- Alerts follow the selected Dutch or English language.
+- The shortest active timer gets a thin green outline in All timers.
+- It works across accounts, builders, lab, pets and visible helpers.
+- The outline moves automatically when the next timer finishes.
+- Sorting, boost colors and all other timers remain unchanged.
