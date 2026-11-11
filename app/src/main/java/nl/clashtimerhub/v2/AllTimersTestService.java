@@ -18,6 +18,12 @@ public final class AllTimersTestService extends RemoteViewsService {
  static boolean showMixedLabReady(String category,int ready,long finish,long now){
   return AllTimersWidgetSettings.LAB.equals(category)&&ready>0&&finish!=Long.MAX_VALUE&&finish>now;
  }
+ /** Keep completed/ready statuses together and leave the gap BETWEEN categories. */
+ static String compactIdleLabel(boolean checkedMax,boolean pendingSync,boolean english){
+  if(checkedMax)return "✓ MAX";
+  if(pendingSync)return english?"! Ready":"! Klaar";
+  return "—";
+ }
  @Override public RemoteViewsFactory onGetViewFactory(Intent intent){
   int id=intent==null?AppWidgetManager.INVALID_APPWIDGET_ID:
    intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,AppWidgetManager.INVALID_APPWIDGET_ID);
@@ -126,16 +132,15 @@ public final class AllTimersTestService extends RemoteViewsService {
    rv.setViewVisibility(READY[slot],mixedLab?View.VISIBLE:View.GONE);
    rv.setTextViewText(READY[slot],ready+" ✓");
    rv.setTextColor(READY[slot],GREEN);
-   rv.setViewVisibility(end,mixedLab?View.GONE:View.VISIBLE);
+   rv.setViewVisibility(end,active&&!mixedLab?View.VISIBLE:View.GONE);
    // Do not hide an unsynced completion behind a manually checked MAX flag.
    boolean pendingSync=!active&&ready>0;
    boolean checkedMax=!active&&maxed&&!pendingSync;
    rv.setViewVisibility(clock,active?View.VISIBLE:View.GONE);
    rv.setViewVisibility(idle,active?View.GONE:View.VISIBLE);
-   rv.setTextViewText(idle,checkedMax?"✓":pendingSync?"!":"—");
-   rv.setTextViewText(end,active?(!twoLines&&layoutMode==2?
-    AllTimersTestData.endTime(ctx,finish,now):AllTimersTestData.compactEnd(ctx,finish,now)):
-    checkedMax?"MAX":pendingSync?(I18n.english(ctx)?"Ready":"Klaar"):"—");
+   rv.setTextViewText(idle,compactIdleLabel(checkedMax,pendingSync,I18n.english(ctx)));
+   if(active)rv.setTextViewText(end,!twoLines&&layoutMode==2?
+    AllTimersTestData.endTime(ctx,finish,now):AllTimersTestData.compactEnd(ctx,finish,now));
    if(active){
     // This is the predicted REAL completion time. Never speed the Chronometer
     // by 10x/24x a second time: that multiplier is already in estimateFinish.

@@ -20,10 +20,21 @@ public final class LiveWidgetService extends Service {
  private final Handler handler=new Handler(Looper.getMainLooper());
  private boolean registered;
  private boolean interactive=true;
+ // Chronometer ticks locally; this alarm-style boundary refresh also moves
+ // the green outline and removes stale 00:00 immediately after completion.
+ private long nextCompletion=Long.MAX_VALUE;
  private final Runnable tick=new Runnable(){
   @Override public void run(){
    if(!hasLiveWidgets(LiveWidgetService.this)){stopSelf();return;}
-   if(interactive)AllTimersTestWidget.refreshCountdownRows(LiveWidgetService.this);
+   if(interactive){
+    long now=System.currentTimeMillis();
+    if(now>=nextCompletion){
+     nextCompletion=AllTimersTestData.load(LiveWidgetService.this).next;
+     // Rebuild the host widget as soon as the next predicted finish passes,
+     // instead of leaving an outlined, already-expired 00:00 on screen.
+     AllTimersTestWidget.update(LiveWidgetService.this);
+    }else AllTimersTestWidget.refreshCountdownRows(LiveWidgetService.this);
+   }
    // Keep successive refreshes aligned to whole-second boundaries so that
    // scheduling latency never accumulates into a slower-than-1s cadence.
    long uptime=SystemClock.uptimeMillis();
@@ -36,7 +47,8 @@ public final class LiveWidgetService extends Service {
    if(Intent.ACTION_SCREEN_OFF.equals(action)){interactive=false;return;}
    if(Intent.ACTION_SCREEN_ON.equals(action)||Intent.ACTION_USER_PRESENT.equals(action)){
     interactive=true;
-    AllTimersTestWidget.refreshCountdownRows(context);
+    nextCompletion=AllTimersTestData.load(context).next;
+    AllTimersTestWidget.update(context);
     scheduleTick();
    }
   }
@@ -92,6 +104,7 @@ public final class LiveWidgetService extends Service {
   if(Build.VERSION.SDK_INT>=33)registerReceiver(screenReceiver,filter,Context.RECEIVER_NOT_EXPORTED);
   else registerReceiver(screenReceiver,filter);
   registered=true;
+  nextCompletion=AllTimersTestData.load(this).next;
   scheduleTick();
  }
  private void scheduleTick(){
@@ -101,6 +114,7 @@ public final class LiveWidgetService extends Service {
  }
  @Override public int onStartCommand(Intent intent,int flags,int startId){
   if(!hasLiveWidgets(this)){stopSelf();return START_NOT_STICKY;}
+  nextCompletion=AllTimersTestData.load(this).next;
   scheduleTick();
   return START_STICKY;
  }
