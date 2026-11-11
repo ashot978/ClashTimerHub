@@ -84,7 +84,7 @@ final class MagicSnackTracker {
  }
  /**
   * Integrate the remaining unboosted work from the latest JSON export.
-  * Builder Bite does NOT stack with a Builder Potion (max of 2x / 10x).
+  * Builder Bite and Builder Potion stack additively: 1x + 1x + 9x = 11x.
   * Study Soup combines its +3x with Research Potion's +23x for research.
   * Pet House uses the same +3x with any active Pet Potion's +23x.
   * Split at each actual boost transition; otherwise a snack may be wrongly
@@ -183,7 +183,7 @@ final class MagicSnackTracker {
   boolean potion=false;
   for(long[] p:potionPeriods)
    if(p[0]<=when&&p[1]>when){potion=true;break;}
-  if(builder)return potion?10L:snack?2L:1L;
+  if(builder)return 1L+(potion?9L:0L)+(snack?1L:0L);
   return 1L+(potion?23L:0L)+(snack?3L:0L);
  }
 

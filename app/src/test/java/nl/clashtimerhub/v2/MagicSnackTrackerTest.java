@@ -20,8 +20,9 @@ public class MagicSnackTrackerTest {
   assertEquals(HOUR,MagicSnackTracker.integrate(0L,2L*HOUR,0L,HOUR,
    true,Collections.emptyList()));
  }
- @Test public void builderBiteDoesNotStackWithBuilderPotion(){
-  assertEquals(HOUR,MagicSnackTracker.integrate(0L,6L*HOUR,0L,HOUR,
+ @Test public void builderBiteAndPotionAddUpToElevenTimes(){
+  // 30m at 11x completes 5h30m of work; final 30m of work takes 15m at 2x.
+  assertEquals(3L*HOUR/4L,MagicSnackTracker.integrate(0L,6L*HOUR,0L,HOUR,
    true,Arrays.asList(new long[]{0L,HOUR/2L})));
  }
  @Test public void studySoupAndResearchPotionAreAdditive(){
@@ -49,8 +50,13 @@ public class MagicSnackTrackerTest {
   long snackEnd=export+58L*minute+6_000L;
   long predicted=MagicSnackTracker.integrate(export,638L*minute,
    export,snackEnd,true,Arrays.asList(new long[]{export,potionEnd}));
-  // 10x potion always overrides concurrent 2x Builder Bite.
-  assertEquals(export+112L*minute+15_000L,predicted);
+  // Concurrent 10x potion + 2x Bite equals 11x and finishes 638m of work in 58m.
+  assertEquals(export+58L*minute,predicted);
+ }
+ @Test public void builderBiteCarriesOnAfterPotionEnds(){
+  // 30m at 11x completes 330m of work; 30m at 2x completes the last 60m.
+  assertEquals(HOUR,MagicSnackTracker.integrate(0L,390L*60_000L,0L,HOUR,
+   true,Arrays.asList(new long[]{0L,HOUR/2L})));
  }
  @Test public void futureSnackStartsOnlyWhenActivated(){
   assertEquals(HOUR+HOUR/2L,MagicSnackTracker.integrate(0L,2L*HOUR,

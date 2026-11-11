@@ -66,11 +66,11 @@ public final class BuilderAlarm extends android.content.BroadcastReceiver {
    nm.createNotificationChannel(new NotificationChannel(TimerWidget.CHANNEL,
     I18n.tr(ctx,"Upgrade meldingen"),NotificationManager.IMPORTANCE_HIGH));
   String title=AppData.displayName(ctx,ac)+(I18n.english(ctx)?
-   (early?" · Upgrade nearly ready":" · Upgrade complete"):
-   (early?" · Upgrade bijna klaar":" · Upgrade voltooid"));
+   (early?" · Upgrade nearly ready":" · Estimated complete"):
+   (early?" · Upgrade bijna klaar":" · Vermoedelijk klaar"));
   String text=early?resolvedName+" · "+Math.max(1,(finish-now+59999L)/60000L)+
    (I18n.english(ctx)?" min remaining":" min resterend"):
-   resolvedName+(I18n.english(ctx)?" is ready":" is klaar");
+   resolvedName+(I18n.english(ctx)?" · sync to confirm":" · sync om te bevestigen");
   Intent open=new Intent(ctx,MainActivity.class).setAction("nl.clashtimerhub.v2.OPEN_UPGRADE_"+id);
   open.putExtra("openAccount",ac);
   PendingIntent click=PendingIntent.getActivity(ctx,("click:"+ac+":"+cat+":"+id).hashCode(),open,
