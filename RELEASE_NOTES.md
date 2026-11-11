@@ -1,15 +1,11 @@
 ### NL
-- Klaar en MAX staan nu compact naast elkaar in Alle timers.
-- De ruimte tussen categorieën blijft behouden.
-- De widget ververst volledig wanneer de eerstvolgende timer afloopt.
-- De groene rand verhuist direct naar de volgende actieve timer.
-- Bij terugkeer naar het startscherm worden de timers opnieuw geladen.
-- De aftellers blijven seconden tonen met de bestaande Clash-eindtijden.
+- ✓ MAX staat nu direct achter het icoon van de categorie.
+- De lege ruimte van verborgen aftellers is verwijderd.
+- Dit werkt voor bouwers, laboratorium en pets in alle widgetformaten.
+- Actieve timers, groene omlijning en kolomvolgorde blijven hetzelfde.
 
 ### EN
-- Ready and MAX now sit together compactly in All timers.
-- Spacing between categories is preserved.
-- The widget fully refreshes when the next timer finishes.
-- The green outline moves straight to the next active timer.
-- Returning to the home screen reloads the timer rows.
-- Countdowns still show seconds using the existing Clash finish times.
+- ✓ MAX now sits directly next to its category icon.
+- Hidden countdowns no longer leave an empty gap.
+- This works for builders, laboratory and pets in every widget layout.
+- Active timers, green outlines and column order stay the same.

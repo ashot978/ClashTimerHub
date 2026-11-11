@@ -18,6 +18,10 @@ public final class AllTimersTestService extends RemoteViewsService {
  static boolean showMixedLabReady(String category,int ready,long finish,long now){
   return AllTimersWidgetSettings.LAB.equals(category)&&ready>0&&finish!=Long.MAX_VALUE&&finish>now;
  }
+ /** An inactive Chronometer must not leave an empty fixed-width frame in front of MAX. */
+ static boolean showCountdownFrame(long finish,long now){
+  return finish!=Long.MAX_VALUE&&finish>now;
+ }
  /** Keep completed/ready statuses together and leave the gap BETWEEN categories. */
  static String compactIdleLabel(boolean checkedMax,boolean pendingSync,boolean english){
   if(checkedMax)return "✓ MAX";
@@ -38,6 +42,8 @@ public final class AllTimersTestService extends RemoteViewsService {
    R.id.all_slot_0_icon,R.id.all_slot_1_icon,R.id.all_slot_2_icon};
   private static final int[] CLOCKS={
    R.id.all_slot_0_clock,R.id.all_slot_1_clock,R.id.all_slot_2_clock};
+  private static final int[] TIMER_FRAMES={
+   R.id.all_slot_0_timer_frame,R.id.all_slot_1_timer_frame,R.id.all_slot_2_timer_frame};
   private static final int[] IDLES={
    R.id.all_slot_0_idle,R.id.all_slot_1_idle,R.id.all_slot_2_idle};
   private static final int[] ENDS={
@@ -121,7 +127,10 @@ public final class AllTimersTestService extends RemoteViewsService {
     finish=a.labAt;ready=a.labReady;maxed=a.labMax;boosted=a.labBoost;icon="🧙";
    }
    int clock=CLOCKS[slot],idle=IDLES[slot],end=ENDS[slot],marker=ICONS[slot];
-   boolean active=finish!=Long.MAX_VALUE&&finish>now;
+   boolean active=showCountdownFrame(finish,now);
+   // Hide the whole timer frame in idle/MAX states. Hiding only the Chronometer
+   // left a 52-55dp empty column between the icon and its status text.
+   rv.setViewVisibility(TIMER_FRAMES[slot],active?View.VISIBLE:View.GONE);
    // Outline only the active countdown, not the entire category or its finish date.
    setTimerOutline(rv,clock,
     active&&highlight!=null&&highlight.matches(a.key,category,finish));
