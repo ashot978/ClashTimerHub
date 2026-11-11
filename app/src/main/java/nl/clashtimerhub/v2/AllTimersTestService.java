@@ -77,9 +77,8 @@ public final class AllTimersTestService extends RemoteViewsService {
    rv.setTextColor(R.id.all_account_helpers,GOLD);
    // One winner across every visible account and timer type, regardless of row/column order.
    NextTimerHighlight.Selection highlight=NextTimerHighlight.find(accounts,helpers,now);
-   rv.setInt(R.id.all_account_helpers,"setBackgroundResource",
-    helpers&&highlight!=null&&highlight.matches(a.key,NextTimerHighlight.HELPERS,a.helperNext)?
-     R.drawable.widget_next_timer_border:0);
+   setTimerOutline(rv,R.id.all_account_helpers,
+    helpers&&highlight!=null&&highlight.matches(a.key,NextTimerHighlight.HELPERS,a.helperNext));
    for(int slot=0;slot<3;slot++){
     renderSlot(rv,slot,columns[slot],a,now,highlight);
     // Every point in the row opens the same account, never a potion editor.
@@ -87,6 +86,20 @@ public final class AllTimersTestService extends RemoteViewsService {
    }
    rv.setOnClickFillInIntent(R.id.all_account_row,new Intent().putExtra("account",a.key));
    return rv;
+  }
+
+  /** RemoteViews padding uses physical pixels: convert the requested dp to px.
+   * Reset every cell on each bind because launcher hosts may recycle row views.
+   * Only the highlighted countdown gets the extra room; column widths stay fixed.
+   */
+  private int dp(int dip){
+   return Math.round(dip*ctx.getResources().getDisplayMetrics().density);
+  }
+  private void setTimerOutline(RemoteViews rv,int viewId,boolean outlined){
+   rv.setInt(viewId,"setBackgroundResource",
+    outlined?R.drawable.widget_next_timer_border:0);
+   rv.setViewPadding(viewId,dp(outlined?4:2),dp(outlined?2:1),
+    dp(outlined?4:2),dp(outlined?2:1));
   }
   private void renderSlot(RemoteViews rv,int slot,String category,AllTimersTestData.Account a,
    long now,NextTimerHighlight.Selection highlight){
@@ -104,9 +117,8 @@ public final class AllTimersTestService extends RemoteViewsService {
    int clock=CLOCKS[slot],idle=IDLES[slot],end=ENDS[slot],marker=ICONS[slot];
    boolean active=finish!=Long.MAX_VALUE&&finish>now;
    // Outline only the active countdown, not the entire category or its finish date.
-   rv.setInt(clock,"setBackgroundResource",
-    active&&highlight!=null&&highlight.matches(a.key,category,finish)?
-     R.drawable.widget_next_timer_border:0);
+   setTimerOutline(rv,clock,
+    active&&highlight!=null&&highlight.matches(a.key,category,finish));
    // Display completed research alongside another still-running laboratory
    // job, e.g. "🧙 1 ✓ 2:14:26". Only the fourth, mixed state replaces the
    // finish-time label; ordinary running, boosted and idle views are unchanged.

@@ -1,11 +1,11 @@
 ### NL
-- De groene rand sluit nu mooi aan op de tekst van de kortste timer.
-- Geen brede of te hoge kaders meer rondom de countdown.
-- Alle timerkolommen blijven netjes uitgelijnd.
-- Ook helpers krijgen de compacte rand wanneer hun timer als eerste afloopt.
+- De eerstvolgende timer krijgt 2dp extra ruimte links en rechts.
+- De groene rand heeft ook 1dp meer ruimte boven en onder.
+- De rand blijft 1dp dun en krijgt iets rondere hoeken.
+- Alle andere timers en de kolombreedtes blijven ongewijzigd.
 
 ### EN
-- The green outline now fits the shortest countdown text closely.
-- No more overly wide or tall boxes around the countdown.
-- All timer columns stay neatly aligned.
-- Helpers use the same compact outline when their timer finishes first.
+- The next timer gets 2dp more space on the left and right.
+- Its green outline also gets 1dp more space above and below.
+- The border stays 1dp thin with slightly rounder corners.
+- Other timers and column widths stay unchanged.
