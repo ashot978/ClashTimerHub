@@ -1,15 +1,13 @@
 ### NL
-- Builder Potion en Builder Bite versnellen samen met 11x.
-- Een Potion alleen blijft 10x en een Bite alleen 2x.
-- De berekening volgt de eindtijd bij wisselende boosts.
-- Een voorspeld vrije bouwer krijgt een vraagteken tot de volgende sync.
-- Een afgeronde voorspelling toont 'Sync' in plaats van 'Klaar'.
-- Meldingen vragen om bevestiging via een nieuwe Clash-export.
+- De bouwerteller toont weer het vertrouwde vinkje: 0✓ 7⚒.
+- Het vraagteken verdwijnt, ook direct na een geslaagde sync.
+- Voltooide timers tonen weer 'Klaar' in de widget.
+- De verbeterde Builder Potion + Builder Bite-berekening blijft behouden.
+- Andere widgets gebruiken dezelfde vertrouwde tellerweergave.
 
 ### EN
-- Builder Potion and Builder Bite now combine for 11x builder speed.
-- Potion alone remains 10x, and Bite alone remains 2x.
-- Predictions follow boost changes and expiry times correctly.
-- A predicted free builder shows '?' until the next sync.
-- Unconfirmed completion shows 'Sync' instead of 'Ready'.
-- Completion alerts ask for a fresh export to confirm.
+- The builder counter uses its familiar checkmark again: 0✓ 7⚒.
+- The question mark is gone, including after a successful sync.
+- Completed timers display 'Ready' in the widget again.
+- The improved Builder Potion + Builder Bite calculation is retained.
+- Other widgets share the familiar builder counter layout.

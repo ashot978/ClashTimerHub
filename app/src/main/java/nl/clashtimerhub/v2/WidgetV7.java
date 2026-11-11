@@ -237,7 +237,7 @@ final class WidgetV7 {
     R.id.v7_wide_pet_timer,R.id.v7_wide_pet_idle,R.id.v7_wide_finish,R.id.v7_wide_helpers})
      row.setTextViewTextSize(textId,android.util.TypedValue.COMPLEX_UNIT_SP,small);
 
-   row.setTextViewText(R.id.v7_wide_builders,s.builderReady+"? "+s.builderActive+"⚒");
+   row.setTextViewText(R.id.v7_wide_builders,s.builderReady+"✓ "+s.builderActive+"⚒");
    String helperText=showHelpersForRow(ctx,id)?HelperTracker.compact(ctx,s.account,now):"";
    row.setTextViewText(R.id.v7_wide_helpers,helperText);
    // Reserve the same helper-column width in every row; empty accounts
@@ -407,7 +407,7 @@ final class WidgetV7 {
    timer(w,R.id.v7_single_pet_timer,R.id.v7_single_pet_idle,Long.MAX_VALUE,now);
   }
   if(s!=null){
-   w.setTextViewText(R.id.v7_single_builders,s.builderReady+"?  "+s.builderActive+"⚒");
+   w.setTextViewText(R.id.v7_single_builders,s.builderReady+"✓  "+s.builderActive+"⚒");
    w.setTextViewText(R.id.v7_single_lab_count,"🧙 "+s.labActive);
    w.setTextViewText(R.id.v7_single_pet_count,"🐾 "+s.petActive);
    timer(w,R.id.v7_single_builder_timer,R.id.v7_single_builder_idle,s.builderNext,now);

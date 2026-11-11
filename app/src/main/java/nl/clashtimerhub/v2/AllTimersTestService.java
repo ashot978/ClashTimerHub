@@ -69,8 +69,7 @@ public final class AllTimersTestService extends RemoteViewsService {
      R.layout.widget_all_timers_account_narrow;
    RemoteViews rv=new RemoteViews(ctx.getPackageName(),layout);
    rv.setTextViewText(R.id.all_account_name,AppData.displayName(ctx,a.key));
-   // Completion from an export is a forecast, not a confirmed free builder.
-   rv.setTextViewText(R.id.all_account_builders,a.ready+"? "+a.builders+"⚒");
+   rv.setTextViewText(R.id.all_account_builders,a.ready+"✓ "+a.builders+"⚒");
    boolean helpers=AllTimersWidgetSettings.preferences(ctx).getBoolean(
     AllTimersWidgetSettings.key("helpers",widgetId),true);
    rv.setTextViewText(R.id.all_account_helpers,
@@ -103,7 +102,7 @@ public final class AllTimersTestService extends RemoteViewsService {
    // finish-time label; ordinary running, boosted and idle views are unchanged.
    boolean mixedLab=showMixedLabReady(category,ready,finish,now);
    rv.setViewVisibility(READY[slot],mixedLab?View.VISIBLE:View.GONE);
-   rv.setTextViewText(READY[slot],ready+" ?");
+   rv.setTextViewText(READY[slot],ready+" ✓");
    rv.setTextColor(READY[slot],GREEN);
    rv.setViewVisibility(end,mixedLab?View.GONE:View.VISIBLE);
    // Do not hide an unsynced completion behind a manually checked MAX flag.
@@ -114,7 +113,7 @@ public final class AllTimersTestService extends RemoteViewsService {
    rv.setTextViewText(idle,checkedMax?"✓":pendingSync?"!":"—");
    rv.setTextViewText(end,active?(!twoLines&&layoutMode==2?
     AllTimersTestData.endTime(ctx,finish,now):AllTimersTestData.compactEnd(ctx,finish,now)):
-    checkedMax?"MAX":pendingSync?"Sync":"—");
+    checkedMax?"MAX":pendingSync?(I18n.english(ctx)?"Ready":"Klaar"):"—");
    if(active){
     // This is the predicted REAL completion time. Never speed the Chronometer
     // by 10x/24x a second time: that multiplier is already in estimateFinish.
