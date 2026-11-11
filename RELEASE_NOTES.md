@@ -1,13 +1,17 @@
 ### NL
-- De bouwerteller toont weer het vertrouwde vinkje: 0✓ 7⚒.
-- Het vraagteken verdwijnt, ook direct na een geslaagde sync.
-- Voltooide timers tonen weer 'Klaar' in de widget.
-- De verbeterde Builder Potion + Builder Bite-berekening blijft behouden.
-- Andere widgets gebruiken dezelfde vertrouwde tellerweergave.
+- Kortere waarschuwing: account · Bijna klaar.
+- De upgrade toont hoeveel minuten er nog resten.
+- Kortere eindmelding: account · Upgrade klaar!
+- Bij voltooiing: Controleer in Clash.
+- Iedere upgrade houdt zijn eigen melding.
+- Instelbare voorafwaarschuwingen blijven werken.
+- Meldingen volgen de ingestelde Nederlandse of Engelse taal.
 
 ### EN
-- The builder counter uses its familiar checkmark again: 0✓ 7⚒.
-- The question mark is gone, including after a successful sync.
-- Completed timers display 'Ready' in the widget again.
-- The improved Builder Potion + Builder Bite calculation is retained.
-- Other widgets share the familiar builder counter layout.
+- Shorter advance alert: account · Almost ready.
+- The upgrade displays how many minutes remain.
+- Shorter completion alert: account · Upgrade complete!
+- Completion text says: Check in Clash.
+- Each upgrade keeps its own notification.
+- Configurable advance warnings still work.
+- Alerts follow the selected Dutch or English language.
