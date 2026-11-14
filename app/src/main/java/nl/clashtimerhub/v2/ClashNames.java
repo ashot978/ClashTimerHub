@@ -75,6 +75,18 @@ final class ClashNames {
   NAMES.put(73000011L, "Angry Jelly");
   NAMES.put(73000016L, "Sneezy");
   NAMES.put(73000017L, "Greedy Raven");
+  // Current Home Village IDs (2026); legacy IDs remain for saved timers.
+  NAMES.put(1000064L, "B.O.B's Hut");
+  NAMES.put(28000007L, "Dragon Duke");
+  NAMES.put(93000000L, "Builder's Apprentice");
+  NAMES.put(93000001L, "Lab Assistant");
+  NAMES.put(93000002L, "Prospector");
+  NAMES.put(107000000L, "Longshot");
+  NAMES.put(107000001L, "Smasher");
+  NAMES.put(103000033L, "Hot Candle - Hitpoints");
+  NAMES.put(26000098L, "Revive Spell");
+  NAMES.put(26000120L, "Totem Spell");
+  NAMES.put(26000123L, "Angry Spell");
   // Seasonal defences and their individual upgrade modules (2026 exports).
   NAMES.put(103000008L, "Roaster");
   NAMES.put(103000009L, "Air Bombs");
@@ -123,6 +135,16 @@ final class ClashNames {
   NAMES.put(4000087L, "Log Launcher");
   NAMES.put(4000091L, "Flame Flinger");
   NAMES.put(4000092L, "Battle Drill");
+  NAMES.put(4000095L, "Electro Titan");
+  NAMES.put(4000097L, "Apprentice Warden");
+  NAMES.put(4000109L, "Ruin Witch");
+  NAMES.put(4000110L, "Root Rider");
+  NAMES.put(4000123L, "Druid");
+  NAMES.put(4000132L, "Thrower");
+  NAMES.put(4000135L, "Troop Launcher");
+  NAMES.put(4000150L, "Furnace");
+  NAMES.put(4000177L, "Meteor Golem");
+  NAMES.put(4000188L, "Sky Wagon");
   NAMES.put(26000000L, "Lightning Spell");
   NAMES.put(26000001L, "Healing Spell");
   NAMES.put(26000002L, "Rage Spell");

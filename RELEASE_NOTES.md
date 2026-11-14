@@ -1,11 +1,11 @@
 ### NL
-- ✓ MAX staat nu direct achter het icoon van de categorie.
-- De lege ruimte van verborgen aftellers is verwijderd.
-- Dit werkt voor bouwers, laboratorium en pets in alle widgetformaten.
-- Actieve timers, groene omlijning en kolomvolgorde blijven hetzelfde.
+- Troop Launcher (ID 4000135) toont nu zijn echte naam.
+- Nieuwe troepen en belegeringsmachines worden herkend.
+- Ook Dragon Duke, nieuwe spreuken en extra gebouwen hebben een naam.
+- Oude timers tonen de nieuwe namen zonder nieuwe Clash-export.
 
 ### EN
-- ✓ MAX now sits directly next to its category icon.
-- Hidden countdowns no longer leave an empty gap.
-- This works for builders, laboratory and pets in every widget layout.
-- Active timers, green outlines and column order stay the same.
+- Troop Launcher (ID 4000135) now shows its real name.
+- More troops and siege machines are recognized.
+- Dragon Duke, new spells and additional buildings also have names.
+- Existing timers show updated names without another Clash export.
