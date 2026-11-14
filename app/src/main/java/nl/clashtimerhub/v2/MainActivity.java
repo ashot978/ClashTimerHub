@@ -126,7 +126,8 @@ public final class MainActivity extends Activity {
   showSuccessfulUpdateIfPending();
   String priorError=getPreferences(0).getString("lastInstallError","");
   if(!priorError.isEmpty()){
-   getPreferences(0).edit().remove("lastInstallError").apply();
+   getPreferences(0).edit().putString("previousInstallError",priorError)
+     .remove("lastInstallError").apply();
    showUpdateInstallError(priorError);
   }
   String pending=getPreferences(0).getString("pendingVerifiedApk","");
@@ -563,6 +564,7 @@ public final class MainActivity extends Activity {
    String sha=getPreferences(0).getString("lastVerifiedHash","");
    java.io.File apk=path.isEmpty()?null:new java.io.File(path);
    boolean fallback=apk!=null&&apk.isFile()&&apk.length()>1024*1024;
+   getPreferences(0).edit().putString("previousInstallError",reason).apply();
    android.app.AlertDialog.Builder dialog=new android.app.AlertDialog.Builder(this)
     .setTitle(t("Update niet geïnstalleerd"))
     .setMessage(t(reason)+"\n\n"+t("De bestaande installatie is niet gewijzigd. Verwijder de app niet."))
@@ -612,6 +614,7 @@ public final class MainActivity extends Activity {
   long latest=getPreferences(0).getLong("latestFeedBuild",0);
   long pending=getPreferences(0).getLong("activeUpdateDownloadId",-1);
   String lastError=getPreferences(0).getString("lastInstallError","");
+  if(lastError.isEmpty())lastError=getPreferences(0).getString("previousInstallError","");
   String verified=getPreferences(0).getString("lastVerifiedApk","");
   boolean permitted=getPackageManager().canRequestPackageInstalls();
   android.content.SharedPreferences heartbeat=getSharedPreferences("allTimersWidgetHeartbeat",MODE_PRIVATE);

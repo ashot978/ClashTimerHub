@@ -1,11 +1,11 @@
 ### NL
-- Troop Launcher (ID 4000135) toont nu zijn echte naam.
-- Nieuwe troepen en belegeringsmachines worden herkend.
-- Ook Dragon Duke, nieuwe spreuken en extra gebouwen hebben een naam.
-- Oude timers tonen de nieuwe namen zonder nieuwe Clash-export.
+- Update-diagnose bewaart nu de laatste installatiefout.
+- Die fout blijft zichtbaar nadat je de app opnieuw opent.
+- Een geslaagde installatie wist de opgeslagen fout.
+- Geen wijzigingen aan accounts, timers of APK-ondertekening.
 
 ### EN
-- Troop Launcher (ID 4000135) now shows its real name.
-- More troops and siege machines are recognized.
-- Dragon Duke, new spells and additional buildings also have names.
-- Existing timers show updated names without another Clash export.
+- Update diagnostics now retains the latest installation error.
+- The error remains available after reopening the app.
+- A successful installation clears the saved error.
+- Account data, timers and APK signing are unchanged.

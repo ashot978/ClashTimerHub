@@ -33,7 +33,7 @@ public final class UpdateInstallReceiver extends BroadcastReceiver {
   }
   if(status==PackageInstaller.STATUS_SUCCESS){
    context.getSharedPreferences(MainActivity.class.getName(),Context.MODE_PRIVATE)
-    .edit().remove("lastInstallError").remove("lastVerifiedApk")
+    .edit().remove("lastInstallError").remove("previousInstallError").remove("lastVerifiedApk")
     .remove("lastVerifiedBuild").remove("lastVerifiedHash").apply();
    return;
   }
