@@ -12,6 +12,11 @@ public class AllTimersMixedLabTest {
   assertTrue(AllTimersTestService.showMixedLabReady(
    AllTimersWidgetSettings.LAB,2,120000L,60000L));
  }
+ @Test public void mixedResearchStillShowsThePredictedFinishTime(){
+  assertTrue(AllTimersTestService.showEndTime(true,true));
+  assertTrue(AllTimersTestService.showEndTime(true,false));
+  assertFalse(AllTimersTestService.showEndTime(false,true));
+ }
  @Test public void ordinaryActiveResearchRetainsExistingAppearance(){
   assertFalse(AllTimersTestService.showMixedLabReady(
    AllTimersWidgetSettings.LAB,0,120000L,60000L));

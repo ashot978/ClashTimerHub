@@ -22,6 +22,10 @@ public final class AllTimersTestService extends RemoteViewsService {
  static boolean showCountdownFrame(long finish,long now){
   return finish!=Long.MAX_VALUE&&finish>now;
  }
+ /** A ready research badge never hides the finish time of another running job. */
+ static boolean showEndTime(boolean active,boolean mixedLab){
+  return active;
+ }
  /** Keep completed/ready statuses together and leave the gap BETWEEN categories. */
  static String compactIdleLabel(boolean checkedMax,boolean pendingSync,boolean english){
   if(checkedMax)return "✓ MAX";
@@ -134,14 +138,13 @@ public final class AllTimersTestService extends RemoteViewsService {
    // Outline only the active countdown, not the entire category or its finish date.
    setTimerOutline(rv,clock,
     active&&highlight!=null&&highlight.matches(a.key,category,finish));
-   // Display completed research alongside another still-running laboratory
-   // job, e.g. "🧙 1 ✓ 2:14:26". Only the fourth, mixed state replaces the
-   // finish-time label; ordinary running, boosted and idle views are unchanged.
+   // Show completed research alongside an active job without hiding its finish.
+   // Both the countdown and finish time remain visible in mixed lab states.
    boolean mixedLab=showMixedLabReady(category,ready,finish,now);
    rv.setViewVisibility(READY[slot],mixedLab?View.VISIBLE:View.GONE);
-   rv.setTextViewText(READY[slot],ready+" ✓");
+   rv.setTextViewText(READY[slot],ready+"✓");
    rv.setTextColor(READY[slot],GREEN);
-   rv.setViewVisibility(end,active&&!mixedLab?View.VISIBLE:View.GONE);
+   rv.setViewVisibility(end,showEndTime(active,mixedLab)?View.VISIBLE:View.GONE);
    // Do not hide an unsynced completion behind a manually checked MAX flag.
    boolean pendingSync=!active&&ready>0;
    boolean checkedMax=!active&&maxed&&!pendingSync;

@@ -33,9 +33,9 @@
    android:layout_height="match_parent" android:gravity="center_vertical"
    android:text="🧙" android:textColor="#D6BCEA" android:textSize="9sp"
    android:includeFontPadding="false"/>
-  <TextView android:id="@+id/all_slot_0_ready" android:layout_width="32dp"
+  <TextView android:id="@+id/all_slot_0_ready" android:layout_width="26dp"
    android:layout_height="match_parent" android:gravity="left|center_vertical"
-   android:text="1 ✓" android:textColor="#8BE3AD" android:textSize="9sp"
+   android:text="1✓" android:textColor="#8BE3AD" android:textSize="9sp"
    android:singleLine="true" android:visibility="gone"
    android:includeFontPadding="false"/>
   <FrameLayout android:id="@+id/all_slot_0_timer_frame" android:layout_width="55dp" android:layout_height="match_parent">
@@ -63,9 +63,9 @@
    android:layout_height="match_parent" android:gravity="center_vertical"
    android:text="🧙" android:textColor="#D6BCEA" android:textSize="9sp"
    android:includeFontPadding="false"/>
-  <TextView android:id="@+id/all_slot_1_ready" android:layout_width="32dp"
+  <TextView android:id="@+id/all_slot_1_ready" android:layout_width="26dp"
    android:layout_height="match_parent" android:gravity="left|center_vertical"
-   android:text="1 ✓" android:textColor="#8BE3AD" android:textSize="9sp"
+   android:text="1✓" android:textColor="#8BE3AD" android:textSize="9sp"
    android:singleLine="true" android:visibility="gone"
    android:includeFontPadding="false"/>
   <FrameLayout android:id="@+id/all_slot_1_timer_frame" android:layout_width="55dp" android:layout_height="match_parent">
@@ -93,9 +93,9 @@
    android:layout_height="match_parent" android:gravity="center_vertical"
    android:text="🧙" android:textColor="#D6BCEA" android:textSize="9sp"
    android:includeFontPadding="false"/>
-  <TextView android:id="@+id/all_slot_2_ready" android:layout_width="32dp"
+  <TextView android:id="@+id/all_slot_2_ready" android:layout_width="26dp"
    android:layout_height="match_parent" android:gravity="left|center_vertical"
-   android:text="1 ✓" android:textColor="#8BE3AD" android:textSize="9sp"
+   android:text="1✓" android:textColor="#8BE3AD" android:textSize="9sp"
    android:singleLine="true" android:visibility="gone"
    android:includeFontPadding="false"/>
   <FrameLayout android:id="@+id/all_slot_2_timer_frame" android:layout_width="55dp" android:layout_height="match_parent">
