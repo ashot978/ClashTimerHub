@@ -1,13 +1,13 @@
 ### NL
-- Spiky Tower verschijnt nu met naam in plaats van Upgrade #1000107.
-- Firecracker Tower verschijnt nu met naam in plaats van Upgrade #1000108.
-- Guardian Shrine (1000105) is toegevoegd aan de gebouwenlijst.
-- Reeds opgeslagen upgrades krijgen meteen hun echte naam.
-- Eigen, handmatig gekozen namen blijven ongewijzigd.
+- Alle 12 nieuwe Squads tonen hun echte naam.
+- Heroic Spell en nieuwe eventtroepen worden herkend.
+- Ook nieuwe Guardians en seizoensverdedigingen krijgen namen.
+- Losse Seasonal Defense-modules hebben herkenbare labels.
+- Bestaande timers herstellen automatisch na installeren.
 
 ### EN
-- Spiky Tower now displays its name instead of Upgrade #1000107.
-- Firecracker Tower now displays its name instead of Upgrade #1000108.
-- Guardian Shrine (1000105) is added to the building name list.
-- Existing saved upgrades show their proper names automatically.
-- User-edited upgrade names remain unchanged.
+- All 12 new Squads now show their correct names.
+- Heroic Spell and new event troops are recognised.
+- New Guardians and seasonal defenses have readable names.
+- Individual seasonal defense modules have clear labels.
+- Saved timers are automatically renamed after installation.
