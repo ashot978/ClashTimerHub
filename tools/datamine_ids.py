@@ -28,11 +28,11 @@ def unpack(data):
         import lzham
         size = int.from_bytes(data[5:9], "little")
         return lzham.decompress(data[9:], size, {"dict_size_log2": data[4]})
-    if data[:4] == b"\\x28\\xb5\\x2f\\xfd":
+    if data[:4] == bytes.fromhex("28b52ffd"):
         import zstandard
         return zstandard.ZstdDecompressor().decompress(data)
-    if data[:1] == b"\\x5d":
-        return lzma.LZMADecompressor().decompress(data[:9] + b"\\0"*4 + data[9:])
+    if data[:1] == bytes([0x5D]):
+        return lzma.LZMADecompressor().decompress(data[:9] + bytes(4) + data[9:])
     if b"," in data[:400]:
         return data
     raise ValueError("Unrecognised file header " + data[:24].hex())
@@ -76,11 +76,11 @@ def run():
             results[dataset]={"count":len(entries),"fields":fields[:15],"items":entries}
             print(dataset,":",len(entries),"entities; new:",[e for e in entries if (e.get("id",0)>=1000105 and e.get("id",0)<=1000125) or ("Squad" in e["name"] and not "builder" in e["name"].lower())][:30],flush=True)
         except Exception as ex:
-            print("ERROR",dataset,repr(ex),flush=True)
+            print("ERROR",dataset,type(ex).__name__,str(ex)[:400],flush=True)
             results[dataset]={"error":str(ex)}
     out=Path("docs/datamine/game_ids_2026-11-16.json")
     out.parent.mkdir(parents=True,exist_ok=True)
-    out.write_text(json.dumps({"fingerprint":FINGERPRINT,"datasets":results},ensure_ascii=False,indent=2)+"\\n",encoding="utf8")
+    out.write_text(json.dumps({"fingerprint":FINGERPRINT,"datasets":results},ensure_ascii=False,indent=2)+"\n",encoding="utf8")
     if any(results[d].get("error") for d in ("logic/buildings.csv","logic/characters.csv","logic/spells.csv")):
         raise RuntimeError("Core asset extraction failed; inspect above errors")
 
