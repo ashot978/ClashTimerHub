@@ -6,10 +6,10 @@ import java.util.HashSet;
 import java.util.Set;
 import static org.junit.Assert.*;
 
-/** Covers the eight Home Village sources that can contain active timers. */
+/** Covers the nine Home Village sources that can contain active timers. */
 public class VillageExportCategoryCoverageTest {
  private static final String[] HOME_VILLAGE_TIMER_SECTIONS={
-  "buildings","heroes","units","spells","siege_machines","pets","traps","guardians"
+  "buildings","heroes","units","spells","siege_machines","squads","pets","traps","guardians"
  };
  private static final String[] BUILDER_BASE_SECTIONS={
   "buildings2","traps2","units2","heroes2"

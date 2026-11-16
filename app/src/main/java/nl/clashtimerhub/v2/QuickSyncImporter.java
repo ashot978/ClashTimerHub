@@ -8,7 +8,7 @@ import java.util.*;
 /** Atomic, account-scoped clipboard import for the floating shortcut. */
 public final class QuickSyncImporter {
  // Import Guardians alongside building and hero upgrades; entries without a timer are ignored.
- static final String[] TIMER_SECTIONS={"buildings","heroes","units","spells","siege_machines","pets","traps","guardians"};
+ static final String[] TIMER_SECTIONS={"buildings","heroes","units","spells","siege_machines","squads","pets","traps","guardians"};
  private QuickSyncImporter(){}
  public static String importJson(Context context,String raw)throws Exception{
   if(raw==null||raw.length()>10000000)throw new IllegalArgumentException("Klembord is leeg of te groot");
@@ -91,6 +91,16 @@ public final class QuickSyncImporter {
       throw new IllegalArgumentException("Export mist guardians; bestaande Guardian-timers blijven behouden.");
     }
    }
+   if("Laboratorium".equals(cat)&&!json.has("squads")){
+    for(int index=0;index<oldUpgrades.length();index++){
+     JSONObject previous=oldUpgrades.optJSONObject(index);
+     if(previous!=null&&account.equals(previous.optString("account"))
+       &&previous.optBoolean("exported",false)
+       &&previous.optString("syncKey","").startsWith("squads/")
+       &&previous.optLong("finish")>now)
+      throw new IllegalArgumentException("Export mist squads; bestaande Squad-timers blijven behouden.");
+    }
+   }
    if("Laboratorium".equals(cat)&&!json.has("siege_machines")){
     for(int index=0;index<oldUpgrades.length();index++){
      JSONObject previous=oldUpgrades.optJSONObject(index);
@@ -119,7 +129,7 @@ public final class QuickSyncImporter {
    for(int i=0;i<arr.length();i++){
     JSONObject entry=arr.optJSONObject(i);if(entry==null)continue;
     long id=entry.optLong("data",-1);if(id<0)continue;
-    String category="pets".equals(section)?"Pets":("units".equals(section)||"spells".equals(section)||"siege_machines".equals(section))?"Laboratorium":"Bouwers";
+    String category="pets".equals(section)?"Pets":("units".equals(section)||"spells".equals(section)||"siege_machines".equals(section)||"squads".equals(section))?"Laboratorium":"Bouwers";
     int helperLevel="Bouwers".equals(category)?builderHelperLevel:
      "Laboratorium".equals(category)?labHelperLevel:0;
     JSONArray types=entry.optJSONArray("types");

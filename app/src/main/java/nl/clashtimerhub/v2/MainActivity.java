@@ -1393,7 +1393,7 @@ public final class MainActivity extends Activity {
   out.add(o);
  }
  private String exportName(long id){
-  if(id==1000089)return "Crafting Station";
+  // Use the single shared export ID map; 1000089 is Firespitter, not Crafting Station.
   if(id==1000002)return "Elixir Collector";
   if(id==1000015)return "Builder's Hut";
   if(id==1000019)return "Hidden Tesla";
