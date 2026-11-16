@@ -23,7 +23,8 @@ public class ExportNameRepairTest {
   assertEquals("Super Wizard", ClashNames.resolvedName("Upgrade #4000083",-1L));
   assertEquals("Squad Barracks", ClashNames.resolvedName("Upgrade #1000106",-1L));
   assertEquals("Custom building", ClashNames.resolvedName("Custom building",1000106L));
-  assertEquals("Upgrade #1000107", ClashNames.resolvedName("Upgrade #1000107",-1L));
+  assertEquals("Spiky Tower", ClashNames.resolvedName("Upgrade #1000107",-1L));
+  assertEquals("Firecracker Tower", ClashNames.resolvedName("Upgrade #1000108",-1L));
  }
  @Test public void allVerifiedNewEntriesResolveBothWays() {
   assertEquals("Sour Elixir Cauldron", ClashNames.resolvedName("Upgrade #1000083", 1000083L));
