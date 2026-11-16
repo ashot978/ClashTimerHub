@@ -3774,6 +3774,68 @@
         }
       ]
     },
+    "logic/seasonal_defense_archetypes.csv": {
+      "count": 17,
+      "fields": [
+        "Name",
+        "SpecialAbility",
+        "Modules",
+        "TotalModuleLevelThresholds"
+      ],
+      "items": [
+        {
+          "name": "HookTower"
+        },
+        {
+          "name": "SunBeam"
+        },
+        {
+          "name": "LogLobber"
+        },
+        {
+          "name": "FlameSpinner"
+        },
+        {
+          "name": "CrusherMortar"
+        },
+        {
+          "name": "LazyLaser"
+        },
+        {
+          "name": "SlowdownTower"
+        },
+        {
+          "name": "HeroBooster"
+        },
+        {
+          "name": "SDRoaster"
+        },
+        {
+          "name": "SDAirBombs"
+        },
+        {
+          "name": "SDLavaLauncher"
+        },
+        {
+          "name": "Inferno Candle"
+        },
+        {
+          "name": "Headhunter Tower"
+        },
+        {
+          "name": "Cake Thrower"
+        },
+        {
+          "name": "Rocket Artillery Tower"
+        },
+        {
+          "name": "Minion Hive Launcher"
+        },
+        {
+          "name": "Goblin Thrower Tower"
+        }
+      ]
+    },
     "logic/character_items.csv": {
       "count": 64,
       "fields": [
