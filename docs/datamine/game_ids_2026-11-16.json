@@ -1,0 +1,4476 @@
+{
+  "fingerprint": "0f8af5ebc59dc7b88f884643c1fb8b57928113d6",
+  "datasets": {
+    "logic/buildings.csv": {
+      "count": 109,
+      "fields": [
+        "Name",
+        "GlobalID",
+        "BuildingLevel",
+        "TID",
+        "InfoTID",
+        "BuildingClass",
+        "SecondaryTargetingClass",
+        "ShopBuildingClass",
+        "SWF",
+        "ExportName",
+        "ExportNameNpc",
+        "ExportNameConstruction",
+        "ExportNameLocked",
+        "EarlyExportName",
+        "EarlyExportNameMaxTownHall"
+      ],
+      "items": [
+        {
+          "name": "Town Hall",
+          "id": 1000001,
+          "TID": "TID_BUILDING_TOWN_HALL",
+          "BuildingLevel": "1",
+          "TownHallLevel": "0"
+        },
+        {
+          "name": "Clan Castle",
+          "id": 1000014,
+          "TID": "TID_BUILDING_ALLIANCE_CASTLE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "3",
+          "HousingSpace": "10"
+        },
+        {
+          "name": "Gold Storage",
+          "id": 1000005,
+          "TID": "TID_BUILDING_GOLD_STORAGE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "Elixir Storage",
+          "id": 1000003,
+          "TID": "TID_BUILDING_ELIXIR_STORAGE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "Dark Elixir Storage",
+          "id": 1000024,
+          "TID": "TID_BUILDING_DARK_ELIXIR_STORAGE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "7"
+        },
+        {
+          "name": "Gold Mine",
+          "id": 1000004,
+          "TID": "TID_BUILDING_GOLD_MINE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "Elixir Collector",
+          "id": 1000002,
+          "TID": "TID_BUILDING_ELIXIR_PUMP",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "Dark Elixir Drill",
+          "id": 1000023,
+          "TID": "TID_BUILDING_DARK_ELIXIR_PUMP",
+          "BuildingLevel": "1",
+          "TownHallLevel": "7"
+        },
+        {
+          "name": "Army Camp",
+          "id": 1000000,
+          "TID": "TID_BUILDING_HOUSING",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1",
+          "HousingSpace": "20"
+        },
+        {
+          "name": "Laboratory",
+          "id": 1000007,
+          "TID": "TID_BUILDING_LABORATORY",
+          "BuildingLevel": "1",
+          "TownHallLevel": "3"
+        },
+        {
+          "name": "Barracks",
+          "id": 1000006,
+          "TID": "TID_BUILDING_BARRACK",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "Dark Barracks",
+          "id": 1000026,
+          "TID": "TID_DARK_ELIXIR_BARRACK",
+          "BuildingLevel": "1",
+          "TownHallLevel": "7"
+        },
+        {
+          "name": "Spell Factory",
+          "id": 1000020,
+          "TID": "TID_BUILDING_SPELL_FORGE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "5"
+        },
+        {
+          "name": "Dark Spell Factory",
+          "id": 1000029,
+          "TID": "TID_BUILDING_MINI_SPELL_FACTORY",
+          "BuildingLevel": "1",
+          "TownHallLevel": "8"
+        },
+        {
+          "name": "Siege Workshop",
+          "id": 1000059,
+          "TID": "TID_SIEGE_WORKSHOP",
+          "BuildingLevel": "1",
+          "TownHallLevel": "12"
+        },
+        {
+          "name": "Hero Hall",
+          "id": 1000071,
+          "TID": "TID_HERO_TAVERN",
+          "BuildingLevel": "1",
+          "TownHallLevel": "4"
+        },
+        {
+          "name": "Pet House",
+          "id": 1000068,
+          "TID": "TID_PET_SHOP",
+          "BuildingLevel": "1",
+          "TownHallLevel": "14"
+        },
+        {
+          "name": "Blacksmith",
+          "id": 1000070,
+          "TID": "TID_SMITHY",
+          "BuildingLevel": "1",
+          "TownHallLevel": "8"
+        },
+        {
+          "name": "Builders Hut",
+          "id": 1000015,
+          "TID": "TID_WORKER_BUILDING",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "BOBs Hut",
+          "id": 1000064,
+          "TID": "TID_BOB_HUT",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "Helper Hut",
+          "id": 1000093,
+          "TID": "TID_BUILDING_VILLAGER_APPRENTICE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "9"
+        },
+        {
+          "name": "Wall",
+          "id": 1000010,
+          "TID": "TID_BUILDING_WALL",
+          "BuildingLevel": "1",
+          "TownHallLevel": "2"
+        },
+        {
+          "name": "Cannon",
+          "id": 1000008,
+          "TID": "TID_BUILDING_CANNON",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "Archer Tower",
+          "id": 1000009,
+          "TID": "TID_BUILDING_ARCHER_TOWER",
+          "BuildingLevel": "1",
+          "TownHallLevel": "2"
+        },
+        {
+          "name": "Mortar",
+          "id": 1000013,
+          "TID": "TID_BUILDING_MORTAR",
+          "BuildingLevel": "1",
+          "TownHallLevel": "3"
+        },
+        {
+          "name": "Air Defense",
+          "id": 1000012,
+          "TID": "TID_BUILDING_AIR_DEFENSE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "4"
+        },
+        {
+          "name": "Wizard Tower",
+          "id": 1000011,
+          "TID": "TID_BUILDING_WIZARD_TOWER",
+          "BuildingLevel": "1",
+          "TownHallLevel": "5"
+        },
+        {
+          "name": "Hidden Tesla",
+          "id": 1000019,
+          "TID": "TID_BUILDING_TESLA_TOWER",
+          "BuildingLevel": "1",
+          "TownHallLevel": "7"
+        },
+        {
+          "name": "Air Sweeper",
+          "id": 1000028,
+          "TID": "TID_AIR_BLASTER",
+          "BuildingLevel": "1",
+          "TownHallLevel": "6"
+        },
+        {
+          "name": "Bomb Tower",
+          "id": 1000032,
+          "TID": "TID_BUILDING_BOMB_TOWER",
+          "BuildingLevel": "1",
+          "TownHallLevel": "8"
+        },
+        {
+          "name": "X-Bow",
+          "id": 1000021,
+          "TID": "TID_BUILDING_BOW",
+          "BuildingLevel": "1",
+          "TownHallLevel": "9"
+        },
+        {
+          "name": "Inferno Tower",
+          "id": 1000027,
+          "TID": "TID_BUILDING_DARK_TOWER",
+          "BuildingLevel": "1",
+          "TownHallLevel": "10"
+        },
+        {
+          "name": "Eagle Artillery",
+          "id": 1000031,
+          "TID": "TID_BUILDING_ARTILLERY",
+          "BuildingLevel": "1",
+          "TownHallLevel": "11"
+        },
+        {
+          "name": "Scattershot",
+          "id": 1000067,
+          "TID": "TID_BUILDING_SCATTERSHOT",
+          "BuildingLevel": "1",
+          "TownHallLevel": "13"
+        },
+        {
+          "name": "Spell Tower",
+          "id": 1000072,
+          "TID": "TID_BUILDING_SPELL_TOWER",
+          "BuildingLevel": "1",
+          "TownHallLevel": "15"
+        },
+        {
+          "name": "Monolith",
+          "id": 1000077,
+          "TID": "TID_BUILDING_MONOLITH",
+          "BuildingLevel": "1",
+          "TownHallLevel": "15"
+        },
+        {
+          "name": "Multi Archer Tower",
+          "id": 1000084,
+          "TID": "TID_BUILDING_MULTI_ARCHER_TOWER",
+          "BuildingLevel": "1",
+          "TownHallLevel": "16"
+        },
+        {
+          "name": "Ricochet Cannon",
+          "id": 1000085,
+          "TID": "TID_BUILDING_RICOCHET_CANNON",
+          "BuildingLevel": "1",
+          "TownHallLevel": "16"
+        },
+        {
+          "name": "Multi Gear Tower",
+          "id": 1000079,
+          "TID": "TID_BUILDING_ARCHER_CANNON",
+          "BuildingLevel": "1",
+          "TownHallLevel": "17"
+        },
+        {
+          "name": "Firespitter",
+          "id": 1000089,
+          "TID": "TID_BUILDING_GATLING_GUN",
+          "BuildingLevel": "1",
+          "TownHallLevel": "17"
+        },
+        {
+          "name": "Revenge Tower",
+          "id": 1000086,
+          "TID": "TID_BUILDING_DEBRIS_TOWER",
+          "BuildingLevel": "1",
+          "TownHallLevel": "18"
+        },
+        {
+          "name": "Super Wizard Tower",
+          "id": 1000102,
+          "TID": "TID_BUILDING_MERGED_WIZARD_TOWER",
+          "BuildingLevel": "1",
+          "TownHallLevel": "18"
+        },
+        {
+          "name": "Crafting Station",
+          "id": 1000097,
+          "TID": "TID_BUILDING_SEASONAL_PLATFORM",
+          "BuildingLevel": "1",
+          "TownHallLevel": "17",
+          "SeasonalDefense": "TRUE"
+        },
+        {
+          "name": "Barbarian King Altar",
+          "id": 1000022,
+          "TID": "TID_BARBARIAN_KING",
+          "BuildingLevel": "1",
+          "TownHallLevel": "7"
+        },
+        {
+          "name": "Archer Queen Altar",
+          "id": 1000025,
+          "TID": "TID_ARCHER_QUEEN",
+          "BuildingLevel": "1",
+          "TownHallLevel": "9"
+        },
+        {
+          "name": "Grand Warden Altar",
+          "id": 1000030,
+          "TID": "TID_GRAND_WARDEN",
+          "BuildingLevel": "1",
+          "TownHallLevel": "11"
+        },
+        {
+          "name": "Royal Champion Altar",
+          "id": 1000066,
+          "TID": "TID_HERO_ROYAL_CHAMPION",
+          "BuildingLevel": "1",
+          "TownHallLevel": "13"
+        },
+        {
+          "name": "Communications mast",
+          "id": 1000016,
+          "TID": "TID_CAPBUILD_GOBLIN_HUT",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "Goblin Hall",
+          "id": 1000017,
+          "TID": "TID_BUILDING_GOBLIN_HALL",
+          "BuildingLevel": "1"
+        },
+        {
+          "name": "Goblin Hut",
+          "id": 1000018,
+          "TID": "TID_CAPBUILD_GOBLIN_HUT",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "Tutorial Cannon",
+          "id": 1000060,
+          "TID": "TID_BUILDING_CANNON",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "Goblin Castle",
+          "id": 1000061,
+          "TID": "TID_BUILDING_GOBLIN_CASTLE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1",
+          "HousingSpace": "50"
+        },
+        {
+          "name": "Foreboding Cave",
+          "id": 1000062,
+          "TID": "TID_BUILDING_DRAGON_CAVE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1",
+          "HousingSpace": "50"
+        },
+        {
+          "name": "Goblin Boss TH",
+          "id": 1000069,
+          "TID": "TID_BUILDING_GOBLIN_HALL",
+          "BuildingLevel": "1"
+        },
+        {
+          "name": "TroopCage",
+          "id": 1000073,
+          "TID": "TID_BUILDING_TROOP_CAGE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "DragonLair",
+          "id": 1000074,
+          "TID": "TID_BUILDING_DRAGON_CAVE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "SpellCage",
+          "id": 1000075,
+          "TID": "TID_BUILDING_SPELL_CAGE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "PEKKAs Playhouse",
+          "id": 1000076,
+          "TID": "TID_BUILDING_DRAGON_CAVE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "Sour Elixir Cauldron",
+          "id": 1000083,
+          "TID": "TID_BUILDING_CLASHOWEEN_BUILDING",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "PetCage",
+          "id": 1000090,
+          "TID": "TID_BUILDING_PET_CAGE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "DefenseTroopCage",
+          "id": 1000091,
+          "TID": "TID_BUILDING_DEFENSE_TROOP_CAGE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "DirectHeroChallengeMainBuilding",
+          "id": 1000092,
+          "TID": "TID_BUILDING_DIRECT_HERO_CONTROL_MAIN_BUILDING",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "GenericSpellCage",
+          "id": 1000098,
+          "TID": "TID_BUILDING_GEN_SPELL_CAGE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "GenericTroopCage",
+          "id": 1000099,
+          "TID": "TID_BUILDING_GEN_TROOP_CAGE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "DefenseGenericTroopCage",
+          "id": 1000100,
+          "TID": "TID_BUILDING_GEN_DEFENCE_TROOP_CAGE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "DirectHeroChallengeGenericMainBuilding",
+          "id": 1000101,
+          "TID": "TID_BUILDING_GEN_DIRECT_HERO_CONTROL_MAIN_BUILDING",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "Town Hall 18 Teaser",
+          "id": 1000103,
+          "TID": "TID_BUILDING_TOWN_HALL",
+          "BuildingLevel": "1",
+          "TownHallLevel": "17"
+        },
+        {
+          "name": "Town Hall 17 Upgrading",
+          "id": 1000104,
+          "TID": "TID_BUILDING_TOWN_HALL",
+          "BuildingLevel": "1",
+          "TownHallLevel": "17"
+        },
+        {
+          "name": "Unused2",
+          "id": 1000087,
+          "TID": "TID_BUILDING_CANNON",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1000"
+        },
+        {
+          "name": "Unused3",
+          "id": 1000088,
+          "TID": "TID_BUILDING_CANNON",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1000"
+        },
+        {
+          "name": "Unused4",
+          "id": 1000094,
+          "TID": "TID_BUILDING_CANNON",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1000"
+        },
+        {
+          "name": "Unused5",
+          "id": 1000095,
+          "TID": "TID_BUILDING_CANNON",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1000"
+        },
+        {
+          "name": "Unused6",
+          "id": 1000096,
+          "TID": "TID_BUILDING_CANNON",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1000"
+        },
+        {
+          "name": "BB Builder Hall",
+          "id": 1000034,
+          "TID": "TID_BUILDING_TOWN_HALL2",
+          "BuildingLevel": "1",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Gold Storage",
+          "id": 1000038,
+          "TID": "TID_BUILDING_GOLD_STORAGE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "3",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Elixir Storage",
+          "id": 1000036,
+          "TID": "TID_BUILDING_ELIXIR_STORAGE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "3",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Gold Mine",
+          "id": 1000037,
+          "TID": "TID_BUILDING_GOLD_MINE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Elixir Collector",
+          "id": 1000035,
+          "TID": "TID_BUILDING_ELIXIR_PUMP",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Army Camp",
+          "id": 1000042,
+          "TID": "TID_BUILDING_HOUSING",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Reinforcement Camp",
+          "id": 1000049,
+          "TID": "TID_BUILDING_REINFORCEMENT_CAMP",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Star Laboratory",
+          "id": 1000046,
+          "TID": "TID_BUILDING_TELESCOPE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Barracks",
+          "id": 1000040,
+          "TID": "TID_BUILDING_BARRACK2",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB OTTOs Outpost",
+          "id": 1000078,
+          "TID": "TID_BUILDING_OTTOS_OUTPOST",
+          "BuildingLevel": "1",
+          "TownHallLevel": "6",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Healing Hut",
+          "id": 1000082,
+          "TID": "TID_RECOVERY_BUILDING",
+          "BuildingLevel": "1",
+          "TownHallLevel": "6",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB BOB Control",
+          "id": 1000065,
+          "TID": "TID_BOB_UNLOCK_BUILDING",
+          "BuildingLevel": "1",
+          "TownHallLevel": "9",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Gem Mine",
+          "id": 1000058,
+          "TID": "TID_BUILDING_GEM_MINE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "3",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Clock Tower",
+          "id": 1000039,
+          "TID": "TID_BUILDING_CLOCK_TOWER",
+          "BuildingLevel": "1",
+          "TownHallLevel": "4",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Battle Machine Altar",
+          "id": 1000053,
+          "TID": "TID_WARMACHINE",
+          "BuildingLevel": "1",
+          "TownHallLevel": "5",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Battle Copter Altar",
+          "id": 1000080,
+          "TID": "TID_HERO_BATTLE_COPTER",
+          "BuildingLevel": "1",
+          "TownHallLevel": "5",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Wall",
+          "id": 1000033,
+          "TID": "TID_BUILDING_WALL",
+          "BuildingLevel": "1",
+          "TownHallLevel": "2",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Cannon",
+          "id": 1000044,
+          "TID": "TID_BUILDING_CANNON2",
+          "BuildingLevel": "1",
+          "TownHallLevel": "1",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Archer Tower",
+          "id": 1000048,
+          "TID": "TID_BUILDING_ARCHER_TOWER2",
+          "BuildingLevel": "1",
+          "TownHallLevel": "2",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Double Cannon",
+          "id": 1000041,
+          "TID": "TID_BUILDING_DOUBLE_CANNON",
+          "BuildingLevel": "1",
+          "TownHallLevel": "2",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Firecrackers",
+          "id": 1000050,
+          "TID": "TID_BUILDING_AIR_DEFENSE_SMALL",
+          "BuildingLevel": "1",
+          "TownHallLevel": "3",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Crusher",
+          "id": 1000055,
+          "TID": "TID_BUILDING_CRUSHER",
+          "BuildingLevel": "1",
+          "TownHallLevel": "3",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Hidden Tesla",
+          "id": 1000043,
+          "TID": "TID_BUILDING_TESLA_TOWER2",
+          "BuildingLevel": "1",
+          "TownHallLevel": "3",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Guard Post",
+          "id": 1000051,
+          "TID": "TID_BUILDING_GUARD_POST",
+          "BuildingLevel": "1",
+          "TownHallLevel": "4",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Air Bombs",
+          "id": 1000054,
+          "TID": "TID_BUILDING_AIR_DEFENSE2",
+          "BuildingLevel": "1",
+          "TownHallLevel": "4",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Multi Mortar",
+          "id": 1000045,
+          "TID": "TID_BUILDING_MULTI_MORTAR",
+          "BuildingLevel": "1",
+          "TownHallLevel": "5",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Roaster",
+          "id": 1000056,
+          "TID": "TID_BUILDING_FLAMER",
+          "BuildingLevel": "1",
+          "TownHallLevel": "6",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Giant Cannon",
+          "id": 1000057,
+          "TID": "TID_BUILDING_GIANT_CANNON",
+          "BuildingLevel": "1",
+          "TownHallLevel": "7",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Mega Tesla",
+          "id": 1000052,
+          "TID": "TID_BUILDING_MEGA_TESLA",
+          "BuildingLevel": "1",
+          "TownHallLevel": "8",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Lava Launcher",
+          "id": 1000063,
+          "TID": "TID_BUILDING_LAVA_LAUNCHER",
+          "BuildingLevel": "1",
+          "TownHallLevel": "9",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB X-Bow",
+          "id": 1000081,
+          "TID": "TID_BUILDING_XBOW2",
+          "BuildingLevel": "1",
+          "TownHallLevel": "10",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Builders Hut",
+          "id": 1000047,
+          "TID": "TID_WORKER2_BUILDING",
+          "BuildingLevel": "1",
+          "TownHallLevel": "2",
+          "VillageType": "1"
+        },
+        {
+          "name": "Guardian Building",
+          "id": 1000105,
+          "TID": "TID_BUILDING_GUARDIAN_BUILDING",
+          "BuildingLevel": "1",
+          "TownHallLevel": "19"
+        },
+        {
+          "name": "Squad Barracks",
+          "id": 1000106,
+          "TID": "TID_BUILDING_SQUAD_BARRACKS",
+          "BuildingLevel": "1",
+          "TownHallLevel": "8"
+        },
+        {
+          "name": "Spiky Tower",
+          "id": 1000107,
+          "TID": "TID_BUILDING_SPIKY_TOWER",
+          "BuildingLevel": "1",
+          "TownHallLevel": "19"
+        },
+        {
+          "name": "Firecracker Tower",
+          "id": 1000108,
+          "TID": "TID_BUILDING_FIRECRACKER_TOWER",
+          "BuildingLevel": "1",
+          "TownHallLevel": "19"
+        }
+      ]
+    },
+    "logic/characters.csv": {
+      "count": 213,
+      "fields": [
+        "Name",
+        "GlobalID",
+        "VisualLevel",
+        "Deprecated",
+        "TID",
+        "InfoTID",
+        "HousingSpace",
+        "BarrackLevel",
+        "LaboratoryLevel",
+        "Speed",
+        "Hitpoints",
+        "UpgradeTimeH",
+        "UpgradeTimeM",
+        "UpgradeResource",
+        "UpgradeCost"
+      ],
+      "items": [
+        {
+          "name": "Barbarian",
+          "id": 4000000,
+          "TID": "TID_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "0",
+          "UpgradeTimeM": "30",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Archer",
+          "id": 4000001,
+          "TID": "TID_ARCHER",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Giant",
+          "id": 4000003,
+          "TID": "TID_GIANT",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "2",
+          "HousingSpace": "5",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Goblin",
+          "id": 4000002,
+          "TID": "TID_GOBLIN",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "2",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Wall Breaker",
+          "id": 4000004,
+          "TID": "TID_WALL_BREAKER",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "3",
+          "HousingSpace": "2",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Balloon",
+          "id": 4000005,
+          "TID": "TID_GOBLIN_BALLOON",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "4",
+          "HousingSpace": "5",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Wizard",
+          "id": 4000006,
+          "TID": "TID_WIZARD",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "4",
+          "HousingSpace": "4",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Healer",
+          "id": 4000007,
+          "TID": "TID_HEALER",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "12",
+          "HousingSpace": "14",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Dragon",
+          "id": 4000008,
+          "TID": "TID_DRAGON",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "18",
+          "HousingSpace": "20",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "PEKKA",
+          "id": 4000009,
+          "TID": "TID_PEKKA",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "12",
+          "HousingSpace": "25",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Baby Dragon",
+          "id": 4000023,
+          "TID": "TID_BABY_DRAGON",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "24",
+          "HousingSpace": "10",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Miner",
+          "id": 4000024,
+          "TID": "TID_MINER",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "24",
+          "HousingSpace": "6",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Electro Dragon",
+          "id": 4000059,
+          "TID": "TID_LIGHTNINGDRAGON",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "96",
+          "HousingSpace": "30",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Yeti",
+          "id": 4000053,
+          "TID": "TID_CHARACTER_YETI",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "72",
+          "HousingSpace": "18",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Yetimite",
+          "id": 4000054,
+          "TID": "TID_CHARACTER_YETIMITE",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "2"
+        },
+        {
+          "name": "Dragon Rider",
+          "id": 4000065,
+          "TID": "TID_CHARACTER_MECHA_DRAGON",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "132",
+          "HousingSpace": "25",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Electro Titan",
+          "id": 4000095,
+          "TID": "TID_CHARACTER_ELECTRO_TITAN",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "180",
+          "HousingSpace": "32",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Root Rider",
+          "id": 4000110,
+          "TID": "TID_CHARACTER_TREANT",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "180",
+          "HousingSpace": "20",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Thrower",
+          "id": 4000132,
+          "TID": "TID_CHARACTER_THROWER",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "216",
+          "HousingSpace": "16",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Meteor Golem",
+          "id": 4000177,
+          "TID": "TID_METEOR_GOLEM",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "240",
+          "UpgradeTimeM": "0",
+          "HousingSpace": "40",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Meteormite",
+          "id": 4000178,
+          "TID": "TID_METEOR_GOLEM_SMALL",
+          "HousingSpace": "20"
+        },
+        {
+          "name": "Defensive Meteor Golem",
+          "id": 4000179,
+          "TID": "TID_METEOR_GOLEM",
+          "HousingSpace": "40"
+        },
+        {
+          "name": "Defensive Meteormite",
+          "id": 4000180,
+          "TID": "TID_METEOR_GOLEM_SMALL",
+          "HousingSpace": "20"
+        },
+        {
+          "name": "Minion",
+          "id": 4000010,
+          "TID": "TID_GARGOYLE",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "6",
+          "HousingSpace": "2",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Hog Rider",
+          "id": 4000011,
+          "TID": "TID_BOARRIDER",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "10",
+          "HousingSpace": "5",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Valkyrie",
+          "id": 4000012,
+          "TID": "TID_WARRIORGIRL",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "8",
+          "HousingSpace": "8",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Golem",
+          "id": 4000013,
+          "TID": "TID_GOLEM",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "16",
+          "HousingSpace": "30",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Golemite",
+          "id": 4000014,
+          "TID": "TID_GOLEM_SEC",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "6"
+        },
+        {
+          "name": "Witch",
+          "id": 4000015,
+          "TID": "TID_WARLOCK",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "48",
+          "HousingSpace": "12",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Skeleton",
+          "id": 4000016,
+          "TID": "TID_SKELETON",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "Lava Hound",
+          "id": 4000017,
+          "TID": "TID_AD_SEEKER",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "48",
+          "HousingSpace": "30",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Lava Pup",
+          "id": 4000018,
+          "TID": "TID_AD_SEEKER_FRAG",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "Defensive Lava Hound",
+          "id": 4000077,
+          "TID": "TID_AD_SEEKER",
+          "HousingSpace": "30"
+        },
+        {
+          "name": "Bowler",
+          "id": 4000022,
+          "TID": "TID_BOWLER",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "48",
+          "HousingSpace": "6",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Ice Golem",
+          "id": 4000058,
+          "TID": "TID_ICEGOLEM",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "48",
+          "HousingSpace": "15",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Defensive Ice Golem",
+          "id": 4000069,
+          "TID": "TID_ICEGOLEM",
+          "HousingSpace": "15"
+        },
+        {
+          "name": "Headhunter",
+          "id": 4000082,
+          "TID": "TID_CHARACTER_HEADHUNTER",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "96",
+          "HousingSpace": "6",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Apprentice Warden",
+          "id": 4000097,
+          "TID": "TID_CHARACTER_APPRENTICE_WARDEN",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "120",
+          "HousingSpace": "20",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Druid",
+          "id": 4000123,
+          "TID": "TID_CHARACTER_SHAPESHIFTER_DRUID",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "168",
+          "HousingSpace": "16",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Bear",
+          "id": 4000124,
+          "TID": "TID_CHARACTER_SHAPESHIFTER_DRUID_BEAR",
+          "HousingSpace": "16"
+        },
+        {
+          "name": "Furnace",
+          "id": 4000150,
+          "TID": "TID_CHARACTER_FURNACE",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "204",
+          "HousingSpace": "18",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Firemite Spawn",
+          "id": 4000149,
+          "TID": "TID_CHARACTER_FIREMITE",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "Furnace_DEF",
+          "id": 4000151,
+          "TID": "TID_CHARACTER_FURNACE",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "18"
+        },
+        {
+          "name": "Firemite Spawn_DEF",
+          "id": 4000152,
+          "TID": "TID_CHARACTER_FIREMITE",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "Super Barbarian",
+          "id": 4000026,
+          "TID": "TID_CHARACTER_ELITE_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "5",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Super Archer",
+          "id": 4000027,
+          "TID": "TID_CHARACTER_MAGIC_ARCHER",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "12",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Super Giant",
+          "id": 4000029,
+          "TID": "TID_CHARACTER_ELITE_GIANT",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "10",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Sneaky Goblin",
+          "id": 4000055,
+          "TID": "TID_CHARACTER_ELITE_GOBLIN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "3",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Super Wall Breaker",
+          "id": 4000028,
+          "TID": "TID_CHARACTER_ELITE_WALLBREAKER",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "8",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Rocket Balloon",
+          "id": 4000057,
+          "TID": "TID_CHARACTER_HASTY_BALLOON",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "8",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Super Wizard",
+          "id": 4000083,
+          "TID": "TID_SUPER_WIZARD",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "10",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Super Dragon",
+          "id": 4000081,
+          "TID": "TID_SUPER_DRAGON",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "40",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Inferno Dragon",
+          "id": 4000063,
+          "TID": "TID_CHARACTER_INFERNO_DRAGON",
+          "LaboratoryLevel": "10",
+          "HousingSpace": "15",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Super Miner",
+          "id": 4000056,
+          "TID": "TID_SUPER_MINER",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "24",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Super Yeti",
+          "id": 4000147,
+          "TID": "TID_CHARACTER_SUPER_YETI",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "35",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Electromite",
+          "id": 4000148,
+          "TID": "TID_CHARACTER_ELECTROMITE",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "3"
+        },
+        {
+          "name": "Super Minion",
+          "id": 4000084,
+          "TID": "TID_SUPER_MINION",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "12",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Defensive Super Minion",
+          "id": 4000086,
+          "TID": "TID_SUPER_MINION",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "12"
+        },
+        {
+          "name": "Super Hog Rider",
+          "id": 4000098,
+          "TID": "TID_CHARACTER_SUPER_HOG_RIDER",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "12",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Super Hog",
+          "id": 4000099,
+          "TID": "TID_CHARACTER_RIDERLESS_HOG",
+          "HousingSpace": "5",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Super Rider",
+          "id": 4000100,
+          "TID": "TID_CHARACTER_HOGLESS_RIDER",
+          "HousingSpace": "5",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Super Valkyrie",
+          "id": 4000064,
+          "TID": "TID_CHARACTER_SUPER_VALKYRIE",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "20",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Super Witch",
+          "id": 4000066,
+          "TID": "TID_CHARACTER_SUPER_WITCH",
+          "LaboratoryLevel": "10",
+          "HousingSpace": "40",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Big Boy",
+          "id": 4000078,
+          "TID": "TID_CHARACTER_BIG_BOY",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "20",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Ice Hound",
+          "id": 4000076,
+          "TID": "TID_ICE_HOUND",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "40",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Ice Hound Pup",
+          "id": 4000085,
+          "TID": "TID_ICE_PUP",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "Defensive Ice Hound",
+          "id": 4000079,
+          "TID": "TID_ICE_HOUND",
+          "LaboratoryLevel": "10",
+          "HousingSpace": "40"
+        },
+        {
+          "name": "Super Bowler",
+          "id": 4000080,
+          "TID": "TID_SUPER_BOWLER",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "30",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Wall Wrecker",
+          "id": 4000051,
+          "TID": "TID_SIEGE_MACHINE_RAM",
+          "LaboratoryLevel": "9",
+          "UpgradeTimeH": "48",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Siege Workshop"
+        },
+        {
+          "name": "Battle Blimp",
+          "id": 4000052,
+          "TID": "TID_SIEGE_MACHINE_FLYER",
+          "LaboratoryLevel": "9",
+          "UpgradeTimeH": "48",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Siege Workshop"
+        },
+        {
+          "name": "Stone Slammer",
+          "id": 4000062,
+          "TID": "TID_SIEGE_MACHINE_BALLOON",
+          "LaboratoryLevel": "9",
+          "UpgradeTimeH": "48",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Siege Workshop"
+        },
+        {
+          "name": "Siege Barracks",
+          "id": 4000075,
+          "TID": "TID_SIEGE_MACHINE_CARRIER",
+          "LaboratoryLevel": "9",
+          "UpgradeTimeH": "72",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Siege Workshop"
+        },
+        {
+          "name": "Log Launcher",
+          "id": 4000087,
+          "TID": "TID_SIEGE_MACHINE_LOG_LAUNCHER",
+          "LaboratoryLevel": "9",
+          "UpgradeTimeH": "72",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Siege Workshop"
+        },
+        {
+          "name": "Flame Flinger",
+          "id": 4000091,
+          "TID": "TID_CHARACTER_SIEGE_MACHINE_CATAPULT",
+          "LaboratoryLevel": "9",
+          "UpgradeTimeH": "72",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Siege Workshop"
+        },
+        {
+          "name": "Battle Drill",
+          "id": 4000092,
+          "TID": "TID_CHARACTER_SIEGE_BATTLE_DRILL",
+          "LaboratoryLevel": "13",
+          "UpgradeTimeH": "96",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Siege Workshop"
+        },
+        {
+          "name": "Troop Launcher",
+          "id": 4000135,
+          "TID": "TID_CHARACTER_SIEGE_MACHINE_TROOP_CATAPULT",
+          "LaboratoryLevel": "13",
+          "UpgradeTimeH": "144",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Siege Workshop"
+        },
+        {
+          "name": "Longshot",
+          "id": 4000169,
+          "TID": "TID_INFERNO_GUARDIAN",
+          "UpgradeTimeH": "168",
+          "HousingSpace": "25"
+        },
+        {
+          "name": "Smasher",
+          "id": 4000170,
+          "TID": "TID_MELEE_AREA_GUARDIAN",
+          "UpgradeTimeH": "120",
+          "HousingSpace": "25"
+        },
+        {
+          "name": "Ice Wizard",
+          "id": 4000030,
+          "TID": "TID_WIZARD2",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "4",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Battle Ram",
+          "id": 4000045,
+          "TID": "TID_BATTLERAM",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "4",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Battle Ram Barbarian",
+          "id": 4000046,
+          "TID": "TID_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Royal Ghost",
+          "id": 4000047,
+          "TID": "TID_GHOST",
+          "LaboratoryLevel": "1",
+          "VillageType": "0",
+          "HousingSpace": "8",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Pumpkin Barbarian Armored",
+          "id": 4000048,
+          "TID": "TID_PUMPKIN_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Pumpkin Barbarian Bare",
+          "id": 4000049,
+          "TID": "TID_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Giant Skeleton",
+          "id": 4000050,
+          "TID": "TID_GIANT_SKELETON",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "20",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Skeleton Barrel",
+          "id": 4000061,
+          "TID": "TID_CHARACTER_SKELETON_BARREL",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "5",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "MECHA",
+          "id": 4000067,
+          "TID": "TID_MECHA",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "10",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Party Wizard",
+          "id": 4000072,
+          "TID": "TID_PARTY_WIZARD",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "4",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Ram Rider",
+          "id": 4000094,
+          "TID": "TID_CHARACTER_RAM_RIDER",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "12",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Barcher",
+          "id": 4000101,
+          "TID": "TID_CHARACTER_BARCHER",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "3",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Witch Golem",
+          "id": 4000102,
+          "TID": "TID_CHARACTER_GRAVE_GOLEM",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "41",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Witch Golem Skeleton",
+          "id": 4000116,
+          "TID": "TID_SKELETON",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "Witch Golem Big Boy",
+          "id": 4000117,
+          "TID": "TID_CHARACTER_BIG_BOY",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "20",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Hog Wizard",
+          "id": 4000103,
+          "TID": "TID_CHARACTER_HOG_WIZARD",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "7",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Lavaloon",
+          "id": 4000104,
+          "TID": "TID_CHARACTER_LAVALOON",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "21",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Lavaloon Pup",
+          "id": 4000108,
+          "TID": "TID_CHARACTER_LAVALOON_PUP",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "COOKIE",
+          "id": 4000118,
+          "TID": "TID_CHARACTER_COOKIE_PEKKA",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "10",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Firecracker",
+          "id": 4000119,
+          "TID": "TID_CHARACTER_FIRECRACKER",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "10",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Azure Dragon",
+          "id": 4000120,
+          "TID": "TID_CHARACTER_WATER_DRAGON",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "40",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Barbarian Kicker",
+          "id": 4000121,
+          "TID": "TID_CHARACTER_FREE_KICKER",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "12",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Giant Thrower",
+          "id": 4000122,
+          "TID": "TID_CHARACTER_SIDE_THROWER",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "15",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Broom Witch",
+          "id": 4000125,
+          "TID": "TID_CHARACTER_COURIER",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "20",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Witch Spirit",
+          "id": 4000126,
+          "TID": "TID_CHARACTER_COURIERSPAWN",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "Ice Minion",
+          "id": 4000130,
+          "TID": "TID_ICEMINION",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "4",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Tax Collector",
+          "id": 4000136,
+          "TID": "TID_TAX_COLLECTOR",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "4",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Snake Barrel",
+          "id": 4000142,
+          "TID": "TID_CHARACTER_SNAKE_BARREL",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "8",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Snake",
+          "id": 4000143,
+          "TID": "TID_SNAKE",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "Giant Giant",
+          "id": 4000156,
+          "TID": "TID_CHARACTER_APRIL25GTG",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "50",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "KANE",
+          "id": 4000157,
+          "TID": "TID_CHARACTER_APRIL25TBRM",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "75",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Reborn KANE",
+          "id": 4000162,
+          "TID": "TID_CHARACTER_APRIL25TBRM",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "75",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Disarmer",
+          "id": 4000158,
+          "TID": "TID_CHARACTER_APRIL25BLTM",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "60",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Defensive Disarmer",
+          "id": 4000165,
+          "TID": "TID_CHARACTER_APRIL25BLTM",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "60",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "YEETer",
+          "id": 4000159,
+          "TID": "TID_CHARACTER_APRIL25RRBL",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "45",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Tribal Tag Team",
+          "id": 4000163,
+          "TID": "TID_CHARACTER_TRIBAL_TAG_TEAM",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "5"
+        },
+        {
+          "name": "Defensive YEETer",
+          "id": 4000164,
+          "TID": "TID_CHARACTER_APRIL25RRBL",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "45",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Defensive Tribal Tag Team",
+          "id": 4000166,
+          "TID": "TID_CHARACTER_TRIBAL_TAG_TEAM",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "5"
+        },
+        {
+          "name": "Event Meteor Golem",
+          "id": 4000167,
+          "TID": "TID_METEOR_GOLEM",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "40",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Event Meteormite",
+          "id": 4000168,
+          "TID": "TID_METEOR_GOLEM_SMALL",
+          "HousingSpace": "20"
+        },
+        {
+          "name": "Tutorial Goblin",
+          "id": 4000039,
+          "TID": "TID_GOBLIN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "Tutorial Barbarian",
+          "id": 4000089,
+          "TID": "TID_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "Golden Dragon",
+          "id": 4000060,
+          "TID": "TID_DRAGON",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "100"
+        },
+        {
+          "name": "MOMMA",
+          "id": 4000090,
+          "TID": "TID_SUPER_CHARGED_PEKKA",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "100"
+        },
+        {
+          "name": "Mega COOKIE",
+          "id": 4000145,
+          "TID": "TID_CHARACTER_COOKIE_PEKKA",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "100",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Defending Builder",
+          "id": 4000088,
+          "HousingSpace": "1"
+        },
+        {
+          "name": "Icemite",
+          "id": 4000096,
+          "TID": "TID_CHARACTER_ICE_SPIRIT",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "Booger",
+          "id": 4000141,
+          "TID": "TID_SNEEZY_SPAWN",
+          "HousingSpace": "4"
+        },
+        {
+          "name": "Spell Shielded Skeleton",
+          "id": 4000073,
+          "TID": "TID_SKELETON",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "Spell Unshielded Skeleton",
+          "id": 4000074,
+          "TID": "TID_SKELETON",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "Spell Bat",
+          "id": 4000068,
+          "TID": "TID_BAT",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "BouncingFrostmite",
+          "id": 4000113,
+          "TID": "TID_CHARACTER_ICE_SPIRIT",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "Totem",
+          "id": 4000175,
+          "TID": "TID_GOLEM",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "Trap Skeleton",
+          "id": 4000019,
+          "TID": "TID_SKELETON",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "Trap Air Skeleton",
+          "id": 4000021,
+          "TID": "TID_AIR_SKELETON",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Trap Minion",
+          "id": 4000020,
+          "TID": "TID_GARGOYLE",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "2",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "BK Equipment Snake",
+          "id": 4000144,
+          "TID": "TID_BARBKINGEQUIPSNAKE",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "MP Equipment Henchman",
+          "id": 4000146,
+          "TID": "TID_MINION_BODYGUARD",
+          "HousingSpace": "10"
+        },
+        {
+          "name": "GW Equipment Lavaloon",
+          "id": 4000128,
+          "TID": "TID_CHARACTER_LAVALOON",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "21"
+        },
+        {
+          "name": "GW Equipment Lavaloon Pup",
+          "id": 4000129,
+          "TID": "TID_CHARACTER_LAVALOON_PUP",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "Prototype3",
+          "id": 4000093,
+          "TID": "TID_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Ruin Witch",
+          "id": 4000109,
+          "TID": "TID_CHARACTER_RUIN_WITCH",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "264",
+          "HousingSpace": "26",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Prototype4",
+          "id": 4000111,
+          "TID": "TID_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Prototype5",
+          "id": 4000112,
+          "TID": "TID_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Prototype6",
+          "id": 4000114,
+          "TID": "TID_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Prototype7",
+          "id": 4000115,
+          "TID": "TID_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Ruin Knight",
+          "id": 4000127,
+          "TID": "TID_CHARACTER_RUIN_KNIGHT",
+          "HousingSpace": "18"
+        },
+        {
+          "name": "Prototype8",
+          "id": 4000131,
+          "TID": "TID_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Prototype9",
+          "id": 4000133,
+          "TID": "TID_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Prototype10",
+          "id": 4000134,
+          "TID": "TID_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Prototype11",
+          "id": 4000137,
+          "TID": "TID_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Prototype12",
+          "id": 4000138,
+          "TID": "TID_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Prototype13",
+          "id": 4000139,
+          "TID": "TID_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Prototype14",
+          "id": 4000140,
+          "TID": "TID_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Prototype15",
+          "id": 4000153,
+          "TID": "TID_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Prototype16",
+          "id": 4000154,
+          "TID": "TID_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Prototype17",
+          "id": 4000155,
+          "TID": "TID_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Unused2",
+          "id": 4000160,
+          "TID": "TID_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Unused3",
+          "id": 4000161,
+          "TID": "TID_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Guardian Eagle",
+          "id": 4000171,
+          "TID": "TID_GOLEM",
+          "HousingSpace": "25"
+        },
+        {
+          "name": "Guardian Giga Inferno",
+          "id": 4000172,
+          "TID": "TID_GOLEM",
+          "HousingSpace": "25"
+        },
+        {
+          "name": "Guardian Assassins",
+          "id": 4000173,
+          "TID": "TID_GOLEM",
+          "HousingSpace": "25"
+        },
+        {
+          "name": "Guardian Reviver",
+          "id": 4000174,
+          "TID": "TID_GOLEM",
+          "HousingSpace": "25"
+        },
+        {
+          "name": "Unused4",
+          "id": 4000176,
+          "TID": "TID_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "DEPRECATED",
+          "id": 4000025,
+          "TID": "TID_MINER",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "24",
+          "HousingSpace": "6"
+        },
+        {
+          "name": "BB Raged Barbarian",
+          "id": 4000031,
+          "TID": "TID_RAGED_BARBARIAN",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "0",
+          "UpgradeTimeM": "0",
+          "VillageType": "1",
+          "HousingSpace": "4",
+          "ProductionBuilding": "BB Barracks"
+        },
+        {
+          "name": "BB Sneaky Archer",
+          "id": 4000032,
+          "TID": "TID_SNEAKY_ARCHER",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "0",
+          "UpgradeTimeM": "3",
+          "VillageType": "1",
+          "HousingSpace": "3",
+          "ProductionBuilding": "BB Barracks"
+        },
+        {
+          "name": "BB Boxer Giant",
+          "id": 4000034,
+          "TID": "TID_IRONFIST_GIANT",
+          "LaboratoryLevel": "3",
+          "UpgradeTimeH": "5",
+          "VillageType": "1",
+          "HousingSpace": "18",
+          "ProductionBuilding": "BB Barracks"
+        },
+        {
+          "name": "BB Beta Minion",
+          "id": 4000033,
+          "TID": "TID_TOXIC_MINION",
+          "LaboratoryLevel": "3",
+          "UpgradeTimeH": "4",
+          "VillageType": "1",
+          "HousingSpace": "3",
+          "ProductionBuilding": "BB Barracks"
+        },
+        {
+          "name": "BB Bomber",
+          "id": 4000035,
+          "TID": "TID_BOMBER",
+          "LaboratoryLevel": "4",
+          "UpgradeTimeH": "16",
+          "VillageType": "1",
+          "HousingSpace": "12",
+          "ProductionBuilding": "BB Barracks"
+        },
+        {
+          "name": "BB Baby Dragon",
+          "id": 4000041,
+          "TID": "TID_BABY_DRAGON2",
+          "LaboratoryLevel": "4",
+          "UpgradeTimeH": "16",
+          "VillageType": "1",
+          "HousingSpace": "12",
+          "ProductionBuilding": "BB Barracks"
+        },
+        {
+          "name": "BB Cannon Cart",
+          "id": 4000037,
+          "TID": "TID_MOVING_CANNON",
+          "LaboratoryLevel": "5",
+          "UpgradeTimeH": "24",
+          "VillageType": "1",
+          "HousingSpace": "16",
+          "ProductionBuilding": "BB Barracks"
+        },
+        {
+          "name": "BB Night Witch",
+          "id": 4000042,
+          "TID": "TID_DARK_WITCH",
+          "LaboratoryLevel": "6",
+          "UpgradeTimeH": "48",
+          "VillageType": "1",
+          "HousingSpace": "14",
+          "ProductionBuilding": "BB Barracks"
+        },
+        {
+          "name": "BB Bat",
+          "id": 4000043,
+          "TID": "TID_BAT",
+          "LaboratoryLevel": "1",
+          "VillageType": "1",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "BB Enraged Bat",
+          "id": 4000105,
+          "TID": "TID_BAT",
+          "LaboratoryLevel": "1",
+          "VillageType": "1",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "BB Drop Ship",
+          "id": 4000038,
+          "TID": "TID_BALLOON_CARRIER",
+          "LaboratoryLevel": "7",
+          "UpgradeTimeH": "60",
+          "VillageType": "1",
+          "HousingSpace": "15",
+          "ProductionBuilding": "BB Barracks"
+        },
+        {
+          "name": "BB Drop Ship Skeleton",
+          "id": 4000040,
+          "TID": "TID_SKELETON",
+          "LaboratoryLevel": "1",
+          "VillageType": "1",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "BB Power PEKKA",
+          "id": 4000036,
+          "TID": "TID_SUPER_CHARGED_PEKKA",
+          "LaboratoryLevel": "8",
+          "UpgradeTimeH": "108",
+          "VillageType": "1",
+          "HousingSpace": "22",
+          "ProductionBuilding": "BB Barracks"
+        },
+        {
+          "name": "BB Hog Glider",
+          "id": 4000070,
+          "TID": "TID_HOG_GLIDER",
+          "LaboratoryLevel": "9",
+          "UpgradeTimeH": "132",
+          "VillageType": "1",
+          "HousingSpace": "12",
+          "ProductionBuilding": "BB Barracks"
+        },
+        {
+          "name": "BB Hog Rider",
+          "id": 4000071,
+          "TID": "TID_HOG_RIDER",
+          "LaboratoryLevel": "1",
+          "VillageType": "1",
+          "HousingSpace": "12",
+          "ProductionBuilding": "BB Barracks"
+        },
+        {
+          "name": "BB Electrofire Wizard",
+          "id": 4000106,
+          "TID": "TID_ELECTROFIRE_WIZARD",
+          "LaboratoryLevel": "10",
+          "UpgradeTimeH": "144",
+          "VillageType": "1",
+          "HousingSpace": "14",
+          "ProductionBuilding": "BB Barracks"
+        },
+        {
+          "name": "BB Zappy",
+          "id": 4000107,
+          "TID": "TID_ZAPPY",
+          "VillageType": "1",
+          "HousingSpace": "6"
+        },
+        {
+          "name": "BB MovingCannonSecondary",
+          "id": 4000044,
+          "TID": "TID_MOVING_CANNON",
+          "LaboratoryLevel": "4",
+          "VillageType": "1",
+          "HousingSpace": "16",
+          "ProductionBuilding": "BB Barracks"
+        },
+        {
+          "name": "Guardian Sniffer",
+          "id": 4000181,
+          "TID": "TID_SNIFFER_GUARDIAN",
+          "UpgradeTimeH": "168",
+          "HousingSpace": "25"
+        },
+        {
+          "name": "Guardian Builder",
+          "id": 4000182,
+          "TID": "TID_BUILDER_GUARDIAN",
+          "UpgradeTimeH": "168",
+          "HousingSpace": "25"
+        },
+        {
+          "name": "Guardian Logger",
+          "id": 4000183,
+          "TID": "TID_LOGGER_GUARDIAN",
+          "UpgradeTimeH": "168",
+          "HousingSpace": "25"
+        },
+        {
+          "name": "Guardian Returner",
+          "id": 4000184,
+          "TID": "TID_RETURNER_GUARDIAN",
+          "UpgradeTimeH": "168",
+          "HousingSpace": "25"
+        },
+        {
+          "name": "Elephant",
+          "id": 4000186,
+          "TID": "TID_CHARACTER_ELEPHANT",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "20",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Rider",
+          "id": 4000187,
+          "TID": "TID_CHARACTER_ELEPHANT_RIDER_DEPLOYED",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "10",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "Air Troop Launcher",
+          "id": 4000188,
+          "TID": "TID_SIEGE_MACHINE_AIR_TROOP_LAUNCHER",
+          "LaboratoryLevel": "14",
+          "UpgradeTimeH": "240",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Siege Workshop"
+        },
+        {
+          "name": "UnusedSiegePrototype",
+          "id": 4000189,
+          "TID": "TID_SIEGE_MACHINE_RAM",
+          "LaboratoryLevel": "9",
+          "UpgradeTimeH": "48",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Siege Workshop"
+        },
+        {
+          "name": "Elephant Rider",
+          "id": 4000185,
+          "TID": "TID_CHARACTER_ELEPHANT_RIDER",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "24",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Undead Wrestler Big Boy",
+          "id": 4000191,
+          "TID": "TID_CHARACTER_UNDEAD_WRESTLER_BIG_BOY",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "20",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Ruin Witch_DEF",
+          "id": 4000192,
+          "TID": "TID_CHARACTER_RUIN_WITCH",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "26",
+          "ProductionBuilding": "Dark Barracks"
+        },
+        {
+          "name": "UndeadWrestler",
+          "id": 4000190,
+          "TID": "TID_CHARACTER_UNDEAD_WRESTLER",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "80",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Tiny Totem",
+          "id": 4000193,
+          "HousingSpace": "20"
+        },
+        {
+          "name": "Totem Thrower",
+          "id": 4000194,
+          "TID": "TID_CHARACTER_TOTEM_THROWER",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "28",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "Barcher Squad",
+          "id": 4000195,
+          "TID": "TID_BARCHER_SQUAD",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "264",
+          "UpgradeTimeM": "0",
+          "HousingSpace": "15",
+          "ProductionBuilding": "Squad Barracks"
+        },
+        {
+          "name": "Giant Wizard Squad",
+          "id": 4000196,
+          "TID": "TID_GIANT_WIZARD_SQUAD",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "288",
+          "HousingSpace": "25",
+          "ProductionBuilding": "Squad Barracks"
+        },
+        {
+          "name": "Wall Breaker Squad",
+          "id": 4000197,
+          "TID": "TID_WALL_BREAKER_SQUAD",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "252",
+          "HousingSpace": "8",
+          "ProductionBuilding": "Squad Barracks"
+        },
+        {
+          "name": "Minion Squad",
+          "id": 4000198,
+          "TID": "TID_MINION_SQUAD",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "276",
+          "HousingSpace": "12",
+          "ProductionBuilding": "Squad Barracks"
+        },
+        {
+          "name": "Balloon Squad",
+          "id": 4000199,
+          "TID": "TID_BALLOON_SQUAD",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "324",
+          "HousingSpace": "16",
+          "ProductionBuilding": "Squad Barracks"
+        },
+        {
+          "name": "Golemwitch Squad",
+          "id": 4000200,
+          "TID": "TID_GOLEMWITCH_SQUAD",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "312",
+          "HousingSpace": "55",
+          "ProductionBuilding": "Squad Barracks"
+        },
+        {
+          "name": "Hog Rider Squad",
+          "id": 4000201,
+          "TID": "TID_HOG_RIDER_SQUAD",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "300",
+          "HousingSpace": "48",
+          "ProductionBuilding": "Squad Barracks"
+        },
+        {
+          "name": "Miner Squad",
+          "id": 4000202,
+          "TID": "TID_MINER_SQUAD",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "240",
+          "HousingSpace": "48",
+          "ProductionBuilding": "Squad Barracks"
+        },
+        {
+          "name": "Healer Squad",
+          "id": 4000203,
+          "TID": "TID_HEALER_SQUAD",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "330",
+          "HousingSpace": "70",
+          "ProductionBuilding": "Squad Barracks"
+        },
+        {
+          "name": "PEKKA Etitan Squad",
+          "id": 4000204,
+          "TID": "TID_PEKKA_ETITAN_SQUAD",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "318",
+          "HousingSpace": "46",
+          "ProductionBuilding": "Squad Barracks"
+        },
+        {
+          "name": "Dragon Squad",
+          "id": 4000205,
+          "TID": "TID_DRAGON_SQUAD",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "336",
+          "HousingSpace": "85",
+          "ProductionBuilding": "Squad Barracks"
+        },
+        {
+          "name": "Baby Dragon Squad",
+          "id": 4000206,
+          "TID": "TID_BABY_DRAGON_SQUAD",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "312",
+          "HousingSpace": "26",
+          "ProductionBuilding": "Squad Barracks"
+        },
+        {
+          "name": "Seasonal Defense Spear Goblin",
+          "id": 4000207,
+          "TID": "TID_CHARACTER_SPEAR_GOBLIN",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "Christmas Yeti",
+          "id": 4000208,
+          "TID": "TID_CHARACTER_CHRISTMAS_YETI",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "26",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "ChristmasYetiMite",
+          "id": 4000209,
+          "TID": "TID_CHARACTER_CHRISTMAS_YETI_MITE",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1"
+        },
+        {
+          "name": "FireGoat",
+          "id": 4000210,
+          "TID": "TID_CHARACTER_FIRE_GOAT",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "28",
+          "ProductionBuilding": "Barracks"
+        },
+        {
+          "name": "FireGoatMini",
+          "id": 4000211,
+          "TID": "TID_CHARACTER_FIRE_GOAT_MINI",
+          "HousingSpace": "5"
+        },
+        {
+          "name": "FireGoatAdult",
+          "id": 4000212,
+          "TID": "TID_CHARACTER_FIRE_GOAT",
+          "HousingSpace": "28"
+        }
+      ]
+    },
+    "logic/spells.csv": {
+      "count": 155,
+      "fields": [
+        "Name",
+        "GlobalID",
+        "Level",
+        "TID",
+        "InfoTID",
+        "DisableProduction",
+        "SpellForgeLevel",
+        "LaboratoryLevel",
+        "HousingSpace",
+        "DeployTimeMS",
+        "ChargingTimeMS",
+        "HitTimeMS",
+        "UpgradeTimeH",
+        "UpgradeResource",
+        "UpgradeCost"
+      ],
+      "items": [
+        {
+          "name": "Lightning",
+          "id": 26000000,
+          "TID": "TID_LIGHTNING_STORM",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "2",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Spell Factory",
+          "SpellForgeLevel": "1"
+        },
+        {
+          "name": "Healing",
+          "id": 26000001,
+          "TID": "TID_HEALING_WAVE",
+          "LaboratoryLevel": "2",
+          "UpgradeTimeH": "3",
+          "HousingSpace": "2",
+          "ProductionBuilding": "Spell Factory",
+          "SpellForgeLevel": "2"
+        },
+        {
+          "name": "Rage",
+          "id": 26000002,
+          "TID": "TID_HASTE",
+          "LaboratoryLevel": "3",
+          "UpgradeTimeH": "6",
+          "HousingSpace": "2",
+          "ProductionBuilding": "Spell Factory",
+          "SpellForgeLevel": "3"
+        },
+        {
+          "name": "Jump",
+          "id": 26000003,
+          "TID": "TID_JUMP_SPELL",
+          "LaboratoryLevel": "4",
+          "UpgradeTimeH": "24",
+          "HousingSpace": "2",
+          "ProductionBuilding": "Spell Factory",
+          "SpellForgeLevel": "4"
+        },
+        {
+          "name": "Freeze",
+          "id": 26000005,
+          "TID": "TID_FREEZE_SPELL",
+          "LaboratoryLevel": "7",
+          "UpgradeTimeH": "24",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Spell Factory",
+          "SpellForgeLevel": "4"
+        },
+        {
+          "name": "Clone",
+          "id": 26000016,
+          "TID": "TID_DUPLICATE_SPELL",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "24",
+          "HousingSpace": "3",
+          "ProductionBuilding": "Spell Factory",
+          "SpellForgeLevel": "5"
+        },
+        {
+          "name": "Invisibility",
+          "id": 26000035,
+          "TID": "TID_INVISIBILITY_SPELL",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "72",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Spell Factory",
+          "SpellForgeLevel": "6"
+        },
+        {
+          "name": "Recall",
+          "id": 26000053,
+          "TID": "TID_SPELL_RECALL",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "168",
+          "HousingSpace": "2",
+          "ProductionBuilding": "Spell Factory",
+          "SpellForgeLevel": "7"
+        },
+        {
+          "name": "Revive",
+          "id": 26000098,
+          "TID": "TID_SPELL_REVIVE",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "168",
+          "HousingSpace": "2",
+          "ProductionBuilding": "Spell Factory",
+          "SpellForgeLevel": "8"
+        },
+        {
+          "name": "Totem Spell",
+          "id": 26000120,
+          "TID": "TID_TOTEM_SPELL",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "228",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Spell Factory",
+          "SpellForgeLevel": "9"
+        },
+        {
+          "name": "Poison",
+          "id": 26000009,
+          "TID": "TID_POISON_CLOUD",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "6",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Dark Spell Factory",
+          "SpellForgeLevel": "1"
+        },
+        {
+          "name": "Earthquake",
+          "id": 26000010,
+          "TID": "TID_EARTHQUAKE",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "12",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Dark Spell Factory",
+          "SpellForgeLevel": "2"
+        },
+        {
+          "name": "Haste",
+          "id": 26000011,
+          "TID": "TID_SPEEDUP",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "24",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Dark Spell Factory",
+          "SpellForgeLevel": "3"
+        },
+        {
+          "name": "Skeleton Spell",
+          "id": 26000017,
+          "TID": "TID_CREATE_SKELETONS_SPELL",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "12",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Dark Spell Factory",
+          "SpellForgeLevel": "4"
+        },
+        {
+          "name": "Bat Spell",
+          "id": 26000028,
+          "TID": "TID_SPELL_BATS",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "18",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Dark Spell Factory",
+          "SpellForgeLevel": "5"
+        },
+        {
+          "name": "Overgrowth",
+          "id": 26000070,
+          "TID": "TID_SPELL_OVERGROWTH",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "120",
+          "HousingSpace": "2",
+          "ProductionBuilding": "Dark Spell Factory",
+          "SpellForgeLevel": "6"
+        },
+        {
+          "name": "Ice Block",
+          "id": 26000109,
+          "TID": "TID_ICE_BLOCK_SPELL",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "168",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Dark Spell Factory",
+          "SpellForgeLevel": "7"
+        },
+        {
+          "name": "xmas",
+          "id": 26000004,
+          "TID": "TID_XMAS_SPELL",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "2",
+          "SpellForgeLevel": "1"
+        },
+        {
+          "name": "Santas Surprise",
+          "id": 26000006,
+          "TID": "TID_XMAS_SPELL",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "2",
+          "ProductionBuilding": "Spell Factory",
+          "SpellForgeLevel": "1"
+        },
+        {
+          "name": "Slow",
+          "id": 26000007,
+          "TID": "TID_SLOW_SPELL",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "0",
+          "HousingSpace": "2",
+          "SpellForgeLevel": "1"
+        },
+        {
+          "name": "BoostDefences",
+          "id": 26000008,
+          "TID": "TID_BOOSTDEFENCES_SPELL",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "0",
+          "HousingSpace": "2",
+          "SpellForgeLevel": "1"
+        },
+        {
+          "name": "Eternal Tome Aura",
+          "id": 26000012
+        },
+        {
+          "name": "Life Gem Aura",
+          "id": 26000013
+        },
+        {
+          "name": "Eagle Artillery Hit Spell",
+          "id": 26000014
+        },
+        {
+          "name": "MiniGrowth",
+          "id": 26000015
+        },
+        {
+          "name": "FreezeTrap",
+          "id": 26000018
+        },
+        {
+          "name": "Lava Launcher Hit Spell",
+          "id": 26000019,
+          "VillageType": "1"
+        },
+        {
+          "name": "TroopRage",
+          "id": 26000020
+        },
+        {
+          "name": "ShrinkTrap",
+          "id": 26000021
+        },
+        {
+          "name": "Birthday2017",
+          "id": 26000022,
+          "TID": "TID_BIRTHDAY_SPELL",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "2",
+          "ProductionBuilding": "Spell Factory",
+          "SpellForgeLevel": "1"
+        },
+        {
+          "name": "IceGolemFreeze",
+          "id": 26000023
+        },
+        {
+          "name": "ElectroDragonDie",
+          "id": 26000024
+        },
+        {
+          "name": "Tornado Trap",
+          "id": 26000025
+        },
+        {
+          "name": "TroopHaste",
+          "id": 26000026
+        },
+        {
+          "name": "ProtoSpell2",
+          "id": 26000027,
+          "TID": "TID_LIGHTNING_STORM",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "72",
+          "HousingSpace": "3",
+          "SpellForgeLevel": "5"
+        },
+        {
+          "name": "IceGolemFreeze_DEF",
+          "id": 26000029
+        },
+        {
+          "name": "Scattershot Hit Spell",
+          "id": 26000030
+        },
+        {
+          "name": "BatRage",
+          "id": 26000031
+        },
+        {
+          "name": "TH13 Frost",
+          "id": 26000032
+        },
+        {
+          "name": "Electro Titan Aura",
+          "id": 26000033
+        },
+        {
+          "name": "EliteValkyrieRage",
+          "id": 26000034
+        },
+        {
+          "name": "IceHoundFreeze",
+          "id": 26000036
+        },
+        {
+          "name": "TH14 Poison",
+          "id": 26000037
+        },
+        {
+          "name": "FireSpiritExplosion",
+          "id": 26000038
+        },
+        {
+          "name": "PhoenixImmortality",
+          "id": 26000039
+        },
+        {
+          "name": "TroopImmortality",
+          "id": 26000040
+        },
+        {
+          "name": "AreaStun",
+          "id": 26000041
+        },
+        {
+          "name": "DrillerSurfacing",
+          "id": 26000042
+        },
+        {
+          "name": "TH15 Poison",
+          "id": 26000043
+        },
+        {
+          "name": "Spell Tower Poison",
+          "id": 26000044,
+          "TID": "TID_POISON_CLOUD_TOWER",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "8",
+          "HousingSpace": "1",
+          "SpellForgeLevel": "1"
+        },
+        {
+          "name": "SuperHogRiderSummonHog",
+          "id": 26000045
+        },
+        {
+          "name": "Spell Tower Rage",
+          "id": 26000046,
+          "TID": "TID_HASTE_TOWER",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "12",
+          "HousingSpace": "2",
+          "SpellForgeLevel": "1"
+        },
+        {
+          "name": "SuperHogRiderSummonRider",
+          "id": 26000047
+        },
+        {
+          "name": "Spell Tower Invisibility",
+          "id": 26000048,
+          "TID": "TID_INVISIBILITY_SPELL_TOWER",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "192",
+          "HousingSpace": "1",
+          "SpellForgeLevel": "1"
+        },
+        {
+          "name": "GraveGolemSummonBigBoy",
+          "id": 26000049
+        },
+        {
+          "name": "HogWizardDamageAura",
+          "id": 26000050
+        },
+        {
+          "name": "Unused1",
+          "id": 26000051
+        },
+        {
+          "name": "COOKIEAura",
+          "id": 26000052
+        },
+        {
+          "name": "GrandWardenRangeRing",
+          "id": 26000054
+        },
+        {
+          "name": "PoisonLizardAttack",
+          "id": 26000055
+        },
+        {
+          "name": "RamRiderDestroyWalls",
+          "id": 26000056,
+          "TID": "TID_RAM_RIDER_ABILITY_TITLE"
+        },
+        {
+          "name": "SlowBomb",
+          "id": 26000057
+        },
+        {
+          "name": "VisualRage",
+          "id": 26000058
+        },
+        {
+          "name": "Baby Dragon Flaming Sneeze",
+          "id": 26000059,
+          "VillageType": "1"
+        },
+        {
+          "name": "Power PEKKA Overcharge",
+          "id": 26000060,
+          "VillageType": "1"
+        },
+        {
+          "name": "Drop Ship Skeleton Bomb",
+          "id": 26000061,
+          "VillageType": "1"
+        },
+        {
+          "name": "Night Witch Bat Swarm",
+          "id": 26000062,
+          "VillageType": "1"
+        },
+        {
+          "name": "Cannon Cart Mortar Mode Splash",
+          "id": 26000063,
+          "VillageType": "1"
+        },
+        {
+          "name": "Apprentice Aura",
+          "id": 26000064
+        },
+        {
+          "name": "PetJump",
+          "id": 26000065
+        },
+        {
+          "name": "PetSpeedUp",
+          "id": 26000066
+        },
+        {
+          "name": "FireSpiritBurn",
+          "id": 26000067
+        },
+        {
+          "name": "TreantWallDamageAura",
+          "id": 26000068
+        },
+        {
+          "name": "SiegeInvisibility",
+          "id": 26000069
+        },
+        {
+          "name": "Heroic Torch Aura",
+          "id": 26000071
+        },
+        {
+          "name": "Blizzard",
+          "id": 26000072,
+          "TID": "TID_FREEZE_SPELL",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "42",
+          "HousingSpace": "1",
+          "SpellForgeLevel": "5"
+        },
+        {
+          "name": "BagOfFrostmites",
+          "id": 26000073,
+          "TID": "TID_SPELL_BAG_OF_FROSTMITES",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Spell Factory",
+          "SpellForgeLevel": "1"
+        },
+        {
+          "name": "TroopCatapultSummonTroop",
+          "id": 26000074
+        },
+        {
+          "name": "LavaloonSpawnPup",
+          "id": 26000075
+        },
+        {
+          "name": "Firecracker Hit Spell",
+          "id": 26000076
+        },
+        {
+          "name": "Earthquake Boots Spell",
+          "id": 26000077,
+          "TID": "TID_EARTHQUAKE"
+        },
+        {
+          "name": "Fireball Hit Spell",
+          "id": 26000078
+        },
+        {
+          "name": "Rage Gem Aura",
+          "id": 26000079
+        },
+        {
+          "name": "QueenFreeze",
+          "id": 26000080
+        },
+        {
+          "name": "ElectrifiedShield",
+          "id": 26000081
+        },
+        {
+          "name": "BarbarianKingDestroyWalls",
+          "id": 26000082,
+          "TID": "TID_RAM_RIDER_ABILITY_TITLE"
+        },
+        {
+          "name": "Healing Tome Aura",
+          "id": 26000083
+        },
+        {
+          "name": "Yellow Card",
+          "id": 26000084,
+          "TID": "TID_SPELL_YELLOW_CARD",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Spell Factory",
+          "SpellForgeLevel": "1"
+        },
+        {
+          "name": "GWPhoenixStickSpell",
+          "id": 26000085
+        },
+        {
+          "name": "BattleDruidHeal",
+          "id": 26000086,
+          "TID": "TID_HEALING_WAVE"
+        },
+        {
+          "name": "Electro Boots Aura",
+          "id": 26000087
+        },
+        {
+          "name": "GWLavaloonSpawnPup",
+          "id": 26000088
+        },
+        {
+          "name": "IceMinionFreeze",
+          "id": 26000089
+        },
+        {
+          "name": "Commander Aura",
+          "id": 26000090
+        },
+        {
+          "name": "TroopCatapultSummonTroopNew",
+          "id": 26000091
+        },
+        {
+          "name": "TorchThrowerB",
+          "id": 26000092
+        },
+        {
+          "name": "Destroyer",
+          "id": 26000093
+        },
+        {
+          "name": "Debris Explosion 1",
+          "id": 26000094,
+          "TID": "TID_LIGHTNING_STORM",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "2",
+          "HousingSpace": "2",
+          "SpellForgeLevel": "8"
+        },
+        {
+          "name": "Debris Explosion 2",
+          "id": 26000095,
+          "TID": "TID_EARTHQUAKE",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "2",
+          "ProductionBuilding": "Spell Factory",
+          "SpellForgeLevel": "1"
+        },
+        {
+          "name": "FireSpiritBurn_DEF",
+          "id": 26000096
+        },
+        {
+          "name": "Resurrect",
+          "id": 26000097,
+          "TID": "TID_SPELL_REVIVE",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "2",
+          "SpellForgeLevel": "6"
+        },
+        {
+          "name": "TH17WeaponAreaDamage",
+          "id": 26000099
+        },
+        {
+          "name": "BarbKingEquipSpawn",
+          "id": 26000100
+        },
+        {
+          "name": "MassDestruction",
+          "id": 26000101,
+          "TID": "TID_SPELL_MASS_DESTRUCTION"
+        },
+        {
+          "name": "MinionGiantPoison",
+          "id": 26000102,
+          "TID": "TID_POISON_CLOUD"
+        },
+        {
+          "name": "Unused2",
+          "id": 26000103
+        },
+        {
+          "name": "Unused3",
+          "id": 26000104
+        },
+        {
+          "name": "April25_TBRM_Aura",
+          "id": 26000105
+        },
+        {
+          "name": "April25_TBRM_DeathSpawn",
+          "id": 26000106
+        },
+        {
+          "name": "April25_RRAltProjectile_Spawn",
+          "id": 26000107
+        },
+        {
+          "name": "April25_RRAltProjectile_Spawn_DEF",
+          "id": 26000108
+        },
+        {
+          "name": "MPMeteorStaffSpell",
+          "id": 26000110
+        },
+        {
+          "name": "MeteorGolemImpactSpell",
+          "id": 26000111
+        },
+        {
+          "name": "TH18EventMeteorDeathDamage",
+          "id": 26000112
+        },
+        {
+          "name": "SmasherRageArea",
+          "id": 26000113
+        },
+        {
+          "name": "SlowdownTowerSlowness",
+          "id": 26000114,
+          "TID": "TID_POISON_CLOUD_TOWER",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "8",
+          "HousingSpace": "1",
+          "SpellForgeLevel": "1"
+        },
+        {
+          "name": "GuardianRage",
+          "id": 26000115
+        },
+        {
+          "name": "GuardianReviveSpell",
+          "id": 26000116
+        },
+        {
+          "name": "SeasonalDefenseHeroBoosterRageAura",
+          "id": 26000117
+        },
+        {
+          "name": "SeasonalDefenseHeroBoosterHealthBoostAura",
+          "id": 26000118
+        },
+        {
+          "name": "Debris Explosion 3",
+          "id": 26000119,
+          "TID": "TID_LIGHTNING_STORM",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "2",
+          "HousingSpace": "2",
+          "SpellForgeLevel": "8"
+        },
+        {
+          "name": "TotemSummon",
+          "id": 26000121
+        },
+        {
+          "name": "PhoenixSpell",
+          "id": 26000122,
+          "TID": "TID_HEALING_WAVE",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "3",
+          "HousingSpace": "2",
+          "SpellForgeLevel": "8"
+        },
+        {
+          "name": "AngrySpell",
+          "id": 26000123,
+          "TID": "TID_ANGRY_SPELL_ANGER",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "216",
+          "HousingSpace": "1",
+          "ProductionBuilding": "Dark Spell Factory",
+          "SpellForgeLevel": "8"
+        },
+        {
+          "name": "Unused4",
+          "id": 26000124
+        },
+        {
+          "name": "Unused5",
+          "id": 26000125
+        },
+        {
+          "name": "Clashmas25FireArea",
+          "id": 26000126
+        },
+        {
+          "name": "LNY26HealingArea",
+          "id": 26000127
+        },
+        {
+          "name": "LNY26DeathDamage",
+          "id": 26000128
+        },
+        {
+          "name": "Lava Launcher Hit Spell_Seasonal_Defense",
+          "id": 26000129
+        },
+        {
+          "name": "Spell Tower Earthquake",
+          "id": 26000130,
+          "TID": "TID_EARTHQUAKE"
+        },
+        {
+          "name": "DragonDukeDashAura",
+          "id": 26000131
+        },
+        {
+          "name": "DragonDukeRingOfFire",
+          "id": 26000132
+        },
+        {
+          "name": "DragonDukeFireBlast",
+          "id": 26000133
+        },
+        {
+          "name": "DragonCrownExplosion",
+          "id": 26000134
+        },
+        {
+          "name": "DDBlastSpell",
+          "id": 26000135
+        },
+        {
+          "name": "DragonDukeFireBlastMini",
+          "id": 26000136
+        },
+        {
+          "name": "GuardianBuilderRageSpell",
+          "id": 26000137
+        },
+        {
+          "name": "ElephantRiderSummonElephant",
+          "id": 26000138
+        },
+        {
+          "name": "ElephantRiderSummonRider",
+          "id": 26000139
+        },
+        {
+          "name": "AirTroopSummon",
+          "id": 26000141
+        },
+        {
+          "name": "CakeThrowerExplosion",
+          "id": 26000142
+        },
+        {
+          "name": "UndeadWrestlerDeathSpawn",
+          "id": 26000140
+        },
+        {
+          "name": "Blizzard Axe Aura",
+          "id": 26000148
+        },
+        {
+          "name": "TinyTotemImpact",
+          "id": 26000143
+        },
+        {
+          "name": "TinyTotemSummon",
+          "id": 26000144
+        },
+        {
+          "name": "CakeThrowerExplosion2",
+          "id": 26000145
+        },
+        {
+          "name": "CakeThrowerExplosion3",
+          "id": 26000146
+        },
+        {
+          "name": "CakeThrowerExplosion4",
+          "id": 26000147
+        },
+        {
+          "name": "GoblinThrowerTowerSummon",
+          "id": 26000149
+        },
+        {
+          "name": "Firecracker Tower Hit Spell",
+          "id": 26000150
+        },
+        {
+          "name": "ShieldBroochBurst",
+          "id": 26000151
+        },
+        {
+          "name": "ChristmasYetiMiteFreeze",
+          "id": 26000152
+        },
+        {
+          "name": "Heroic Spell",
+          "id": 26000153,
+          "TID": "TID_SPELL_HEROIC_SPELL",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "312",
+          "HousingSpace": "2",
+          "ProductionBuilding": "Spell Factory",
+          "SpellForgeLevel": "10"
+        },
+        {
+          "name": "FireGoatSummonLamb",
+          "id": 26000154
+        }
+      ]
+    },
+    "logic/guardians.csv": {
+      "count": 10,
+      "fields": [
+        "Name",
+        "Level",
+        "TID",
+        "InfoTID",
+        "ShortInfoTID",
+        "UpgradeData",
+        "isDefault",
+        "Deprecated",
+        "IconSWF",
+        "IconExportName",
+        "BannerSWF",
+        "BannerExportName",
+        "DisplaySkin",
+        "CharacterDatas",
+        "CharacterLevels"
+      ],
+      "items": [
+        {
+          "name": "InfernoArtillery",
+          "TID": "TID_INFERNO_GUARDIAN"
+        },
+        {
+          "name": "MeleeAreaaaa",
+          "TID": "TID_MELEE_AREA_GUARDIAN"
+        },
+        {
+          "name": "Eagle",
+          "TID": "TID_EAGLE_GUARDIAN"
+        },
+        {
+          "name": "GigaInferno",
+          "TID": "TID_GIGA_INFERNO_GUARDIAN"
+        },
+        {
+          "name": "Assassins",
+          "TID": "TID_ASSASSINS_GUARDIAN"
+        },
+        {
+          "name": "Reviver",
+          "TID": "TID_REVIVER_GUARDIAN"
+        },
+        {
+          "name": "Sniffer",
+          "TID": "TID_SNIFFER_GUARDIAN"
+        },
+        {
+          "name": "Builder",
+          "TID": "TID_BUILDER_GUARDIAN"
+        },
+        {
+          "name": "Logger",
+          "TID": "TID_LOGGER_GUARDIAN"
+        },
+        {
+          "name": "Returner",
+          "TID": "TID_RETURNER_GUARDIAN"
+        }
+      ]
+    },
+    "logic/seasonal_defense.csv": {
+      "count": 5,
+      "fields": [
+        "Name",
+        "Archetypes",
+        "TID",
+        "InfoTID"
+      ],
+      "items": [
+        {
+          "name": "Season1",
+          "TID": "TID_SEASONAL_DEFENCE_SEASON_1_TITLE"
+        },
+        {
+          "name": "Season2",
+          "TID": "TID_SEASONAL_DEFENCE_SEASON_2_TITLE"
+        },
+        {
+          "name": "Season3",
+          "TID": "TID_SEASONAL_DEFENCE_SEASON_3_TITLE"
+        },
+        {
+          "name": "Season4",
+          "TID": "TID_SEASONAL_DEFENCE_SEASON_3_TITLE"
+        },
+        {
+          "name": "Season5",
+          "TID": "TID_SEASONAL_DEFENCE_SEASON_3_TITLE"
+        }
+      ]
+    },
+    "logic/seasonal_defense_modules.csv": {
+      "count": 51,
+      "fields": [
+        "Name",
+        "SpecialAbility",
+        "StatType",
+        "NextLevelShownStatTypes",
+        "BuildTimeD",
+        "BuildTimeH",
+        "BuildTimeM",
+        "BuildTimeS",
+        "BuildResource",
+        "BuildCost",
+        "TID",
+        "HintPriority",
+        "TownHallLevel"
+      ],
+      "items": [
+        {
+          "name": "HookTowerHPModule",
+          "TID": "TID_SEAONAL_DEFENSE_HOOK_TOWER_MODULE_HP",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "HookTowerAttackModule",
+          "TID": "TID_SEAONAL_DEFENSE_HOOK_TOWER_MODULE_ATTACK",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "HookTowerEffectModule",
+          "TID": "TID_SEAONAL_DEFENSE_HOOK_TOWER_MODULE_EFFECT",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "LazyLaserHPModule",
+          "TID": "TID_SEAONAL_DEFENSE_LAZY_LASER_MODULE_HP",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "LazyLaserAttackModule",
+          "TID": "TID_SEAONAL_DEFENSE_LAZY_LASER_MODULE_ATTACK",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "LazyLaserEffectModule",
+          "TID": "TID_SEAONAL_DEFENSE_LAZY_LASER_MODULE_EFFECT",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "LogLobberHPModule",
+          "TID": "TID_SEAONAL_DEFENSE_LOG_LOBBER_MODULE_HP",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "LogLobberAttackModule",
+          "TID": "TID_SEAONAL_DEFENSE_LOG_LOBBER_MODULE_ATTACK",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "LogLobberEffectModule",
+          "TID": "TID_SEAONAL_DEFENSE_LOG_LOBBER_MODULE_EFFECT",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "FlameSpinnerHPModule",
+          "TID": "TID_SEAONAL_DEFENSE_FLAME_SPINNER_MODULE_HP",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "FlameSpinnerAttackModule",
+          "TID": "TID_SEAONAL_DEFENSE_FLAME_SPINNER_MODULE_ATTACK",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "FlameSpinnerEffectModule",
+          "TID": "TID_SEAONAL_DEFENSE_FLAME_SPINNER_MODULE_EFFECT",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "CrusherMortarHPModule",
+          "TID": "TID_SEAONAL_DEFENSE_CRUSHER_MORTAR_MODULE_HP",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "CrusherMortarAttackModule",
+          "TID": "TID_SEAONAL_DEFENSE_CRUSHER_MORTAR_MODULE_ATTACK",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "CrusherMortarEffectModule",
+          "TID": "TID_SEAONAL_DEFENSE_CRUSHER_MORTAR_MODULE_EFFECT",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "SunBeamHPModule",
+          "TID": "TID_SEAONAL_DEFENSE_SUN_BEAM_MODULE_HP",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "SunBeamAttackModule",
+          "TID": "TID_SEAONAL_DEFENSE_SUN_BEAM_MODULE_ATTACK",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "SunBeamEffectModule",
+          "TID": "TID_SEAONAL_DEFENSE_SUN_BEAM_MODULE_EFFECT",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "SlowdownTowerHPModule",
+          "TID": "TID_SEASONAL_DEFENSE_SLOWDOWN_TOWER_MODULE_HP",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "SlowdownTowerAttackModule",
+          "TID": "TID_SEASONAL_DEFENSE_SLOWDOWN_TOWER_MODULE_ATTACK",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "SlowdownTowerEffectModule",
+          "TID": "TID_SEASONAL_DEFENSE_SLOWDOWN_TOWER_MODULE_EFFECT",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "HeroBoosterHPModule",
+          "TID": "TID_SEASONAL_DEFENSE_HERO_BOOSTER_MODULE_HP",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "HeroBoosterAttackModule",
+          "TID": "TID_SEASONAL_DEFENSE_HERO_BOOSTER_MODULE_ATTACK",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "HeroBoosterEffectModule",
+          "TID": "TID_SEASONAL_DEFENSE_HERO_BOOSTER_MODULE_EFFECT",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "RoasterHPModule",
+          "TID": "TID_SEASONAL_DEFENSE_ROASTER_MODULE_HP",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "RoasterAttackModule",
+          "TID": "TID_SEASONAL_DEFENSE_ROASTER_MODULE_ATTACK",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "RoasterEffectModule",
+          "TID": "TID_SEASONAL_DEFENSE_ROASTER_MODULE_EFFECT",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "AirBombsHPModule",
+          "TID": "TID_SEASONAL_DEFENSE_AIR_BOMBS_MODULE_HP",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "AirBombsAttackModule",
+          "TID": "TID_SEASONAL_DEFENSE_AIR_BOMBS_MODULE_ATTACK",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "AirBombsEffectModule",
+          "TID": "TID_SEASONAL_DEFENSE_AIR_BOMBS_MODULE_EFFECT",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "LavaLauncherHPModule",
+          "TID": "TID_SEASONAL_DEFENSE_LAVA_LAUNCHER_MODULE_HP",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "LavaLauncherAttackModule",
+          "TID": "TID_SEASONAL_DEFENSE_LAVA_LAUNCHER_MODULE_ATTACK",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "LavaLauncherEffectModule",
+          "TID": "TID_SEASONAL_DEFENSE_LAVA_LAUNCHER_MODULE_EFFECT",
+          "TownHallLevel": "MAX"
+        },
+        {
+          "name": "InfernoCandleHPModule",
+          "TID": "TID_SEASONAL_DEFENSE_INFERNO_CANDLE_MODULE_HP",
+          "TownHallLevel": "11"
+        },
+        {
+          "name": "InfernoCandleAttackModule",
+          "TID": "TID_SEASONAL_DEFENSE_INFERNO_CANDLE_MODULE_ATTACK",
+          "TownHallLevel": "11"
+        },
+        {
+          "name": "InfernoCandleEffectModule",
+          "TID": "TID_SEASONAL_DEFENSE_INFERNO_CANDLE_MODULE_EFFECT",
+          "TownHallLevel": "11"
+        },
+        {
+          "name": "HeadhunterTowerHPModule",
+          "TID": "TID_SEASONAL_DEFENSE_HEADHUNTER_TOWER_MODULE_HP",
+          "TownHallLevel": "11"
+        },
+        {
+          "name": "HeadhunterTowerAttackModule",
+          "TID": "TID_SEASONAL_DEFENSE_HEADHUNTER_TOWER_MODULE_ATTACK",
+          "TownHallLevel": "11"
+        },
+        {
+          "name": "HeadhunterTowerEffectModule",
+          "TID": "TID_SEASONAL_DEFENSE_HEADHUNTER_TOWER_MODULE_EFFECT",
+          "TownHallLevel": "11"
+        },
+        {
+          "name": "CakeThrowerHPModule",
+          "TID": "TID_SEASONAL_DEFENSE_SNOW_MORTAR_MODULE_HP",
+          "TownHallLevel": "11"
+        },
+        {
+          "name": "CakeThrowerAttackModule",
+          "TID": "TID_SEASONAL_DEFENSE_SNOW_MORTAR_MODULE_ATTACK",
+          "TownHallLevel": "11"
+        },
+        {
+          "name": "CakeThrowerEffectModule",
+          "TID": "TID_SEASONAL_DEFENSE_SNOW_MORTAR_MODULE_EFFECT",
+          "TownHallLevel": "11"
+        },
+        {
+          "name": "RocketArtilleryTowerHPModule",
+          "TID": "TID_SEASONAL_DEFENSE_ROCKET_ARTILLERY_TOWER_MODULE_HP",
+          "TownHallLevel": "12"
+        },
+        {
+          "name": "RocketArtilleryTowerAttackModule",
+          "TID": "TID_SEASONAL_DEFENSE_ROCKET_ARTILLERY_TOWER_MODULE_ATTACK",
+          "TownHallLevel": "12"
+        },
+        {
+          "name": "RocketArtilleryTowerEffectModule",
+          "TID": "TID_SEASONAL_DEFENSE_ROCKET_ARTILLERY_TOWER_MODULE_EFFECT",
+          "TownHallLevel": "12"
+        },
+        {
+          "name": "MinionHiveLauncherHPModule",
+          "TID": "TID_SEASONAL_DEFENSE_MINION_HIVE_LAUNCHER_MODULE_HP",
+          "TownHallLevel": "12"
+        },
+        {
+          "name": "MinionHiveLauncherAttackModule",
+          "TID": "TID_SEASONAL_DEFENSE_MINION_HIVE_LAUNCHER_MODULE_ATTACK",
+          "TownHallLevel": "12"
+        },
+        {
+          "name": "MinionHiveLauncherEffectModule",
+          "TID": "TID_SEASONAL_DEFENSE_MINION_HIVE_LAUNCHER_MODULE_EFFECT",
+          "TownHallLevel": "12"
+        },
+        {
+          "name": "GoblinThrowerTowerHPModule",
+          "TID": "TID_SEASONAL_DEFENSE_GOBLIN_THROWER_TOWER_MODULE_HP",
+          "TownHallLevel": "12"
+        },
+        {
+          "name": "GoblinThrowerTowerAttackModule",
+          "TID": "TID_SEASONAL_DEFENSE_GOBLIN_THROWER_TOWER_MODULE_ATTACK",
+          "TownHallLevel": "12"
+        },
+        {
+          "name": "GoblinThrowerTowerEffectModule",
+          "TID": "TID_SEASONAL_DEFENSE_GOBLIN_THROWER_TOWER_MODULE_EFFECT",
+          "TownHallLevel": "12"
+        }
+      ]
+    },
+    "logic/character_items.csv": {
+      "count": 64,
+      "fields": [
+        "Name",
+        "Level",
+        "IconSWF",
+        "IconExportName",
+        "TID",
+        "InfoTID",
+        "Deprecated",
+        "AllowedCharacters",
+        "Rarity",
+        "Claimable",
+        "DiamondValue",
+        "RequiredBlacksmithLevel",
+        "RequiredCharacterLevel",
+        "UpgradeResources",
+        "UpgradeCosts"
+      ],
+      "items": [
+        {
+          "name": "Barbarian Puppet",
+          "TID": "TID_GEAR_TITLE_BARBARIAN_CROWN"
+        },
+        {
+          "name": "Rage Vial",
+          "TID": "TID_GEAR_TITLE_IRON_FIST"
+        },
+        {
+          "name": "Archer Puppet",
+          "TID": "TID_GEAR_TITLE_ARCHER_CROWN"
+        },
+        {
+          "name": "Invisibility Vial",
+          "TID": "TID_GEAR_TITLE_ROYAL_CLOAK"
+        },
+        {
+          "name": "Eternal Tome",
+          "TID": "TID_GEAR_TITLE_ETERNAL_TOME"
+        },
+        {
+          "name": "Life Gem",
+          "TID": "TID_GEAR_TITLE_LIFE_GEM"
+        },
+        {
+          "name": "Seeking Shield",
+          "TID": "TID_GEAR_TITLE_SEEKING_SHIELD"
+        },
+        {
+          "name": "Royal Gem",
+          "TID": "TID_GEAR_PROTECTIVE_CLOAK"
+        },
+        {
+          "name": "Earthquake Boots",
+          "TID": "TID_GEAR_EARTHQUAKE_BOOTS"
+        },
+        {
+          "name": "Hog Rider Puppet",
+          "TID": "TID_GEAR_HOG_TOTEM"
+        },
+        {
+          "name": "Giant Gauntlet",
+          "TID": "TID_GEAR_GIANT_GAUNTLET"
+        },
+        {
+          "name": "Vampstache",
+          "TID": "TID_GEAR_VAMPSTACHE"
+        },
+        {
+          "name": "Haste Vial",
+          "TID": "TID_GEAR_TITLE_HASTE_VIAL"
+        },
+        {
+          "name": "Rocket Spear",
+          "TID": "TID_GEAR_ROCKET_SPEAR"
+        },
+        {
+          "name": "Spiky Ball",
+          "TID": "TID_GEAR_TITLE_FOOTBALL"
+        },
+        {
+          "name": "Frozen Arrow",
+          "TID": "TID_GEAR_FROZEN_ARROW"
+        },
+        {
+          "name": "Monolith Arrow",
+          "TID": "TID_GEAR_MONOLITH_ARROW"
+        },
+        {
+          "name": "Giant Arrow",
+          "TID": "TID_GEAR_GIANT_ARROW"
+        },
+        {
+          "name": "UNUSED2",
+          "TID": "TID_GEAR_GIANT_ARROW"
+        },
+        {
+          "name": "Heroic Torch",
+          "TID": "TID_GEAR_TITLE_HEROIC_TORCH"
+        },
+        {
+          "name": "Healer Puppet",
+          "TID": "TID_GEAR_HEALER_JAR"
+        },
+        {
+          "name": "UNUSED3",
+          "TID": "TID_GEAR_TITLE_BARBARIAN_CROWN"
+        },
+        {
+          "name": "Fireball",
+          "TID": "TID_GEAR_FIRE_IN_A_CAN"
+        },
+        {
+          "name": "UNUSED4",
+          "TID": "TID_GEAR_TITLE_BARBARIAN_CROWN"
+        },
+        {
+          "name": "Rage Gem",
+          "TID": "TID_GEAR_ANGRY_TOME"
+        },
+        {
+          "name": "UNUSED5",
+          "TID": "TID_GEAR_TITLE_BARBARIAN_CROWN"
+        },
+        {
+          "name": "UNUSED6",
+          "TID": "TID_GEAR_TITLE_BARBARIAN_CROWN"
+        },
+        {
+          "name": "UNUSED7",
+          "TID": "TID_GEAR_TITLE_BARBARIAN_CROWN"
+        },
+        {
+          "name": "UNUSED8",
+          "TID": "TID_GEAR_TITLE_BARBARIAN_CROWN"
+        },
+        {
+          "name": "UNUSED9",
+          "TID": "TID_GEAR_TITLE_BARBARIAN_CROWN"
+        },
+        {
+          "name": "UNUSED10",
+          "TID": "TID_GEAR_HOG_TOTEM"
+        },
+        {
+          "name": "UNUSED11",
+          "TID": "TID_GEAR_TITLE_BARBARIAN_CROWN"
+        },
+        {
+          "name": "Snake Bracelet",
+          "TID": "TID_GEAR_TITLE_SNAKE_ARMOR"
+        },
+        {
+          "name": "UNUSED13",
+          "TID": "TID_GEAR_TITLE_BARBARIAN_CROWN"
+        },
+        {
+          "name": "Healing Tome",
+          "TID": "TID_GEAR_HEALING_TOME"
+        },
+        {
+          "name": "Dark Crown",
+          "TID": "TID_GEAR_DARK_CROWN"
+        },
+        {
+          "name": "UNUSED15",
+          "TID": "TID_GEAR_TITLE_BARBARIAN_CROWN"
+        },
+        {
+          "name": "UNUSED16",
+          "TID": "TID_GEAR_TITLE_BARBARIAN_CROWN"
+        },
+        {
+          "name": "UNUSED17",
+          "TID": "TID_GEAR_TITLE_BARBARIAN_CROWN"
+        },
+        {
+          "name": "Magic Mirror",
+          "TID": "TID_GEAR_TITLE_CLONING_CLOAK"
+        },
+        {
+          "name": "Electro Boots",
+          "TID": "TID_GEAR_ELECTRO_SHIELD"
+        },
+        {
+          "name": "Lavaloon Puppet",
+          "TID": "TID_GEAR_LAVALOON_PUPPET"
+        },
+        {
+          "name": "Henchmen Puppet",
+          "TID": "TID_GEAR_TITLE_MINION_BODYGUARDS"
+        },
+        {
+          "name": "Dark Orb",
+          "TID": "TID_GEAR_TITLE_DARK_ORB"
+        },
+        {
+          "name": "Metal Pants",
+          "TID": "TID_GEAR_TITLE_STONE_AMULET"
+        },
+        {
+          "name": "MP Trap Shield",
+          "TID": "TID_GEAR_TITLE_TRAP_SHIELD"
+        },
+        {
+          "name": "Punch Arrow",
+          "TID": "TID_GEAR_TITLE_CLONING_CLOAK"
+        },
+        {
+          "name": "Noble Iron",
+          "TID": "TID_GEAR_TITLE_TURBO_START"
+        },
+        {
+          "name": "Action Figure",
+          "TID": "TID_GEAR_ACTION_FIGURE"
+        },
+        {
+          "name": "Meteor Staff",
+          "TID": "TID_GEAR_METEOR_WAND"
+        },
+        {
+          "name": "Frost Charm",
+          "TID": "TID_GEAR_FROST_CHARM"
+        },
+        {
+          "name": "Stick Horse",
+          "TID": "TID_GEAR_TITLE_STICK_HORSE"
+        },
+        {
+          "name": "Fire Heart",
+          "TID": "TID_GEAR_TITLE_FIRE_HEART"
+        },
+        {
+          "name": "Rocket Backpack",
+          "TID": "TID_GEAR_TITLE_DEADLY_DASH"
+        },
+        {
+          "name": "Deadly Dash2",
+          "TID": "TID_GEAR_TITLE_DEADLY_DASH"
+        },
+        {
+          "name": "Deadly Dash3",
+          "TID": "TID_GEAR_TITLE_DEADLY_DASH"
+        },
+        {
+          "name": "Stun Blaster",
+          "TID": "TID_GEAR_TITLE_STUN_BLAST"
+        },
+        {
+          "name": "Flame Blower",
+          "TID": "TID_GEAR_TITLE_FLAME_BREATH"
+        },
+        {
+          "name": "FlameAttack",
+          "TID": "TID_GEAR_TITLE_STUN_BLAST"
+        },
+        {
+          "name": "ElectroAttack",
+          "TID": "TID_GEAR_TITLE_ELECTRO_ATTACK"
+        },
+        {
+          "name": "Draconic Counter",
+          "TID": "TID_GEAR_DRAGON_REFLECTOR"
+        },
+        {
+          "name": "Cosmic Portal",
+          "TID": "TID_GEAR_TITLE_COSMIC_PORTAL"
+        },
+        {
+          "name": "Shield Brooch",
+          "TID": "TID_GEAR_TITLE_SHIELD_BROOCH"
+        },
+        {
+          "name": "Blizzard Axe",
+          "TID": "TID_GEAR_TITLE_BLIZZARD_AXE"
+        }
+      ]
+    },
+    "logic/heroes.csv": {
+      "count": 8,
+      "fields": [
+        "Name",
+        "VisualLevel",
+        "TID",
+        "InfoTID",
+        "EnabledByCalendar",
+        "Speed",
+        "Hitpoints",
+        "UpgradeTimeH",
+        "UpgradeResource",
+        "UpgradeCost",
+        "RequiredTownHallLevel",
+        "RequiredHeroTavernLevel",
+        "AttackRange",
+        "AltAttackRange",
+        "AttackSpeed"
+      ],
+      "items": [
+        {
+          "name": "Barbarian King",
+          "TID": "TID_BARBARIAN_KING",
+          "UpgradeTimeH": "2",
+          "HousingSpace": "25"
+        },
+        {
+          "name": "Archer Queen",
+          "TID": "TID_ARCHER_QUEEN",
+          "UpgradeTimeH": "2",
+          "HousingSpace": "25"
+        },
+        {
+          "name": "Grand Warden",
+          "TID": "TID_GRAND_WARDEN",
+          "UpgradeTimeH": "2",
+          "HousingSpace": "25"
+        },
+        {
+          "name": "BB Battle Machine",
+          "TID": "TID_WARMACHINE",
+          "UpgradeTimeH": "12",
+          "VillageType": "1",
+          "HousingSpace": "25"
+        },
+        {
+          "name": "Royal Champion",
+          "TID": "TID_HERO_ROYAL_CHAMPION",
+          "UpgradeTimeH": "4",
+          "HousingSpace": "25"
+        },
+        {
+          "name": "BB Battle Copter",
+          "TID": "TID_HERO_BATTLE_COPTER",
+          "UpgradeTimeH": "120",
+          "VillageType": "1",
+          "HousingSpace": "25"
+        },
+        {
+          "name": "Minion Prince",
+          "TID": "TID_MINION_HERO",
+          "UpgradeTimeH": "2",
+          "HousingSpace": "25"
+        },
+        {
+          "name": "Dragon Duke",
+          "TID": "TID_DRAGON_DUKE",
+          "UpgradeTimeH": "6",
+          "HousingSpace": "25"
+        }
+      ]
+    },
+    "logic/pets.csv": {
+      "count": 18,
+      "fields": [
+        "Name",
+        "TroopLevel",
+        "Deprecated",
+        "TID",
+        "InfoTID",
+        "HousingSpace",
+        "BarrackLevel",
+        "LaboratoryLevel",
+        "Speed",
+        "Hitpoints",
+        "TrainingTime",
+        "TrainingResource",
+        "TrainingCost",
+        "UpgradeTimeH",
+        "UpgradeTimeM"
+      ],
+      "items": [
+        {
+          "name": "LASSI",
+          "TID": "TID_PET_MELEEJUMPER",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "24",
+          "HousingSpace": "20"
+        },
+        {
+          "name": "Mighty Yak",
+          "TID": "TID_PET_WALLBUSTER",
+          "LaboratoryLevel": "3",
+          "UpgradeTimeH": "24",
+          "HousingSpace": "20"
+        },
+        {
+          "name": "Electro Owl",
+          "TID": "TID_PET_RANGEDATTACKER",
+          "LaboratoryLevel": "2",
+          "UpgradeTimeH": "36",
+          "HousingSpace": "20"
+        },
+        {
+          "name": "Unicorn",
+          "TID": "TID_PET_HEALER",
+          "LaboratoryLevel": "4",
+          "UpgradeTimeH": "36",
+          "HousingSpace": "20"
+        },
+        {
+          "name": "Phoenix",
+          "TID": "TID_PET_PHOENIX",
+          "LaboratoryLevel": "8",
+          "UpgradeTimeH": "36",
+          "HousingSpace": "20"
+        },
+        {
+          "name": "Phoenix Egg",
+          "TID": "TID_PET_PHOENIX",
+          "LaboratoryLevel": "8",
+          "UpgradeTimeH": "1",
+          "HousingSpace": "20"
+        },
+        {
+          "name": "Stork",
+          "TID": "TID_PET_HEALER",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "20"
+        },
+        {
+          "name": "Poison Lizard",
+          "TID": "TID_PET_POISON_LIZARD",
+          "LaboratoryLevel": "7",
+          "UpgradeTimeH": "24",
+          "HousingSpace": "20"
+        },
+        {
+          "name": "Diggy",
+          "TID": "TID_PET_DIGGY",
+          "LaboratoryLevel": "6",
+          "UpgradeTimeH": "36",
+          "HousingSpace": "20"
+        },
+        {
+          "name": "Frosty",
+          "TID": "TID_PET_FROSTY",
+          "LaboratoryLevel": "5",
+          "UpgradeTimeH": "36",
+          "HousingSpace": "20"
+        },
+        {
+          "name": "Spirit Fox",
+          "TID": "TID_PET_SPIRIT_FOX",
+          "LaboratoryLevel": "9",
+          "UpgradeTimeH": "72",
+          "HousingSpace": "20"
+        },
+        {
+          "name": "Angry Jelly",
+          "TID": "TID_PET_ANGRY_JELLY",
+          "LaboratoryLevel": "10",
+          "UpgradeTimeH": "72",
+          "HousingSpace": "20"
+        },
+        {
+          "name": "JumpAuraPet",
+          "TID": "TID_PET_MELEEJUMPER",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "72",
+          "HousingSpace": "20"
+        },
+        {
+          "name": "SpeedupPet",
+          "TID": "TID_PET_RANGEDATTACKER",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "72",
+          "HousingSpace": "20"
+        },
+        {
+          "name": "Turtle",
+          "TID": "TID_PET_MELEEJUMPER",
+          "LaboratoryLevel": "1",
+          "UpgradeTimeH": "72",
+          "HousingSpace": "20"
+        },
+        {
+          "name": "AirSplitPetSpawnRemoved",
+          "TID": "TID_PET_RANGEDATTACKER",
+          "LaboratoryLevel": "1",
+          "HousingSpace": "20"
+        },
+        {
+          "name": "Sneezy",
+          "TID": "TID_PET_SNEEZY",
+          "LaboratoryLevel": "11",
+          "UpgradeTimeH": "180",
+          "HousingSpace": "20"
+        },
+        {
+          "name": "Crow",
+          "TID": "TID_PET_RAVEN",
+          "LaboratoryLevel": "12",
+          "UpgradeTimeH": "192",
+          "HousingSpace": "20"
+        }
+      ]
+    },
+    "logic/traps.csv": {
+      "count": 21,
+      "fields": [
+        "Name",
+        "GlobalID",
+        "Level",
+        "TID",
+        "InfoTID",
+        "SWF",
+        "ExportName",
+        "ExportNameAir",
+        "ExportNameBuildAnim",
+        "ExportNameBuildAnimAir",
+        "ExportNameBroken",
+        "ExportNameBrokenAir",
+        "BigPicture",
+        "BigPictureSWF",
+        "EffectBroken"
+      ],
+      "items": [
+        {
+          "name": "Bomb",
+          "id": 12000000,
+          "TID": "TID_TRAP_MINE",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "Spring Trap",
+          "id": 12000001,
+          "TID": "TID_TRAP_EJECTOR",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "Air Bomb",
+          "id": 12000005,
+          "TID": "TID_TRAP_AIR",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "Giant Bomb",
+          "id": 12000002,
+          "TID": "TID_TRAP_SUPERBOMB",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "Seeking Air Mine",
+          "id": 12000006,
+          "TID": "TID_TRAP_AIR_MEGA",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "Skeleton Trap",
+          "id": 12000008,
+          "TID": "TID_TRAP_HALLOWEEN_SKEL",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "Tornado Trap",
+          "id": 12000016,
+          "TID": "TID_TRAP_TORNADO",
+          "TownHallLevel": "11"
+        },
+        {
+          "name": "Giga Bomb",
+          "id": 12000020,
+          "TID": "TID_TRAP_GIGA_BOMB",
+          "TownHallLevel": "17"
+        },
+        {
+          "name": "Halloweenbomb",
+          "id": 12000003,
+          "TID": "TID_TRAP_HALLOWEENBOMB",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "Slowbomb",
+          "id": 12000004,
+          "TID": "TID_TRAP_MINE",
+          "TownHallLevel": "9999"
+        },
+        {
+          "name": "SantaTrap",
+          "id": 12000007,
+          "TID": "TID_TRAP_SANTA",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "FreezeBomb",
+          "id": 12000009,
+          "TID": "TID_TRAP_FREEZE",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "AirTrap2",
+          "id": 12000012,
+          "TID": "TID_TRAP_AIR2",
+          "TownHallLevel": "1",
+          "VillageType": "1"
+        },
+        {
+          "name": "ShrinkTrap",
+          "id": 12000015,
+          "TID": "TID_TRAP_SHRINK",
+          "TownHallLevel": "1"
+        },
+        {
+          "name": "ShrinkTrap_SinglePlayer",
+          "id": 12000017,
+          "TID": "TID_TRAP_SHRINK_SP",
+          "TownHallLevel": "9999"
+        },
+        {
+          "name": "FreezeTrap_SinglePlayer",
+          "id": 12000018,
+          "TID": "TID_TRAP_FREEZE_SP",
+          "TownHallLevel": "9999"
+        },
+        {
+          "name": "Ghost Trap",
+          "id": 12000019,
+          "TID": "TID_TRAP_HALLOWEEN_SKEL",
+          "TownHallLevel": "9999"
+        },
+        {
+          "name": "BB Push Trap",
+          "id": 12000011,
+          "TID": "TID_PUSHER",
+          "TownHallLevel": "2",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Mine",
+          "id": 12000013,
+          "TID": "TID_ADVANCED_TRAP",
+          "TownHallLevel": "3",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Spring Trap",
+          "id": 12000010,
+          "TID": "TID_TRAP_EJECTOR",
+          "TownHallLevel": "3",
+          "VillageType": "1"
+        },
+        {
+          "name": "BB Mega Mine",
+          "id": 12000014,
+          "TID": "TID_ADVANCED_MEGA_TRAP",
+          "TownHallLevel": "4",
+          "VillageType": "1"
+        }
+      ]
+    },
+    "logic/upgrade_data.csv": {
+      "count": 3,
+      "fields": [
+        "Name",
+        "UpgradeLevel",
+        "UpgradeType",
+        "UpgradeTimeDays",
+        "UpgradeTimeHours",
+        "UpgradeTimeMinutes",
+        "UpgradeTimeSeconds",
+        "UpgradeResource",
+        "AltUpgradeResource",
+        "UpgradeCost",
+        "UpgradePriority",
+        "RequiredTownHallLevel"
+      ],
+      "items": [
+        {
+          "name": "GuardianGeneral"
+        },
+        {
+          "name": "GuardianAssassin"
+        },
+        {
+          "name": "GuardianSmasher"
+        }
+      ]
+    },
+    "logic/upgrade_tasks.csv": {
+      "count": 0,
+      "fields": [
+        "Arto Upgrade Tasks",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "items": []
+    }
+  }
+}
