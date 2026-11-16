@@ -1,0 +1,33 @@
+name: Datamine Clash global IDs
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/datamine-ids.yml'
+      - 'tools/datamine_ids.py'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install game asset decoder
+        run: pip install requests pylzham zstandard
+      - name: Extract IDs from current Clash game files
+        run: python tools/datamine_ids.py
+      - name: Publish source-backed ID snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/datamine/game_ids_2026-11-16.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Record 16 Nov 2026 Clash game asset IDs"
+            git push
+          fi
