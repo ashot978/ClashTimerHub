@@ -16,7 +16,8 @@ BASE_URL = "https://game-assets.clashofclans.com/" + FINGERPRINT
 DATASETS = [
     "logic/buildings.csv", "logic/characters.csv", "logic/spells.csv",
     "logic/guardians.csv", "logic/seasonal_defense.csv",
-    "logic/seasonal_defense_modules.csv", "logic/character_items.csv",
+    "logic/seasonal_defense_modules.csv", "logic/seasonal_defense_archetypes.csv",
+    "logic/character_items.csv",
     "logic/heroes.csv", "logic/pets.csv", "logic/traps.csv",
     "logic/upgrade_data.csv", "logic/upgrade_tasks.csv",
 ]
