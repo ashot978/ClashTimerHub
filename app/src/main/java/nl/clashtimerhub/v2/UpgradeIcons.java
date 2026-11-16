@@ -29,7 +29,8 @@ final class UpgradeIcons {
   "dark_elixir_drill","dark_elixir_storage","dark_barracks","inferno_tower","air_sweeper",
   "dark_spell_factory","eagle_artillery","bomb_tower","workshop","scattershot",
   "pet_house","blacksmith","hero_hall","spell_tower","monolith","multi-archer_tower",
-  "ricochet_cannon","firespitter","multi-gear_tower","crafting_station"));
+  "ricochet_cannon","firespitter","multi-gear_tower","crafting_station",
+  "squad_barracks","spiky_tower","firecracker_tower","guardian_shrine"));
  private static final Set<String> TRAPS=new HashSet<>(Arrays.asList(
   "bomb","spring_trap","giant_bomb","air_bomb","seeking_air_mine","skeleton_trap",
   "tornado_trap","giga_bomb"));

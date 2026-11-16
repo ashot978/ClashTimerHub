@@ -50,6 +50,8 @@ final class ClashNames {
   NAMES.put(1000093L, "Helper Hut");
   NAMES.put(1000097L, "Crafting Station");
   NAMES.put(1000102L, "Super Wizard Tower");
+  // TH19 (16 Nov 2026): shared across the new Squad Barracks build timers.
+  NAMES.put(1000106L, "Squad Barracks");
   NAMES.put(12000000L, "Bomb");
   NAMES.put(12000001L, "Spring Trap");
   NAMES.put(12000002L, "Giant Bomb");

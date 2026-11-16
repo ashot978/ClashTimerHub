@@ -1,9 +1,9 @@
 ### NL
-- Onderzoek toont weer de eindtijd als een ander onderzoek al klaar is.
-- Het groene aantal afgeronde onderzoeken neemt minder ruimte in.
-- Afteller en eindkloktijd staan nu samen bij hetzelfde onderzoek.
+- Nieuwe Squad Barracks krijgt een naam in plaats van Upgrade #1000106.
+- Bestaande timers tonen de naam meteen, zonder nieuwe import.
+- Nieuwe TH19-gebouwen kunnen hun pictogram tonen zodra dit beschikbaar is.
 
 ### EN
-- Research finish time stays visible when another research job is ready.
-- The green completed-research count uses less space.
-- Countdown and finish time now appear together for the same research job.
+- New Squad Barracks displays a name instead of Upgrade #1000106.
+- Existing timers show the name immediately, without reimporting.
+- New TH19 buildings can show artwork when it becomes available.
