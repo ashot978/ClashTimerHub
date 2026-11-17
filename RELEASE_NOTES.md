@@ -1,13 +1,17 @@
 ### NL
-- Je kunt de volledige Sync-roadmap nu in Instellingen lezen.
-- Het overzicht werkt offline, zonder GitHub te openen.
-- Gekozen functies en overige ideeën zijn duidelijk onderscheiden.
-- Appupdates nemen automatisch de nieuwste roadmap mee.
-- De bestaande timers en Sync-knop blijven ongewijzigd.
+- De onoverzichtelijke roadmap-pagina is verwijderd.
+- Uitrusting en verzamelingen worden vanaf nu bij Sync opgeslagen.
+- Bekijk Hero Equipment-levels en indicatieve Ore-kosten per account.
+- Decoraties, obstakels, skins en sceneries zijn per account zichtbaar.
+- Ontbrekende exportsecties wissen geen eerder verzamelde gegevens.
+- Open het overzicht via Uitrusting & Verzamelingen in accountdetails.
+- Collectiegegevens worden meegenomen in lokale back-ups.
 
 ### EN
-- You can now read the full Sync roadmap from Settings.
-- The roadmap is available offline, without opening GitHub.
-- Selected features and other ideas are distinguished.
-- App updates include the latest roadmap automatically.
-- Existing timers and Sync behaviour are unchanged.
+- Removed the confusing roadmap page.
+- Equipment and collections are now stored during Sync.
+- See Hero Equipment levels and estimated Ore costs per account.
+- Decorations, obstacles, skins and sceneries are shown per account.
+- Missing export sections preserve previously synced data.
+- Open Equipment & Collections from account details.
+- Collection data is included in local backups.

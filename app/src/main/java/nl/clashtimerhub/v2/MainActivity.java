@@ -203,7 +203,6 @@ public final class MainActivity extends Activity {
   if(open!=null&&accounts.contains(open)){selectedAccount=open;activeTab=0;draw();}
  }
  @Override public void onBackPressed(){
-  if(activeTab==4){activeTab=3;draw();return;}
   if(activeTab==0&&!selectedAccount.isEmpty()){selectedAccount="";draw();return;}
   if(activeTab!=0){activeTab=0;selectedAccount="";draw();return;}
   super.onBackPressed();
@@ -302,7 +301,7 @@ public final class MainActivity extends Activity {
    button.setSingleLine(true);button.setEllipsize(android.text.TextUtils.TruncateAt.END);
    button.setGravity(android.view.Gravity.CENTER);
    button.setPadding(dp(2),0,dp(2),0);button.setMinHeight(0);button.setMinimumHeight(0);
-   boolean active=tab==activeTab||(tab==3&&activeTab==4);
+   boolean active=tab==activeTab;
    button.setTextColor(active?0xffffd88a:0xffc6b9d6);
    button.setBackground(clashSurface(active?0xff49335f:0xff261a36,active?0xffd8ae69:0xff352742,10));
    button.setOnClickListener(v->{activeTab=tab;draw();});
@@ -339,8 +338,6 @@ public final class MainActivity extends Activity {
    dashboard=null;showTimeline();
   }else if(activeTab==2){
    dashboard=null;showAccountScreen();
-  }else if(activeTab==4){
-   dashboard=null;showRoadmapScreen();
   }else{
    dashboard=null;showSettingsScreen();
   }
@@ -383,59 +380,6 @@ public final class MainActivity extends Activity {
   row.setMargins(0,dp(1),0,dp(1));section.addView(item,row);
   item.setOnClickListener(v->task.run());
  }
- private void showRoadmapScreen(){
-  Button back=new Button(this);
-  back.setText(I18n.english(this)?"‹  Back to settings":"‹  Terug naar instellingen");
-  back.setTextSize(13);back.setAllCaps(false);
-  back.setOnClickListener(v->{activeTab=3;draw();});
-  screenContent.addView(back,new LinearLayout.LayoutParams(-1,dp(48)));
-  TextView title=label(I18n.english(this)?"ROADMAP & IDEAS":"ROADMAP & IDEEËN",21);
-  title.setTypeface(null,android.graphics.Typeface.BOLD);
-  title.setTextColor(0xffffd783);
-  title.setPadding(dp(8),dp(12),dp(8),dp(6));screenContent.addView(title);
-  TextView subtitle=label(I18n.english(this)?
-   "Available offline. Updated with each APK that includes a new roadmap.":
-   "Offline leesbaar. Nieuwe appversies bevatten ook de bijgewerkte roadmap.",12);
-  subtitle.setTextColor(0xffbba7d1);
-  subtitle.setPadding(dp(8),0,dp(8),dp(10));screenContent.addView(subtitle);
-  try(java.io.BufferedReader reader=new java.io.BufferedReader(
-   new java.io.InputStreamReader(getAssets().open("SYNC_ROADMAP.md"),
-    java.nio.charset.StandardCharsets.UTF_8))){
-   StringBuilder md=new StringBuilder();String line;
-   while((line=reader.readLine())!=null)md.append(line).append('\n');
-   for(RoadmapText.Entry item:RoadmapText.parse(md.toString())){
-    if(item.kind==RoadmapText.DIVIDER){
-     View divider=new View(this);divider.setBackgroundColor(0xff654875);
-     LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,dp(1));
-     lp.setMargins(dp(10),dp(10),dp(10),dp(10));screenContent.addView(divider,lp);
-     continue;
-    }
-    int font=item.kind==RoadmapText.TITLE?20:
-     item.kind==RoadmapText.HEADING?17:item.kind==RoadmapText.SUBHEADING?15:13;
-    TextView row=label(item.text,font);
-    row.setTextColor(item.kind==RoadmapText.TITLE||item.kind==RoadmapText.HEADING?
-     0xffffd783:item.kind==RoadmapText.SUBHEADING?0xffdab8ff:0xffe7dbf1);
-    row.setLineSpacing(dp(3),1.0f);
-    row.setPadding(dp(item.kind==RoadmapText.BULLET?14:10),dp(6),dp(10),dp(6));
-    if(item.kind==RoadmapText.CARD){
-     row.setBackground(clashSurface(0xff30243e,0xff654875,10));
-     LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);
-     lp.setMargins(dp(3),dp(4),dp(3),dp(4));screenContent.addView(row,lp);
-    }else{
-     if(item.kind==RoadmapText.TITLE||item.kind==RoadmapText.HEADING
-       ||item.kind==RoadmapText.SUBHEADING)
-      row.setTypeface(null,android.graphics.Typeface.BOLD);
-     screenContent.addView(row,new LinearLayout.LayoutParams(-1,-2));
-    }
-   }
-  }catch(Exception error){
-   TextView failure=label(I18n.english(this)?
-    "Roadmap unavailable in this app build.":
-    "Roadmap kon niet worden geladen in deze appversie.",14);
-   failure.setTextColor(0xffffb39e);screenContent.addView(failure);
-   android.util.Log.e("ClashTimerHub","Could not load bundled roadmap",error);
-  }
- }
  private void showSettingsScreen(){
   // On unfolded phones and tablets, split settings into two compact columns.
   // Narrow screens retain a natural single-column reading order.
@@ -450,8 +394,6 @@ public final class MainActivity extends Activity {
    rightLayout.setMargins(dp(10),0,0,0);
    columns.addView(left,leftLayout);columns.addView(right,rightLayout);
   }
-  LinearLayout roadmapCard=settingsSection(left,"✦  ROADMAP","Bekijk onze planning in de app");
-  settingsItem(roadmapCard,"☷","Roadmap & ideeën","Hero Equipment, verzamelingen en plannen",()->{activeTab=4;draw();});
   LinearLayout language=settingsSection(left,"🌐  TAAL","Kies je voorkeurstaal");
   settingsItem(language,I18n.flag(this),"Taal",I18n.flag(this)+"  "+I18n.label(this),()->chooseLanguage());
   LinearLayout sync=settingsSection(left,"↻  SYNCHRONISATIE","Accounts bijwerken zonder Clash te verlaten");
@@ -784,6 +726,18 @@ public final class MainActivity extends Activity {
    exported.setTextColor(0xffbba7d1);detailPanel.addView(exported);
   }
   if(ac.startsWith("#")){Button link=new Button(this);link.setAllCaps(false);link.setText(t("Koppel deze player tag aan bestaand account"));link.setOnClickListener(v->linkImportedAccount(ac));detailPanel.addView(link);}
+  Button collectionButton=new Button(this);
+  collectionButton.setText(I18n.english(this)?"Equipment & Collections":"Uitrusting & Verzamelingen");
+  collectionButton.setTextSize(14);collectionButton.setAllCaps(false);
+  collectionButton.setTextColor(0xffffd783);
+  collectionButton.setBackground(clashSurface(0xff49335f,0xffd8ae69,12));
+  collectionButton.setOnClickListener(v->{
+   Intent open=new Intent(this,SyncExtrasActivity.class);
+   open.putExtra("account",ac);startActivity(open);
+  });
+  LinearLayout.LayoutParams collectionLayout=new LinearLayout.LayoutParams(-1,dp(52));
+  collectionLayout.setMargins(dp(2),dp(6),dp(2),dp(8));
+  detailPanel.addView(collectionButton,collectionLayout);
   showAccountHelpers(detailPanel,ac);
   CheckBox alchemist=new CheckBox(this);
   alchemist.setText(I18n.english(this)?"Alchemist available":"Alchemist beschikbaar");
@@ -1217,6 +1171,7 @@ public final class MainActivity extends Activity {
        .putString("playerTags",data.optJSONObject("playerTags")==null?"{}":data.optJSONObject("playerTags").toString())
        .putString("accountNames",data.optJSONObject("accountNames")==null?"{}":data.optJSONObject("accountNames").toString())
        .putString("maxedCategories",data.optJSONObject("maxedCategories")==null?"{}":data.optJSONObject("maxedCategories").toString())
+       .putString(SyncExtras.KEY,data.optJSONObject("syncExtrasByAccount")==null?"{}":data.optJSONObject("syncExtrasByAccount").toString())
        .putString(HelperTracker.KEY,data.optJSONObject("helpersByAccount")==null?"{}":data.optJSONObject("helpersByAccount").toString())
        .putString(HelperTracker.ALCHEMIST_AVAILABLE_KEY,
         data.optJSONObject("alchemistAvailableByAccount")==null?"{}":
