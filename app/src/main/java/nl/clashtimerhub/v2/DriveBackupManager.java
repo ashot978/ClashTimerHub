@@ -65,6 +65,7 @@ final class DriveBackupManager {
   data.put("helpersByAccount",new JSONObject(p.getString(HelperTracker.KEY,"{}")));
   data.put("alchemistAvailableByAccount",new JSONObject(p.getString(HelperTracker.ALCHEMIST_AVAILABLE_KEY,"{}")));
   data.put("maxedCategories",new JSONObject(p.getString("maxedCategories","{}")));
+  data.put("syncExtrasByAccount",new JSONObject(p.getString(SyncExtras.KEY,"{}")));
   JSONObject preferences=new JSONObject();
   preferences.put("language",I18n.code(context));
   preferences.put("timerStart",p.getInt("timerStart",70));

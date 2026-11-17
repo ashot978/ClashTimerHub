@@ -235,6 +235,8 @@ public final class QuickSyncImporter {
   // duration when provided, and do not infer snacks from an absent field.
   String snackBoost=MagicSnackTracker.mergedFromExport(prefs,json,account,timestamp,now);
   if(snackBoost!=null)editor.putString(MagicSnackTracker.KEY,snackBoost);
+  String extras=SyncExtras.merged(prefs,json,account,timestamp);
+  if(extras!=null)editor.putString(SyncExtras.KEY,extras);
   if(!editor.commit())throw new IllegalStateException("Opslaan mislukt");
   TimerWidget.schedule(context);
   // Run Drive backup independently: it must never make a successful Clash sync fail.
