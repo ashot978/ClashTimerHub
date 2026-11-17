@@ -1,5 +1,18 @@
 # Sync roadmap (proposals, not implemented)
 
+## Status voor appgebruikers · 17 november 2026
+
+- **Al beschikbaar:** upgrades en timers, vrije builders, widgets, meldingen en Sync voor Squads, Guardians, helpers en potions.
+- **Gekozen, nog niet gebouwd:** Hero Equipment. Levels per account, Common/Epic en benodigde Shiny, Glowy en Starry Ore.
+- **Gekozen, nog niet gebouwd:** Verzamelingen. Decoraties, obstakels, skins en sceneries per account.
+- **Nog uitzoeken:** of de nieuwste Clash-export alle Equipment- en verzamelgegevens bevat.
+- **Overige ideeën:** Town Hall-voortgang, upgradegeschiedenis, upgradeplanner en Builder Base.
+
+De roadmap wordt **meegeleverd met appupdates**. Een gepland onderdeel is nog geen werkende functie. Voor nieuwe spelergegevens moet je nog steeds een actuele Clash-export synchroniseren.
+
+---
+
+
 ## Next selected features - Hero Equipment & Collection Tracker (17 Nov 2026)
 
 Builder availability already exists in Clash Timer Hub and is **not** a requested new feature.
