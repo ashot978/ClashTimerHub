@@ -1,7 +1,9 @@
 ### NL
-- Voorstellen voor extra Sync-functies zijn uitgewerkt in een roadmap.
-- Geen nieuwe appfuncties of wijzigingen aan je timers in deze build.
+- Hero Equipment en verzamelingen staan bovenaan de nieuwe Sync-roadmap.
+- De bestaande vrije-buildersfunctie blijft ongewijzigd.
+- Dit is alleen een planning; nieuwe schermen worden nog niet toegevoegd.
 
 ### EN
-- A roadmap for future Sync improvements has been documented.
-- This build does not change app features or existing timers.
+- Hero Equipment and Collections are now the top Sync roadmap priorities.
+- Existing free-builder tracking is unchanged.
+- This is planning only; no new screens have been added yet.

@@ -1,5 +1,55 @@
 # Sync roadmap (proposals, not implemented)
 
+## Next selected features - Hero Equipment & Collection Tracker (17 Nov 2026)
+
+Builder availability already exists in Clash Timer Hub and is **not** a requested new feature.
+
+### Feature 6: Hero Equipment
+
+- Per-account equipment by hero; show owned equipment name, level, rarity, and max level.
+- From verified level + current game-data cost table, calculate Shiny, Glowy,
+  and Starry Ore needed for the **next** level and remaining to max.
+- Mark costs as estimates until current game's ore prices are verified.
+- Do not claim to know ore balances when they aren't in the export.
+- Highlight equipment that increased in level since the prior sync.
+- Require actual synced `equipment`/matching-equipment section before displaying levels.
+- Do not mistake equipment instance `id` for the game item `data` ID.
+
+### Feature 10: Collection Tracker
+
+- Per-account owned decorations and obstacles for Home Village and Builder Base.
+- Owned hero skins and sceneries where the export *explicitly* lists unlocked items.
+- Show Owned / Not found in export, grouped by type; do not equate
+  "not found" with "not owned" when exports have incomplete coverage.
+- Resolve export IDs against an updated asset catalog (game-data fingerprint,
+  name, category, release year and optional artwork). No guessed mappings.
+- Keep collectible/seasonal obstacles separate from ordinary spawn obstacles.
+- Preserve earlier category snapshots if newer exports omit that category.
+- Never identify a selected scenery as "owned" merely because a background ID
+  appears in the active-layout setting.
+
+### Initial technical work
+
+1. Confirm **actual JSON structure from at least one current 2026 village export**.
+   A read-only local schema inspector may report section names and field shapes
+   without uploading tags, player metadata or the raw JSON.
+2. Save per-player-tag equipment and collection state locally on Sync.
+3. Build two distinct account-filterable screens, accessible without breaking
+   the existing Overview/Timeline/Settings navigation.
+4. Add offline game-ID mapping, ore cost validation and tests for missing/partial
+   exports; make backups retain these snapshots.
+5. Retest each of the user's seven accounts and publish an APK only after tests.
+
+References:
+- https://www.clashmetic.com/tracker (village JSON based cosmetics collector)
+- https://clashprogress.com/villages (equipment levels in JSON)
+- https://github.com/ClashKingInc/ClashKingAssets/tree/main/assets/static_data
+
+**Status:** selected for development, not implemented by this roadmap-only commit.
+
+---
+
+
 Reviewed against `QuickSyncImporter.java` on 17 Nov 2026. The app currently reads
 active timers from `buildings`, `heroes`, `units`, `spells`,
 `siege_machines`, `squads`, `pets`, `traps`, `guardians`; helper
