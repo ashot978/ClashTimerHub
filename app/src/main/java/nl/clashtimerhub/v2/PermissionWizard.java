@@ -53,13 +53,14 @@ final class PermissionWizard {
   if(requestCode!=NOTIFICATION_REQUEST||!running)return;
   current++;next();
  }
+ static int stepCount(){return BuildConfig.GITHUB_UPDATES?4:3;}
  static int grantedCount(Context ctx){
   int granted=0;
   if(Build.VERSION.SDK_INT<33||ctx.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)==PackageManager.PERMISSION_GRANTED)granted++;
   if(Settings.canDrawOverlays(ctx))granted++;
   AlarmManager alarm=(AlarmManager)ctx.getSystemService(Context.ALARM_SERVICE);
   if(Build.VERSION.SDK_INT<31||alarm!=null&&alarm.canScheduleExactAlarms())granted++;
-  if(Build.VERSION.SDK_INT<26||ctx.getPackageManager().canRequestPackageInstalls())granted++;
+  if(BuildConfig.GITHUB_UPDATES&&(Build.VERSION.SDK_INT<26||ctx.getPackageManager().canRequestPackageInstalls()))granted++;
   return granted;
  }
  private boolean granted(int step){
@@ -103,15 +104,15 @@ final class PermissionWizard {
  }
  private void next(){
   if(!running||activity.isFinishing()||activity.isDestroyed())return;
-  while(current<4&&granted(current))current++;
-  if(current>=4){finish();return;}
+  while(current<stepCount()&&granted(current))current++;
+  if(current>=stepCount()){finish();return;}
   int step=current;
   LinearLayout box=new LinearLayout(activity);
   box.setOrientation(LinearLayout.VERTICAL);
   int pad=(int)(18*activity.getResources().getDisplayMetrics().density);
   box.setPadding(pad,pad/2,pad,pad/2);
   TextView progress=new TextView(activity);
-  progress.setText(tr("Stap ","Step ")+(step+1)+" / 4  •  "+grantedCount(activity)+"/4 "+
+  progress.setText(tr("Stap ","Step ")+(step+1)+" / "+stepCount()+"  •  "+grantedCount(activity)+"/"+stepCount()+" "+
    tr("toegestaan","granted"));
   progress.setTextColor(0xffa98bd4);progress.setTextSize(13);box.addView(progress);
   TextView description=new TextView(activity);
@@ -160,13 +161,13 @@ final class PermissionWizard {
   end(true);
   if(activity.isFinishing()||activity.isDestroyed())return;
   new AlertDialog.Builder(activity)
-   .setTitle(count==4?tr("Alles ingesteld","All set"):
+   .setTitle(count==stepCount()?tr("Alles ingesteld","All set"):
     tr("Toestemmingen gecontroleerd","Permissions reviewed"))
-   .setMessage(count+"/4 "+tr("toestemmingen actief. Je kunt ontbrekende toestemmingen later via Instellingen geven.",
+   .setMessage(count+"/"+stepCount()+" "+tr("toestemmingen actief. Je kunt ontbrekende toestemmingen later via Instellingen geven.",
     "permissions enabled. You can grant missing ones later via Settings."))
    .setPositiveButton(tr("Gereed","Done"),(d,w)->{})
-   .setNeutralButton(count<4?tr("Opnieuw proberen","Try again"):tr("Sluiten","Close"),
-    (d,w)->{if(count<4)start(true);})
+   .setNeutralButton(count<stepCount()?tr("Opnieuw proberen","Try again"):tr("Sluiten","Close"),
+    (d,w)->{if(count<stepCount())start(true);})
    .show();
  }
  private void end(boolean completed){

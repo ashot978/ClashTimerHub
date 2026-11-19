@@ -1,5 +1,8 @@
 plugins { id 'com.android.application' }
-android { namespace 'nl.clashtimerhub.v2'; compileSdk 35
+
+def playKeystore = System.getenv('PLAY_UPLOAD_KEYSTORE_PATH')
+def playVersion = providers.gradleProperty('playVersionCode')
+android { namespace 'nl.clashtimerhub.v2'; compileSdk 36
  defaultConfig { applicationId 'nl.clashtimerhub.app'; minSdk 26; targetSdk 35; versionCode 1003; versionName '7.5.20-beta1' }
  // Bundle the same Markdown file as GitHub: one roadmap source, offline in app.
  // The CI restore step puts the permanent identity here. Do not let Gradle
@@ -12,20 +15,33 @@ android { namespace 'nl.clashtimerhub.v2'; compileSdk 35
    keyPassword 'android'
   }
  }
- if (System.getenv('PLAY_UPLOAD_KEYSTORE_PATH')) {
+ if (playKeystore) {
   signingConfigs {
    playUpload {
-    storeFile file(System.getenv('PLAY_UPLOAD_KEYSTORE_PATH'))
+    storeType 'PKCS12'
+    storeFile file(playKeystore)
     storePassword System.getenv('PLAY_UPLOAD_STORE_PASSWORD')
     keyAlias System.getenv('PLAY_UPLOAD_KEY_ALIAS')
     keyPassword System.getenv('PLAY_UPLOAD_KEY_PASSWORD')
    }
   }
  }
+ buildFeatures { buildConfig true }
+ flavorDimensions 'distribution'
+ productFlavors {
+  github { dimension 'distribution'; buildConfigField 'boolean', 'GITHUB_UPDATES', 'true' }
+  play {
+   dimension 'distribution'
+   buildConfigField 'boolean', 'GITHUB_UPDATES', 'false'
+   targetSdk 36
+   versionName '7.5.20-play-beta2'
+   if (playVersion.isPresent()) versionCode playVersion.get().toInteger()
+   if (playKeystore) signingConfig signingConfigs.playUpload
+  }
+ }
  buildTypes {
   debug { signingConfig signingConfigs.debug }
   release {
-   if (System.getenv('PLAY_UPLOAD_KEYSTORE_PATH')) signingConfig signingConfigs.playUpload
    minifyEnabled false
   }
  }

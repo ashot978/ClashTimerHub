@@ -119,6 +119,7 @@ public final class MainActivity extends Activity {
   // Android 12+ may block a background service start; foreground resume
   // provides a user-visible opportunity to restore live widget updates.
   LiveWidgetService.reconcile(this);
+  if(!BuildConfig.GITHUB_UPDATES)return;
   // An installer already in progress must not compete with a new update prompt.
   boolean hadActiveDownload=getPreferences(0).getLong("activeUpdateDownloadId",-1)>0;
   startListeningForUpdateDownload();
@@ -402,7 +403,8 @@ public final class MainActivity extends Activity {
   LinearLayout notifications=settingsSection(left,"♧  MELDINGEN","Upgrade-alarmen en tests");
   settingsItem(notifications,"♧","Meldingen instellen","Gereedmelding en waarschuwingen",()->notificationSettings());
   settingsItem(notifications,"✓","Toestemmingen controleren",
-   PermissionWizard.grantedCount(this)+"/4 actief · meldingen, zwevende knop, alarmen en app-updates",
+   PermissionWizard.grantedCount(this)+"/"+PermissionWizard.stepCount()+" actief · meldingen, zwevende knop, alarmen"
+    +(BuildConfig.GITHUB_UPDATES?" en app-updates":""),
    ()->{if(permissionWizard==null)permissionWizard=new PermissionWizard(this);permissionWizard.start(true);});
   settingsItem(notifications,"✓","Testmelding","Controleer of notificaties aankomen",()->sendTestNotification());
   settingsItem(notifications,"◷","Alarmtest over 1 minuut","Controleer of Android een alarm uitvoert",()->{
@@ -413,22 +415,29 @@ public final class MainActivity extends Activity {
   settingsItem(widget,"⚙","Widget instellen","All Timers, mini-account, account of Sync",()->showWidgetSettings());
   LinearLayout players=settingsSection(right,"♙  ACCOUNTS","Geef je accounts herkenbare namen");
   settingsItem(players,"✎","Accountnamen aanpassen","Verander de naam zonder de player tag te wijzigen",()->renameAccount());
-  LinearLayout releases=settingsSection(right,"↓  APP-UPDATES","Versie en GitHub-builds");
-  TextView currentBuild=label(installedBuildDescription(),13);
-  currentBuild.setTextColor(0xff8be3ad);
-  currentBuild.setPadding(dp(12),dp(8),dp(12),dp(4));
-  releases.addView(currentBuild);
-  long known=getPreferences(0).getLong("latestFeedBuild",0);
-  long installedCode=UpdateChecker.installedVersionCode(this);
-  long installedBuild=installedCode>=1000?installedCode-1000:installedCode;
-  TextView latestBuild=label(known>0?"Nieuwste GitHub-build: #"+known+(known>installedBuild?" · UPDATE BESCHIKBAAR":" · Up-to-date"):"Nieuwste GitHub-build: nog niet gecontroleerd",12);
-  latestBuild.setTextColor(0xffbba7d1);
-  latestBuild.setPadding(dp(12),dp(2),dp(12),dp(8));
-  releases.addView(latestBuild);
-  settingsItem(releases,"↻","Controleer op updates","Vergelijk met de nieuwste gepubliceerde APK",()->checkUpdates(false));
-  settingsItem(releases,"↓","GitHub-builds bekijken","Open de builds in je browser",()->openUpdates());
-  settingsItem(releases,"ⓘ","Update-diagnose",
-   "Bekijk installatiecontrole, downloadstatus en laatste fout",()->showUpdateDiagnostics());
+  if(BuildConfig.GITHUB_UPDATES){
+   LinearLayout releases=settingsSection(right,"↓  APP-UPDATES","Versie en GitHub-builds");
+   TextView currentBuild=label(installedBuildDescription(),13);
+   currentBuild.setTextColor(0xff8be3ad);
+   currentBuild.setPadding(dp(12),dp(8),dp(12),dp(4));
+   releases.addView(currentBuild);
+   long known=getPreferences(0).getLong("latestFeedBuild",0);
+   long installedCode=UpdateChecker.installedVersionCode(this);
+   long installedBuild=installedCode>=1000?installedCode-1000:installedCode;
+   TextView latestBuild=label(known>0?"Nieuwste GitHub-build: #"+known+(known>installedBuild?" · UPDATE BESCHIKBAAR":" · Up-to-date"):"Nieuwste GitHub-build: nog niet gecontroleerd",12);
+   latestBuild.setTextColor(0xffbba7d1);
+   latestBuild.setPadding(dp(12),dp(2),dp(12),dp(8));
+   releases.addView(latestBuild);
+   settingsItem(releases,"↻","Controleer op updates","Vergelijk met de nieuwste gepubliceerde APK",()->checkUpdates(false));
+   settingsItem(releases,"↓","GitHub-builds bekijken","Open de builds in je browser",()->openUpdates());
+   settingsItem(releases,"ⓘ","Update-diagnose",
+    "Bekijk installatiecontrole, downloadstatus en laatste fout",()->showUpdateDiagnostics());
+  }else{
+   LinearLayout app=settingsSection(right,"Google Play","Clash Timer Hub");
+   settingsItem(app,"ⓘ","Privacy Policy","How Clash Timer Hub handles your data",()->startActivity(
+    new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(
+     "https://ashot978.github.io/GrigorianPortfolio/apps/clash-timer-hub/privacy.html"))));
+  }
   LinearLayout backups=settingsSection(right,"▣  BACK-UP","Je opgeslagen accounts veilig bewaren");
   settingsItem(backups,"▣","Back-up kopiëren","Accounts, timers, taal, meldingen en widgetinstellingen",()->copyBackup());
   settingsItem(backups,"↶","Back-up herstellen","Herstel timers en opgeslagen voorkeuren",()->restoreBackupClipboard());

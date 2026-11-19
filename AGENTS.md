@@ -1,5 +1,16 @@
 # Agent instructions
 
+## Google Play builds
+
+**A Google Play update requires a verified `.aab` from the `playRelease` variant.**
+The GitHub updater uses the APK from `githubDebug`. Successful APK builds do not satisfy a Play request. Use the existing package ID `nl.clashtimerhub.app` for both distributions.
+
+1. Check App Bundle Explorer in Play Console for the highest version code already used across tracks. Use a strictly higher unused code. The first verified Play builds used `1570` and `1575`. Never infer the next Play code from the GitHub APK build number.
+2. Run `.github/workflows/build-play.yml` on the requested commit on `main` with that `version_code`. Use only the original AshLab Studios **Play upload key**, alias `clashtimerhub-upload`. Its SHA-256 certificate fingerprint is `8A:EE:DB:5B:7D:7A:47:5F:B9:D8:42:06:D4:4A:4F:C5:A6:CC:B2:D7:42:2D:7E:17:41:40:4B:08:27:B3:34:3E`. Compare the upload certificate in Play Console if Google reports a mismatch. Keep the upload key separate from the GitHub APK signing key and the app signing key managed by Google Play.
+3. Use the four Actions secrets declared in the Play workflow. Keep signing material out of commits, release attachments, logs and chat. If the workflow or its secrets are unavailable, build locally only with a securely available copy of the original upload key. If the original key is unavailable, stop the Play build and report the blocker. A key rotation requires explicit approval and verification in Play Console.
+4. Run the Play release unit tests and `.github/scripts/verify-play-bundle.sh` against the finished signed file. The verifier checks the certificate and signature, package ID, requested version code, Android API 36 or newer, release flags, 16 KB alignment, and removal of the APK installation permission and receiver. Keep the GitHub updater disabled in the Play variant. If any check fails, do not distribute the bundle.
+5. Verify the workflow run and downloaded artifact against the exact source commit. Report the Play version code and provide the verified `.aab` link. For a local build, state the source commit and that it was built locally. Report Play Console acceptance only after it is observed. Upload to a Play track only when the user requests it.
+
 ## Mandatory release completion gate
 
 ## Unconditional build after EVERY prompt

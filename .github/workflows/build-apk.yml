@@ -23,6 +23,8 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: android-actions/setup-android@v4
+      - name: Install Android 16 SDK
+        run: sdkmanager 'platforms;android-36'
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.11.1'
@@ -39,59 +41,28 @@ jobs:
       - name: Set version for upgrade
         run: sed -i -E "s/versionCode [0-9]+/versionCode $((1000 + ${{ github.run_number }}))/" app/build.gradle
       - name: Build new app
-        run: gradle --no-daemon :app:testDebugUnitTest :app:assembleDebug
+        run: gradle --no-daemon :app:testGithubDebugUnitTest :app:assembleGithubDebug
       - name: Verify actual APK signing certificate
         shell: bash
         run: |
           set -euo pipefail
           signer="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
           test -n "$signer" || { echo 'ERROR: Android apksigner missing'; exit 1; }
-          "$signer" verify --verbose --print-certs app/build/outputs/apk/debug/app-debug.apk | tee /tmp/clash-apk-verification.txt
+          "$signer" verify --verbose --print-certs app/build/outputs/apk/github/debug/app-github-debug.apk | tee /tmp/clash-apk-verification.txt
           expected="d2ee752fb5224958db8db8cc1b8e9d189376c1da075cf741056870bfd43ceb10"
           grep -iF "certificate SHA-256 digest: $expected" /tmp/clash-apk-verification.txt ||
             { echo 'ERROR: APK was not signed with the persistent ClashTimerHub certificate'; exit 1; }
       - uses: actions/upload-artifact@v4
         with:
           name: ClashTimerHubV7-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: app/build/outputs/apk/github/debug/app-github-debug.apk
           if-no-files-found: error
-
-      - name: Build signed Play Console bundle
-        env:
-          PLAY_UPLOAD_KEYSTORE_BASE64: ${{ secrets.PLAY_UPLOAD_KEYSTORE_BASE64 }}
-          PLAY_UPLOAD_STORE_PASSWORD: ${{ secrets.PLAY_UPLOAD_STORE_PASSWORD }}
-          PLAY_UPLOAD_KEY_ALIAS: ${{ secrets.PLAY_UPLOAD_KEY_ALIAS }}
-          PLAY_UPLOAD_KEY_PASSWORD: ${{ secrets.PLAY_UPLOAD_KEY_PASSWORD }}
-        run: |
-          set -euo pipefail
-          if [[ -z "$PLAY_UPLOAD_KEYSTORE_BASE64" || -z "$PLAY_UPLOAD_STORE_PASSWORD" || -z "$PLAY_UPLOAD_KEY_ALIAS" || -z "$PLAY_UPLOAD_KEY_PASSWORD" ]]; then
-            echo "::notice::Play upload signing secrets are not configured; no Play bundle will be published."
-            exit 0
-          fi
-          export PLAY_UPLOAD_KEYSTORE_PATH="$RUNNER_TEMP/play-upload.jks"
-          printf '%s' "$PLAY_UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$PLAY_UPLOAD_KEYSTORE_PATH"
-          chmod 600 "$PLAY_UPLOAD_KEYSTORE_PATH"
-          gradle --no-daemon :app:bundleRelease
-          jarsigner -verify -strict -certs app/build/outputs/bundle/release/app-release.aab
-          keytool -printcert -jarfile app/build/outputs/bundle/release/app-release.aab > "$RUNNER_TEMP/play-cert.txt"
-          expected="8A:EE:DB:5B:7D:7A:47:5F:B9:D8:42:06:D4:4A:4F:C5:A6:CC:B2:D7:42:2D:7E:17:41:40:4B:08:27:B3:34:3E"
-          grep -iF "SHA256: $expected" "$RUNNER_TEMP/play-cert.txt" || {
-            echo "::error::Signing certificate differs from the previously accepted AshLab Studios Play AAB."
-            exit 1
-          }
-          rm -f "$PLAY_UPLOAD_KEYSTORE_PATH"
-      - name: Upload signed Play Console AAB
-        uses: actions/upload-artifact@v4
-        with:
-          name: ClashTimerHubV7-play-console-signed-aab
-          path: app/build/outputs/bundle/release/app-release.aab
-          if-no-files-found: ignore
 
       - name: Publish latest installable APK
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          cp app/build/outputs/apk/debug/app-debug.apk ClashTimerHub.apk
+          cp app/build/outputs/apk/github/debug/app-github-debug.apk ClashTimerHub.apk
           bash .github/scripts/generate-release-notes.sh
           gh release create "build-${GITHUB_RUN_NUMBER}" "./ClashTimerHub.apk"             --title "ClashTimerHub build #${GITHUB_RUN_NUMBER}"             --notes-file release-notes.md             --latest             --target "${GITHUB_SHA}"
