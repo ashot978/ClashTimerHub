@@ -39,7 +39,7 @@ jobs:
       - name: Set version for upgrade
         run: sed -i -E "s/versionCode [0-9]+/versionCode $((1000 + ${{ github.run_number }}))/" app/build.gradle
       - name: Build new app
-        run: gradle --no-daemon :app:testDebugUnitTest :app:assembleDebug :app:bundleDebug
+        run: gradle --no-daemon :app:testDebugUnitTest :app:assembleDebug
       - name: Verify actual APK signing certificate
         shell: bash
         run: |
@@ -56,12 +56,30 @@ jobs:
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
 
-      - name: Upload Android App Bundle for Play Console
+      - name: Build signed Play Console bundle
+        env:
+          PLAY_UPLOAD_KEYSTORE_BASE64: ${{ secrets.PLAY_UPLOAD_KEYSTORE_BASE64 }}
+          PLAY_UPLOAD_STORE_PASSWORD: ${{ secrets.PLAY_UPLOAD_STORE_PASSWORD }}
+          PLAY_UPLOAD_KEY_ALIAS: ${{ secrets.PLAY_UPLOAD_KEY_ALIAS }}
+          PLAY_UPLOAD_KEY_PASSWORD: ${{ secrets.PLAY_UPLOAD_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$PLAY_UPLOAD_KEYSTORE_BASE64" || -z "$PLAY_UPLOAD_STORE_PASSWORD" || -z "$PLAY_UPLOAD_KEY_ALIAS" || -z "$PLAY_UPLOAD_KEY_PASSWORD" ]]; then
+            echo "::notice::Play upload signing secrets are not configured; no Play bundle will be published."
+            exit 0
+          fi
+          export PLAY_UPLOAD_KEYSTORE_PATH="$RUNNER_TEMP/play-upload.jks"
+          printf '%s' "$PLAY_UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$PLAY_UPLOAD_KEYSTORE_PATH"
+          chmod 600 "$PLAY_UPLOAD_KEYSTORE_PATH"
+          gradle --no-daemon :app:bundleRelease
+          jarsigner -verify -strict -certs app/build/outputs/bundle/release/app-release.aab
+          rm -f "$PLAY_UPLOAD_KEYSTORE_PATH"
+      - name: Upload signed Play Console AAB
         uses: actions/upload-artifact@v4
         with:
-          name: ClashTimerHubV7-play-console-aab
-          path: app/build/outputs/bundle/debug/app-debug.aab
-          if-no-files-found: error
+          name: ClashTimerHubV7-play-console-signed-aab
+          path: app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: ignore
 
       - name: Publish latest installable APK
         env:
