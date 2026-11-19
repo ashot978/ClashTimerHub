@@ -9,7 +9,7 @@
  android:layout_height="21dp" android:orientation="horizontal" android:gravity="center_vertical">
  <TextView android:id="@+id/all_account_name" android:layout_width="70dp"
   android:layout_height="match_parent" android:gravity="left|center_vertical"
-  android:text="Shotty" android:textColor="#FFFFFF" android:textSize="10sp"
+  android:text="Account 1" android:textColor="#FFFFFF" android:textSize="10sp"
   android:textStyle="bold" android:singleLine="true" android:ellipsize="end"/>
  <TextView android:id="@+id/all_account_builders" android:layout_width="48dp"
   android:layout_height="match_parent" android:gravity="left|center_vertical"

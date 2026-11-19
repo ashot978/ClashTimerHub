@@ -10,7 +10,7 @@
  <LinearLayout android:layout_width="match_parent" android:layout_height="23dp"
   android:orientation="horizontal" android:gravity="center_vertical" android:background="@drawable/widget_row_background">
   <TextView android:layout_width="0dp" android:layout_weight="1.1" android:layout_height="match_parent"
-   android:gravity="center_vertical" android:paddingLeft="4dp" android:text="Shotty" android:textSize="10sp" android:textColor="#FFFFFF"/>
+   android:gravity="center_vertical" android:paddingLeft="4dp" android:text="Account 1" android:textSize="10sp" android:textColor="#FFFFFF"/>
   <TextView android:layout_width="0dp" android:layout_weight="0.8" android:layout_height="match_parent"
    android:gravity="center_vertical" android:text="1h40" android:textSize="10sp" android:textColor="#FFD783"/>
   <TextView android:layout_width="40dp" android:layout_height="21dp" android:gravity="center"
@@ -22,7 +22,7 @@
  <LinearLayout android:layout_width="match_parent" android:layout_height="23dp"
   android:orientation="horizontal" android:gravity="center_vertical" android:background="@drawable/widget_row_background">
   <TextView android:layout_width="0dp" android:layout_weight="1.1" android:layout_height="match_parent"
-   android:gravity="center_vertical" android:paddingLeft="4dp" android:text="RushShot" android:textSize="10sp" android:textColor="#FFFFFF"/>
+   android:gravity="center_vertical" android:paddingLeft="4dp" android:text="Account 2" android:textSize="10sp" android:textColor="#FFFFFF"/>
   <TextView android:layout_width="0dp" android:layout_weight="0.8" android:layout_height="match_parent"
    android:gravity="center_vertical" android:text="—" android:textSize="10sp" android:textColor="#FFD783"/>
   <TextView android:layout_width="40dp" android:layout_height="21dp" android:gravity="center"
@@ -34,7 +34,7 @@
  <LinearLayout android:layout_width="match_parent" android:layout_height="23dp"
   android:orientation="horizontal" android:gravity="center_vertical" android:background="@drawable/widget_row_background">
   <TextView android:layout_width="0dp" android:layout_weight="1.1" android:layout_height="match_parent"
-   android:gravity="center_vertical" android:paddingLeft="4dp" android:text="AshotRush" android:textSize="10sp" android:textColor="#FFFFFF"/>
+   android:gravity="center_vertical" android:paddingLeft="4dp" android:text="Account 3" android:textSize="10sp" android:textColor="#FFFFFF"/>
   <TextView android:layout_width="0dp" android:layout_weight="0.8" android:layout_height="match_parent"
    android:gravity="center_vertical" android:text="—" android:textSize="10sp" android:textColor="#FFD783"/>
   <TextView android:layout_width="40dp" android:layout_height="21dp" android:gravity="center"
@@ -46,7 +46,7 @@
  <LinearLayout android:layout_width="match_parent" android:layout_height="23dp"
   android:orientation="horizontal" android:gravity="center_vertical" android:background="@drawable/widget_row_background">
   <TextView android:layout_width="0dp" android:layout_weight="1.1" android:layout_height="match_parent"
-   android:gravity="center_vertical" android:paddingLeft="4dp" android:text="Ashotty" android:textSize="10sp" android:textColor="#FFFFFF"/>
+   android:gravity="center_vertical" android:paddingLeft="4dp" android:text="Account 4" android:textSize="10sp" android:textColor="#FFFFFF"/>
   <TextView android:layout_width="0dp" android:layout_weight="0.8" android:layout_height="match_parent"
    android:gravity="center_vertical" android:text="—" android:textSize="10sp" android:textColor="#FFD783"/>
   <TextView android:layout_width="40dp" android:layout_height="21dp" android:gravity="center"

@@ -8,7 +8,7 @@
   android:orientation="horizontal" android:gravity="center_vertical">
   <TextView android:id="@+id/all_timer_account" android:layout_width="79dp"
    android:layout_height="match_parent" android:gravity="center_vertical"
-   android:text="Shotty" android:textColor="#FFFFFF" android:textStyle="bold"
+   android:text="Account 1" android:textColor="#FFFFFF" android:textStyle="bold"
    android:textSize="11sp" android:singleLine="true" android:ellipsize="end"/>
   <TextView android:id="@+id/all_timer_name" android:layout_width="0dp"
    android:layout_weight="1" android:layout_height="match_parent"
