@@ -73,6 +73,12 @@ jobs:
           chmod 600 "$PLAY_UPLOAD_KEYSTORE_PATH"
           gradle --no-daemon :app:bundleRelease
           jarsigner -verify -strict -certs app/build/outputs/bundle/release/app-release.aab
+          keytool -printcert -jarfile app/build/outputs/bundle/release/app-release.aab > "$RUNNER_TEMP/play-cert.txt"
+          expected="8A:EE:DB:5B:7D:7A:47:5F:B9:D8:42:06:D4:4A:4F:C5:A6:CC:B2:D7:42:2D:7E:17:41:40:4B:08:27:B3:34:3E"
+          grep -iF "SHA256: $expected" "$RUNNER_TEMP/play-cert.txt" || {
+            echo "::error::Signing certificate differs from the previously accepted AshLab Studios Play AAB."
+            exit 1
+          }
           rm -f "$PLAY_UPLOAD_KEYSTORE_PATH"
       - name: Upload signed Play Console AAB
         uses: actions/upload-artifact@v4
