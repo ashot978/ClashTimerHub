@@ -96,6 +96,7 @@ public final class MainActivity extends Activity {
  }
 
  private final android.os.Handler ticker=new android.os.Handler(android.os.Looper.getMainLooper());
+ private PlayUpdates playUpdates;
  private String lastLoadedSnapshot="";
  private boolean foldExpanded=false;
  private LinearLayout detailPanel;
@@ -119,7 +120,11 @@ public final class MainActivity extends Activity {
   // Android 12+ may block a background service start; foreground resume
   // provides a user-visible opportunity to restore live widget updates.
   LiveWidgetService.reconcile(this);
-  if(!BuildConfig.GITHUB_UPDATES)return;
+  if(!BuildConfig.GITHUB_UPDATES){
+   playUpdates.onResume(()->(permissionWizard==null||!permissionWizard.isRunning())
+     &&(getIntent()==null||!Intent.ACTION_SEND.equals(getIntent().getAction())));
+   return;
+  }
   // An installer already in progress must not compete with a new update prompt.
   boolean hadActiveDownload=getPreferences(0).getLong("activeUpdateDownloadId",-1)>0;
   startListeningForUpdateDownload();
@@ -164,7 +169,13 @@ public final class MainActivity extends Activity {
     .setPositiveButton(t("OK"),null).show();
   });
  }
- @Override protected void onPause(){stopListeningForUpdateDownload();getPreferences(0).unregisterOnSharedPreferenceChangeListener(syncWatcher);ticker.removeCallbacks(tick);super.onPause();}
+ @Override protected void onPause(){
+  if(!BuildConfig.GITHUB_UPDATES)playUpdates.onPause();
+  stopListeningForUpdateDownload();
+  getPreferences(0).unregisterOnSharedPreferenceChangeListener(syncWatcher);
+  ticker.removeCallbacks(tick);
+  super.onPause();
+ }
  @Override protected void onStop(){
   updateActivityVisible=false;
   // Avoid leaving a stale update prompt on screen across foreground visits.
@@ -176,6 +187,7 @@ public final class MainActivity extends Activity {
   super.onCreate(b);
   AppData.migrate(this);load();
   permissionWizard=new PermissionWizard(this);
+  playUpdates=new PlayUpdates(this);
   googleDriveUi=new GoogleDriveUi(this,()->draw(),this::restoreBackup);
   draw();
   TimerWidget.schedule(this);
