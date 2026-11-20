@@ -1246,6 +1246,7 @@ public final class MainActivity extends Activity {
  private void renderDashboard(){
   if(dashboard==null)return;
   dashboard.removeAllViews();dashboardClocks.clear();dashboardFinishes.clear();
+  boolean english=I18n.english(this);
   long now=System.currentTimeMillis();
   ArrayList<String> ordered=new ArrayList<>(accounts);
   Collections.sort(ordered,(a,b)->{
@@ -1261,7 +1262,7 @@ public final class MainActivity extends Activity {
    TextView recent=label("↻  "+last,11);recent.setTextColor(0xffbba7d1);dashboard.addView(recent);
   }
   if(foldExpanded){
-   TextView compact=label(accounts.size()+" accounts  ·  "+active+" bezig  ·  "+totalReady+" klaar",12);
+   TextView compact=label(accounts.size()+" accounts  ·  "+active+(english?" busy  ·  ":" bezig  ·  ")+totalReady+(english?" ready":" klaar"),12);
    compact.setTextColor(0xffffd783);compact.setBackground(clashSurface(0xff292139,0xff644b76,12));
    dashboard.addView(compact);
   }else{
@@ -1270,7 +1271,7 @@ public final class MainActivity extends Activity {
    stats.setBaselineAligned(false);
    stats.setGravity(android.view.Gravity.TOP);
    dashboard.addView(stats,new LinearLayout.LayoutParams(-1,dp(76)));
-   String[] metrics={accounts.size()+"\\nACCOUNTS",active+"\\nBOUWERS BEZIG",totalReady+"\\nKLAAR"};
+   String[] metrics={accounts.size()+"\\nACCOUNTS",active+(english?"\\nBUILDERS BUSY":"\\nBOUWERS BEZIG"),totalReady+(english?"\\nREADY":"\\nKLAAR")};
    for(String metric:metrics){
     TextView view=label(metric.replace("\\n","\n"),13);view.setGravity(android.view.Gravity.CENTER);
     view.setTextColor(0xffffd88a);view.setBackground(clashSurface(0xff292139,0xff644b76,12));
@@ -1305,7 +1306,7 @@ public final class MainActivity extends Activity {
    name.setEllipsize(android.text.TextUtils.TruncateAt.END);name.setPadding(dp(6),0,dp(3),0);
    card.addView(name,new LinearLayout.LayoutParams(-1,dp(34)));
 
-   String statusText=ready?(I18n.english(this)?completed+" UPGRADES READY":completed+" UPGRADES KLAAR"):"";
+   String statusText=ready?completed+(completed==1?" UPGRADE":" UPGRADES")+(english?" READY":" KLAAR"):"";
    TextView status=label(statusText,10);status.setTextColor(0xff8be3ad);
    status.setSingleLine(true);status.setEllipsize(android.text.TextUtils.TruncateAt.END);
    status.setGravity(android.view.Gravity.CENTER_VERTICAL);status.setPadding(dp(6),0,0,0);

@@ -34,7 +34,7 @@ android { namespace 'nl.clashtimerhub.v2'; compileSdk 36
    dimension 'distribution'
    buildConfigField 'boolean', 'GITHUB_UPDATES', 'false'
    targetSdk 36
-   versionName '7.5.20-play-beta3'
+   versionName '7.5.20-play-beta4'
    if (playVersion.isPresent()) versionCode playVersion.get().toInteger()
    if (playKeystore) signingConfig signingConfigs.playUpload
   }

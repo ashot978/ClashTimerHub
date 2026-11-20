@@ -1,7 +1,9 @@
 ### NL
-- De Play-versie kan bij het openen een beschikbare update aanbieden.
-- Je kunt tijdens het downloaden gewoon doorgaan met de app.
+- Engelse dashboardtellers tonen nu volledig Engelse teksten.
+- Bij één afgeronde upgrade staat nu het juiste enkelvoud.
+- Ook het brede dashboard volgt de gekozen taal.
 
 ### EN
-- The Play version can offer an available update when you open the app.
-- You can keep using the app while the update downloads.
+- English dashboard counters now use fully English labels.
+- A single completed upgrade now uses the correct singular label.
+- The wide dashboard also follows your selected language.
