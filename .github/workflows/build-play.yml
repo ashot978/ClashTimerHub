@@ -1,6 +1,9 @@
 name: Build signed Google Play bundle
 
 on:
+  push:
+    branches: [main]
+    paths: [.github/play-version-code]
   workflow_dispatch:
     inputs:
       version_code:
@@ -23,6 +26,11 @@ jobs:
       PLAY_VERSION_CODE: ${{ inputs.version_code }}
     steps:
       - uses: actions/checkout@v4
+      - name: Select explicitly requested Play version
+        run: |
+          if [[ -z "$PLAY_VERSION_CODE" ]]; then
+            echo "PLAY_VERSION_CODE=$(cat .github/play-version-code)" >> "$GITHUB_ENV"
+          fi
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -70,6 +78,6 @@ jobs:
           bash .github/scripts/verify-play-bundle.sh app/build/outputs/bundle/playRelease/app-play-release.aab "$bundletool" "$PLAY_VERSION_CODE"
       - uses: actions/upload-artifact@v4
         with:
-          name: ClashTimerHub-Play-AAB-${{ inputs.version_code }}
+          name: ClashTimerHub-Play-AAB-${{ env.PLAY_VERSION_CODE }}
           path: app/build/outputs/bundle/playRelease/app-play-release.aab
           if-no-files-found: error

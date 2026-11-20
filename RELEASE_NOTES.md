@@ -1,9 +1,9 @@
 ### NL
-- Engelse dashboardtellers tonen nu volledig Engelse teksten.
-- Bij één afgeronde upgrade staat nu het juiste enkelvoud.
-- Ook het brede dashboard volgt de gekozen taal.
+- Dashboardteksten volgen de gekozen taal, ook in de brede weergave.
+- Bij één afgeronde upgrade staat het juiste enkelvoud.
+- De Play-bundel kan nu via een expliciete releasecommit worden gebouwd.
 
 ### EN
-- English dashboard counters now use fully English labels.
-- A single completed upgrade now uses the correct singular label.
-- The wide dashboard also follows your selected language.
+- Dashboard labels follow your language, including the wide layout.
+- A single completed upgrade uses the correct singular label.
+- The Play bundle can now be built from an explicit release commit.
