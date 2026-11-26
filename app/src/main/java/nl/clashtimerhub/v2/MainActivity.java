@@ -285,7 +285,10 @@ public final class MainActivity extends Activity {
    v.setPadding(bars.left,bars.top,bars.right,bars.bottom);return insets;
   });
   setContentView(shell);
-  ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);
+  ScrollView scroll=new MenuSwipeScrollView(this,direction->{
+   int target=MenuSwipe.targetTab(activeTab,direction);
+   if(target!=activeTab&&!isFinishing()&&!isDestroyed()){activeTab=target;draw();}
+  });scroll.setFillViewport(true);
   root=new LinearLayout(this);root.setOrientation(1);root.setPadding(dp(12),dp(activeTab==3?9:22),dp(12),dp(activeTab==3?20:64));scroll.addView(root);
 
   if(activeTab!=3){

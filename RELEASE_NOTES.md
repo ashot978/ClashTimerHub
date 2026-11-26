@@ -1,9 +1,7 @@
 ### NL
-- Dashboardteksten volgen de gekozen taal, ook in de brede weergave.
-- Bij één afgeronde upgrade staat het juiste enkelvoud.
-- De Play-bundel kan nu via een expliciete releasecommit worden gebouwd.
+- Swipe links of rechts tussen Overzicht, Tijdlijn en Instellingen.
+- De menuknoppen blijven beschikbaar en verticaal scrollen blijft werken.
 
 ### EN
-- Dashboard labels follow your language, including the wide layout.
-- A single completed upgrade uses the correct singular label.
-- The Play bundle can now be built from an explicit release commit.
+- Swipe left or right between Overview, Timeline and Settings.
+- The menu buttons remain available, and vertical scrolling still works.
