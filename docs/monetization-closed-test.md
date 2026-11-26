@@ -58,3 +58,20 @@ https://developers.google.com/admob/android/app-open
 https://developers.google.com/admob/android/privacy
 https://developer.android.com/google/play/billing/integrate
 https://developer.android.com/google/play/billing/test
+
+## Roadmap preview 2
+
+- The CI artifact uses debug-only application ID nl.clashtimerhub.app.preview and label
+  Clash Timer Hub Preview. This can be installed separately from the existing app.
+- The roadmap is available under Settings in both languages, bundled from
+  app/src/main/assets/ROADMAP.md (the editable single roadmap source).
+- The isolated preview never launches purchases or queries real ownership. The demo ad
+  path uses a free preview state, still requiring UMP consent. Consent or ad failures
+  must skip the ad rather than bypass privacy. Real purchase tests require the actual
+  package and Play distribution to license testers.
+- The preview uses a disposable debug key and independent local storage. Do not remove
+  the production app. If replacing an earlier isolated preview with a different signing
+  key, remove only the isolated preview. The preview is not an AAB or a Play release.
+- Preview version code 1579 belongs to the separate preview package only. The production
+  request file and pinned upload certificate are unchanged; choose the next unused
+  Play version code only when publication is authorized.

@@ -216,6 +216,9 @@ final class Monetization {
 
  private void connect(){
   if(closed)return;
+  // A separately installed preview cannot own the production Play product.
+  // Only this isolated debug package may exercise demo ads without Billing.
+  if(BuildConfig.ISOLATED_PREVIEW){ownershipKnown=true;pendingPurchase=false;maybeAd();return;}
   if(billing.isReady()){queryOwnership();queryProduct();return;}
   if(connecting)return;
   connecting=true;
@@ -277,6 +280,7 @@ final class Monetization {
  }
 
  String statusText(){
+  if(BuildConfig.ISOLATED_PREVIEW)return text("Preview · €2,99 gepland · geen betaling","Preview · €2.99 planned · no payment");
   if(premium)return text("Actief · geen advertenties","Active · no ads");
   if(pendingPurchase)return text("Betaling in behandeling","Payment pending");
   if(!BuildConfig.MONETIZATION_TEST_PURCHASES)
@@ -304,6 +308,7 @@ final class Monetization {
  }
 
  void restore(){
+  if(BuildConfig.ISOLATED_PREVIEW){toast(text("Aankopen herstellen wordt getest via Google Play, niet in deze preview.","Purchase restoration is tested through Google Play, not this preview."));return;}
   restoreRequested=true;
   if(billing.isReady())queryOwnership();else connect();
  }

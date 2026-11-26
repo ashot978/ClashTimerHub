@@ -1,9 +1,11 @@
 ### NL
-- Testadvertenties alleen bij een nieuwe appstart, nooit tijdens gebruik.
-- Advertentievrij: eenmalige aankoop en aankopen herstellen voorbereid.
-- Advertentieprivacy en toestemming toegevoegd voor de Play-testversie.
+- Roadmap in Instellingen: huidige status en geplande verbeteringen.
+- Roadmap is offline beschikbaar in Nederlands en Engels.
+- Aparte preview-app om naast de bestaande Clash Timer Hub te testen.
+- In de preview zijn uitsluitend testadvertenties mogelijk; geen betalingen.
 
 ### EN
-- Test ads only on a new app launch, never during use.
-- Ad-free one-time purchase and purchase restoration prepared.
-- Ad privacy and consent added for the Play test version.
+- Roadmap in Settings: current status and planned improvements.
+- The roadmap is available offline in Dutch and English.
+- Separate preview app for testing alongside existing Clash Timer Hub.
+- The preview only supports test ads; no payments.

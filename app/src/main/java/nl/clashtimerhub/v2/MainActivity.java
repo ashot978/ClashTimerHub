@@ -455,6 +455,9 @@ public final class MainActivity extends Activity {
     settingsItem(premium,"ⓘ",en?"Ad privacy choices":"Privacykeuzes voor advertenties",
      en?"Manage your consent":"Beheer je toestemming",monetization::showPrivacyOptions);
   }
+  boolean roadmapEn=I18n.english(this);
+  LinearLayout roadmap=settingsSection(left,roadmapEn?"↗  DEVELOPMENT":"↗  ONTWIKKELING","");
+  settingsItem(roadmap,"↗","Roadmap",roadmapEn?"Current status and upcoming features":"Huidige status en geplande functies",this::showRoadmap);
   LinearLayout language=settingsSection(left,"🌐  TAAL","Kies je voorkeurstaal");
   settingsItem(language,I18n.flag(this),"Taal",I18n.flag(this)+"  "+I18n.label(this),()->chooseLanguage());
   LinearLayout sync=settingsSection(left,"↻  SYNCHRONISATIE","Accounts bijwerken zonder Clash te verlaten");
@@ -505,6 +508,37 @@ public final class MainActivity extends Activity {
    "Deel handmatig een JSON-back-up met Google Drive",()->shareBackupToDrive());
   settingsItem(backups,"↑","Back-upbestand importeren",
    "Kies een eerder opgeslagen .json-bestand om te herstellen",()->openBackupFile());
+ }
+ private void showRoadmap(){
+  boolean en=I18n.english(this);
+  String copy;
+  try(java.io.InputStream in=getAssets().open("ROADMAP.md")){
+   java.io.ByteArrayOutputStream bytes=new java.io.ByteArrayOutputStream();
+   byte[] buffer=new byte[2048];
+   int length;
+   while((length=in.read(buffer))!=-1)bytes.write(buffer,0,length);
+   copy=RoadmapText.localized(new String(bytes.toByteArray(),java.nio.charset.StandardCharsets.UTF_8),en);
+  }catch(java.io.IOException error){
+   copy="";
+  }
+  if(copy.isEmpty())copy=en?"The roadmap is unavailable.":"De roadmap is niet beschikbaar.";
+  ScrollView scroll=new ScrollView(this);
+  scroll.setFillViewport(false);
+  LinearLayout content=new LinearLayout(this);content.setOrientation(1);
+  content.setPadding(dp(16),dp(8),dp(16),dp(16));content.setBackgroundColor(0xff160f25);
+  for(String line:copy.split("\\n")){
+   if(line.isEmpty())continue;
+   boolean heading=line.startsWith("### ");
+   String message=heading?line.substring(4):line.startsWith("- ")?"•  "+line.substring(2):line;
+   TextView row=new TextView(this);row.setText(message);
+   row.setTextSize(heading?16:14);row.setTextColor(heading?0xffffd783:0xfff5f4ff);
+   if(heading)row.setTypeface(null,android.graphics.Typeface.BOLD);
+   row.setPadding(0,dp(heading?16:6),0,dp(heading?4:6));
+   content.addView(row,new LinearLayout.LayoutParams(-1,-2));
+  }
+  scroll.addView(content,new ScrollView.LayoutParams(-1,-2));
+  new android.app.AlertDialog.Builder(this).setTitle("Clash Timer Hub · Roadmap").setView(scroll)
+   .setPositiveButton(en?"Close":"Sluiten",null).show();
  }
  private void renameAccount(){
   if(accounts.isEmpty()){toast("Geen accounts beschikbaar");return;}

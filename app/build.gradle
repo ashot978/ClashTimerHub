@@ -4,8 +4,14 @@ def playKeystore = System.getenv('PLAY_UPLOAD_KEYSTORE_PATH')
 def playVersion = providers.gradleProperty('playVersionCode')
 // Never enable the purchase flow in a shared test build unless every tester is a Play license tester.
 def testPurchases = providers.gradleProperty('enableMonetizationTestPurchases').orElse('false').get() == 'true'
+def isolatedPreview = providers.gradleProperty('isolatedPreview').orElse('false').get() == 'true'
+if (isolatedPreview && testPurchases) throw new GradleException('Isolated previews must never enable purchases.')
 android { namespace 'nl.clashtimerhub.v2'; compileSdk 36
- defaultConfig { applicationId 'nl.clashtimerhub.app'; minSdk 26; targetSdk 35; versionCode 1003; versionName '7.5.20-beta1' }
+ defaultConfig {
+  applicationId 'nl.clashtimerhub.app'; minSdk 26; targetSdk 35; versionCode 1003; versionName '7.5.20-beta1'
+  manifestPlaceholders = [appLabel: 'Clash Timer Hub']
+  buildConfigField 'boolean', 'ISOLATED_PREVIEW', 'false'
+ }
  // Bundle the same Markdown file as GitHub: one roadmap source, offline in app.
  // The CI restore step puts the permanent identity here. Do not let Gradle
  // generate a fresh, unrelated debug certificate for each build.
@@ -43,7 +49,15 @@ android { namespace 'nl.clashtimerhub.v2'; compileSdk 36
   }
  }
  buildTypes {
-  debug { signingConfig signingConfigs.debug }
+  debug {
+   signingConfig signingConfigs.debug
+   if (isolatedPreview) {
+    applicationIdSuffix '.preview'
+    versionNameSuffix '-roadmap-preview2'
+    manifestPlaceholders = [appLabel: 'Clash Timer Hub Preview']
+    buildConfigField 'boolean', 'ISOLATED_PREVIEW', 'true'
+   }
+  }
   release {
    minifyEnabled false
   }

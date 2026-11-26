@@ -34,9 +34,20 @@ jobs:
             -storepass android -alias androiddebugkey >/dev/null
           echo 'Disposable debug key ready; no release signing secrets used.'
       - name: Compile both variants and test
-        run: gradle --no-daemon :app:testPlayDebugUnitTest :app:assemblePlayDebug :app:testGithubDebugUnitTest
+        run: gradle --no-daemon -PisolatedPreview=true -PplayVersionCode=1579 :app:testPlayDebugUnitTest :app:assemblePlayDebug :app:testGithubDebugUnitTest
+      - name: Verify isolated APK and debug signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk=app/build/outputs/apk/play/debug/app-play-debug.apk
+          aapt=$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort -V | tail -n 1)
+          "$aapt" dump badging "$apk" > "$RUNNER_TEMP/preview-badging.txt"
+          grep -F "package: name='nl.clashtimerhub.app.preview'" "$RUNNER_TEMP/preview-badging.txt"
+          grep -F "application-label:'Clash Timer Hub Preview'" "$RUNNER_TEMP/preview-badging.txt"
+          "$(dirname "$aapt")/apksigner" verify "$apk"
+          cp "$apk" "$RUNNER_TEMP/ClashTimerHub-Roadmap-Preview2.apk"
       - uses: actions/upload-artifact@v4
         with:
-          name: Monetization-test-debug-APK-not-for-Play-upload
-          path: app/build/outputs/apk/play/debug/app-play-debug.apk
+          name: ClashTimerHub-Roadmap-Preview2-APK
+          path: ${{ runner.temp }}/ClashTimerHub-Roadmap-Preview2.apk
           if-no-files-found: error
