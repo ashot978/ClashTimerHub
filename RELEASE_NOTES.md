@@ -1,7 +1,9 @@
 ### NL
-- Swipe links of rechts tussen Overzicht, Tijdlijn en Instellingen.
-- De menuknoppen blijven beschikbaar en verticaal scrollen blijft werken.
+- Testadvertenties alleen bij een nieuwe appstart, nooit tijdens gebruik.
+- Advertentievrij: eenmalige aankoop en aankopen herstellen voorbereid.
+- Advertentieprivacy en toestemming toegevoegd voor de Play-testversie.
 
 ### EN
-- Swipe left or right between Overview, Timeline and Settings.
-- The menu buttons remain available, and vertical scrolling still works.
+- Test ads only on a new app launch, never during use.
+- Ad-free one-time purchase and purchase restoration prepared.
+- Ad privacy and consent added for the Play test version.

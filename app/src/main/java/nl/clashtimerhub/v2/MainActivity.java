@@ -97,6 +97,8 @@ public final class MainActivity extends Activity {
 
  private final android.os.Handler ticker=new android.os.Handler(android.os.Looper.getMainLooper());
  private PlayUpdates playUpdates;
+ private Monetization monetization;
+ private boolean initialContentReady,activityResumed,contentResumed,initialPermissionPrompt;
  private String lastLoadedSnapshot="";
  private boolean foldExpanded=false;
  private LinearLayout detailPanel;
@@ -114,7 +116,22 @@ public final class MainActivity extends Activity {
  }
  @Override protected void onResume(){
   super.onResume();
+  activityResumed=true;
+  monetization.onResume();
+  if(!initialContentReady){monetization.beginStartup(this::finishInitialContent);return;}
+  resumeContent();
+ }
+ private void resumeContent(){
+  if(contentResumed||!activityResumed||!initialContentReady||isFinishing()||isDestroyed())return;
+  contentResumed=true;
   if(permissionWizard!=null)permissionWizard.onResume();
+  if(initialPermissionPrompt){
+   initialPermissionPrompt=false;
+   getWindow().getDecorView().post(()->{
+    if(activityResumed&&!isFinishing()&&!isDestroyed()&&permissionWizard!=null)
+     permissionWizard.start(false);
+   });
+  }
   getPreferences(0).registerOnSharedPreferenceChangeListener(syncWatcher);
   refreshExternalImport();ticker.removeCallbacks(tick);ticker.post(tick);
   // Android 12+ may block a background service start; foreground resume
@@ -170,11 +187,20 @@ public final class MainActivity extends Activity {
   });
  }
  @Override protected void onPause(){
-  if(!BuildConfig.GITHUB_UPDATES)playUpdates.onPause();
-  stopListeningForUpdateDownload();
-  getPreferences(0).unregisterOnSharedPreferenceChangeListener(syncWatcher);
-  ticker.removeCallbacks(tick);
+  activityResumed=false;
+  monetization.onPause();
+  if(contentResumed){
+   contentResumed=false;
+   if(!BuildConfig.GITHUB_UPDATES)playUpdates.onPause();
+   stopListeningForUpdateDownload();
+   getPreferences(0).unregisterOnSharedPreferenceChangeListener(syncWatcher);
+   ticker.removeCallbacks(tick);
+  }
   super.onPause();
+ }
+ @Override protected void onDestroy(){
+  if(monetization!=null)monetization.close();
+  super.onDestroy();
  }
  @Override protected void onStop(){
   updateActivityVisible=false;
@@ -189,23 +215,30 @@ public final class MainActivity extends Activity {
   permissionWizard=new PermissionWizard(this);
   playUpdates=new PlayUpdates(this);
   googleDriveUi=new GoogleDriveUi(this,()->draw(),this::restoreBackup);
+  monetization=new Monetization(this,()->{if(initialContentReady&&activeTab==3&&activityResumed&&!isFinishing()&&!isDestroyed())draw();});
+  initialPermissionPrompt=b==null&&getIntent()!=null&&!Intent.ACTION_SEND.equals(getIntent().getAction())
+    &&!getIntent().hasExtra("openAccount");
+  if(monetization.shouldGateStartup(b==null,getIntent()))monetization.renderLoading();
+  else finishInitialContent();
+ }
+ private void finishInitialContent(){
+  if(initialContentReady||isFinishing()||isDestroyed())return;
+  initialContentReady=true;
   draw();
   TimerWidget.schedule(this);
   handleWidgetNavigation(getIntent());
   handleSharedJson(getIntent());
-  // Display after the activity is visible, not during an external JSON import.
-  if(b==null&&getIntent()!=null&&!Intent.ACTION_SEND.equals(getIntent().getAction())
-    &&!getIntent().hasExtra("openAccount"))
-   getWindow().getDecorView().post(()->{
-    if(permissionWizard!=null&&!isFinishing()&&!isDestroyed())
-     permissionWizard.start(false);
-   });
+  if(activityResumed)resumeContent();
  }
  @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults){
   super.onRequestPermissionsResult(requestCode,permissions,grantResults);
   if(permissionWizard!=null)permissionWizard.onRequestPermissionsResult(requestCode);
  }
- @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);setIntent(intent);handleWidgetNavigation(intent);handleSharedJson(intent);}
+ @Override protected void onNewIntent(Intent intent){
+  super.onNewIntent(intent);setIntent(intent);
+  if(!initialContentReady){monetization.skipStartup();finishInitialContent();return;}
+  handleWidgetNavigation(intent);handleSharedJson(intent);
+ }
  private void handleWidgetNavigation(Intent intent){
   if(intent==null)return;
   if(intent.getBooleanExtra("openSettings",false)){
@@ -216,6 +249,7 @@ public final class MainActivity extends Activity {
   if(open!=null&&accounts.contains(open)){selectedAccount=open;activeTab=0;draw();}
  }
  @Override public void onBackPressed(){
+  if(!initialContentReady){monetization.skipStartup();finishInitialContent();return;}
   if(activeTab==0&&!selectedAccount.isEmpty()){selectedAccount="";draw();return;}
   if(activeTab!=0){activeTab=0;selectedAccount="";draw();return;}
   super.onBackPressed();
@@ -409,6 +443,17 @@ public final class MainActivity extends Activity {
    LinearLayout.LayoutParams rightLayout=new LinearLayout.LayoutParams(0,-2,1);
    rightLayout.setMargins(dp(10),0,0,0);
    columns.addView(left,leftLayout);columns.addView(right,rightLayout);
+  }
+  if(monetization.enabled()){
+   boolean en=I18n.english(this);
+   LinearLayout premium=settingsSection(left,en?"★  AD-FREE":"★  ADVERTENTIEVRIJ","");
+   settingsItem(premium,"★",en?"Remove ads permanently":"Verwijder advertenties permanent",
+    monetization.statusText(),monetization::purchase);
+   settingsItem(premium,"↻",en?"Restore purchase":"Aankoop herstellen",
+    en?"Restore using your Google Play account":"Herstel via je Google Play-account",monetization::restore);
+   if(monetization.privacyOptionsRequired())
+    settingsItem(premium,"ⓘ",en?"Ad privacy choices":"Privacykeuzes voor advertenties",
+     en?"Manage your consent":"Beheer je toestemming",monetization::showPrivacyOptions);
   }
   LinearLayout language=settingsSection(left,"🌐  TAAL","Kies je voorkeurstaal");
   settingsItem(language,I18n.flag(this),"Taal",I18n.flag(this)+"  "+I18n.label(this),()->chooseLanguage());

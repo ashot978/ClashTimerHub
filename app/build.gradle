@@ -2,6 +2,8 @@ plugins { id 'com.android.application' }
 
 def playKeystore = System.getenv('PLAY_UPLOAD_KEYSTORE_PATH')
 def playVersion = providers.gradleProperty('playVersionCode')
+// Never enable the purchase flow in a shared test build unless every tester is a Play license tester.
+def testPurchases = providers.gradleProperty('enableMonetizationTestPurchases').orElse('false').get() == 'true'
 android { namespace 'nl.clashtimerhub.v2'; compileSdk 36
  defaultConfig { applicationId 'nl.clashtimerhub.app'; minSdk 26; targetSdk 35; versionCode 1003; versionName '7.5.20-beta1' }
  // Bundle the same Markdown file as GitHub: one roadmap source, offline in app.
@@ -33,6 +35,7 @@ android { namespace 'nl.clashtimerhub.v2'; compileSdk 36
   play {
    dimension 'distribution'
    buildConfigField 'boolean', 'GITHUB_UPDATES', 'false'
+   buildConfigField 'boolean', 'MONETIZATION_TEST_PURCHASES', testPurchases.toString()
    targetSdk 36
    versionName '7.5.20-play-beta5'
    if (playVersion.isPresent()) versionCode playVersion.get().toInteger()
@@ -49,4 +52,7 @@ android { namespace 'nl.clashtimerhub.v2'; compileSdk 36
 }
 dependencies {
  playImplementation 'com.google.android.play:app-update:2.1.0'
+ playImplementation 'com.google.android.gms:play-services-ads:25.4.0'
+ playImplementation 'com.google.android.ump:user-messaging-platform:4.0.0'
+ playImplementation 'com.android.billingclient:billing:8.3.0'
  implementation 'com.google.mlkit:text-recognition:16.0.1'; implementation 'com.google.android.gms:play-services-auth:22.0.0'; implementation 'com.squareup.okhttp3:okhttp:4.12.0'; implementation 'androidx.core:core:1.16.0'; testImplementation 'junit:junit:4.13.2'; testImplementation 'org.json:json:20240303' }

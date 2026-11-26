@@ -2,6 +2,9 @@
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" tools:node="remove"/>
     <application>
+        <!-- Google's public demo ID: no real ads/revenue in this development branch. -->
+        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/>
         <receiver android:name=".UpdateInstallReceiver" tools:node="remove"/>
     </application>
 </manifest>
